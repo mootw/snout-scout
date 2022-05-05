@@ -1,0 +1,102 @@
+{
+  "main": {
+    "id": "40730f1e63deae28",
+    "type": "split",
+    "children": [
+      {
+        "id": "3fe1c3ae88456c32",
+        "type": "leaf",
+        "state": {
+          "type": "markdown",
+          "state": {
+            "file": "Data.md",
+            "mode": "source",
+            "source": false
+          }
+        }
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "5f2838519db894bd",
+    "type": "split",
+    "children": [
+      {
+        "id": "ab4de5dae92782b5",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "1591b1ac7581f189",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {}
+            }
+          },
+          {
+            "id": "3f464bff7c8ca44f",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "70a977e98a359dd2",
+    "type": "split",
+    "children": [
+      {
+        "id": "feeffd92e7de1c0f",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "d43fac54f1bc466a",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "Data.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "active": "3fe1c3ae88456c32",
+  "lastOpenFiles": [
+    "Data.md",
+    "endpoints.md",
+    "data_types/scouting_results.md",
+    "Untitled.md",
+    "App.md",
+    "For State.md",
+    "Match Scouting.md",
+    "Pit Scouting.md",
+    "Match Viewer.md"
+  ]
+}
