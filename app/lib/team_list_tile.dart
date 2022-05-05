@@ -2,17 +2,20 @@ import 'package:app/view_team_page.dart';
 import 'package:flutter/material.dart';
 
 class TeamListTile extends StatelessWidget {
-  const TeamListTile({Key? key}) : super(key: key);
+  final int teamNumber;
+
+  const TeamListTile({Key? key, required this.teamNumber}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      title: Text("6749"),
-      subtitle: Text("terabytes"),
+      title: Text(teamNumber.toString()),
+      subtitle: Text("Team Name"),
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const TeamViewPage()),
+          MaterialPageRoute(
+              builder: (context) => TeamViewPage(number: teamNumber)),
         );
       },
     );

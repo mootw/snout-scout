@@ -1,11 +1,50 @@
 import 'package:app/api.dart';
+import 'package:app/data/scouting_config.dart';
 import 'package:app/matches_page.dart';
 import 'package:app/teams_page.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(const MyApp());
 }
+
+Future<String> getServer() async {
+  var prefs = await SharedPreferences.getInstance();
+  String result = prefs.getString("server") ?? "";
+  return result;
+}
+
+Future setServer(String newServer) async {
+  var prefs = await SharedPreferences.getInstance();
+  prefs.setString("server", newServer);
+  await snoutData.loadConfig();
+}
+
+Future<String> getName() async {
+  var prefs = await SharedPreferences.getInstance();
+  String result = prefs.getString("name") ?? "guest";
+  return result;
+}
+
+Future setName(String newName) async {
+  var prefs = await SharedPreferences.getInstance();
+  prefs.setString("name", newName);
+}
+
+class SnoutScoutData {
+  int currentEventId = 0;
+
+  ScoutingConfig? scoutingConfig;
+
+  Future loadConfig() async {
+    var data =
+        await apiClient.get(Uri.parse("${await getServer()}/config/scouting"));
+    scoutingConfig = scoutingConfigFromJson(data.body);
+  }
+}
+
+var snoutData = SnoutScoutData();
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -31,12 +70,6 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _currentPageIndex = 0;
 
-  final pages = [
-    Container(),
-    AllTeamsPage(),
-    AllMatchesPage(),
-  ];
-
   @override
   void initState() {
     super.initState();
@@ -44,8 +77,10 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void getStuff() async {
-    var result = await apiClient.get(Uri.parse("http://localhost:8080/"));
-    print(result.statusCode);
+    print("load data");
+    await snoutData.loadConfig();
+    setState(() {});
+    print("loaded data");
   }
 
   @override
@@ -56,7 +91,11 @@ class _MyHomePageState extends State<MyHomePage> {
         // the App.build method, and use it to set our appbar title.
         title: Text("snout scout"),
       ),
-      body: pages[_currentPageIndex],
+      body: [
+        Container(),
+        AllTeamsPage(),
+        AllMatchesPage(),
+      ][_currentPageIndex],
       drawer: Drawer(
         child: ListView(children: [
           SizedBox(height: 32),
@@ -65,10 +104,24 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           ListTile(
             title: Text("Server"),
-            subtitle: Text("snoutscout.xqkz.net"),
+            subtitle: FutureBuilder<String>(
+                future: getServer(),
+                builder: (BuildContext context, var snapshot) {
+                  if (snapshot.hasData) {
+                    return Text(snapshot.data!);
+                  }
+                  return Text("Loading");
+                }),
             trailing: IconButton(
               icon: Icon(Icons.edit),
-              onPressed: () {},
+              onPressed: () async {
+                var result = await showStringInputDialog(
+                    context, "Server", await getServer());
+                if (result != null) {
+                  await setServer(result);
+                  setState(() {});
+                }
+              },
             ),
           ),
           ListTile(
@@ -77,10 +130,24 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           ListTile(
             title: Text("Name"),
-            subtitle: Text("spencer"),
+            subtitle: FutureBuilder<String>(
+                future: getName(),
+                builder: (BuildContext context, var snapshot) {
+                  if (snapshot.hasData) {
+                    return Text(snapshot.data!);
+                  }
+                  return Text("Loading");
+                }),
             trailing: IconButton(
               icon: Icon(Icons.edit),
-              onPressed: () {},
+              onPressed: () async {
+                var result = await showStringInputDialog(
+                    context, "Name", await getName());
+                if (result != null) {
+                  await setName(result);
+                  setState(() {});
+                }
+              },
             ),
           ),
           ListTile(
@@ -119,4 +186,37 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
   }
+}
+
+Future<String?> showStringInputDialog(
+    BuildContext context, String label, String currentValue) async {
+  final myController = TextEditingController();
+  myController.text = currentValue;
+  return await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(label),
+          content: TextField(
+            controller: myController,
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+            ),
+          ),
+          actions: [
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop(null);
+              },
+            ),
+            TextButton(
+              child: const Text('Save'),
+              onPressed: () {
+                Navigator.of(context).pop(myController.text);
+              },
+            ),
+          ],
+        );
+      });
 }
