@@ -102,6 +102,30 @@ const requestListener = function (req, res) {
         return;
     }
 
+    if(req.url == "/matches") {
+        res.writeHead(200);
+        //Array of team numbers
+
+        const team_filter = +req.headers.team;
+        let matches = [];
+        for(const match of eventData.matches) {
+            matches.push({
+                "section": match.section,
+                "scheduled_time": Date.parse(match.scheduled_time),
+                "blue": match.blue,
+                "red": match.red,
+                results: null,
+            });
+        }
+        if(team_filter != null) {
+            matches = matches.filter(match => [...match.blue, ...match.red].includes(team_filter));
+        }
+
+        res.end(JSON.stringify(matches));
+        return;
+    }
+
+
     if(req.url == "/pit_scout") {
         if(req.method == "POST") {
             const data = JSON.parse(req.headers.jsondata);
@@ -123,7 +147,6 @@ const requestListener = function (req, res) {
             res.end(JSON.stringify(data));
             return;
         }
-        
     }
 
     res.writeHead(200);

@@ -1,1 +1,267 @@
-{"events":{"state":{"name":"State","teams":[1816,2052,2169,2220,2239,2470,2491,2502,2503,2509,2531,2823,2847,2883,3018,3082,3130,3184,3206,3293,3630,3883,4009,4607,4728,5172,5434,5653,5690,5913,5914,6453,6749,7028,7541,8516],"matches":[{"section":"Qual","number":1,"time":"05 May 2022 08:30:00 CST","blue":[2823,2503,7028],"red":[5653,4728,2509]},{"section":"Qual","number":2,"time":"05 May 2022 08:38:00 CST","blue":[7541,3630,5172],"red":[4607,2239,5914]},{"section":"Qual","number":3,"time":"05 May 2022 08:46:00 CST","blue":[3018,3883,3184],"red":[3130,8516,2470]}],"pit_scouting":{"1816":{"team":1816,"time":"2022-05-06T00:25:45.102","scout":"spencer","survey":[{"id":"auto_high","type":"number","value":2},{"id":"auto_low","type":"number","value":0},{"id":"teleop_high","type":"number","value":3},{"id":"teleop_low","type":"number","value":0},{"id":"shooting_positions","type":"map-boolean","value":null},{"id":"shooter_type","type":"selector","value":"Any goal"},{"id":"climb","type":"selector","value":"Traversal"},{"id":"climb_time","type":"number","value":5},{"id":"can_defense","type":"toggle","value":true},{"id":"comments","type":"text-box","value":"Windmill climber"}]},"6749":{"team":6749,"time":"2022-05-05T22:16:03.044","scout":"spencer","survey":[{"id":"auto_high","type":"number","value":2},{"id":"auto_low","type":"number","value":0},{"id":"teleop_high","type":"number","value":4},{"id":"teleop_low","type":"number","value":0},{"id":"shooting_positions","type":"map-boolean","value":null},{"id":"shooter_type","type":"selector","value":"High Goal"},{"id":"climb","type":"selector","value":"Traversal"},{"id":"climb_time","type":"number","value":25},{"id":"can_defense","type":"toggle","value":true},{"id":"comments","type":"text-box","value":"This is our robot lol"}]}},"match_results":[],"match_timelines":[]}}}
+{
+    "events": {
+        "state": {
+            "name": "State",
+            "teams": [
+                1816,
+                2052,
+                2169,
+                2220,
+                2239,
+                2470,
+                2491,
+                2502,
+                2503,
+                2509,
+                2531,
+                2823,
+                2847,
+                2883,
+                3018,
+                3082,
+                3130,
+                3184,
+                3206,
+                3293,
+                3630,
+                3883,
+                4009,
+                4607,
+                4728,
+                5172,
+                5434,
+                5653,
+                5690,
+                5913,
+                5914,
+                6453,
+                6749,
+                7028,
+                7541,
+                8516
+            ],
+            "matches": [
+                {
+                    "section": "Qual",
+                    "number": 1,
+                    "scheduled_time": "05 May 2022 08:30:00 CST",
+                    "blue": [
+                        2823,
+                        2503,
+                        7028
+                    ],
+                    "red": [
+                        5653,
+                        4728,
+                        2509
+                    ]
+                },
+                {
+                    "section": "Qual",
+                    "number": 2,
+                    "scheduled_time": "05 May 2022 08:38:00 CST",
+                    "blue": [
+                        7541,
+                        3630,
+                        5172
+                    ],
+                    "red": [
+                        4607,
+                        2239,
+                        5914
+                    ]
+                },
+                {
+                    "section": "Qual",
+                    "number": 3,
+                    "scheduled_time": "05 May 2022 08:46:00 CST",
+                    "blue": [
+                        3018,
+                        3883,
+                        3184
+                    ],
+                    "red": [
+                        3130,
+                        8516,
+                        2470
+                    ]
+                }
+            ],
+            "pit_scouting": {
+                "1816": {
+                    "team": 1816,
+                    "time": "2022-05-06T00:25:45.102",
+                    "scout": "spencer",
+                    "survey": [
+                        {
+                            "id": "auto_high",
+                            "type": "number",
+                            "value": 2
+                        },
+                        {
+                            "id": "auto_low",
+                            "type": "number",
+                            "value": 0
+                        },
+                        {
+                            "id": "teleop_high",
+                            "type": "number",
+                            "value": 3
+                        },
+                        {
+                            "id": "teleop_low",
+                            "type": "number",
+                            "value": 0
+                        },
+                        {
+                            "id": "shooting_positions",
+                            "type": "map-boolean",
+                            "value": null
+                        },
+                        {
+                            "id": "shooter_type",
+                            "type": "selector",
+                            "value": "Any goal"
+                        },
+                        {
+                            "id": "climb",
+                            "type": "selector",
+                            "value": "Traversal"
+                        },
+                        {
+                            "id": "climb_time",
+                            "type": "number",
+                            "value": 5
+                        },
+                        {
+                            "id": "can_defense",
+                            "type": "toggle",
+                            "value": true
+                        },
+                        {
+                            "id": "comments",
+                            "type": "text-box",
+                            "value": "Windmill climber"
+                        }
+                    ]
+                },
+                "2052": {
+                    "team": 2052,
+                    "time": "2022-05-06T10:47:13.431",
+                    "scout": "guest",
+                    "survey": [
+                        {
+                            "id": "auto_high",
+                            "type": "number",
+                            "value": null
+                        },
+                        {
+                            "id": "auto_low",
+                            "type": "number",
+                            "value": null
+                        },
+                        {
+                            "id": "teleop_high",
+                            "type": "number",
+                            "value": null
+                        },
+                        {
+                            "id": "teleop_low",
+                            "type": "number",
+                            "value": null
+                        },
+                        {
+                            "id": "shooting_positions",
+                            "type": "map-boolean",
+                            "value": null
+                        },
+                        {
+                            "id": "shooter_type",
+                            "type": "selector",
+                            "value": null
+                        },
+                        {
+                            "id": "climb",
+                            "type": "selector",
+                            "value": null
+                        },
+                        {
+                            "id": "climb_time",
+                            "type": "number",
+                            "value": null
+                        },
+                        {
+                            "id": "can_defense",
+                            "type": "toggle",
+                            "value": false
+                        },
+                        {
+                            "id": "comments",
+                            "type": "text-box",
+                            "value": null
+                        }
+                    ]
+                },
+                "6749": {
+                    "team": 6749,
+                    "time": "2022-05-05T22:16:03.044",
+                    "scout": "spencer",
+                    "survey": [
+                        {
+                            "id": "auto_high",
+                            "type": "number",
+                            "value": 2
+                        },
+                        {
+                            "id": "auto_low",
+                            "type": "number",
+                            "value": 0
+                        },
+                        {
+                            "id": "teleop_high",
+                            "type": "number",
+                            "value": 4
+                        },
+                        {
+                            "id": "teleop_low",
+                            "type": "number",
+                            "value": 0
+                        },
+                        {
+                            "id": "shooting_positions",
+                            "type": "map-boolean",
+                            "value": null
+                        },
+                        {
+                            "id": "shooter_type",
+                            "type": "selector",
+                            "value": "High Goal"
+                        },
+                        {
+                            "id": "climb",
+                            "type": "selector",
+                            "value": "Traversal"
+                        },
+                        {
+                            "id": "climb_time",
+                            "type": "number",
+                            "value": 25
+                        },
+                        {
+                            "id": "can_defense",
+                            "type": "toggle",
+                            "value": true
+                        },
+                        {
+                            "id": "comments",
+                            "type": "text-box",
+                            "value": "This is our robot lol"
+                        }
+                    ]
+                }
+            },
+            "match_results": [],
+            "match_timelines": []
+        }
+    }
+}

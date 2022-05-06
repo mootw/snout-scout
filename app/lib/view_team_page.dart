@@ -94,10 +94,18 @@ class ScoutingResultsViewer extends StatelessWidget {
             if (snapshot.data == null) {
               return ListTile(title: Text("Team has no pit scouting data"));
             }
+
+            var list = <Widget>[];
+
+            for (var item in snapshot.data!.survey) {
+              if(item.value != null) {
+                list.add(ScoutingResultViewer(result: item));
+              }
+            }
+
             return Column(
               children: [
-                for (var item in snapshot.data!.survey)
-                  ScoutingResultViewer(result: item),
+                ...list,
               ],
             );
           }
@@ -114,6 +122,11 @@ class ScoutingResultViewer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    if(result.value == null) {
+      return Container();
+    }
+
     var config = snoutData.scoutingConfig;
     if (config == null) {
       return const Text("Season config is null");

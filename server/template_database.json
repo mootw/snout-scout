@@ -44,7 +44,7 @@
                 {
                     "section": "Qual",
                     "number": 1,
-                    "time": "05 May 2022 08:30:00 CST",
+                    "scheduled_time": "05 May 2022 08:30:00 CST",
                     "blue": [
                         2823,
                         2503,
@@ -59,7 +59,7 @@
                 {
                     "section": "Qual",
                     "number": 2,
-                    "time": "05 May 2022 08:38:00 CST",
+                    "scheduled_time": "05 May 2022 08:38:00 CST",
                     "blue": [
                         7541,
                         3630,
@@ -74,7 +74,7 @@
                 {
                     "section": "Qual",
                     "number": 3,
-                    "time": "05 May 2022 08:46:00 CST",
+                    "scheduled_time": "05 May 2022 08:46:00 CST",
                     "blue": [
                         3018,
                         3883,

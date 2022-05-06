@@ -1,6 +1,5 @@
 {
-	"id": "asdfeafasefasef",
-	"start_time": "asdfhiasefihsef",
+	"start_time": "Some ISO string",
 	"red": {
 		"points": 0,
 		"rp": 0,
@@ -15,5 +14,5 @@
 		"taxi": 0,
 		"cargo": 0
 	},
-	"winner": "tie"
+	"winner": "tie",
 }
