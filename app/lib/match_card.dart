@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 const TextStyle whiteText = TextStyle(color: Colors.white70);
-const TextStyle whiteTextBold = TextStyle(color: Colors.white);
+const TextStyle whiteTextBold =
+    TextStyle(color: Colors.white, decoration: TextDecoration.underline);
 
 class MatchCard extends StatelessWidget {
   final Match match;
@@ -30,14 +31,14 @@ class MatchCard extends StatelessWidget {
                     children: [
                       Text("${match.section} ${match.number}"),
                       Text(
-                          "${DateFormat.jm().format(DateTime.parse(match.scheduledTime))}"),
+                          "${DateFormat.jm().format(DateTime.parse(match.scheduledTime).toLocal())}"),
                     ],
                   ),
                 ),
                 Column(
                   children: [
                     Container(
-                      color: Colors.redAccent,
+                      color: Colors.red,
                       child: Row(children: [
                         for (var team in match.red)
                           TextButton(
@@ -66,7 +67,7 @@ class MatchCard extends StatelessWidget {
                       ]),
                     ),
                     Container(
-                      color: Colors.blueAccent,
+                      color: Colors.blue,
                       child: Row(children: [
                         for (var team in match.blue)
                           TextButton(
