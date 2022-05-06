@@ -100,6 +100,7 @@ class _MyHomePageState extends State<MyHomePage> {
         Container(),
         AllTeamsPage(),
         AllMatchesPage(),
+        Container(),
       ][_currentPageIndex],
       drawer: Drawer(
         child: ListView(children: [
@@ -128,10 +129,6 @@ class _MyHomePageState extends State<MyHomePage> {
                 }
               },
             ),
-          ),
-          ListTile(
-            title: Text("Connection Status"),
-            subtitle: Text("Connected (11:10 PM)"),
           ),
           ListTile(
             title: Text("Name"),
@@ -186,6 +183,11 @@ class _MyHomePageState extends State<MyHomePage> {
           NavigationDestination(
             icon: Icon(Icons.bookmark_border),
             label: 'Matches',
+          ),
+          NavigationDestination(
+            selectedIcon: Icon(Icons.analytics),
+            icon: Icon(Icons.analytics_outlined),
+            label: 'Analysis',
           ),
         ],
       ),

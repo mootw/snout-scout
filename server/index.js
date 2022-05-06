@@ -106,19 +106,21 @@ const requestListener = function (req, res) {
         res.writeHead(200);
         //Array of team numbers
 
-        const team_filter = +req.headers.team;
+        const team_filter = req.headers.team;
         let matches = [];
         for(const match of eventData.matches) {
             matches.push({
                 "section": match.section,
-                "scheduled_time": Date.parse(match.scheduled_time),
+                "number": match.number,
+                "scheduled_time": new Date(match.scheduled_time).toISOString(),
                 "blue": match.blue,
                 "red": match.red,
                 results: null,
             });
         }
-        if(team_filter != null) {
-            matches = matches.filter(match => [...match.blue, ...match.red].includes(team_filter));
+        if(team_filter != undefined) {
+            console.log("filtering matches");
+            matches = matches.filter(match => [...match.blue, ...match.red].includes(+team_filter));
         }
 
         res.end(JSON.stringify(matches));

@@ -1,7 +1,10 @@
 import 'package:app/api.dart';
+import 'package:app/data/matches.dart';
 import 'package:app/data/scouting_config.dart';
 import 'package:app/data/scouting_result.dart';
 import 'package:app/main.dart';
+import 'package:app/match_card.dart';
+import 'package:app/matches_page.dart';
 import 'package:app/scout_team.dart';
 import 'package:flutter/material.dart';
 
@@ -62,8 +65,11 @@ class _TeamViewPageState extends State<TeamViewPage> {
           shrinkWrap: true,
           children: [
             ScoutingResultsViewer(teamNumber: widget.number),
-            Text("Matches"),
+            Divider(height: 32),
+            TeamMatchesViewer(team: widget.number),
+            Divider(height: 32),
             Text("Performance Summary"),
+            Divider(height: 32),
             Text("Graphs"),
           ],
         ));
@@ -98,8 +104,8 @@ class ScoutingResultsViewer extends StatelessWidget {
             var list = <Widget>[];
 
             for (var item in snapshot.data!.survey) {
-              if(item.value != null) {
-                list.add(ScoutingResultViewer(result: item));
+              if (item.value != null) {
+                list.add(ScoutingResult(result: item));
               }
             }
 
@@ -114,16 +120,14 @@ class ScoutingResultsViewer extends StatelessWidget {
   }
 }
 
-class ScoutingResultViewer extends StatelessWidget {
+class ScoutingResult extends StatelessWidget {
   final Survey result;
 
-  const ScoutingResultViewer({Key? key, required this.result})
-      : super(key: key);
+  const ScoutingResult({Key? key, required this.result}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-
-    if(result.value == null) {
+    if (result.value == null) {
       return Container();
     }
 
@@ -140,5 +144,32 @@ class ScoutingResultViewer extends StatelessWidget {
       title: Text(result.value.toString()),
       subtitle: Text(item.label),
     );
+  }
+}
+
+class TeamMatchesViewer extends StatefulWidget {
+  final int team;
+  const TeamMatchesViewer({Key? key, required this.team}) : super(key: key);
+
+  @override
+  State<TeamMatchesViewer> createState() => _TeamMatchesViewerState();
+}
+
+class _TeamMatchesViewerState extends State<TeamMatchesViewer> {
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+        future: getMatches(teamFilter: widget.team),
+        builder: (context, AsyncSnapshot snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            return Column(
+              children: [
+                for (var match in snapshot.data!)
+                  MatchCard(match: match, focusTeam: widget.team),
+              ],
+            );
+          }
+          return CircularProgressIndicator.adaptive();
+        });
   }
 }

@@ -1,2 +1,7 @@
 GET http://localhost:8080/submit/pit_scout
 jsondata: {"aesifasef": "aefasef"}
+
+###
+
+GET http://localhost:8080/matches
+team: 2823

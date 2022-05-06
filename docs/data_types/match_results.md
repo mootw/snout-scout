@@ -1,4 +1,8 @@
 {
+	"scout": "name",
+	"time": "ISO submitted time",
+	"section": "Qual",
+	"number": 2,
 	"start_time": "Some ISO string",
 	"red": {
 		"points": 0,

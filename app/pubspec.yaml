@@ -30,6 +30,7 @@ dependencies:
   flutter:
     sdk: flutter
 
+  intl: 0.17.0
   shared_preferences: 2.0.13
   http: 0.13.4
   

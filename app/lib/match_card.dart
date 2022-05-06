@@ -1,9 +1,17 @@
+import 'package:app/data/matches.dart';
+import 'package:app/view_team_page.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 const TextStyle whiteText = TextStyle(color: Colors.white70);
+const TextStyle whiteTextBold = TextStyle(color: Colors.white);
 
 class MatchCard extends StatelessWidget {
-  const MatchCard({Key? key}) : super(key: key);
+  final Match match;
+  final int? focusTeam;
+
+  const MatchCard({Key? key, required this.match, this.focusTeam})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -13,34 +21,43 @@ class MatchCard extends StatelessWidget {
         onTap: () {},
         child: Column(
           children: [
-            Text("Qualification 1"),
             SizedBox(height: 4),
             Row(
               children: [
-                Column(
-                  children: [
-                    Text("10:38 AM"),
-                  ],
+                Container(
+                  width: 96,
+                  child: Column(
+                    children: [
+                      Text("${match.section} ${match.number}"),
+                      Text(
+                          "${DateFormat.jm().format(DateTime.parse(match.scheduledTime))}"),
+                    ],
+                  ),
                 ),
                 Column(
                   children: [
                     Container(
                       color: Colors.redAccent,
                       child: Row(children: [
-                        TextButton(
-                            onPressed: () {},
-                            child: Text("6749", style: whiteText)),
-                        TextButton(
-                            onPressed: () {},
-                            child: Text("6749", style: whiteText)),
-                        TextButton(
-                            onPressed: () {},
-                            child: Text("6749", style: whiteText)),
+                        for (var team in match.red)
+                          TextButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          TeamViewPage(number: team)),
+                                );
+                              },
+                              child: Text("$team",
+                                  style: focusTeam == team
+                                      ? whiteTextBold
+                                      : whiteText)),
                         Container(
                           alignment: Alignment.center,
                           width: 52,
                           child: Text(
-                            "69",
+                            "?",
                             style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white),
@@ -51,20 +68,25 @@ class MatchCard extends StatelessWidget {
                     Container(
                       color: Colors.blueAccent,
                       child: Row(children: [
-                        TextButton(
-                            onPressed: () {},
-                            child: Text("6749", style: whiteText)),
-                        TextButton(
-                            onPressed: () {},
-                            child: Text("6749", style: whiteText)),
-                        TextButton(
-                            onPressed: () {},
-                            child: Text("6749", style: whiteText)),
+                        for (var team in match.blue)
+                          TextButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          TeamViewPage(number: team)),
+                                );
+                              },
+                              child: Text("$team",
+                                  style: focusTeam == team
+                                      ? whiteTextBold
+                                      : whiteText)),
                         Container(
                           alignment: Alignment.center,
                           width: 52,
                           child: Text(
-                            "420",
+                            "?",
                             style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white),
