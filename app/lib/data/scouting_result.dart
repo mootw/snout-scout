@@ -12,17 +12,20 @@ String scoutingResultsToJson(ScoutingResults data) =>
 
 class ScoutingResults {
   ScoutingResults({
+    required this.team,
     required this.time,
     required this.scout,
     required this.survey,
   });
 
+  int team;
   String time;
   String scout;
   List<Survey> survey;
 
   factory ScoutingResults.fromJson(Map<String, dynamic> json) =>
       ScoutingResults(
+        team: json["team"],
         time: json["time"],
         scout: json["scout"],
         survey:
@@ -30,6 +33,7 @@ class ScoutingResults {
       );
 
   Map<String, dynamic> toJson() => {
+        "team": team,
         "time": time,
         "scout": scout,
         "survey": List<dynamic>.from(survey.map((x) => x.toJson())),

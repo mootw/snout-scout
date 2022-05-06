@@ -15,6 +15,8 @@ class APIClient extends http.BaseClient {
     //   await attest();
     // }
 
+    print(request.headers);
+
     // Device? device = await Device.getFromDisk();
     // request.headers['accept-version'] = apiVersion.toString();
     // request.headers['identity'] = device?.token ?? "";

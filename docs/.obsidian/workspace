@@ -9,7 +9,7 @@
         "state": {
           "type": "markdown",
           "state": {
-            "file": "Data.md",
+            "file": "data_types/pit_scouting_results.md",
             "mode": "source",
             "source": false
           }
@@ -69,7 +69,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Data.md",
+                "file": "data_types/pit_scouting_results.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -89,14 +89,15 @@
   },
   "active": "3fe1c3ae88456c32",
   "lastOpenFiles": [
+    "data_types/pit_scouting_results.md",
+    "data_types/match_timelines.md",
+    "data_types/match_results.md",
+    "Database.md",
     "Data.md",
-    "endpoints.md",
-    "data_types/scouting_results.md",
+    "Match Scouting.md",
     "Untitled.md",
     "App.md",
-    "For State.md",
-    "Match Scouting.md",
-    "Pit Scouting.md",
-    "Match Viewer.md"
+    "endpoints.md",
+    "For State.md"
   ]
 }

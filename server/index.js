@@ -3,6 +3,31 @@ const http = require('http');
 const fs = require('fs');
 
 
+let database = {
+    "pit_scouting": {
+
+    },
+    "match_results": [
+
+    ],
+    "match_timelines": [
+
+    ],
+};
+
+const exists = fs.existsSync('database.json');
+if(exists) {
+    database = JSON.parse(fs.readFileSync('database.json'));
+}
+
+function write () {
+    console.log(JSON.stringify(database));
+    fs.writeFileSync('database.json', JSON.stringify(database));
+}
+
+console.log(database);
+
+
 const rapid_react_config = {
     "season": "Rapid React",
     "events": [
@@ -76,6 +101,8 @@ const rapid_react_config = {
         "survey": [
             { "id": "auto_high", "type": "number", "label": "Number of balls robot can score high in autonomous" },
             { "id": "auto_low", "type": "number", "label": "Number of balls robot can score low in autonomous" },
+            { "id": "teleop_high", "type": "number", "label": "Number of balls robot can score high in teleop" },
+            { "id": "teleop_low", "type": "number", "label": "Number of balls robot can score low in teleop" },
             { "id": "shooting_positions", "type": "map-boolean", "label": "Positions this robot can shoot from." },
             { "id": "shooter_type", "type": "selector", "options": ["No Shooter", "Low Goal", "High Goal", "Any goal"], "label": "Shooter type" },
             { "id": "climb", "type": "selector", "options": ["No Climb", "Low", "Medium", "High", "Traversal"], "label": "Climb" },
@@ -125,10 +152,17 @@ const rapid_react_config = {
 
 const requestListener = function (req, res) {
 
-    //Cors stuff
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Headers', '*');
     res.setHeader('Access-Control-Allow-Methods', '*');
+    res.setHeader('Access-Control-Request-Method', '*');
+
+    if(req.method == "OPTIONS") {
+        console.log("its a cors request");
+        res.writeHead(200);
+        res.end();
+        return;
+    }
 
     //Temporary before it can be selected in the app.
     const season_config = rapid_react_config;
@@ -143,12 +177,12 @@ const requestListener = function (req, res) {
         return;
     }
 
-    if(req.url == "/config/scouting") {
+    if(req.url == "/submit/pit_scout") {
+        const data = JSON.parse(req.headers.jsondata);
+        database.pit_scouting[data.team.toString()] = data;
+        write();
         res.writeHead(200);
-        res.end(JSON.stringify({
-            "pit_scouting": season_config.pit_scouting,
-            "match_scouting": season_config.match_scouting,
-        }));
+        res.end();
         return;
     }
 

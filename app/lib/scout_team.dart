@@ -1,3 +1,4 @@
+import 'package:app/api.dart';
 import 'package:app/data/scouting_config.dart';
 import 'package:app/data/scouting_result.dart';
 import 'package:app/main.dart';
@@ -37,12 +38,19 @@ class _ScoutTeamPageState extends State<ScoutTeamPage> {
               onPressed: () async {
                 //Save the scouting results to the server!!
                 var scout_result = ScoutingResults(
+                  team: widget.team,
                   scout: await getName(),
                   time: DateTime.now().toIso8601String(),
                   survey: results.values.toList(),
                 );
 
                 var json = scoutingResultsToJson(scout_result);
+                // print(json);
+                var res = await apiClient.get(
+                  Uri.parse("${await getServer()}/submit/pit_scout"),
+                  headers: {"jsondata": json}
+                );
+                print(res.statusCode);
               },
               icon: Icon(Icons.save))
         ],
