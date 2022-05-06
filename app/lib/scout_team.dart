@@ -5,20 +5,20 @@ import 'package:app/main.dart';
 import 'package:app/scouting_tools/scouting_tool.dart';
 import 'package:flutter/material.dart';
 
-class ScoutTeamPage extends StatefulWidget {
+class PitScoutTeamPage extends StatefulWidget {
   final int team;
   final ScoutingConfig config;
   final ScoutingResults? oldData;
 
-  const ScoutTeamPage(
+  const PitScoutTeamPage(
       {Key? key, required this.team, required this.config, this.oldData})
       : super(key: key);
 
   @override
-  State<ScoutTeamPage> createState() => _ScoutTeamPageState();
+  State<PitScoutTeamPage> createState() => _PitScoutTeamPageState();
 }
 
-class _ScoutTeamPageState extends State<ScoutTeamPage> {
+class _PitScoutTeamPageState extends State<PitScoutTeamPage> {
   Map<String, Survey> results = <String, Survey>{};
 
   @override
@@ -65,6 +65,7 @@ class _ScoutTeamPageState extends State<ScoutTeamPage> {
                     content: Text('Saved Scouting Data'),
                     duration: Duration(seconds: 4),
                   ));
+                  Navigator.of(context).pop(true);
                 }
               },
               icon: Icon(Icons.save))

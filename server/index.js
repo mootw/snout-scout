@@ -17,10 +17,10 @@ const rapid_react_config = {
     "season": "Rapid React",
     "pit_scouting": {
         "survey": [
-            { "id": "auto_high", "type": "number", "label": "Number of balls robot can score high in autonomous" },
-            { "id": "auto_low", "type": "number", "label": "Number of balls robot can score low in autonomous" },
-            { "id": "teleop_high", "type": "number", "label": "Number of balls robot can score high in teleop" },
-            { "id": "teleop_low", "type": "number", "label": "Number of balls robot can score low in teleop" },
+            { "id": "auto_high", "type": "number", "label": "Cargo high in autonomous" },
+            { "id": "auto_low", "type": "number", "label": "Cargo low in autonomous" },
+            { "id": "teleop_high", "type": "number", "label": "Cargo high in teleop" },
+            { "id": "teleop_low", "type": "number", "label": "Cargo low in teleop" },
             { "id": "shooting_positions", "type": "map-boolean", "label": "Positions this robot can shoot from." },
             { "id": "shooter_type", "type": "selector", "options": ["No Shooter", "Low Goal", "High Goal", "Any goal"], "label": "Shooter type" },
             { "id": "climb", "type": "selector", "options": ["No Climb", "Low", "Medium", "High", "Traversal"], "label": "Climb" },
@@ -69,6 +69,8 @@ const rapid_react_config = {
 };
 
 const requestListener = function (req, res) {
+
+    console.log(`request made ${req.url}`);
 
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Headers', '*');
