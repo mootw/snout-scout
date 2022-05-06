@@ -38,9 +38,14 @@ class SnoutScoutData {
   ScoutingConfig? scoutingConfig;
 
   Future loadConfig() async {
-    var data =
-        await apiClient.get(Uri.parse("${await getServer()}/config/scouting"));
-    scoutingConfig = scoutingConfigFromJson(data.body);
+    try {
+      var data = await apiClient
+          .get(Uri.parse("${await getServer()}/config/scouting"));
+      scoutingConfig = scoutingConfigFromJson(data.body);
+    } catch (e, s) {
+      print(e);
+      print(s);
+    }
   }
 }
 

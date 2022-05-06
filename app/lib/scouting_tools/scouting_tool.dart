@@ -17,9 +17,6 @@ class ScoutingToolWidget extends StatefulWidget {
 
 class _ScoutingToolWidgetState extends State<ScoutingToolWidget> {
   final myController = TextEditingController();
-  String? dropdownValue;
-
-  bool switchValue = false;
 
   @override
   void initState() {
@@ -27,6 +24,10 @@ class _ScoutingToolWidgetState extends State<ScoutingToolWidget> {
     super.initState();
     if (widget.tool.type == "toggle" && widget.survey.value == null) {
       widget.survey.value = false;
+    }
+
+    if (widget.tool.type == "text-box" || widget.tool.type == "number") {
+      myController.text = widget.survey.value?.toString() ?? "";
     }
   }
 
@@ -65,14 +66,12 @@ class _ScoutingToolWidgetState extends State<ScoutingToolWidget> {
       return ListTile(
         title: Text(widget.tool.label),
         trailing: DropdownButton<String>(
-          value: dropdownValue,
+          value: widget.survey.value,
           icon: const Icon(Icons.arrow_downward),
           onChanged: (String? newValue) {
             setState(() {
-              dropdownValue = newValue!;
+              widget.survey.value = newValue!;
             });
-
-            widget.survey.value = newValue;
           },
           items:
               widget.tool.options.map<DropdownMenuItem<String>>((String value) {
@@ -89,12 +88,11 @@ class _ScoutingToolWidgetState extends State<ScoutingToolWidget> {
       return ListTile(
         title: Text(widget.tool.label),
         trailing: Switch(
-            value: switchValue,
+            value: widget.survey.value,
             onChanged: (value) {
               setState(() {
-                switchValue = value;
+                widget.survey.value = value;
               });
-              widget.survey.value = value;
             }),
       );
     }

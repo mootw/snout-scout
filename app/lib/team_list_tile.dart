@@ -10,7 +10,6 @@ class TeamListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       title: Text(teamNumber.toString()),
-      subtitle: Text("Team Name"),
       onTap: () {
         Navigator.push(
           context,

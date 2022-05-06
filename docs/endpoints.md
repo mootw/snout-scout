@@ -5,7 +5,7 @@ Returns the scouting config for the year
 This includes pit_scouting and match_scouting
 
 # /teams
-returns all teams that are attending
+returns list of all team numbers that are attending
 
 # /team/[number]
 returns all details about a specific team number

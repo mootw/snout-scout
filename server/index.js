@@ -3,22 +3,7 @@ const http = require('http');
 const fs = require('fs');
 
 
-let database = {
-    "pit_scouting": {
-
-    },
-    "match_results": [
-
-    ],
-    "match_timelines": [
-
-    ],
-};
-
-const exists = fs.existsSync('database.json');
-if(exists) {
-    database = JSON.parse(fs.readFileSync('database.json'));
-}
+let database = JSON.parse(fs.readFileSync('database.json'));
 
 function write () {
     console.log(JSON.stringify(database));
@@ -30,73 +15,6 @@ console.log(database);
 
 const rapid_react_config = {
     "season": "Rapid React",
-    "events": [
-        {
-            "id": "state",
-            "teams": [
-                1816,
-                2052,
-                2169,
-                2220,
-                2239,
-                2470,
-                2491,
-                2502,
-                2503,
-                2509,
-                2531,
-                2823,
-                2847,
-                2883,
-                3018,
-                3082,
-                3130,
-                3184,
-                3206,
-                3293,
-                3630,
-                3883,
-                4009,
-                4607,
-                4728,
-                5172,
-                5434,
-                5653,
-                5690,
-                5913,
-                5914,
-                6453,
-                6749,
-                7028,
-                7541,
-                8516
-            ],
-            "matches": [
-                {
-                    "number": 1,
-                    "section": "Qualifications",
-                    "time": "05 May 2022 08:30:00 CST",
-                    "blue": [2823, 2503, 7028],
-                    "red": [5653, 4728, 2509],
-                },
-                {
-                    "number": 2,
-                    "section": "Qualifications",
-                    "time": "05 May 2022 08:38:00 CST",
-                    "blue": [7541, 3630, 5172],
-                    "red": [4607, 2239, 5914],
-                },
-                {
-                    "number": 3,
-                    "section": "Qualifications",
-                    "time": "05 May 2022 08:46:00 CST",
-                    "blue": [3018, 3883, 3184],
-                    "red": [3130, 8516, 2470],
-                },
-            ],
-        },
-    ],
-    "team_number": 6749,
     "pit_scouting": {
         "survey": [
             { "id": "auto_high", "type": "number", "label": "Number of balls robot can score high in autonomous" },
@@ -158,7 +76,6 @@ const requestListener = function (req, res) {
     res.setHeader('Access-Control-Request-Method', '*');
 
     if(req.method == "OPTIONS") {
-        console.log("its a cors request");
         res.writeHead(200);
         res.end();
         return;
@@ -168,22 +85,43 @@ const requestListener = function (req, res) {
     const season_config = rapid_react_config;
     const event = "state";
 
+    const eventData = database.events[event];
+
     if(req.url == "/config/scouting") {
         res.writeHead(200);
-        res.end(JSON.stringify({
-            "pit_scouting": season_config.pit_scouting,
-            "match_scouting": season_config.match_scouting,
-        }));
+        res.end(JSON.stringify(season_config));
         return;
     }
 
-    if(req.url == "/submit/pit_scout") {
-        const data = JSON.parse(req.headers.jsondata);
-        database.pit_scouting[data.team.toString()] = data;
-        write();
+    if(req.url == "/teams") {
         res.writeHead(200);
-        res.end();
+        //Array of team numbers
+        res.end(JSON.stringify(eventData.teams));
         return;
+    }
+
+    if(req.url == "/pit_scout") {
+        if(req.method == "POST") {
+            const data = JSON.parse(req.headers.jsondata);
+            eventData.pit_scouting[data.team.toString()] = data;
+            write();
+            res.writeHead(200);
+            res.end();
+            return;
+        }
+        if(req.method == "GET") {
+            const data = eventData.pit_scouting[req.headers.team];
+            if(data == undefined) {
+                res.writeHead(404);
+                res.end();
+                return;
+            }
+            res.writeHead(200);
+            //Team must be a string
+            res.end(JSON.stringify(data));
+            return;
+        }
+        
     }
 
     res.writeHead(200);

@@ -8,8 +8,10 @@ import 'package:flutter/material.dart';
 class ScoutTeamPage extends StatefulWidget {
   final int team;
   final ScoutingConfig config;
+  final ScoutingResults? oldData;
 
-  const ScoutTeamPage({Key? key, required this.team, required this.config})
+  const ScoutTeamPage(
+      {Key? key, required this.team, required this.config, this.oldData})
       : super(key: key);
 
   @override
@@ -24,8 +26,16 @@ class _ScoutTeamPageState extends State<ScoutTeamPage> {
     // TODO: implement initState
     super.initState();
 
+    //Populate map to ensure non-null
     for (var item in widget.config.pitScouting.survey) {
       results[item.id] = Survey(id: item.id, type: item.type, value: null);
+    }
+
+    //populate old data on top
+    if (widget.oldData != null) {
+      for (var survey in widget.oldData!.survey) {
+        results[survey.id] = survey;
+      }
     }
   }
 
@@ -46,11 +56,16 @@ class _ScoutTeamPageState extends State<ScoutTeamPage> {
 
                 var json = scoutingResultsToJson(scout_result);
                 // print(json);
-                var res = await apiClient.get(
-                  Uri.parse("${await getServer()}/submit/pit_scout"),
-                  headers: {"jsondata": json}
-                );
-                print(res.statusCode);
+                var res = await apiClient.post(
+                    Uri.parse("${await getServer()}/pit_scout"),
+                    headers: {"jsondata": json});
+
+                if (res.statusCode == 200) {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                    content: Text('Saved Scouting Data'),
+                    duration: Duration(seconds: 4),
+                  ));
+                }
               },
               icon: Icon(Icons.save))
         ],
