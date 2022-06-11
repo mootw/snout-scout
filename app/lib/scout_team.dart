@@ -1,5 +1,5 @@
 import 'package:app/api.dart';
-import 'package:app/data/scouting_config.dart';
+import 'package:app/data/season_config.dart';
 import 'package:app/data/scouting_result.dart';
 import 'package:app/main.dart';
 import 'package:app/scouting_tools/scouting_tool.dart';
@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 
 class PitScoutTeamPage extends StatefulWidget {
   final int team;
-  final ScoutingConfig config;
+  final SeasonConfig config;
   final ScoutingResults? oldData;
 
   const PitScoutTeamPage(

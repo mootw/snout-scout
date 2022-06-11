@@ -1,6 +1,6 @@
 //Data class that handles scouting tool things
 
-import 'package:app/data/scouting_config.dart';
+import 'package:app/data/season_config.dart';
 import 'package:app/data/scouting_result.dart';
 import 'package:flutter/material.dart';
 

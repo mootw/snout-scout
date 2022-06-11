@@ -1,6 +1,6 @@
 
 
-# /config/scouting
+# /config
 Returns the scouting config for the year
 This includes pit_scouting and match_scouting
 

@@ -1,4 +1,5 @@
 import 'package:app/data/matches.dart';
+import 'package:app/match_page.dart';
 import 'package:app/view_team_page.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -19,13 +20,18 @@ class MatchCard extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: InkWell(
-        onTap: () {},
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => MatchPage(match: match)),
+          );
+        },
         child: Column(
           children: [
             SizedBox(height: 4),
             Row(
               children: [
-                Container(
+                SizedBox(
                   width: 96,
                   child: Column(
                     children: [

@@ -1,11 +1,13 @@
+import 'dart:convert';
+
 import 'package:app/api.dart';
-import 'package:app/data/scouting_config.dart';
+import 'package:app/data/season_config.dart';
 import 'package:app/matches_page.dart';
 import 'package:app/teams_page.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-void main() {
+void main() async {
   runApp(const MyApp());
 }
 
@@ -33,15 +35,27 @@ Future setName(String newName) async {
 }
 
 class SnoutScoutData {
-  int currentEventId = 0;
+  String? selectedEventID;
+  List<String> events = [];
 
-  ScoutingConfig? scoutingConfig;
+  String? serverURL;
+
+  SeasonConfig? config;
 
   Future loadConfig() async {
+    serverURL = await getServer();
+    var eventsData =
+        await apiClient.get(Uri.parse("${await getServer()}/events"));
+    print(eventsData.body);
+    events = List<String>.from(jsonDecode(eventsData.body));
+    if(events.isNotEmpty) {
+      selectedEventID = events.first;
+    }
+
     try {
       var data = await apiClient
-          .get(Uri.parse("${await getServer()}/config/scouting"));
-      scoutingConfig = scoutingConfigFromJson(data.body);
+          .get(Uri.parse("${await getServer()}/config"));
+      config = seasonConfigFromJson(data.body);
     } catch (e, s) {
       print(e);
       print(s);
@@ -51,6 +65,13 @@ class SnoutScoutData {
 
 var snoutData = SnoutScoutData();
 
+//Set up theme
+const primaryColor = Color.fromARGB(255, 49, 219, 43);
+final darkScheme =
+    ColorScheme.fromSeed(seedColor: primaryColor, brightness: Brightness.dark);
+ThemeData defaultTheme =
+    ThemeData.from(colorScheme: darkScheme, useMaterial3: true);
+
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
@@ -59,7 +80,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
-      theme: ThemeData.dark(),
+      theme: defaultTheme,
       home: const MyHomePage(),
     );
   }
@@ -75,6 +96,8 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _currentPageIndex = 0;
 
+  bool isLoaded = false;
+
   @override
   void initState() {
     super.initState();
@@ -84,7 +107,9 @@ class _MyHomePageState extends State<MyHomePage> {
   void getStuff() async {
     print("load data");
     await snoutData.loadConfig();
-    setState(() {});
+    setState(() {
+      isLoaded = true;
+    });
     print("loaded data");
   }
 
@@ -94,14 +119,30 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
-        title: Text("snout scout"),
+        title: snoutData.events.isEmpty ? Text("No events!") : DropdownButton<String>(
+          onChanged: (value) {
+            setState(() {
+              snoutData.selectedEventID = value;
+            });
+          },
+          value: snoutData.selectedEventID,
+          items: snoutData.events
+          .map<DropdownMenuItem<String>>((String value) {
+        return DropdownMenuItem<String>(
+          value: value,
+          child: Text(value),
+        );
+      }).toList(),
+        ),
       ),
-      body: [
-        Container(),
-        AllTeamsPage(),
-        AllMatchesPage(),
-        Container(),
-      ][_currentPageIndex],
+      body: isLoaded == false
+          ? CircularProgressIndicator.adaptive()
+          : [
+              Container(),
+              AllTeamsPage(),
+              AllMatchesPage(),
+              Container(),
+            ][_currentPageIndex],
       drawer: Drawer(
         child: ListView(children: [
           SizedBox(height: 32),
@@ -154,11 +195,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           ListTile(
             title: Text("Season"),
-            subtitle: Text("RapidReact"),
-          ),
-          ListTile(
-            title: Text("Event"),
-            subtitle: Text("State"),
+            subtitle: Text(snoutData.config?.season ?? "Not connected"),
           ),
         ]),
       ),

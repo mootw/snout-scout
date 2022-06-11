@@ -1,27 +1,31 @@
 import 'dart:convert';
 
-ScoutingConfig scoutingConfigFromJson(String str) =>
-    ScoutingConfig.fromJson(json.decode(str));
+SeasonConfig seasonConfigFromJson(String str) =>
+    SeasonConfig.fromJson(json.decode(str));
 
-String scoutingConfigToJson(ScoutingConfig data) => json.encode(data.toJson());
+String seasonConfigToJson(SeasonConfig data) => json.encode(data.toJson());
 
-class ScoutingConfig {
-  ScoutingConfig({
+class SeasonConfig {
+  SeasonConfig({
     required this.pitScouting,
     required this.matchScouting,
+    required this.season,
   });
 
   final PitScouting pitScouting;
   final MatchScouting matchScouting;
+  final String season;
 
-  factory ScoutingConfig.fromJson(Map<String, dynamic> json) => ScoutingConfig(
+  factory SeasonConfig.fromJson(Map<String, dynamic> json) => SeasonConfig(
         pitScouting: PitScouting.fromJson(json["pit_scouting"]),
         matchScouting: MatchScouting.fromJson(json["match_scouting"]),
+        season: json["season"],
       );
 
   Map<String, dynamic> toJson() => {
         "pit_scouting": pitScouting.toJson(),
         "match_scouting": matchScouting.toJson(),
+        "season": season,
       };
 }
 

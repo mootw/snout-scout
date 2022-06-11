@@ -1,6 +1,6 @@
 import 'package:app/api.dart';
 import 'package:app/data/matches.dart';
-import 'package:app/data/scouting_config.dart';
+import 'package:app/data/season_config.dart';
 import 'package:app/data/scouting_result.dart';
 import 'package:app/main.dart';
 import 'package:app/match_card.dart';
@@ -35,7 +35,7 @@ class _TeamViewPageState extends State<TeamViewPage> {
                     results = scoutingResultsFromJson(res.body);
                   }
 
-                  var config = snoutData.scoutingConfig;
+                  var config = snoutData.config;
                   if (config != null) {
                     var result = await Navigator.push(
                       context,
@@ -131,7 +131,7 @@ class ScoutingResult extends StatelessWidget {
       return Container();
     }
 
-    var config = snoutData.scoutingConfig;
+    var config = snoutData.config;
     if (config == null) {
       return const Text("Season config is null");
     }
