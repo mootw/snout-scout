@@ -110,6 +110,14 @@
                 "type": "event",
                 "points": 2,
                 "rp": 0
+            },
+            {
+                "id": "intake_jam",
+                "label": "Intake Jam",
+                "type": "event",
+                "points": 0,
+                "rp": 0,
+                "visual_priority": 2
             }
         ],
         "teleop": [

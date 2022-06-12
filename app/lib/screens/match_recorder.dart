@@ -18,10 +18,20 @@ class MatchRecorderPage extends StatefulWidget {
 enum MatchMode { PRE_GAME, AUTO, TELEOP, FINISHED }
 
 class TimelineEvent {
-  num time;
-  ScoutingToolData data;
 
-  TimelineEvent(this.time, this.data);
+  RobotPosition? position;
+
+  num time;
+  ScoutingToolData? data;
+
+  TimelineEvent({required this.time, this.data, this.position});
+}
+
+class RobotPosition {
+  double x;
+  double y;
+
+  RobotPosition(this.x, this.y);
 }
 
 class _MatchRecorderPageState extends State<MatchRecorderPage> {
@@ -29,7 +39,18 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
 
   List<TimelineEvent> events = [];
 
+
+  List<RobotPosition> robotPositions = [];
+
   int _time = 0;
+
+  Timer? t;
+
+  @override
+  void dispose() {
+    t?.cancel();
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -41,7 +62,9 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
       child: MaterialButton(
         onPressed: () {
           setState(() {
-            events.add(TimelineEvent(_time, tool));
+            if(_mode != MatchMode.PRE_GAME) {
+              events.add(TimelineEvent(time: _time, data: tool));
+            }
           });
         },
         child: Text(tool.label),
@@ -58,21 +81,27 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
           child: const Text("Start of timeline")),
       for (final item in events.toList()) ...[
         const Divider(height: 0),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(item.time.round().toString()),
-            Text(item.data.label),
-            IconButton(
-              color: Theme.of(context).errorColor,
-              icon: const Icon(Icons.remove),
-              onPressed: () {
-                setState(() {
-                  events.remove(item);
-                });
-              },
-            )
-          ],
+        Padding(
+          padding: const EdgeInsets.only(left: 12, right: 12),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(item.time.round().toString()),
+              if(item.data != null)
+                Text(item.data!.label),
+              if(item.position != null)
+                const Text("Robot Position"),
+              IconButton(
+                color: Theme.of(context).errorColor,
+                icon: const Icon(Icons.remove),
+                onPressed: () {
+                  setState(() {
+                    events.remove(item);
+                  });
+                },
+              ),
+            ],
+          ),
         ),
       ],
     ];
@@ -80,7 +109,8 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
 
   @override
   Widget build(BuildContext context) {
-    var scouting_events = snoutData.config!.matchScouting.auto;
+    
+    final scoutingEvents = _mode == MatchMode.AUTO || _mode == MatchMode.PRE_GAME ? snoutData.config!.matchScouting.auto : _mode == MatchMode.TELEOP ? snoutData.config!.matchScouting.teleop : [];
 
     return Scaffold(
       appBar: AppBar(
@@ -100,17 +130,34 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
             color: Colors.black,
             padding: EdgeInsets.only(left: 8, right: 8),
             width: double.infinity,
-            child: Image.network("${snoutData.serverURL}/field_map.png",
-                height: 220),
+            child: GestureDetector(
+              onTapDown: (details) {
+                setState(() {
+                  for(final event in events.toList()) {
+                    if(event.position != null) {
+                      //Is position event
+                      if(event.time.floor() == _time) {
+                        //Event is the same time, overrwite
+                        events.remove(event);
+                      }
+                    }
+                  }
+                  events.add(TimelineEvent(time: _time, position: RobotPosition(0, 0)));
+                });
+                print("tap ${details.localPosition.dx} ${details.localPosition.dy}");
+              },
+              child: Image.network("${snoutData.serverURL}/field_map.png",
+                  height: 220),
+            ),
           ),
           SizedBox(height: 16),
           Wrap(
             children: [
-              for (int i = 0; i < scouting_events.length; i++)
+              for (int i = 0; i < scoutingEvents.length; i++)
                 SizedBox(
                   height: 80,
                   width: MediaQuery.of(context).size.width / 3,
-                  child: getEventButton(scouting_events[i]),
+                  child: getEventButton(scoutingEvents[i]),
                 ),
             ],
           ),
@@ -127,15 +174,32 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                     },
                     onLongPress: () {
                       if (_mode == MatchMode.TELEOP) {
+
                         //TODO finish the recording.
+                        for(var event in events) {
+                          //Scale times between 15 seconds and 150 seconds
+                          if(event.time > 15) {
+                            num offsetTime = event.time - 15;
+                            event.time = 15 + ((offsetTime/(_time - 15)) * 135);
+                          }
+                        }
                       }
                       if (_mode == MatchMode.AUTO) {
                         _mode = MatchMode.TELEOP;
+                        //Scale auto times
+                        for(var event in events) {
+                          //Scale times to 15 seconds
+                          event.time = (event.time/_time) * 15;
+                        }
+                        //Set time to 15 if auto was recorded faster than real time.
+                        if(_time < 15) {
+                          _time = 15;
+                        }
                       }
                       if (_mode == MatchMode.PRE_GAME) {
                         _mode = MatchMode.AUTO;
                         //Start timer
-                        Timer.periodic(Duration(seconds: 1), (timer) {
+                        t = Timer.periodic(const Duration(seconds: 1), (timer) {
                           if (_mode != MatchMode.FINISHED) {
                             setState(() {
                               _time++;
