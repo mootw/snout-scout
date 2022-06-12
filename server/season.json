@@ -77,6 +77,13 @@
         ],
         "auto": [
             {
+                "id": "cargo_intake",
+                "label": "Intake Cargo",
+                "type": "event",
+                "points": 0,
+                "rp": 0
+            },
+            {
                 "id": "cargo_upper",
                 "label": "Cargo Upper",
                 "type": "event",
@@ -85,18 +92,21 @@
             },
             {
                 "id": "cargo_lower",
+                "label": "Cargo Lower",
                 "type": "event",
                 "points": 2,
                 "rp": 0
             },
             {
                 "id": "cargo_miss",
+                "label": "Cargo Miss",
                 "type": "event",
                 "points": 0,
                 "rp": 0
             },
             {
                 "id": "exit_tarmac",
+                "label": "Exit Tarmac",
                 "type": "event",
                 "points": 2,
                 "rp": 0
@@ -104,7 +114,15 @@
         ],
         "teleop": [
             {
+                "id": "cargo_intake",
+                "label": "Intake Cargo",
+                "type": "event",
+                "points": 0,
+                "rp": 0
+            },
+            {
                 "id": "cargo_upper",
+                "label": "Cargo Upper",
                 "type": "event",
                 "points": 2,
                 "rp": 0,
@@ -112,6 +130,7 @@
             },
             {
                 "id": "cargo_lower",
+                "label": "Cargo Lower",
                 "type": "event",
                 "points": 1,
                 "rp": 0,
@@ -119,6 +138,7 @@
             },
             {
                 "id": "cargo_miss",
+                "label": "Cargo Miss",
                 "type": "event",
                 "points": 0,
                 "rp": 0,
@@ -126,6 +146,7 @@
             },
             {
                 "id": "intake_jam",
+                "label": "Intake Jam",
                 "type": "event",
                 "points": 0,
                 "rp": 0,
@@ -134,29 +155,29 @@
         ],
         "endgame": [
             {
-                "id": "climb_time",
-                "type": "duration"
-            },
-            {
                 "id": "climb_low",
+                "label": "Climb Low",
                 "type": "event",
                 "points": 4,
                 "rp": 0
             },
             {
                 "id": "climb_mid",
+                "label": "Climb Mid",
                 "type": "event",
                 "points": 6,
                 "rp": 0
             },
             {
                 "id": "climb_high",
+                "label": "Climb High",
                 "type": "event",
                 "points": 10,
                 "rp": 0
             },
             {
                 "id": "climb_traversal",
+                "label": "Climb Traversal",
                 "type": "event",
                 "points": 15,
                 "rp": 0

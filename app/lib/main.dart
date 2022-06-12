@@ -2,8 +2,8 @@ import 'dart:convert';
 
 import 'package:app/api.dart';
 import 'package:app/data/season_config.dart';
-import 'package:app/matches_page.dart';
-import 'package:app/teams_page.dart';
+import 'package:app/screens/matches_page.dart';
+import 'package:app/screens/teams_page.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

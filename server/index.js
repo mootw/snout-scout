@@ -2,6 +2,10 @@
 const http = require('http');
 const fs = require('fs');
 
+//used to warn about multiple people editing the same document.
+//Format is key: time
+let editLocks = {};
+
 //Get list of seasons and load the config
 const season = JSON.parse(fs.readFileSync(`./season.json`));
 console.log(season);
@@ -39,6 +43,38 @@ const requestListener = async function (req, res) {
         res.writeHead(200);
         res.end();
         return;
+    }
+
+    console.log(editLocks);
+
+    //Returns true if lock has been set within ttl, false if lock is not set or expired.
+    if(req.url === "/edit_lock") {
+        if(req.method === "GET") {
+            var value = editLocks[req.headers.key];
+            if(value !== undefined) {
+                //300 seconds
+                if(Date.now() - value <= 1000 * 300) {
+                    res.writeHead(200);
+                    res.end("true");
+                    return;
+                }
+            }
+            res.writeHead(200);
+            res.end("false");
+            return;
+        }
+        if(req.method === "POST") {
+            editLocks[req.headers.key] = Date.now();
+            res.writeHead(200);
+            res.end();
+            return;
+        }
+        if(req.method === "DELETE") {
+            delete editLocks[req.headers.key];
+            res.writeHead(200);
+            res.end();
+            return;
+        }
     }
 
     if (req.url === "/field_map.png") {

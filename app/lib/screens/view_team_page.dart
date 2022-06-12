@@ -2,9 +2,10 @@ import 'package:app/api.dart';
 import 'package:app/data/matches.dart';
 import 'package:app/data/season_config.dart';
 import 'package:app/data/scouting_result.dart';
+import 'package:app/edit_lock.dart';
 import 'package:app/main.dart';
 import 'package:app/match_card.dart';
-import 'package:app/matches_page.dart';
+import 'package:app/screens/matches_page.dart';
 import 'package:app/scout_team.dart';
 import 'package:flutter/material.dart';
 
@@ -37,14 +38,26 @@ class _TeamViewPageState extends State<TeamViewPage> {
 
                   var config = snoutData.config;
                   if (config != null) {
-                    var result = await Navigator.push(
+
+                    var result = await navigateWithEditLock(context, "scoutteam:${widget.number}",
+                    () => Navigator.push(
                       context,
                       MaterialPageRoute(
                           builder: (context) => PitScoutTeamPage(
                               team: widget.number,
                               config: config,
                               oldData: results)),
+                    )
                     );
+
+                    // var result = await Navigator.push(
+                    //   context,
+                    //   MaterialPageRoute(
+                    //       builder: (context) => PitScoutTeamPage(
+                    //           team: widget.number,
+                    //           config: config,
+                    //           oldData: results)),
+                    // );
                     if (result == true) {
                       //We should setState and update
                       print("data saved");

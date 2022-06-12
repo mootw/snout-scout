@@ -1,6 +1,6 @@
 import 'package:app/data/matches.dart';
-import 'package:app/match_page.dart';
-import 'package:app/view_team_page.dart';
+import 'package:app/screens/match_page.dart';
+import 'package:app/screens/view_team_page.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 

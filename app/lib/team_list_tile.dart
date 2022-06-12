@@ -1,4 +1,4 @@
-import 'package:app/view_team_page.dart';
+import 'package:app/screens/view_team_page.dart';
 import 'package:flutter/material.dart';
 
 class TeamListTile extends StatelessWidget {
