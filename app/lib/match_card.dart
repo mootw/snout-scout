@@ -28,7 +28,7 @@ class MatchCard extends StatelessWidget {
         },
         child: Column(
           children: [
-            SizedBox(height: 4),
+            const SizedBox(height: 4),
             Row(
               children: [
                 SizedBox(
@@ -64,7 +64,7 @@ class MatchCard extends StatelessWidget {
                           alignment: Alignment.center,
                           width: 52,
                           child: Text(
-                            "?",
+                            match.results?.red.values['points'] != null ? match.results!.red.values['points'].toString() : "?",
                             style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white),
@@ -93,7 +93,7 @@ class MatchCard extends StatelessWidget {
                           alignment: Alignment.center,
                           width: 52,
                           child: Text(
-                            "?",
+                            match.results?.blue.values['points'] != null ? match.results!.blue.values['points'].toString() : "?",
                             style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white),

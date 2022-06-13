@@ -33,10 +33,17 @@ class _EditMatchResultsState extends State<EditMatchResults> {
   void initState() {
     super.initState();
 
+    String? date = widget.match.results?.startTime;
+    if(date != null) {
+      matchEndTime = DateTime.parse(date).add(matchLength);
+    } else {
+      matchEndTime = DateTime.now();
+    }
+
     //Pre-fill result scores
     for (var resultValue in widget.config.matchScouting.results) {
-      _red[resultValue] = TextEditingController();
-      _blue[resultValue] = TextEditingController();
+      _red[resultValue] = TextEditingController(text: widget.match.results?.red.values[resultValue]?.toString());
+      _blue[resultValue] = TextEditingController(text: widget.match.results?.blue.values[resultValue]?.toString());
     }
   }
 

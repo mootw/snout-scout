@@ -107,6 +107,7 @@ const requestListener = async function (req, res) {
 
     const eventData = database.events[event];
 
+    //TODO sort matches by their scheduled_time
 
     if (event === undefined) {
         res.writeHead(403);
@@ -126,24 +127,33 @@ const requestListener = async function (req, res) {
         res.writeHead(200);
         //Array of team numbers
         const team_filter = req.headers.team;
-        let matches = [];
-        for (const match of eventData.matches) {
-            matches.push({
-                //Unique identifer for this match.
-                "id": match.id,
-                "section": match.section,
-                "number": match.number,
-                "scheduled_time": new Date(match.scheduled_time).toISOString(),
-                "blue": match.blue,
-                "red": match.red,
-                "results": match.results,
-            });
-        }
+        //Create new array to modify
+        let matches = eventData.matches.slice();
         if (team_filter != undefined) {
             matches = matches.filter(match => [...match.blue, ...match.red].includes(+team_filter));
         }
 
+        console.log(matches);
+
         res.end(JSON.stringify(matches));
+        return;
+    }
+
+    //Returns one match
+    if (req.url == "/match") {
+        res.writeHead(200);
+        //Array of team numbers
+        const id = req.headers.id;
+        //Create new array to modify
+        for(const match of eventData.matches) {
+            if(match.id === id) {
+                res.end(JSON.stringify(match));
+                return;
+            }
+        }
+        //Not found
+        res.writeHead(404);
+        res.end();
         return;
     }
 

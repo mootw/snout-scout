@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:app/api.dart';
 import 'package:app/data/matches.dart';
 import 'package:app/edit_lock.dart';
 import 'package:app/main.dart';
@@ -49,54 +50,55 @@ class _MatchPageState extends State<MatchPage> {
             ),
             title: Text("Match ${widget.match.section} ${widget.match.number}"),
           ),
-          body: TabBarView(children: [
-            MatchView(match: widget.match, teamNumber: null),
-            MatchView(match: widget.match, teamNumber: widget.match.red[0]),
-            MatchView(match: widget.match, teamNumber: widget.match.red[1]),
-            MatchView(match: widget.match, teamNumber: widget.match.red[2]),
-            MatchView(match: widget.match, teamNumber: widget.match.blue[0]),
-            MatchView(match: widget.match, teamNumber: widget.match.blue[1]),
-            MatchView(match: widget.match, teamNumber: widget.match.blue[2]),
-          ]),
+          body: FutureBuilder<Match>(
+              future: getMatch(widget.match.id),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState != ConnectionState.done) {
+                  return const CircularProgressIndicator.adaptive();
+                }
+                return TabBarView(children: [
+                  _buildMatchView(snapshot.data!, null),
+                  _buildMatchView(snapshot.data!, snapshot.data!.red[0]),
+                  _buildMatchView(snapshot.data!, snapshot.data!.red[1]),
+                  _buildMatchView(snapshot.data!, snapshot.data!.red[2]),
+                  _buildMatchView(snapshot.data!, snapshot.data!.blue[0]),
+                  _buildMatchView(snapshot.data!, snapshot.data!.blue[1]),
+                  _buildMatchView(snapshot.data!, snapshot.data!.blue[2]),
+                ]);
+              }),
         ));
   }
-}
 
-class MatchView extends StatelessWidget {
-  final Match match;
-  final int? teamNumber;
-
-  const MatchView({required this.match, required this.teamNumber, Key? key})
-      : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildMatchView(Match data, int? teamNumber) {
     if (teamNumber == null) {
       return Column(
         children: [
-          
-            SizedBox(
-              height: 50,
-              child: Center(
-                child: ElevatedButton(
-                  child: match.results == null ? Text("Add Results") : Text("Edit results"),
-                  onPressed: () async {
-                    await navigateWithEditLock(
-                        context,
-                        "match:${match.section}${match.number}:results",
-                        () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => EditMatchResults(
-                                  match: match, config: snoutData.config!),
-                            )));
-                  },
-                ),
+          SizedBox(
+            height: 50,
+            child: Center(
+              child: ElevatedButton(
+                child: data.results == null
+                    ? Text("Add Results")
+                    : Text("Edit results"),
+                onPressed: () async {
+                  var result = await navigateWithEditLock(
+                      context,
+                      "match:${data.id}:results",
+                      () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => EditMatchResults(
+                                match: data, config: snoutData.config!),
+                          )));
+
+                  if (result == true) {
+                    setState(() {});
+                  }
+                },
               ),
             ),
-          if (match.results == null) 
-            Text("results"),
-
+          ),
+          if (data.results != null) Text("SHOW RESULTS HERE"),
         ],
       );
     }
@@ -108,7 +110,7 @@ class MatchView extends StatelessWidget {
           onPressed: () async {
             List<TimelineEvent>? result = await navigateWithEditLock(
                 context,
-                "match:${match.section}${match.number}:$teamNumber:timeline",
+                "match:${data.id}:$teamNumber:timeline",
                 () => Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -127,4 +129,12 @@ class MatchView extends StatelessWidget {
       ],
     );
   }
+}
+
+Future<Match> getMatch(String matchId) async {
+  var res =
+      await apiClient.get(Uri.parse("${await getServer()}/match"), headers: {
+    "id": matchId,
+  });
+  return Match.fromJson(jsonDecode(res.body));
 }
