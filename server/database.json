@@ -1,1 +1,1638 @@
-{"version":1,"events":{"state":{"name":"State","teams":[1816,2052,2169,2220,2239,2470,2491,2502,2503,2509,2531,2823,2847,2883,3018,3082,3130,3184,3206,3293,3630,3883,4009,4607,4728,5172,5434,5653,5690,5913,5914,6453,6749,7028,7541,8516],"matches":[{"section":"Qual","number":1,"scheduled_time":"05 May 2022 08:30:00 CST","blue":[2823,2503,7028],"red":[5653,4728,2509]},{"section":"Qual","number":2,"scheduled_time":"05 May 2022 08:38:00 CST","blue":[7541,3630,5172],"red":[4607,2239,5914]},{"section":"Qual","number":3,"scheduled_time":"05 May 2022 08:46:00 CST","blue":[3018,3883,3184],"red":[3130,8516,2470]},{"section":"Qual","number":4,"scheduled_time":"05 May 2022 08:54:00 CST","blue":[2502,5690,5434],"red":[2052,2847,2491]},{"section":"Qual","number":5,"scheduled_time":"05 May 2022 09:02:00 CST","blue":[2531,6749,3082],"red":[4009,2220,6453]},{"section":"Qual","number":6,"scheduled_time":"05 May 2022 09:10:00 CST","blue":[3293,2883,5913],"red":[2169,1816,3206]},{"section":"Qual","number":7,"scheduled_time":"05 May 2022 09:21:00 CST","blue":[2503,3130,5653],"red":[2470,2823,3630]},{"section":"Qual","number":8,"scheduled_time":"05 May 2022 09:28:00 CST","blue":[2509,5434,2239],"red":[7541,5914,3883]},{"section":"Qual","number":9,"scheduled_time":"05 May 2022 09:35:00 CST","blue":[7028,2491,2531],"red":[2052,8516,3082]},{"section":"Qual","number":10,"scheduled_time":"05 May 2022 09:42:00 CST","blue":[4728,5913,3206],"red":[4607,2502,6749]},{"section":"Qual","number":11,"scheduled_time":"05 May 2022 09:49:00 CST","blue":[2220,3184,1816],"red":[3018,2847,2169]},{"section":"Qual","number":12,"scheduled_time":"05 May 2022 09:57:00 CST","blue":[4009,5172,3293],"red":[2883,5690,6453]},{"section":"Qual","number":13,"scheduled_time":"05 May 2022 10:04:00 CST","blue":[5914,2509,7028],"red":[2491,3130,3883]},{"section":"Qual","number":14,"scheduled_time":"05 May 2022 10:11:00 CST","blue":[8516,7541,2823],"red":[2503,2470,6749]},{"section":"Qual","number":15,"scheduled_time":"05 May 2022 10:18:00 CST","blue":[2502,2169,2531],"red":[3018,5434,5653]},{"section":"Qual","number":16,"scheduled_time":"05 May 2022 10:25:00 CST","blue":[4728,3293,2220],"red":[1816,4009,2239]},{"section":"Qual","number":17,"scheduled_time":"05 May 2022 10:33:00 CST","blue":[6453,3082,3184],"red":[3206,5690,4607]},{"section":"Qual","number":18,"scheduled_time":"05 May 2022 10:40:00 CST","blue":[2883,3630,2052],"red":[5172,5913,2847]},{"section":"Qual","number":19,"scheduled_time":"05 May 2022 10:47:00 CST","blue":[3130,2823,2502],"red":[5914,8516,2169]},{"section":"Qual","number":20,"scheduled_time":"05 May 2022 10:54:00 CST","blue":[5653,2531,4009],"red":[2491,2509,1816]},{"section":"Qual","number":21,"scheduled_time":"05 May 2022 11:01:00 CST","blue":[2220,3018,4607],"red":[5434,2503,3293]},{"section":"Qual","number":22,"scheduled_time":"05 May 2022 11:09:00 CST","blue":[3883,5913,6749],"red":[5172,3082,5690]},{"section":"Qual","number":23,"scheduled_time":"05 May 2022 11:16:00 CST","blue":[3630,2847,4728],"red":[2470,6453,7541]},{"section":"Qual","number":24,"scheduled_time":"05 May 2022 11:23:00 CST","blue":[2239,2052,7028],"red":[3206,2883,3184]},{"section":"Qual","number":25,"scheduled_time":"05 May 2022 11:30:00 CST","blue":[8516,2503,2502],"red":[3293,2169,2509]},{"section":"Qual","number":26,"scheduled_time":"05 May 2022 11:37:00 CST","blue":[5172,2220,2491],"red":[5913,5653,2823]},{"section":"Qual","number":27,"scheduled_time":"05 May 2022 11:45:00 CST","blue":[3883,4728,5690],"red":[2531,3018,3630]},{"section":"Qual","number":28,"scheduled_time":"05 May 2022 11:52:00 CST","blue":[4607,3082,2847],"red":[6749,2239,2883]},{"section":"Qual","number":29,"scheduled_time":"05 May 2022 11:59:00 CST","blue":[1816,6453,5434],"red":[7028,3184,2470]},{"section":"Qual","number":30,"scheduled_time":"05 May 2022 12:06:00 CST","blue":[3130,5914,3206],"red":[7541,4009,2052]},{"section":"Qual","number":31,"scheduled_time":"05 May 2022 12:13:00 CST","blue":[3883,2509,8516],"red":[5913,2220,5690]},{"section":"Qual","number":32,"scheduled_time":"05 May 2022 12:21:00 CST","blue":[2847,2531,2883],"red":[2823,3293,4607]},{"section":"Qual","number":33,"scheduled_time":"05 May 2022 12:30:00 CST","blue":[2169,2470,5434],"red":[2239,3630,3082]},{"section":"Qual","number":34,"scheduled_time":"05 May 2022 12:37:00 CST","blue":[4009,4728,2503],"red":[3184,2052,5172]},{"section":"Qual","number":35,"scheduled_time":"05 May 2022 12:44:00 CST","blue":[6453,3206,3018],"red":[5914,5653,2491]},{"section":"Qual","number":36,"scheduled_time":"05 May 2022 12:51:00 CST","blue":[6749,7541,3130],"red":[7028,1816,2502]},{"section":"Qual","number":37,"scheduled_time":"05 May 2022 12:59:00 CST","blue":[2239,2470,5913],"red":[5690,2823,2531]},{"section":"Qual","number":38,"scheduled_time":"05 May 2022 13:06:00 CST","blue":[2169,4607,2503],"red":[2847,3883,4009]},{"section":"Qual","number":39,"scheduled_time":"05 May 2022 13:13:00 CST","blue":[8516,3206,5653],"red":[5434,5172,4728]},{"section":"Qual","number":40,"scheduled_time":"05 May 2022 13:20:00 CST","blue":[2509,2052,6453],"red":[1816,6749,3018]},{"section":"Qual","number":41,"scheduled_time":"05 May 2022 13:27:00 CST","blue":[3630,2502,5914],"red":[2220,7028,2883]},{"section":"Qual","number":42,"scheduled_time":"05 May 2022 13:35:00 CST","blue":[3082,2491,7541],"red":[3184,3293,3130]},{"section":"Qual","number":43,"scheduled_time":"05 May 2022 13:42:00 CST","blue":[2847,5653,2239],"red":[5913,4009,8516]},{"section":"Qual","number":44,"scheduled_time":"05 May 2022 13:49:00 CST","blue":[2052,1816,2823],"red":[6453,4607,3883]},{"section":"Qual","number":45,"scheduled_time":"05 May 2022 13:56:00 CST","blue":[2470,3206,5172],"red":[2509,2502,2220]},{"section":"Qual","number":46,"scheduled_time":"05 May 2022 14:03:00 CST","blue":[3082,5434,3130],"red":[2503,2883,3018]},{"section":"Qual","number":47,"scheduled_time":"05 May 2022 14:11:00 CST","blue":[5690,2491,2169],"red":[4728,7028,7541]},{"section":"Qual","number":48,"scheduled_time":"05 May 2022 14:18:00 CST","blue":[3184,6749,3630],"red":[3293,2531,5914]}],"pit_scouting":{"1816":{"team":1816,"time":"2022-06-11T19:23:52.826","scout":"guest","survey":[{"id":"auto_high","type":"number","value":2},{"id":"auto_low","type":"number","value":0},{"id":"teleop_high","type":"number","value":4},{"id":"teleop_low","type":"number","value":0},{"id":"shooting_positions","type":"map-boolean","value":null},{"id":"shooter_type","type":"selector","value":"Any goal"},{"id":"climb","type":"selector","value":"Traversal"},{"id":"climb_time","type":"number","value":5},{"id":"can_defense","type":"toggle","value":true},{"id":"comments","type":"text-box","value":"Windmill climber"}]},"2052":{"team":2052,"time":"2022-05-07T09:54:40.201","scout":"guest","survey":[{"id":"auto_high","type":"number","value":null},{"id":"auto_low","type":"number","value":null},{"id":"teleop_high","type":"number","value":null},{"id":"teleop_low","type":"number","value":null},{"id":"shooting_positions","type":"map-boolean","value":null},{"id":"shooter_type","type":"selector","value":"High Goal"},{"id":"climb","type":"selector","value":"Traversal"},{"id":"climb_time","type":"number","value":null},{"id":"can_defense","type":"toggle","value":false},{"id":"comments","type":"text-box","value":null}]},"2491":{"team":2491,"time":"2022-05-07T09:12:42.844","scout":"guest","survey":[{"id":"auto_high","type":"number","value":null},{"id":"auto_low","type":"number","value":null},{"id":"teleop_high","type":"number","value":null},{"id":"teleop_low","type":"number","value":null},{"id":"shooting_positions","type":"map-boolean","value":null},{"id":"shooter_type","type":"selector","value":"Low Goal"},{"id":"climb","type":"selector","value":"Traversal"},{"id":"climb_time","type":"number","value":null},{"id":"can_defense","type":"toggle","value":false},{"id":"comments","type":"text-box","value":"robot fell from traversal in match 5"}]},"2509":{"team":2509,"time":"2022-05-07T10:21:53.842","scout":"guest","survey":[{"id":"auto_high","type":"number","value":null},{"id":"auto_low","type":"number","value":null},{"id":"teleop_high","type":"number","value":null},{"id":"teleop_low","type":"number","value":null},{"id":"shooting_positions","type":"map-boolean","value":null},{"id":"shooter_type","type":"selector","value":null},{"id":"climb","type":"selector","value":"Traversal"},{"id":"climb_time","type":"number","value":20},{"id":"can_defense","type":"toggle","value":false},{"id":"comments","type":"text-box","value":null}]},"2531":{"team":2531,"time":"2022-05-06T19:29:01.442","scout":"guest","survey":[{"id":"auto_high","type":"number","value":2},{"id":"auto_low","type":"number","value":0},{"id":"teleop_high","type":"number","value":9},{"id":"teleop_low","type":"number","value":0},{"id":"shooting_positions","type":"map-boolean","value":null},{"id":"shooter_type","type":"selector","value":"High Goal"},{"id":"climb","type":"selector","value":"Traversal"},{"id":"climb_time","type":"number","value":15},{"id":"can_defense","type":"toggle","value":true},{"id":"comments","type":"text-box","value":"very consistent climb"}]},"3082":{"team":3082,"time":"2022-05-06T19:33:28.546","scout":"guest","survey":[{"id":"auto_high","type":"number","value":3},{"id":"auto_low","type":"number","value":null},{"id":"teleop_high","type":"number","value":10},{"id":"teleop_low","type":"number","value":null},{"id":"shooting_positions","type":"map-boolean","value":null},{"id":"shooter_type","type":"selector","value":"High Goal"},{"id":"climb","type":"selector","value":"Traversal"},{"id":"climb_time","type":"number","value":55},{"id":"can_defense","type":"toggle","value":true},{"id":"comments","type":"text-box","value":"consistent 3 ball auto"}]},"3184":{"team":3184,"time":"2022-05-07T09:03:31.807","scout":"guest","survey":[{"id":"auto_high","type":"number","value":null},{"id":"auto_low","type":"number","value":null},{"id":"teleop_high","type":"number","value":null},{"id":"teleop_low","type":"number","value":null},{"id":"shooting_positions","type":"map-boolean","value":null},{"id":"shooter_type","type":"selector","value":null},{"id":"climb","type":"selector","value":"Traversal"},{"id":"climb_time","type":"number","value":null},{"id":"can_defense","type":"toggle","value":false},{"id":"comments","type":"text-box","value":null}]},"3206":{"team":3206,"time":"2022-05-06T15:10:20.219","scout":"spencer","survey":[{"id":"auto_high","type":"number","value":5},{"id":"auto_low","type":"number","value":null},{"id":"teleop_high","type":"number","value":null},{"id":"teleop_low","type":"number","value":null},{"id":"shooting_positions","type":"map-boolean","value":null},{"id":"shooter_type","type":"selector","value":null},{"id":"climb","type":"selector","value":null},{"id":"climb_time","type":"number","value":null},{"id":"can_defense","type":"toggle","value":false},{"id":"comments","type":"text-box","value":null}]},"3293":{"team":3293,"time":"2022-05-07T11:13:36.015","scout":"guest","survey":[{"id":"auto_high","type":"number","value":null},{"id":"auto_low","type":"number","value":null},{"id":"teleop_high","type":"number","value":6},{"id":"teleop_low","type":"number","value":null},{"id":"shooting_positions","type":"map-boolean","value":null},{"id":"shooter_type","type":"selector","value":"High Goal"},{"id":"climb","type":"selector","value":null},{"id":"climb_time","type":"number","value":null},{"id":"can_defense","type":"toggle","value":false},{"id":"comments","type":"text-box","value":null}]},"3883":{"team":3883,"time":"2022-05-07T09:03:55.468","scout":"guest","survey":[{"id":"auto_high","type":"number","value":null},{"id":"auto_low","type":"number","value":null},{"id":"teleop_high","type":"number","value":null},{"id":"teleop_low","type":"number","value":null},{"id":"shooting_positions","type":"map-boolean","value":null},{"id":"shooter_type","type":"selector","value":"High Goal"},{"id":"climb","type":"selector","value":"Traversal"},{"id":"climb_time","type":"number","value":null},{"id":"can_defense","type":"toggle","value":false},{"id":"comments","type":"text-box","value":null}]},"4728":{"team":4728,"time":"2022-05-07T12:01:36.322","scout":"guest","survey":[{"id":"auto_high","type":"number","value":null},{"id":"auto_low","type":"number","value":null},{"id":"teleop_high","type":"number","value":null},{"id":"teleop_low","type":"number","value":null},{"id":"shooting_positions","type":"map-boolean","value":null},{"id":"shooter_type","type":"selector","value":null},{"id":"climb","type":"selector","value":"Traversal"},{"id":"climb_time","type":"number","value":20},{"id":"can_defense","type":"toggle","value":false},{"id":"comments","type":"text-box","value":"epic climber"}]},"5914":{"team":5914,"time":"2022-05-07T09:47:20.974","scout":"guest","survey":[{"id":"auto_high","type":"number","value":9},{"id":"auto_low","type":"number","value":0},{"id":"teleop_high","type":"number","value":0},{"id":"teleop_low","type":"number","value":8},{"id":"shooting_positions","type":"map-boolean","value":null},{"id":"shooter_type","type":"selector","value":"Low Goal"},{"id":"climb","type":"selector","value":"Traversal"},{"id":"climb_time","type":"number","value":10},{"id":"can_defense","type":"toggle","value":false},{"id":"comments","type":"text-box","value":null}]},"6749":{"team":6749,"time":"2022-05-06T15:47:15.042","scout":"guest","survey":[{"id":"auto_high","type":"number","value":2},{"id":"auto_low","type":"number","value":0},{"id":"teleop_high","type":"number","value":4},{"id":"teleop_low","type":"number","value":0},{"id":"shooting_positions","type":"map-boolean","value":null},{"id":"shooter_type","type":"selector","value":"High Goal"},{"id":"climb","type":"selector","value":"Traversal"},{"id":"climb_time","type":"number","value":25},{"id":"can_defense","type":"toggle","value":true},{"id":"comments","type":"text-box","value":"This is our robot lol"}]},"8516":{"team":8516,"time":"2022-05-07T09:55:56.714","scout":"guest","survey":[{"id":"auto_high","type":"number","value":null},{"id":"auto_low","type":"number","value":null},{"id":"teleop_high","type":"number","value":null},{"id":"teleop_low","type":"number","value":null},{"id":"shooting_positions","type":"map-boolean","value":null},{"id":"shooter_type","type":"selector","value":null},{"id":"climb","type":"selector","value":"Traversal"},{"id":"climb_time","type":"number","value":null},{"id":"can_defense","type":"toggle","value":false},{"id":"comments","type":"text-box","value":null}]}},"match_results":[],"match_timelines":[]}}}
+{
+    "version": 1,
+    "events": {
+        "state": {
+            "name": "State",
+            "teams": [
+                1816,
+                2052,
+                2169,
+                2220,
+                2239,
+                2470,
+                2491,
+                2502,
+                2503,
+                2509,
+                2531,
+                2823,
+                2847,
+                2883,
+                3018,
+                3082,
+                3130,
+                3184,
+                3206,
+                3293,
+                3630,
+                3883,
+                4009,
+                4607,
+                4728,
+                5172,
+                5434,
+                5653,
+                5690,
+                5913,
+                5914,
+                6453,
+                6749,
+                7028,
+                7541,
+                8516
+            ],
+            "matches": [
+                {
+                    "section": "Qual",
+                    "number": 1,
+                    "scheduled_time": "05 May 2022 08:30:00 CST",
+                    "blue": [
+                        2823,
+                        2503,
+                        7028
+                    ],
+                    "red": [
+                        5653,
+                        4728,
+                        2509
+                    ],
+                    "id": "Qual1",
+                    "results": {
+                        "scout": "guest",
+                        "time": "2022-06-12T22:58:48.950",
+                        "start_time": "2022-06-12T22:55:58.243",
+                        "red": {
+                            "points": 74,
+                            "rp": 1,
+                            "penalty": 0,
+                            "taxi": 4,
+                            "cargo": 45,
+                            "hangar": 25
+                        },
+                        "blue": {
+                            "points": 90,
+                            "rp": 2,
+                            "penalty": 0,
+                            "taxi": 6,
+                            "cargo": 48,
+                            "hangar": 46
+                        }
+                    }
+                },
+                {
+                    "section": "Qual",
+                    "number": 2,
+                    "scheduled_time": "05 May 2022 08:38:00 CST",
+                    "blue": [
+                        7541,
+                        3630,
+                        5172
+                    ],
+                    "red": [
+                        4607,
+                        2239,
+                        5914
+                    ],
+                    "id": "Qual2"
+                },
+                {
+                    "section": "Qual",
+                    "number": 3,
+                    "scheduled_time": "05 May 2022 08:46:00 CST",
+                    "blue": [
+                        3018,
+                        3883,
+                        3184
+                    ],
+                    "red": [
+                        3130,
+                        8516,
+                        2470
+                    ],
+                    "id": "Qual3"
+                },
+                {
+                    "section": "Qual",
+                    "number": 4,
+                    "scheduled_time": "05 May 2022 08:54:00 CST",
+                    "blue": [
+                        2502,
+                        5690,
+                        5434
+                    ],
+                    "red": [
+                        2052,
+                        2847,
+                        2491
+                    ],
+                    "id": "Qual4"
+                },
+                {
+                    "section": "Qual",
+                    "number": 5,
+                    "scheduled_time": "05 May 2022 09:02:00 CST",
+                    "blue": [
+                        2531,
+                        6749,
+                        3082
+                    ],
+                    "red": [
+                        4009,
+                        2220,
+                        6453
+                    ],
+                    "id": "Qual5"
+                },
+                {
+                    "section": "Qual",
+                    "number": 6,
+                    "scheduled_time": "05 May 2022 09:10:00 CST",
+                    "blue": [
+                        3293,
+                        2883,
+                        5913
+                    ],
+                    "red": [
+                        2169,
+                        1816,
+                        3206
+                    ],
+                    "id": "Qual6"
+                },
+                {
+                    "section": "Qual",
+                    "number": 7,
+                    "scheduled_time": "05 May 2022 09:21:00 CST",
+                    "blue": [
+                        2503,
+                        3130,
+                        5653
+                    ],
+                    "red": [
+                        2470,
+                        2823,
+                        3630
+                    ],
+                    "id": "Qual7"
+                },
+                {
+                    "section": "Qual",
+                    "number": 8,
+                    "scheduled_time": "05 May 2022 09:28:00 CST",
+                    "blue": [
+                        2509,
+                        5434,
+                        2239
+                    ],
+                    "red": [
+                        7541,
+                        5914,
+                        3883
+                    ],
+                    "id": "Qual8"
+                },
+                {
+                    "section": "Qual",
+                    "number": 9,
+                    "scheduled_time": "05 May 2022 09:35:00 CST",
+                    "blue": [
+                        7028,
+                        2491,
+                        2531
+                    ],
+                    "red": [
+                        2052,
+                        8516,
+                        3082
+                    ],
+                    "id": "Qual9"
+                },
+                {
+                    "section": "Qual",
+                    "number": 10,
+                    "scheduled_time": "05 May 2022 09:42:00 CST",
+                    "blue": [
+                        4728,
+                        5913,
+                        3206
+                    ],
+                    "red": [
+                        4607,
+                        2502,
+                        6749
+                    ],
+                    "id": "Qual10"
+                },
+                {
+                    "section": "Qual",
+                    "number": 11,
+                    "scheduled_time": "05 May 2022 09:49:00 CST",
+                    "blue": [
+                        2220,
+                        3184,
+                        1816
+                    ],
+                    "red": [
+                        3018,
+                        2847,
+                        2169
+                    ],
+                    "id": "Qual11"
+                },
+                {
+                    "section": "Qual",
+                    "number": 12,
+                    "scheduled_time": "05 May 2022 09:57:00 CST",
+                    "blue": [
+                        4009,
+                        5172,
+                        3293
+                    ],
+                    "red": [
+                        2883,
+                        5690,
+                        6453
+                    ],
+                    "id": "Qual12"
+                },
+                {
+                    "section": "Qual",
+                    "number": 13,
+                    "scheduled_time": "05 May 2022 10:04:00 CST",
+                    "blue": [
+                        5914,
+                        2509,
+                        7028
+                    ],
+                    "red": [
+                        2491,
+                        3130,
+                        3883
+                    ],
+                    "id": "Qual13"
+                },
+                {
+                    "section": "Qual",
+                    "number": 14,
+                    "scheduled_time": "05 May 2022 10:11:00 CST",
+                    "blue": [
+                        8516,
+                        7541,
+                        2823
+                    ],
+                    "red": [
+                        2503,
+                        2470,
+                        6749
+                    ],
+                    "id": "Qual14"
+                },
+                {
+                    "section": "Qual",
+                    "number": 15,
+                    "scheduled_time": "05 May 2022 10:18:00 CST",
+                    "blue": [
+                        2502,
+                        2169,
+                        2531
+                    ],
+                    "red": [
+                        3018,
+                        5434,
+                        5653
+                    ],
+                    "id": "Qual15"
+                },
+                {
+                    "section": "Qual",
+                    "number": 16,
+                    "scheduled_time": "05 May 2022 10:25:00 CST",
+                    "blue": [
+                        4728,
+                        3293,
+                        2220
+                    ],
+                    "red": [
+                        1816,
+                        4009,
+                        2239
+                    ],
+                    "id": "Qual16"
+                },
+                {
+                    "section": "Qual",
+                    "number": 17,
+                    "scheduled_time": "05 May 2022 10:33:00 CST",
+                    "blue": [
+                        6453,
+                        3082,
+                        3184
+                    ],
+                    "red": [
+                        3206,
+                        5690,
+                        4607
+                    ],
+                    "id": "Qual17"
+                },
+                {
+                    "section": "Qual",
+                    "number": 18,
+                    "scheduled_time": "05 May 2022 10:40:00 CST",
+                    "blue": [
+                        2883,
+                        3630,
+                        2052
+                    ],
+                    "red": [
+                        5172,
+                        5913,
+                        2847
+                    ],
+                    "id": "Qual18"
+                },
+                {
+                    "section": "Qual",
+                    "number": 19,
+                    "scheduled_time": "05 May 2022 10:47:00 CST",
+                    "blue": [
+                        3130,
+                        2823,
+                        2502
+                    ],
+                    "red": [
+                        5914,
+                        8516,
+                        2169
+                    ],
+                    "id": "Qual19"
+                },
+                {
+                    "section": "Qual",
+                    "number": 20,
+                    "scheduled_time": "05 May 2022 10:54:00 CST",
+                    "blue": [
+                        5653,
+                        2531,
+                        4009
+                    ],
+                    "red": [
+                        2491,
+                        2509,
+                        1816
+                    ],
+                    "id": "Qual20"
+                },
+                {
+                    "section": "Qual",
+                    "number": 21,
+                    "scheduled_time": "05 May 2022 11:01:00 CST",
+                    "blue": [
+                        2220,
+                        3018,
+                        4607
+                    ],
+                    "red": [
+                        5434,
+                        2503,
+                        3293
+                    ],
+                    "id": "Qual21"
+                },
+                {
+                    "section": "Qual",
+                    "number": 22,
+                    "scheduled_time": "05 May 2022 11:09:00 CST",
+                    "blue": [
+                        3883,
+                        5913,
+                        6749
+                    ],
+                    "red": [
+                        5172,
+                        3082,
+                        5690
+                    ],
+                    "id": "Qual22"
+                },
+                {
+                    "section": "Qual",
+                    "number": 23,
+                    "scheduled_time": "05 May 2022 11:16:00 CST",
+                    "blue": [
+                        3630,
+                        2847,
+                        4728
+                    ],
+                    "red": [
+                        2470,
+                        6453,
+                        7541
+                    ],
+                    "id": "Qual23"
+                },
+                {
+                    "section": "Qual",
+                    "number": 24,
+                    "scheduled_time": "05 May 2022 11:23:00 CST",
+                    "blue": [
+                        2239,
+                        2052,
+                        7028
+                    ],
+                    "red": [
+                        3206,
+                        2883,
+                        3184
+                    ],
+                    "id": "Qual24"
+                },
+                {
+                    "section": "Qual",
+                    "number": 25,
+                    "scheduled_time": "05 May 2022 11:30:00 CST",
+                    "blue": [
+                        8516,
+                        2503,
+                        2502
+                    ],
+                    "red": [
+                        3293,
+                        2169,
+                        2509
+                    ],
+                    "id": "Qual25"
+                },
+                {
+                    "section": "Qual",
+                    "number": 26,
+                    "scheduled_time": "05 May 2022 11:37:00 CST",
+                    "blue": [
+                        5172,
+                        2220,
+                        2491
+                    ],
+                    "red": [
+                        5913,
+                        5653,
+                        2823
+                    ],
+                    "id": "Qual26"
+                },
+                {
+                    "section": "Qual",
+                    "number": 27,
+                    "scheduled_time": "05 May 2022 11:45:00 CST",
+                    "blue": [
+                        3883,
+                        4728,
+                        5690
+                    ],
+                    "red": [
+                        2531,
+                        3018,
+                        3630
+                    ],
+                    "id": "Qual27"
+                },
+                {
+                    "section": "Qual",
+                    "number": 28,
+                    "scheduled_time": "05 May 2022 11:52:00 CST",
+                    "blue": [
+                        4607,
+                        3082,
+                        2847
+                    ],
+                    "red": [
+                        6749,
+                        2239,
+                        2883
+                    ],
+                    "id": "Qual28"
+                },
+                {
+                    "section": "Qual",
+                    "number": 29,
+                    "scheduled_time": "05 May 2022 11:59:00 CST",
+                    "blue": [
+                        1816,
+                        6453,
+                        5434
+                    ],
+                    "red": [
+                        7028,
+                        3184,
+                        2470
+                    ],
+                    "id": "Qual29"
+                },
+                {
+                    "section": "Qual",
+                    "number": 30,
+                    "scheduled_time": "05 May 2022 12:06:00 CST",
+                    "blue": [
+                        3130,
+                        5914,
+                        3206
+                    ],
+                    "red": [
+                        7541,
+                        4009,
+                        2052
+                    ],
+                    "id": "Qual30"
+                },
+                {
+                    "section": "Qual",
+                    "number": 31,
+                    "scheduled_time": "05 May 2022 12:13:00 CST",
+                    "blue": [
+                        3883,
+                        2509,
+                        8516
+                    ],
+                    "red": [
+                        5913,
+                        2220,
+                        5690
+                    ],
+                    "id": "Qual31"
+                },
+                {
+                    "section": "Qual",
+                    "number": 32,
+                    "scheduled_time": "05 May 2022 12:21:00 CST",
+                    "blue": [
+                        2847,
+                        2531,
+                        2883
+                    ],
+                    "red": [
+                        2823,
+                        3293,
+                        4607
+                    ],
+                    "id": "Qual32"
+                },
+                {
+                    "section": "Qual",
+                    "number": 33,
+                    "scheduled_time": "05 May 2022 12:30:00 CST",
+                    "blue": [
+                        2169,
+                        2470,
+                        5434
+                    ],
+                    "red": [
+                        2239,
+                        3630,
+                        3082
+                    ],
+                    "id": "Qual33"
+                },
+                {
+                    "section": "Qual",
+                    "number": 34,
+                    "scheduled_time": "05 May 2022 12:37:00 CST",
+                    "blue": [
+                        4009,
+                        4728,
+                        2503
+                    ],
+                    "red": [
+                        3184,
+                        2052,
+                        5172
+                    ],
+                    "id": "Qual34"
+                },
+                {
+                    "section": "Qual",
+                    "number": 35,
+                    "scheduled_time": "05 May 2022 12:44:00 CST",
+                    "blue": [
+                        6453,
+                        3206,
+                        3018
+                    ],
+                    "red": [
+                        5914,
+                        5653,
+                        2491
+                    ],
+                    "id": "Qual35"
+                },
+                {
+                    "section": "Qual",
+                    "number": 36,
+                    "scheduled_time": "05 May 2022 12:51:00 CST",
+                    "blue": [
+                        6749,
+                        7541,
+                        3130
+                    ],
+                    "red": [
+                        7028,
+                        1816,
+                        2502
+                    ],
+                    "id": "Qual36"
+                },
+                {
+                    "section": "Qual",
+                    "number": 37,
+                    "scheduled_time": "05 May 2022 12:59:00 CST",
+                    "blue": [
+                        2239,
+                        2470,
+                        5913
+                    ],
+                    "red": [
+                        5690,
+                        2823,
+                        2531
+                    ],
+                    "id": "Qual37"
+                },
+                {
+                    "section": "Qual",
+                    "number": 38,
+                    "scheduled_time": "05 May 2022 13:06:00 CST",
+                    "blue": [
+                        2169,
+                        4607,
+                        2503
+                    ],
+                    "red": [
+                        2847,
+                        3883,
+                        4009
+                    ],
+                    "id": "Qual38"
+                },
+                {
+                    "section": "Qual",
+                    "number": 39,
+                    "scheduled_time": "05 May 2022 13:13:00 CST",
+                    "blue": [
+                        8516,
+                        3206,
+                        5653
+                    ],
+                    "red": [
+                        5434,
+                        5172,
+                        4728
+                    ],
+                    "id": "Qual39"
+                },
+                {
+                    "section": "Qual",
+                    "number": 40,
+                    "scheduled_time": "05 May 2022 13:20:00 CST",
+                    "blue": [
+                        2509,
+                        2052,
+                        6453
+                    ],
+                    "red": [
+                        1816,
+                        6749,
+                        3018
+                    ],
+                    "id": "Qual40"
+                },
+                {
+                    "section": "Qual",
+                    "number": 41,
+                    "scheduled_time": "05 May 2022 13:27:00 CST",
+                    "blue": [
+                        3630,
+                        2502,
+                        5914
+                    ],
+                    "red": [
+                        2220,
+                        7028,
+                        2883
+                    ],
+                    "id": "Qual41"
+                },
+                {
+                    "section": "Qual",
+                    "number": 42,
+                    "scheduled_time": "05 May 2022 13:35:00 CST",
+                    "blue": [
+                        3082,
+                        2491,
+                        7541
+                    ],
+                    "red": [
+                        3184,
+                        3293,
+                        3130
+                    ],
+                    "id": "Qual42"
+                },
+                {
+                    "section": "Qual",
+                    "number": 43,
+                    "scheduled_time": "05 May 2022 13:42:00 CST",
+                    "blue": [
+                        2847,
+                        5653,
+                        2239
+                    ],
+                    "red": [
+                        5913,
+                        4009,
+                        8516
+                    ],
+                    "id": "Qual43"
+                },
+                {
+                    "section": "Qual",
+                    "number": 44,
+                    "scheduled_time": "05 May 2022 13:49:00 CST",
+                    "blue": [
+                        2052,
+                        1816,
+                        2823
+                    ],
+                    "red": [
+                        6453,
+                        4607,
+                        3883
+                    ],
+                    "id": "Qual44"
+                },
+                {
+                    "section": "Qual",
+                    "number": 45,
+                    "scheduled_time": "05 May 2022 13:56:00 CST",
+                    "blue": [
+                        2470,
+                        3206,
+                        5172
+                    ],
+                    "red": [
+                        2509,
+                        2502,
+                        2220
+                    ],
+                    "id": "Qual45"
+                },
+                {
+                    "section": "Qual",
+                    "number": 46,
+                    "scheduled_time": "05 May 2022 14:03:00 CST",
+                    "blue": [
+                        3082,
+                        5434,
+                        3130
+                    ],
+                    "red": [
+                        2503,
+                        2883,
+                        3018
+                    ],
+                    "id": "Qual46"
+                },
+                {
+                    "section": "Qual",
+                    "number": 47,
+                    "scheduled_time": "05 May 2022 14:11:00 CST",
+                    "blue": [
+                        5690,
+                        2491,
+                        2169
+                    ],
+                    "red": [
+                        4728,
+                        7028,
+                        7541
+                    ],
+                    "id": "Qual47"
+                },
+                {
+                    "section": "Qual",
+                    "number": 48,
+                    "scheduled_time": "05 May 2022 14:18:00 CST",
+                    "blue": [
+                        3184,
+                        6749,
+                        3630
+                    ],
+                    "red": [
+                        3293,
+                        2531,
+                        5914
+                    ],
+                    "id": "Qual48"
+                }
+            ],
+            "pit_scouting": {
+                "1816": {
+                    "team": 1816,
+                    "time": "2022-06-11T19:23:52.826",
+                    "scout": "guest",
+                    "survey": [
+                        {
+                            "id": "auto_high",
+                            "type": "number",
+                            "value": 2
+                        },
+                        {
+                            "id": "auto_low",
+                            "type": "number",
+                            "value": 0
+                        },
+                        {
+                            "id": "teleop_high",
+                            "type": "number",
+                            "value": 4
+                        },
+                        {
+                            "id": "teleop_low",
+                            "type": "number",
+                            "value": 0
+                        },
+                        {
+                            "id": "shooting_positions",
+                            "type": "map-boolean",
+                            "value": null
+                        },
+                        {
+                            "id": "shooter_type",
+                            "type": "selector",
+                            "value": "Any goal"
+                        },
+                        {
+                            "id": "climb",
+                            "type": "selector",
+                            "value": "Traversal"
+                        },
+                        {
+                            "id": "climb_time",
+                            "type": "number",
+                            "value": 5
+                        },
+                        {
+                            "id": "can_defense",
+                            "type": "toggle",
+                            "value": true
+                        },
+                        {
+                            "id": "comments",
+                            "type": "text-box",
+                            "value": "Windmill climber"
+                        }
+                    ]
+                },
+                "2052": {
+                    "team": 2052,
+                    "time": "2022-05-07T09:54:40.201",
+                    "scout": "guest",
+                    "survey": [
+                        {
+                            "id": "auto_high",
+                            "type": "number",
+                            "value": null
+                        },
+                        {
+                            "id": "auto_low",
+                            "type": "number",
+                            "value": null
+                        },
+                        {
+                            "id": "teleop_high",
+                            "type": "number",
+                            "value": null
+                        },
+                        {
+                            "id": "teleop_low",
+                            "type": "number",
+                            "value": null
+                        },
+                        {
+                            "id": "shooting_positions",
+                            "type": "map-boolean",
+                            "value": null
+                        },
+                        {
+                            "id": "shooter_type",
+                            "type": "selector",
+                            "value": "High Goal"
+                        },
+                        {
+                            "id": "climb",
+                            "type": "selector",
+                            "value": "Traversal"
+                        },
+                        {
+                            "id": "climb_time",
+                            "type": "number",
+                            "value": null
+                        },
+                        {
+                            "id": "can_defense",
+                            "type": "toggle",
+                            "value": false
+                        },
+                        {
+                            "id": "comments",
+                            "type": "text-box",
+                            "value": null
+                        }
+                    ]
+                },
+                "2491": {
+                    "team": 2491,
+                    "time": "2022-05-07T09:12:42.844",
+                    "scout": "guest",
+                    "survey": [
+                        {
+                            "id": "auto_high",
+                            "type": "number",
+                            "value": null
+                        },
+                        {
+                            "id": "auto_low",
+                            "type": "number",
+                            "value": null
+                        },
+                        {
+                            "id": "teleop_high",
+                            "type": "number",
+                            "value": null
+                        },
+                        {
+                            "id": "teleop_low",
+                            "type": "number",
+                            "value": null
+                        },
+                        {
+                            "id": "shooting_positions",
+                            "type": "map-boolean",
+                            "value": null
+                        },
+                        {
+                            "id": "shooter_type",
+                            "type": "selector",
+                            "value": "Low Goal"
+                        },
+                        {
+                            "id": "climb",
+                            "type": "selector",
+                            "value": "Traversal"
+                        },
+                        {
+                            "id": "climb_time",
+                            "type": "number",
+                            "value": null
+                        },
+                        {
+                            "id": "can_defense",
+                            "type": "toggle",
+                            "value": false
+                        },
+                        {
+                            "id": "comments",
+                            "type": "text-box",
+                            "value": "robot fell from traversal in match 5"
+                        }
+                    ]
+                },
+                "2509": {
+                    "team": 2509,
+                    "time": "2022-05-07T10:21:53.842",
+                    "scout": "guest",
+                    "survey": [
+                        {
+                            "id": "auto_high",
+                            "type": "number",
+                            "value": null
+                        },
+                        {
+                            "id": "auto_low",
+                            "type": "number",
+                            "value": null
+                        },
+                        {
+                            "id": "teleop_high",
+                            "type": "number",
+                            "value": null
+                        },
+                        {
+                            "id": "teleop_low",
+                            "type": "number",
+                            "value": null
+                        },
+                        {
+                            "id": "shooting_positions",
+                            "type": "map-boolean",
+                            "value": null
+                        },
+                        {
+                            "id": "shooter_type",
+                            "type": "selector",
+                            "value": null
+                        },
+                        {
+                            "id": "climb",
+                            "type": "selector",
+                            "value": "Traversal"
+                        },
+                        {
+                            "id": "climb_time",
+                            "type": "number",
+                            "value": 20
+                        },
+                        {
+                            "id": "can_defense",
+                            "type": "toggle",
+                            "value": false
+                        },
+                        {
+                            "id": "comments",
+                            "type": "text-box",
+                            "value": null
+                        }
+                    ]
+                },
+                "2531": {
+                    "team": 2531,
+                    "time": "2022-05-06T19:29:01.442",
+                    "scout": "guest",
+                    "survey": [
+                        {
+                            "id": "auto_high",
+                            "type": "number",
+                            "value": 2
+                        },
+                        {
+                            "id": "auto_low",
+                            "type": "number",
+                            "value": 0
+                        },
+                        {
+                            "id": "teleop_high",
+                            "type": "number",
+                            "value": 9
+                        },
+                        {
+                            "id": "teleop_low",
+                            "type": "number",
+                            "value": 0
+                        },
+                        {
+                            "id": "shooting_positions",
+                            "type": "map-boolean",
+                            "value": null
+                        },
+                        {
+                            "id": "shooter_type",
+                            "type": "selector",
+                            "value": "High Goal"
+                        },
+                        {
+                            "id": "climb",
+                            "type": "selector",
+                            "value": "Traversal"
+                        },
+                        {
+                            "id": "climb_time",
+                            "type": "number",
+                            "value": 15
+                        },
+                        {
+                            "id": "can_defense",
+                            "type": "toggle",
+                            "value": true
+                        },
+                        {
+                            "id": "comments",
+                            "type": "text-box",
+                            "value": "very consistent climb"
+                        }
+                    ]
+                },
+                "3082": {
+                    "team": 3082,
+                    "time": "2022-05-06T19:33:28.546",
+                    "scout": "guest",
+                    "survey": [
+                        {
+                            "id": "auto_high",
+                            "type": "number",
+                            "value": 3
+                        },
+                        {
+                            "id": "auto_low",
+                            "type": "number",
+                            "value": null
+                        },
+                        {
+                            "id": "teleop_high",
+                            "type": "number",
+                            "value": 10
+                        },
+                        {
+                            "id": "teleop_low",
+                            "type": "number",
+                            "value": null
+                        },
+                        {
+                            "id": "shooting_positions",
+                            "type": "map-boolean",
+                            "value": null
+                        },
+                        {
+                            "id": "shooter_type",
+                            "type": "selector",
+                            "value": "High Goal"
+                        },
+                        {
+                            "id": "climb",
+                            "type": "selector",
+                            "value": "Traversal"
+                        },
+                        {
+                            "id": "climb_time",
+                            "type": "number",
+                            "value": 55
+                        },
+                        {
+                            "id": "can_defense",
+                            "type": "toggle",
+                            "value": true
+                        },
+                        {
+                            "id": "comments",
+                            "type": "text-box",
+                            "value": "consistent 3 ball auto"
+                        }
+                    ]
+                },
+                "3184": {
+                    "team": 3184,
+                    "time": "2022-05-07T09:03:31.807",
+                    "scout": "guest",
+                    "survey": [
+                        {
+                            "id": "auto_high",
+                            "type": "number",
+                            "value": null
+                        },
+                        {
+                            "id": "auto_low",
+                            "type": "number",
+                            "value": null
+                        },
+                        {
+                            "id": "teleop_high",
+                            "type": "number",
+                            "value": null
+                        },
+                        {
+                            "id": "teleop_low",
+                            "type": "number",
+                            "value": null
+                        },
+                        {
+                            "id": "shooting_positions",
+                            "type": "map-boolean",
+                            "value": null
+                        },
+                        {
+                            "id": "shooter_type",
+                            "type": "selector",
+                            "value": null
+                        },
+                        {
+                            "id": "climb",
+                            "type": "selector",
+                            "value": "Traversal"
+                        },
+                        {
+                            "id": "climb_time",
+                            "type": "number",
+                            "value": null
+                        },
+                        {
+                            "id": "can_defense",
+                            "type": "toggle",
+                            "value": false
+                        },
+                        {
+                            "id": "comments",
+                            "type": "text-box",
+                            "value": null
+                        }
+                    ]
+                },
+                "3206": {
+                    "team": 3206,
+                    "time": "2022-05-06T15:10:20.219",
+                    "scout": "spencer",
+                    "survey": [
+                        {
+                            "id": "auto_high",
+                            "type": "number",
+                            "value": 5
+                        },
+                        {
+                            "id": "auto_low",
+                            "type": "number",
+                            "value": null
+                        },
+                        {
+                            "id": "teleop_high",
+                            "type": "number",
+                            "value": null
+                        },
+                        {
+                            "id": "teleop_low",
+                            "type": "number",
+                            "value": null
+                        },
+                        {
+                            "id": "shooting_positions",
+                            "type": "map-boolean",
+                            "value": null
+                        },
+                        {
+                            "id": "shooter_type",
+                            "type": "selector",
+                            "value": null
+                        },
+                        {
+                            "id": "climb",
+                            "type": "selector",
+                            "value": null
+                        },
+                        {
+                            "id": "climb_time",
+                            "type": "number",
+                            "value": null
+                        },
+                        {
+                            "id": "can_defense",
+                            "type": "toggle",
+                            "value": false
+                        },
+                        {
+                            "id": "comments",
+                            "type": "text-box",
+                            "value": null
+                        }
+                    ]
+                },
+                "3293": {
+                    "team": 3293,
+                    "time": "2022-05-07T11:13:36.015",
+                    "scout": "guest",
+                    "survey": [
+                        {
+                            "id": "auto_high",
+                            "type": "number",
+                            "value": null
+                        },
+                        {
+                            "id": "auto_low",
+                            "type": "number",
+                            "value": null
+                        },
+                        {
+                            "id": "teleop_high",
+                            "type": "number",
+                            "value": 6
+                        },
+                        {
+                            "id": "teleop_low",
+                            "type": "number",
+                            "value": null
+                        },
+                        {
+                            "id": "shooting_positions",
+                            "type": "map-boolean",
+                            "value": null
+                        },
+                        {
+                            "id": "shooter_type",
+                            "type": "selector",
+                            "value": "High Goal"
+                        },
+                        {
+                            "id": "climb",
+                            "type": "selector",
+                            "value": null
+                        },
+                        {
+                            "id": "climb_time",
+                            "type": "number",
+                            "value": null
+                        },
+                        {
+                            "id": "can_defense",
+                            "type": "toggle",
+                            "value": false
+                        },
+                        {
+                            "id": "comments",
+                            "type": "text-box",
+                            "value": null
+                        }
+                    ]
+                },
+                "3883": {
+                    "team": 3883,
+                    "time": "2022-05-07T09:03:55.468",
+                    "scout": "guest",
+                    "survey": [
+                        {
+                            "id": "auto_high",
+                            "type": "number",
+                            "value": null
+                        },
+                        {
+                            "id": "auto_low",
+                            "type": "number",
+                            "value": null
+                        },
+                        {
+                            "id": "teleop_high",
+                            "type": "number",
+                            "value": null
+                        },
+                        {
+                            "id": "teleop_low",
+                            "type": "number",
+                            "value": null
+                        },
+                        {
+                            "id": "shooting_positions",
+                            "type": "map-boolean",
+                            "value": null
+                        },
+                        {
+                            "id": "shooter_type",
+                            "type": "selector",
+                            "value": "High Goal"
+                        },
+                        {
+                            "id": "climb",
+                            "type": "selector",
+                            "value": "Traversal"
+                        },
+                        {
+                            "id": "climb_time",
+                            "type": "number",
+                            "value": null
+                        },
+                        {
+                            "id": "can_defense",
+                            "type": "toggle",
+                            "value": false
+                        },
+                        {
+                            "id": "comments",
+                            "type": "text-box",
+                            "value": null
+                        }
+                    ]
+                },
+                "4728": {
+                    "team": 4728,
+                    "time": "2022-05-07T12:01:36.322",
+                    "scout": "guest",
+                    "survey": [
+                        {
+                            "id": "auto_high",
+                            "type": "number",
+                            "value": null
+                        },
+                        {
+                            "id": "auto_low",
+                            "type": "number",
+                            "value": null
+                        },
+                        {
+                            "id": "teleop_high",
+                            "type": "number",
+                            "value": null
+                        },
+                        {
+                            "id": "teleop_low",
+                            "type": "number",
+                            "value": null
+                        },
+                        {
+                            "id": "shooting_positions",
+                            "type": "map-boolean",
+                            "value": null
+                        },
+                        {
+                            "id": "shooter_type",
+                            "type": "selector",
+                            "value": null
+                        },
+                        {
+                            "id": "climb",
+                            "type": "selector",
+                            "value": "Traversal"
+                        },
+                        {
+                            "id": "climb_time",
+                            "type": "number",
+                            "value": 20
+                        },
+                        {
+                            "id": "can_defense",
+                            "type": "toggle",
+                            "value": false
+                        },
+                        {
+                            "id": "comments",
+                            "type": "text-box",
+                            "value": "epic climber"
+                        }
+                    ]
+                },
+                "5914": {
+                    "team": 5914,
+                    "time": "2022-05-07T09:47:20.974",
+                    "scout": "guest",
+                    "survey": [
+                        {
+                            "id": "auto_high",
+                            "type": "number",
+                            "value": 9
+                        },
+                        {
+                            "id": "auto_low",
+                            "type": "number",
+                            "value": 0
+                        },
+                        {
+                            "id": "teleop_high",
+                            "type": "number",
+                            "value": 0
+                        },
+                        {
+                            "id": "teleop_low",
+                            "type": "number",
+                            "value": 8
+                        },
+                        {
+                            "id": "shooting_positions",
+                            "type": "map-boolean",
+                            "value": null
+                        },
+                        {
+                            "id": "shooter_type",
+                            "type": "selector",
+                            "value": "Low Goal"
+                        },
+                        {
+                            "id": "climb",
+                            "type": "selector",
+                            "value": "Traversal"
+                        },
+                        {
+                            "id": "climb_time",
+                            "type": "number",
+                            "value": 10
+                        },
+                        {
+                            "id": "can_defense",
+                            "type": "toggle",
+                            "value": false
+                        },
+                        {
+                            "id": "comments",
+                            "type": "text-box",
+                            "value": null
+                        }
+                    ]
+                },
+                "6749": {
+                    "team": 6749,
+                    "time": "2022-05-06T15:47:15.042",
+                    "scout": "guest",
+                    "survey": [
+                        {
+                            "id": "auto_high",
+                            "type": "number",
+                            "value": 2
+                        },
+                        {
+                            "id": "auto_low",
+                            "type": "number",
+                            "value": 0
+                        },
+                        {
+                            "id": "teleop_high",
+                            "type": "number",
+                            "value": 4
+                        },
+                        {
+                            "id": "teleop_low",
+                            "type": "number",
+                            "value": 0
+                        },
+                        {
+                            "id": "shooting_positions",
+                            "type": "map-boolean",
+                            "value": null
+                        },
+                        {
+                            "id": "shooter_type",
+                            "type": "selector",
+                            "value": "High Goal"
+                        },
+                        {
+                            "id": "climb",
+                            "type": "selector",
+                            "value": "Traversal"
+                        },
+                        {
+                            "id": "climb_time",
+                            "type": "number",
+                            "value": 25
+                        },
+                        {
+                            "id": "can_defense",
+                            "type": "toggle",
+                            "value": true
+                        },
+                        {
+                            "id": "comments",
+                            "type": "text-box",
+                            "value": "This is our robot lol"
+                        }
+                    ]
+                },
+                "8516": {
+                    "team": 8516,
+                    "time": "2022-05-07T09:55:56.714",
+                    "scout": "guest",
+                    "survey": [
+                        {
+                            "id": "auto_high",
+                            "type": "number",
+                            "value": null
+                        },
+                        {
+                            "id": "auto_low",
+                            "type": "number",
+                            "value": null
+                        },
+                        {
+                            "id": "teleop_high",
+                            "type": "number",
+                            "value": null
+                        },
+                        {
+                            "id": "teleop_low",
+                            "type": "number",
+                            "value": null
+                        },
+                        {
+                            "id": "shooting_positions",
+                            "type": "map-boolean",
+                            "value": null
+                        },
+                        {
+                            "id": "shooter_type",
+                            "type": "selector",
+                            "value": null
+                        },
+                        {
+                            "id": "climb",
+                            "type": "selector",
+                            "value": "Traversal"
+                        },
+                        {
+                            "id": "climb_time",
+                            "type": "number",
+                            "value": null
+                        },
+                        {
+                            "id": "can_defense",
+                            "type": "toggle",
+                            "value": false
+                        },
+                        {
+                            "id": "comments",
+                            "type": "text-box",
+                            "value": null
+                        }
+                    ]
+                }
+            },
+            "match_timelines": []
+        }
+    }
+}

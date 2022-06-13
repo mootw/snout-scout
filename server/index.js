@@ -48,12 +48,12 @@ const requestListener = async function (req, res) {
     console.log(editLocks);
 
     //Returns true if lock has been set within ttl, false if lock is not set or expired.
-    if(req.url === "/edit_lock") {
-        if(req.method === "GET") {
+    if (req.url === "/edit_lock") {
+        if (req.method === "GET") {
             var value = editLocks[req.headers.key];
-            if(value !== undefined) {
+            if (value !== undefined) {
                 //300 seconds
-                if(Date.now() - value <= 1000 * 300) {
+                if (Date.now() - value <= 1000 * 300) {
                     res.writeHead(200);
                     res.end("true");
                     return;
@@ -63,13 +63,13 @@ const requestListener = async function (req, res) {
             res.end("false");
             return;
         }
-        if(req.method === "POST") {
+        if (req.method === "POST") {
             editLocks[req.headers.key] = Date.now();
             res.writeHead(200);
             res.end();
             return;
         }
-        if(req.method === "DELETE") {
+        if (req.method === "DELETE") {
             delete editLocks[req.headers.key];
             res.writeHead(200);
             res.end();
@@ -107,6 +107,7 @@ const requestListener = async function (req, res) {
 
     const eventData = database.events[event];
 
+
     if (event === undefined) {
         res.writeHead(403);
         res.end('No event defined and it is required');
@@ -124,17 +125,18 @@ const requestListener = async function (req, res) {
     if (req.url == "/matches") {
         res.writeHead(200);
         //Array of team numbers
-
         const team_filter = req.headers.team;
         let matches = [];
         for (const match of eventData.matches) {
             matches.push({
+                //Unique identifer for this match.
+                "id": match.id,
                 "section": match.section,
                 "number": match.number,
                 "scheduled_time": new Date(match.scheduled_time).toISOString(),
                 "blue": match.blue,
                 "red": match.red,
-                results: null,
+                "results": match.results,
             });
         }
         if (team_filter != undefined) {
@@ -143,6 +145,25 @@ const requestListener = async function (req, res) {
 
         res.end(JSON.stringify(matches));
         return;
+    }
+
+    if (req.url == "/match_results") {
+        if (req.method === "POST") {
+            //Submit match results.
+            //Get match data from query
+            const data = JSON.parse(req.headers.jsondata);
+            const id = req.headers.id;
+            //Filter only matches that are not the same number and section.
+            for(let i = 0; i < eventData.matches.length; i++) {
+                if(eventData.matches[i].id === id) {
+                    eventData.matches[i].results = data;
+                }
+            }
+            write();
+            res.writeHead(200);
+            res.end();
+            return;
+        }
     }
 
     if (req.url == "/pit_scout") {
@@ -173,4 +194,4 @@ const requestListener = async function (req, res) {
 }
 
 const server = http.createServer(requestListener);
-server.listen(8080);
+server.listen(6749);

@@ -1,5 +1,9 @@
+import 'dart:convert';
+
 import 'package:app/data/matches.dart';
 import 'package:app/edit_lock.dart';
+import 'package:app/main.dart';
+import 'package:app/screens/edit_match_results.dart';
 import 'package:app/screens/match_recorder.dart';
 import 'package:flutter/material.dart';
 
@@ -62,17 +66,37 @@ class MatchView extends StatelessWidget {
   final Match match;
   final int? teamNumber;
 
-  const MatchView({required this.match, required this.teamNumber, Key? key}) : super(key: key);
+  const MatchView({required this.match, required this.teamNumber, Key? key})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     if (teamNumber == null) {
       return Column(
         children: [
-          ElevatedButton(
-            child: Text("record results"),
-            onPressed: () {},
-          ),
+          
+            SizedBox(
+              height: 50,
+              child: Center(
+                child: ElevatedButton(
+                  child: match.results == null ? Text("Add Results") : Text("Edit results"),
+                  onPressed: () async {
+                    await navigateWithEditLock(
+                        context,
+                        "match:${match.section}${match.number}:results",
+                        () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => EditMatchResults(
+                                  match: match, config: snoutData.config!),
+                            )));
+                  },
+                ),
+              ),
+            ),
+          if (match.results == null) 
+            Text("results"),
+
         ],
       );
     }
@@ -82,14 +106,18 @@ class MatchView extends StatelessWidget {
         ElevatedButton(
           child: Text("record match"),
           onPressed: () async {
-            var result = await navigateWithEditLock(
+            List<TimelineEvent>? result = await navigateWithEditLock(
                 context,
                 "match:${match.section}${match.number}:$teamNumber:timeline",
                 () => Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => MatchRecorderPage()),
+                          builder: (context) =>
+                              MatchRecorderPage(title: "Team $teamNumber")),
                     ));
+
+            print(result);
+            print(jsonEncode(result));
           },
         ),
         ElevatedButton(

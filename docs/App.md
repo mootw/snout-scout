@@ -3,6 +3,10 @@
 2. They will see main timeline section
 3. 
 
+# tools
+Hypothetical Match creator. Lets user select 6 teams and create a match that may happen and analyse the results to see simulated score.
+
+
 ### App sections
 1. Todo
 	1. Upcoming matches

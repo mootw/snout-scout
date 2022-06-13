@@ -88,9 +88,18 @@ class MatchScouting {
 }
 
 class ScoutingToolData {
-  final Map<String, dynamic> values;
+  late final Map<String, dynamic> values;
 
   ScoutingToolData({required this.values});
+
+  ScoutingToolData.fromPosition (x, y) {
+    values = {
+      "type": "robot_position",
+      "label": "Robot Position",
+      "x": x,
+      "y": y,
+    };
+  }
 
   factory ScoutingToolData.fromJson(Map<String, dynamic> json) =>
       ScoutingToolData(
@@ -111,9 +120,6 @@ class ScoutingToolData {
     return values['label'];
   }
 
-  get visualPriority {
-    return values['visual_priority']?.toDouble() ?? 1;
-  }
 
   get options {
     return List<String>.from(values["options"].map((x) => x));

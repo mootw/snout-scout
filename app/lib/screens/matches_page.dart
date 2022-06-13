@@ -39,5 +39,6 @@ Future<List<Match>> getMatches({int? teamFilter}) async {
               "team": "$teamFilter",
             }
           : null);
+            print(res.body);
   return matchesFromJson(res.body);
 }
