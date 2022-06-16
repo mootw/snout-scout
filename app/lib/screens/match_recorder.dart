@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:app/data/matches.dart';
 import 'package:app/data/season_config.dart';
+import 'package:app/data/timeline_event.dart';
 import 'package:app/main.dart';
 import 'package:app/map_viewer.dart';
 import 'package:flutter/material.dart';
@@ -25,18 +27,6 @@ enum MatchMode { PRE_GAME, AUTO, TELEOP, FINISHED }
 
 
 
-class TimelineEvent {
-
-  int time;
-  ScoutingToolData data;
-
-  Map<String, dynamic> toJson() => {
-    "time": time,
-    "data": data.toJson(),
-  };
-
-  TimelineEvent({required this.time, required this.data});
-}
 
 //Number between 0 and 1 on both axis
 //Positive X is towards the opposing alliance.
@@ -199,9 +189,10 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                       ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(
                           content: Text("Long press to move to next section")));
                     },
-                    onLongPress: () {
+                    onLongPress: () async {
                         print(_mode);
                       if(_mode == MatchMode.FINISHED) {
+                        //Submit results to server
                         Navigator.pop(context, events);
                       }
                       if (_mode == MatchMode.TELEOP) {

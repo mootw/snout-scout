@@ -2,8 +2,10 @@ import 'dart:convert';
 
 import 'package:app/api.dart';
 import 'package:app/data/matches.dart';
+import 'package:app/data/timeline_event.dart';
 import 'package:app/edit_lock.dart';
 import 'package:app/main.dart';
+import 'package:app/map_viewer.dart';
 import 'package:app/screens/edit_match_results.dart';
 import 'package:app/screens/match_recorder.dart';
 import 'package:flutter/material.dart';
@@ -98,33 +100,78 @@ class _MatchPageState extends State<MatchPage> {
               ),
             ),
           ),
-          if (data.results != null) Text("SHOW RESULTS HERE"),
+          if (data.results != null)
+            SizedBox(
+              width: 200,
+              child: Table(
+                children: [
+                  TableRow(children: [
+                    Text(""),
+                    Text("Red"),
+                    Text("Blue"),
+                  ]),
+                  for (final type in snoutData.config!.matchScouting.results)
+                    TableRow(children: [
+                      Text(type),
+                      Text(data.results!.red.values[type].toString()),
+                      Text(data.results!.blue.values[type].toString()),
+                    ]),
+                ],
+              ),
+            ),
+
+
+
+            FieldMapViewer(
+              events: [
+              ],
+              onTap: (position) {
+
+              },
+            ),
         ],
       );
     }
 
     return Column(
       children: [
-        ElevatedButton(
-          child: Text("record match"),
-          onPressed: () async {
-            List<TimelineEvent>? result = await navigateWithEditLock(
-                context,
-                "match:${data.id}:$teamNumber:timeline",
-                () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              MatchRecorderPage(title: "Team $teamNumber")),
-                    ));
+        SizedBox(
+          height: 50,
+          child: Center(
+            child: ElevatedButton(
+              child: Text("Record Match"),
+              onPressed: () async {
+                List<TimelineEvent>? result = await navigateWithEditLock(
+                    context,
+                    "match:${data.id}:$teamNumber:timeline",
+                    () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  MatchRecorderPage(title: "Team $teamNumber")),
+                        ));
 
-            print(result);
-            print(jsonEncode(result));
-          },
-        ),
-        ElevatedButton(
-          child: Text("edit timeline"),
-          onPressed: () {},
+                if (result != null) {
+                  final data = {
+                    "scout": await getName(),
+                    "time": DateTime.now().toIso8601String(),
+                    "events": result,
+                  };
+
+                  var asdf = await apiClient.post(
+                      Uri.parse("${await getServer()}/match_timeline"),
+                      headers: {
+                        "jsondata": jsonEncode(data),
+                        "id": widget.match.id,
+                        "team": teamNumber.toString(),
+                      });
+                  setState(() {
+                    
+                  });
+                }
+              },
+            ),
+          ),
         ),
       ],
     );

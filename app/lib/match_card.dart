@@ -30,14 +30,19 @@ class MatchCard extends StatelessWidget {
           children: [
             const SizedBox(height: 4),
             Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 SizedBox(
-                  width: 96,
+                  width: 120,
                   child: Column(
                     children: [
                       Text("${match.section} ${match.number}"),
+                      if(match.results != null)
                       Text(
-                          "${DateFormat.jm().format(DateTime.parse(match.scheduledTime).toLocal())}"),
+                            "${DateFormat.jm().format(DateTime.parse(match.results!.startTime).toLocal())}"),
+                      if(match.results == null)
+                      Text(
+                          "EST ${DateFormat.jm().format(DateTime.parse(match.scheduledTime).toLocal())}"),
                     ],
                   ),
                 ),
@@ -102,7 +107,17 @@ class MatchCard extends StatelessWidget {
                       ]),
                     ),
                   ],
-                )
+                ),
+
+                SizedBox(
+                  width: 80,
+                  child: Column(
+                    children: [
+                      if(match.results != null)
+                        Text("${match.results!.red.values['points'] > match.results!.blue.values['points'] ? "Red" : "Blue"} win")
+                    ],
+                  ),
+                ),
               ],
             )
           ],

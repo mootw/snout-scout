@@ -176,6 +176,26 @@ const requestListener = async function (req, res) {
         }
     }
 
+    if (req.url == "/match_timeline") {
+        if (req.method === "POST") {
+            //Submit match results.
+            //Get match data from query
+            const data = JSON.parse(req.headers.jsondata);
+            const id = req.headers.id;
+            const team = req.headers.team;
+            //Filter only matches that are not the same number and section.
+            for(let i = 0; i < eventData.matches.length; i++) {
+                if(eventData.matches[i].id === id) {
+                    eventData.matches[i].timelines[team] = data;
+                }
+            }
+            write();
+            res.writeHead(200);
+            res.end();
+            return;
+        }
+    }
+
     if (req.url == "/pit_scout") {
         if (req.method == "POST") {
             const data = JSON.parse(req.headers.jsondata);

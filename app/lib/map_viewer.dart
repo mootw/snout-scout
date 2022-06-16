@@ -1,24 +1,24 @@
+import 'package:app/data/timeline_event.dart';
 import 'package:app/main.dart';
 import 'package:app/screens/match_recorder.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/foundation/key.dart';
-import 'package:flutter/src/widgets/framework.dart';
 
 //Ratio of width to height
-double map_ratio = 0.5;
+double mapRatio = 0.5;
 
-double robot_size = 30;
+double robotSize = 30;
 
 //General display widget for a field.
-///NOTE: DO NOT constrain this widget, as it will lose its aspect ratio 
+///NOTE: DO NOT constrain this widget, as it will lose its aspect ratio
 class FieldMapViewer extends StatelessWidget {
-
   final Function(RobotPosition) onTap;
-  
+
   final RobotPosition? robotPosition;
 
+  final List<TimelineEvent>? events;
+
   const FieldMapViewer(
-      {required this.onTap, this.robotPosition, Key? key})
+      {required this.onTap, this.events, this.robotPosition, Key? key})
       : super(key: key);
 
   @override
@@ -26,13 +26,16 @@ class FieldMapViewer extends StatelessWidget {
     //Limit the view to the aspect ratio of the map
     //to prevent layout or touch detection oddity.
     return AspectRatio(
-      aspectRatio: 1 / map_ratio,
+      aspectRatio: 1 / mapRatio,
       child: LayoutBuilder(builder: (context, constraints) {
         return SizedBox(
           child: GestureDetector(
             onTapDown: (details) {
-              onTap(RobotPosition(details.localPosition.dx / constraints.maxWidth,
-                1 - details.localPosition.dy / (constraints.maxWidth * map_ratio)));
+              onTap(RobotPosition(
+                  details.localPosition.dx / constraints.maxWidth,
+                  1 -
+                      details.localPosition.dy /
+                          (constraints.maxWidth * mapRatio)));
             },
             child: Stack(
               children: [
@@ -41,11 +44,17 @@ class FieldMapViewer extends StatelessWidget {
                 ),
                 if (robotPosition != null)
                   Container(
-                    alignment: Alignment(((robotPosition!.x * 2) - 1) * (1 + (robot_size / constraints.maxWidth)),
-                        -((robotPosition!.y * 2) - 1) * (1 + (robot_size / constraints.maxHeight))),
-                    child: Container(
-                      child: Icon(Icons.smart_toy, color: Theme.of(context).colorScheme.primary, size: robot_size)),
+                    alignment: Alignment(
+                        ((robotPosition!.x * 2) - 1) *
+                            (1 + (robotSize / constraints.maxWidth)),
+                        -((robotPosition!.y * 2) - 1) *
+                            (1 + (robotSize / constraints.maxHeight))),
+                    child: Icon(Icons.smart_toy,
+                        color: Theme.of(context).colorScheme.primary,
+                        size: robotSize),
                   ),
+                if (events != null)
+                  ...widgetFromEvents(context, events!),
               ],
             ),
           ),
@@ -53,4 +62,27 @@ class FieldMapViewer extends StatelessWidget {
       }),
     );
   }
+}
+
+List<Widget> widgetFromEvents(BuildContext context, List<TimelineEvent> events) {
+  var widgets = <Widget>[];
+
+  RobotPosition? lastEventPosition;
+
+  for (final event in events) {
+    if (event.data.type == "robot_position") {
+      lastEventPosition =
+          RobotPosition(event.data.getNumber("x"), event.data.getNumber("y"));
+    }
+    if (lastEventPosition != null) {
+      widgets.add(Container(
+        alignment: Alignment(
+            ((lastEventPosition.x * 2) - 1), -((lastEventPosition.y * 2) - 1)),
+        child: Icon(Icons.smart_toy,
+            color: Theme.of(context).colorScheme.primary, size: robotSize),
+      ));
+    }
+  }
+
+  return widgets;
 }

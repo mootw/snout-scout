@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 import 'package:app/data/match_results.dart';
+import 'package:app/data/timeline_event.dart';
+import 'package:app/screens/match_recorder.dart';
 
 List<Match> matchesFromJson(String str) =>
     List<Match>.from(json.decode(str).map((x) => Match.fromJson(x)));
@@ -17,6 +19,7 @@ class Match {
     required this.blue,
     required this.red,
     this.results,
+    required this.timelines,
   });
 
   final String id;
@@ -26,6 +29,7 @@ class Match {
   final List<int> blue;
   final List<int> red;
   final MatchResults? results;
+  final Map<String, List<TimelineEvent>> timelines;
 
   factory Match.fromJson(Map<String, dynamic> json) => Match(
         id: json['id'],
@@ -37,6 +41,10 @@ class Match {
         results: json["results"] == null
             ? null
             : MatchResults.fromJson(json["results"]),
+        timelines: json["timelines"].map((e,s) => MapEntry(e, 
+         []
+         // List<TimelineEvent>.from(s.map((x) => TimelineEvent.fromJson(s)))
+        )),
       );
 
   Map<String, dynamic> toJson() => {
