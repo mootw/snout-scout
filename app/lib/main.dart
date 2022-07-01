@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:app/api.dart';
 import 'package:app/data/season_config.dart';
+import 'package:app/screens/match_page.dart';
 import 'package:app/screens/matches_page.dart';
 import 'package:app/screens/teams_page.dart';
 import 'package:flutter/material.dart';

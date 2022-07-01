@@ -10,7 +10,6 @@ import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
 class MatchRecorderPage extends StatefulWidget {
-
   final String title;
 
   const MatchRecorderPage({required this.title, Key? key}) : super(key: key);
@@ -25,9 +24,6 @@ class MatchRecorderPage extends StatefulWidget {
 
 enum MatchMode { PRE_GAME, AUTO, TELEOP, FINISHED }
 
-
-
-
 //Number between 0 and 1 on both axis
 //Positive X is towards the opposing alliance.
 //Positive Y is along the alliance wall
@@ -38,7 +34,9 @@ class RobotPosition {
   double x;
   double y;
 
-  RobotPosition(this.x, this.y);
+  RobotPosition(double posX, double posY)
+      : x = (posX * 1000).roundToDouble() / 1000,
+        y = (posY * 1000).roundToDouble() / 1000;
 }
 
 class _MatchRecorderPageState extends State<MatchRecorderPage> {
@@ -47,7 +45,6 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
   List<TimelineEvent> events = [];
 
   RobotPosition? lastRobotPosition;
-
 
   //Time = 0 is reserved for pre-game
   //
@@ -73,7 +70,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
       child: MaterialButton(
         onPressed: () {
           setState(() {
-            if(_mode != MatchMode.PRE_GAME) {
+            if (_mode != MatchMode.PRE_GAME) {
               events.add(TimelineEvent(time: _time, data: tool));
             }
           });
@@ -117,19 +114,25 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
 
   @override
   Widget build(BuildContext context) {
-    
-    final scoutingEvents = _mode == MatchMode.AUTO || _mode == MatchMode.PRE_GAME ? snoutData.config!.matchScouting.auto : _mode == MatchMode.TELEOP ? snoutData.config!.matchScouting.teleop : [];
+    final scoutingEvents =
+        _mode == MatchMode.AUTO || _mode == MatchMode.PRE_GAME
+            ? snoutData.config!.matchScouting.auto
+            : _mode == MatchMode.TELEOP
+                ? snoutData.config!.matchScouting.teleop
+                : [];
 
     return Scaffold(
       appBar: AppBar(
         title: Text(
             "${widget.title} - ${_mode == MatchMode.PRE_GAME ? "Waiting to start" : _mode == MatchMode.AUTO ? "Auto" : _mode == MatchMode.TELEOP ? "Teleop" : _mode == MatchMode.FINISHED ? "Finished" : "Unknown State"} - ${_time}"),
         actions: [
-          IconButton(onPressed: () {
-            setState(() {
-              mapRotation += math.pi;
-            });
-          }, icon: Icon(Icons.rotate_right)),
+          IconButton(
+              onPressed: () {
+                setState(() {
+                  mapRotation += math.pi;
+                });
+              },
+              icon: Icon(Icons.rotate_right)),
         ],
       ),
       body: Flex(
@@ -153,18 +156,22 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                   print("${robotPosition.x} ${robotPosition.y}");
                   lastRobotPosition = robotPosition;
                   setState(() {
-                    for(final event in events.toList()) {
-                      if(event.data.type == "robot_position") {
+                    for (final event in events.toList()) {
+                      if (event.data.type == "robot_position") {
                         //Is position event
-                        if(event.time == _time) {
+                        if (event.time == _time) {
                           //Event is the same time, overrwite
                           events.remove(event);
                         }
                       }
                     }
-                    events.add(TimelineEvent(time: _time, data: ScoutingToolData.fromPosition(robotPosition.x, robotPosition.y)));
+                    events.add(TimelineEvent(
+                        time: _time,
+                        data: ScoutingToolData.fromPosition(
+                            robotPosition.x, robotPosition.y)));
                   });
-                },),
+                },
+              ),
             ),
           ),
           const SizedBox(height: 16),
@@ -190,8 +197,8 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                           content: Text("Long press to move to next section")));
                     },
                     onLongPress: () async {
-                        print(_mode);
-                      if(_mode == MatchMode.FINISHED) {
+                      print(_mode);
+                      if (_mode == MatchMode.FINISHED) {
                         //Submit results to server
                         Navigator.pop(context, events);
                       }
@@ -199,11 +206,13 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                         //Stop timer
                         t?.cancel();
                         _mode = MatchMode.FINISHED;
-                        for(var event in events) {
+                        for (var event in events) {
                           //Scale times between 15 seconds and 150 seconds
-                          if(event.time > 15) {
+                          if (event.time > 15) {
                             num offsetTime = event.time - 15;
-                            event.time = (15 + ((offsetTime/(_time - 15)) * 135)).round();
+                            event.time =
+                                (15 + ((offsetTime / (_time - 15)) * 135))
+                                    .round();
                           }
                         }
 
@@ -212,12 +221,12 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                       if (_mode == MatchMode.AUTO) {
                         _mode = MatchMode.TELEOP;
                         //Scale auto times
-                        for(var event in events) {
+                        for (var event in events) {
                           //Scale times to 15 seconds
-                          event.time = ((event.time/_time) * 15).round();
+                          event.time = ((event.time / _time) * 15).round();
                         }
                         //Set time to 15 if auto was recorded faster than real time.
-                        if(_time < 15) {
+                        if (_time < 15) {
                           _time = 15;
                         }
                       }

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:app/data/match_results.dart';
 import 'package:app/data/timeline_event.dart';
+import 'package:app/data/timeline_results.dart';
 import 'package:app/screens/match_recorder.dart';
 
 List<Match> matchesFromJson(String str) =>
@@ -29,23 +30,30 @@ class Match {
   final List<int> blue;
   final List<int> red;
   final MatchResults? results;
-  final Map<String, List<TimelineEvent>> timelines;
-
+  // final dynamic timelines;
+  final Map<String, TimelineResults> timelines;
+  //List<TimelineEvent>
   factory Match.fromJson(Map<String, dynamic> json) => Match(
-        id: json['id'],
-        section: json["section"],
-        number: json["number"],
-        scheduledTime: json["scheduled_time"],
-        blue: List<int>.from(json["blue"].map((x) => x)),
-        red: List<int>.from(json["red"].map((x) => x)),
-        results: json["results"] == null
-            ? null
-            : MatchResults.fromJson(json["results"]),
-        timelines: json["timelines"].map((e,s) => MapEntry(e, 
-         []
-         // List<TimelineEvent>.from(s.map((x) => TimelineEvent.fromJson(s)))
-        )),
-      );
+      id: json['id'],
+      section: json["section"],
+      number: json["number"],
+      scheduledTime: json["scheduled_time"],
+      blue: List<int>.from(json["blue"].map((x) => x)),
+      red: List<int>.from(json["red"].map((x) => x)),
+      results: json["results"] == null
+          ? null
+          : MatchResults.fromJson(json["results"]),
+      timelines: Map<String, TimelineResults>.from(
+        json["timelines"]?.map((e, s) {
+          print(s);
+        return MapEntry(e, TimelineResults.fromJson(s));
+        }
+        ) ?? {},
+        // json["timelines"]?.map((e,s) => MapEntry(e,
+        //  []
+        // List<TimelineEvent>.from(s.map((x) => ))
+        // )) ?? {},
+      ));
 
   Map<String, dynamic> toJson() => {
         "id": id,

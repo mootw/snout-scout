@@ -121,9 +121,11 @@ class _MatchPageState extends State<MatchPage> {
             ),
 
 
-
+            //Display a 'heatmap' of all of the events
             FieldMapViewer(
               events: [
+                for(var timeline in data.timelines.keys)
+                  ...?data.timelines[timeline]?.events,
               ],
               onTap: (position) {
 
@@ -183,5 +185,6 @@ Future<Match> getMatch(String matchId) async {
       await apiClient.get(Uri.parse("${await getServer()}/match"), headers: {
     "id": matchId,
   });
+  print(res.body);
   return Match.fromJson(jsonDecode(res.body));
 }
