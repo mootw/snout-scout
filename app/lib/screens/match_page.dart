@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:app/api.dart';
 import 'package:app/data/matches.dart';
 import 'package:app/data/timeline_event.dart';
+import 'package:app/data/timeline_results.dart';
 import 'package:app/edit_lock.dart';
 import 'package:app/main.dart';
 import 'package:app/map_viewer.dart';
@@ -135,13 +136,16 @@ class _MatchPageState extends State<MatchPage> {
       );
     }
 
+
+    TimelineResults? timeline = data.timelines[teamNumber.toString()];
+
     return Column(
       children: [
         SizedBox(
           height: 50,
           child: Center(
             child: ElevatedButton(
-              child: Text("Record Match"),
+              child: timeline == null ? Text("Record Match") : Text("Edit Timeline"),
               onPressed: () async {
                 List<TimelineEvent>? result = await navigateWithEditLock(
                     context,

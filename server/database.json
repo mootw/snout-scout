@@ -1,6 +1,614 @@
 {
     "version": 1,
     "events": {
+        "test": {
+            "name": "State",
+            "teams": [
+                1816,
+                2052,
+                2169,
+                2220,
+                2239,
+                2470,
+                5914,
+                6453,
+                6749,
+                7028,
+                7541,
+                8516
+            ],
+            "matches": [
+                {
+                    "section": "Qual",
+                    "number": 1,
+                    "scheduled_time": "2022-05-05T14:30:00.000Z",
+                    "blue": [
+                        1816,
+                        2052,
+                        2169
+                    ],
+                    "red": [
+                        2169,
+                        2220,
+                        2239
+                    ],
+                    "id": "Qual1",
+                    "results": {
+                        "scout": "guest",
+                        "time": "2022-07-02T15:47:57.945",
+                        "start_time": "2022-07-02T15:42:30.000",
+                        "red": {
+                            "points": 74,
+                            "rp": 1,
+                            "penalty": 0,
+                            "taxi": 4,
+                            "cargo": 45,
+                            "hangar": 25
+                        },
+                        "blue": {
+                            "points": 90,
+                            "rp": 2,
+                            "penalty": 0,
+                            "taxi": 6,
+                            "cargo": 48,
+                            "hangar": 46
+                        }
+                    },
+                    "timelines": {
+                        "2169": {
+                            "scout": "guest",
+                            "time": "2022-06-13T20:36:14.629",
+                            "events": [
+                                {
+                                    "time": 0,
+                                    "data": {
+                                        "type": "robot_position",
+                                        "label": "Robot Position",
+                                        "x": 0.48760330578512395,
+                                        "y": 0.24380165289256195
+                                    }
+                                },
+                                {
+                                    "time": 4,
+                                    "data": {
+                                        "type": "robot_position",
+                                        "label": "Robot Position",
+                                        "x": 0.4690082644628099,
+                                        "y": 0.04958677685950408
+                                    }
+                                },
+                                {
+                                    "time": 4,
+                                    "data": {
+                                        "id": "cargo_intake",
+                                        "label": "Intake Cargo",
+                                        "type": "event",
+                                        "points": 0,
+                                        "rp": 0
+                                    }
+                                },
+                                {
+                                    "time": 6,
+                                    "data": {
+                                        "id": "exit_tarmac",
+                                        "label": "Exit Tarmac",
+                                        "type": "event",
+                                        "points": 2,
+                                        "rp": 0
+                                    }
+                                },
+                                {
+                                    "time": 6,
+                                    "data": {
+                                        "type": "robot_position",
+                                        "label": "Robot Position",
+                                        "x": 0.45867768595041325,
+                                        "y": 0.2644628099173554
+                                    }
+                                },
+                                {
+                                    "time": 9,
+                                    "data": {
+                                        "id": "cargo_upper",
+                                        "label": "Cargo Upper",
+                                        "type": "event",
+                                        "points": 4,
+                                        "rp": 0
+                                    }
+                                },
+                                {
+                                    "time": 9,
+                                    "data": {
+                                        "id": "cargo_upper",
+                                        "label": "Cargo Upper",
+                                        "type": "event",
+                                        "points": 4,
+                                        "rp": 0
+                                    }
+                                },
+                                {
+                                    "time": 11,
+                                    "data": {
+                                        "type": "robot_position",
+                                        "label": "Robot Position",
+                                        "x": 0.7169421487603306,
+                                        "y": 0.24380165289256195
+                                    }
+                                },
+                                {
+                                    "time": 38,
+                                    "data": {
+                                        "type": "robot_position",
+                                        "label": "Robot Position",
+                                        "x": 0.737603305785124,
+                                        "y": 0.5991735537190083
+                                    }
+                                },
+                                {
+                                    "time": 49,
+                                    "data": {
+                                        "id": "cargo_intake",
+                                        "label": "Intake Cargo",
+                                        "type": "event",
+                                        "points": 0,
+                                        "rp": 0
+                                    }
+                                },
+                                {
+                                    "time": 49,
+                                    "data": {
+                                        "type": "robot_position",
+                                        "label": "Robot Position",
+                                        "x": 0.5785123966942148,
+                                        "y": 0.7851239669421488
+                                    }
+                                },
+                                {
+                                    "time": 60,
+                                    "data": {
+                                        "id": "cargo_upper",
+                                        "label": "Cargo Upper",
+                                        "type": "event",
+                                        "points": 2,
+                                        "rp": 0,
+                                        "visual_priority": 1
+                                    }
+                                },
+                                {
+                                    "time": 71,
+                                    "data": {
+                                        "type": "robot_position",
+                                        "label": "Robot Position",
+                                        "x": 0.2892561983471074,
+                                        "y": 0.7644628099173554
+                                    }
+                                },
+                                {
+                                    "time": 83,
+                                    "data": {
+                                        "id": "cargo_intake",
+                                        "label": "Intake Cargo",
+                                        "type": "event",
+                                        "points": 0,
+                                        "rp": 0
+                                    }
+                                },
+                                {
+                                    "time": 83,
+                                    "data": {
+                                        "type": "robot_position",
+                                        "label": "Robot Position",
+                                        "x": 0.4669421487603306,
+                                        "y": 0.30578512396694213
+                                    }
+                                },
+                                {
+                                    "time": 94,
+                                    "data": {
+                                        "id": "cargo_upper",
+                                        "label": "Cargo Upper",
+                                        "type": "event",
+                                        "points": 2,
+                                        "rp": 0,
+                                        "visual_priority": 1
+                                    }
+                                },
+                                {
+                                    "time": 105,
+                                    "data": {
+                                        "type": "robot_position",
+                                        "label": "Robot Position",
+                                        "x": 0.6239669421487604,
+                                        "y": 0.4297520661157025
+                                    }
+                                },
+                                {
+                                    "time": 105,
+                                    "data": {
+                                        "id": "cargo_intake",
+                                        "label": "Intake Cargo",
+                                        "type": "event",
+                                        "points": 0,
+                                        "rp": 0
+                                    }
+                                },
+                                {
+                                    "time": 128,
+                                    "data": {
+                                        "id": "cargo_upper",
+                                        "label": "Cargo Upper",
+                                        "type": "event",
+                                        "points": 2,
+                                        "rp": 0,
+                                        "visual_priority": 1
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "section": "Qual",
+                    "number": 2,
+                    "scheduled_time": "2022-05-05T14:38:00.000Z",
+                    "blue": [
+                        2169,
+                        2220,
+                        2239
+                    ],
+                    "red": [
+                        2470,
+                        5914,
+                        6453
+                    ],
+                    "id": "Qual2",
+                    "results": {
+                        "scout": "guest",
+                        "time": "2022-07-02T15:48:28.187",
+                        "start_time": "2022-07-02T15:46:30.000",
+                        "red": {
+                            "points": 120,
+                            "rp": 2,
+                            "penalty": 23,
+                            "taxi": 23,
+                            "cargo": 23,
+                            "hangar": 23
+                        },
+                        "blue": {
+                            "points": 69,
+                            "rp": 1,
+                            "penalty": 23,
+                            "taxi": 23,
+                            "cargo": 23,
+                            "hangar": 23
+                        }
+                    },
+                    "timelines": {}
+                },
+                {
+                    "section": "Qual",
+                    "number": 3,
+                    "scheduled_time": "2022-05-05T14:46:00.000Z",
+                    "blue": [
+                        2470,
+                        5914,
+                        6453
+                    ],
+                    "red": [
+                        6749,
+                        7028,
+                        7541
+                    ],
+                    "id": "Qual3",
+                    "timelines": {}
+                },
+                {
+                    "section": "Qual",
+                    "number": 4,
+                    "scheduled_time": "2022-05-05T14:54:00.000Z",
+                    "blue": [
+                        5914,
+                        6453,
+                        6749
+                    ],
+                    "red": [
+                        7028,
+                        7541,
+                        8516
+                    ],
+                    "id": "Qual4",
+                    "timelines": {}
+                }
+            ],
+            "pit_scouting": {
+                "1816": {
+                    "team": 1816,
+                    "time": "2022-06-11T19:23:52.826",
+                    "scout": "guest",
+                    "survey": [
+                        {
+                            "id": "auto_high",
+                            "type": "number",
+                            "value": 2
+                        },
+                        {
+                            "id": "auto_low",
+                            "type": "number",
+                            "value": 0
+                        },
+                        {
+                            "id": "teleop_high",
+                            "type": "number",
+                            "value": 4
+                        },
+                        {
+                            "id": "teleop_low",
+                            "type": "number",
+                            "value": 0
+                        },
+                        {
+                            "id": "shooting_positions",
+                            "type": "map-boolean",
+                            "value": null
+                        },
+                        {
+                            "id": "shooter_type",
+                            "type": "selector",
+                            "value": "Any goal"
+                        },
+                        {
+                            "id": "climb",
+                            "type": "selector",
+                            "value": "Traversal"
+                        },
+                        {
+                            "id": "climb_time",
+                            "type": "number",
+                            "value": 5
+                        },
+                        {
+                            "id": "can_defense",
+                            "type": "toggle",
+                            "value": true
+                        },
+                        {
+                            "id": "comments",
+                            "type": "text-box",
+                            "value": "Windmill climber"
+                        }
+                    ]
+                },
+                "2052": {
+                    "team": 2052,
+                    "time": "2022-05-07T09:54:40.201",
+                    "scout": "guest",
+                    "survey": [
+                        {
+                            "id": "auto_high",
+                            "type": "number",
+                            "value": null
+                        },
+                        {
+                            "id": "auto_low",
+                            "type": "number",
+                            "value": null
+                        },
+                        {
+                            "id": "teleop_high",
+                            "type": "number",
+                            "value": null
+                        },
+                        {
+                            "id": "teleop_low",
+                            "type": "number",
+                            "value": null
+                        },
+                        {
+                            "id": "shooting_positions",
+                            "type": "map-boolean",
+                            "value": null
+                        },
+                        {
+                            "id": "shooter_type",
+                            "type": "selector",
+                            "value": "High Goal"
+                        },
+                        {
+                            "id": "climb",
+                            "type": "selector",
+                            "value": "Traversal"
+                        },
+                        {
+                            "id": "climb_time",
+                            "type": "number",
+                            "value": null
+                        },
+                        {
+                            "id": "can_defense",
+                            "type": "toggle",
+                            "value": false
+                        },
+                        {
+                            "id": "comments",
+                            "type": "text-box",
+                            "value": null
+                        }
+                    ]
+                },
+                "2491": {
+                    "team": 2491,
+                    "time": "2022-05-07T09:12:42.844",
+                    "scout": "guest",
+                    "survey": [
+                        {
+                            "id": "auto_high",
+                            "type": "number",
+                            "value": null
+                        },
+                        {
+                            "id": "auto_low",
+                            "type": "number",
+                            "value": null
+                        },
+                        {
+                            "id": "teleop_high",
+                            "type": "number",
+                            "value": null
+                        },
+                        {
+                            "id": "teleop_low",
+                            "type": "number",
+                            "value": null
+                        },
+                        {
+                            "id": "shooting_positions",
+                            "type": "map-boolean",
+                            "value": null
+                        },
+                        {
+                            "id": "shooter_type",
+                            "type": "selector",
+                            "value": "Low Goal"
+                        },
+                        {
+                            "id": "climb",
+                            "type": "selector",
+                            "value": "Traversal"
+                        },
+                        {
+                            "id": "climb_time",
+                            "type": "number",
+                            "value": null
+                        },
+                        {
+                            "id": "can_defense",
+                            "type": "toggle",
+                            "value": false
+                        },
+                        {
+                            "id": "comments",
+                            "type": "text-box",
+                            "value": "robot fell from traversal in match 5"
+                        }
+                    ]
+                },
+                "6749": {
+                    "team": 6749,
+                    "time": "2022-05-06T15:47:15.042",
+                    "scout": "guest",
+                    "survey": [
+                        {
+                            "id": "auto_high",
+                            "type": "number",
+                            "value": 2
+                        },
+                        {
+                            "id": "auto_low",
+                            "type": "number",
+                            "value": 0
+                        },
+                        {
+                            "id": "teleop_high",
+                            "type": "number",
+                            "value": 4
+                        },
+                        {
+                            "id": "teleop_low",
+                            "type": "number",
+                            "value": 0
+                        },
+                        {
+                            "id": "shooting_positions",
+                            "type": "map-boolean",
+                            "value": null
+                        },
+                        {
+                            "id": "shooter_type",
+                            "type": "selector",
+                            "value": "High Goal"
+                        },
+                        {
+                            "id": "climb",
+                            "type": "selector",
+                            "value": "Traversal"
+                        },
+                        {
+                            "id": "climb_time",
+                            "type": "number",
+                            "value": 25
+                        },
+                        {
+                            "id": "can_defense",
+                            "type": "toggle",
+                            "value": true
+                        },
+                        {
+                            "id": "comments",
+                            "type": "text-box",
+                            "value": "This is our robot lol"
+                        }
+                    ]
+                },
+                "8516": {
+                    "team": 8516,
+                    "time": "2022-05-07T09:55:56.714",
+                    "scout": "guest",
+                    "survey": [
+                        {
+                            "id": "auto_high",
+                            "type": "number",
+                            "value": null
+                        },
+                        {
+                            "id": "auto_low",
+                            "type": "number",
+                            "value": null
+                        },
+                        {
+                            "id": "teleop_high",
+                            "type": "number",
+                            "value": null
+                        },
+                        {
+                            "id": "teleop_low",
+                            "type": "number",
+                            "value": null
+                        },
+                        {
+                            "id": "shooting_positions",
+                            "type": "map-boolean",
+                            "value": null
+                        },
+                        {
+                            "id": "shooter_type",
+                            "type": "selector",
+                            "value": null
+                        },
+                        {
+                            "id": "climb",
+                            "type": "selector",
+                            "value": "Traversal"
+                        },
+                        {
+                            "id": "climb_time",
+                            "type": "number",
+                            "value": null
+                        },
+                        {
+                            "id": "can_defense",
+                            "type": "toggle",
+                            "value": false
+                        },
+                        {
+                            "id": "comments",
+                            "type": "text-box",
+                            "value": null
+                        }
+                    ]
+                }
+            },
+            "match_timelines": []
+        },
         "state": {
             "name": "State",
             "teams": [
@@ -1894,7 +2502,7 @@
             },
             "match_timelines": []
         },
-        "test": {
+        "test old": {
             "name": "State",
             "teams": [
                 1816,
@@ -2193,7 +2801,28 @@
                         7541
                     ],
                     "id": "Qual3",
-                    "timelines": {}
+                    "timelines": {},
+                    "results": {
+                        "scout": "guest",
+                        "time": "2022-07-06T13:06:11.311",
+                        "start_time": "2022-07-06T13:03:10.144",
+                        "red": {
+                            "points": 35,
+                            "rp": 1,
+                            "penalty": 4,
+                            "taxi": 15,
+                            "cargo": 2,
+                            "hangar": 10
+                        },
+                        "blue": {
+                            "points": 123,
+                            "rp": 2,
+                            "penalty": 4,
+                            "taxi": 21,
+                            "cargo": 32,
+                            "hangar": 35
+                        }
+                    }
                 },
                 {
                     "section": "Qual",

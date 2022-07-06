@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:app/api.dart';
 import 'package:app/data/season_config.dart';
-import 'package:app/screens/match_page.dart';
 import 'package:app/screens/matches_page.dart';
 import 'package:app/screens/teams_page.dart';
 import 'package:flutter/material.dart';
@@ -14,7 +13,7 @@ void main() async {
 
 Future<String> getServer() async {
   var prefs = await SharedPreferences.getInstance();
-  String result = prefs.getString("server") ?? "";
+  String result = prefs.getString("server") ?? "http://localhost:6749";
   return result;
 }
 

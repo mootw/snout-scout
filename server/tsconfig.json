@@ -1,0 +1,10 @@
+{
+    "compilerOptions": {
+        "outDir": "./built",
+        "allowJs": true,
+        "target": "es2020"
+    },
+    "include": [
+        "./src/**/*"
+    ]
+}

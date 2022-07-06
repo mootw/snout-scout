@@ -1,23 +1,24 @@
-
-const http = require('http');
-const fs = require('fs');
+import * as fs from "fs";
+import * as http from "http";
+import { DataStore, MatchResults, MatchTimeline, PitSurveyResult } from "./database";
+import { PitSurveyItem, Season } from "./season";
 
 //used to warn about multiple people editing the same document.
 //Format is key: time
 let editLocks = {};
 
 //Get list of seasons and load the config
-const season = JSON.parse(fs.readFileSync(`./season.json`));
+const season: Season = JSON.parse(fs.readFileSync(`./season.json`).toString());
 console.log(season);
 
-let database;
+let database: DataStore|undefined;
 //Load season databases
 if (fs.existsSync(`./database.json`)) {
-    database = JSON.parse(fs.readFileSync(`./database.json`));
+    database = JSON.parse(fs.readFileSync(`./database.json`).toString());
 } else {
     database = {
         version: 1,
-        events: [],
+        events: {},
     };
 }
 
@@ -28,7 +29,6 @@ function write() {
 }
 
 console.log(database);
-
 
 const requestListener = async function (req, res) {
 
@@ -161,8 +161,8 @@ const requestListener = async function (req, res) {
         if (req.method === "POST") {
             //Submit match results.
             //Get match data from query
-            const data = JSON.parse(req.headers.jsondata);
-            const id = req.headers.id;
+            const data: MatchResults = JSON.parse(req.headers.jsondata);
+            const id: string = req.headers.id;
             //Filter only matches that are not the same number and section.
             for(let i = 0; i < eventData.matches.length; i++) {
                 if(eventData.matches[i].id === id) {
@@ -180,7 +180,7 @@ const requestListener = async function (req, res) {
         if (req.method === "POST") {
             //Submit match results.
             //Get match data from query
-            const data = JSON.parse(req.headers.jsondata);
+            const data: MatchTimeline = JSON.parse(req.headers.jsondata);
             const id = req.headers.id;
             const team = req.headers.team;
             //Filter only matches that are not the same number and section.
@@ -198,7 +198,7 @@ const requestListener = async function (req, res) {
 
     if (req.url == "/pit_scout") {
         if (req.method == "POST") {
-            const data = JSON.parse(req.headers.jsondata);
+            const data: PitSurveyResult = JSON.parse(req.headers.jsondata);
             eventData.pit_scouting[data.team.toString()] = data;
             write();
             res.writeHead(200);
@@ -218,6 +218,7 @@ const requestListener = async function (req, res) {
             return;
         }
     }
+
 
     res.writeHead(200);
     res.end('Hello, World!');
