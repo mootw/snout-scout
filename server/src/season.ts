@@ -1,7 +1,6 @@
-
-
 export interface Season {
     season: string;
+    team: number;
     pit_scouting: PitScouting;
     match_scouting: MatchScouting;
 }

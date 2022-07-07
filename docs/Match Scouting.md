@@ -2,7 +2,6 @@ Scout will select the match they want to scout and the team.
 They will be presented with a start button (to be pressed on the start buzzer)
 Match time will automatically be recorded
 
-
 Main view with buttons for event's and actions
 Top section of the view will contain a timeline with the last few recorded events.
 

@@ -1,17 +1,14 @@
 import * as fs from "fs";
 import * as http from "http";
-import { DataStore, MatchResults, MatchTimeline, PitSurveyResult } from "./database";
+import { DataStore, FrcEvent, MatchResults, MatchTimeline, PitSurveyResult } from "./database";
+import { editLock } from "./edit_lock";
 import { PitSurveyItem, Season } from "./season";
-
-//used to warn about multiple people editing the same document.
-//Format is key: time
-let editLocks = {};
 
 //Get list of seasons and load the config
 const season: Season = JSON.parse(fs.readFileSync(`./season.json`).toString());
 console.log(season);
 
-let database: DataStore|undefined;
+let database: DataStore | undefined;
 //Load season databases
 if (fs.existsSync(`./database.json`)) {
     database = JSON.parse(fs.readFileSync(`./database.json`).toString());
@@ -45,32 +42,26 @@ const requestListener = async function (req, res) {
         return;
     }
 
-    console.log(editLocks);
-
     //Returns true if lock has been set within ttl, false if lock is not set or expired.
     if (req.url === "/edit_lock") {
         if (req.method === "GET") {
-            var value = editLocks[req.headers.key];
-            if (value !== undefined) {
-                //300 seconds
-                if (Date.now() - value <= 1000 * 300) {
-                    res.writeHead(200);
-                    res.end("true");
-                    return;
-                }
+            if (editLock.get(req.headers.key)) {
+                res.writeHead(200);
+                res.end("true");
+                return;
             }
             res.writeHead(200);
             res.end("false");
             return;
         }
         if (req.method === "POST") {
-            editLocks[req.headers.key] = Date.now();
+            editLock.set(req.headers.key);
             res.writeHead(200);
             res.end();
             return;
         }
         if (req.method === "DELETE") {
-            delete editLocks[req.headers.key];
+            editLock.clear(req.headers.key);
             res.writeHead(200);
             res.end();
             return;
@@ -127,15 +118,7 @@ const requestListener = async function (req, res) {
         res.writeHead(200);
         //Array of team numbers
         const team_filter = req.headers.team;
-        //Create new array to modify
-        let matches = eventData.matches.slice();
-        if (team_filter != undefined) {
-            matches = matches.filter(match => [...match.blue, ...match.red].includes(+team_filter));
-        }
-
-        console.log(matches);
-
-        res.end(JSON.stringify(matches));
+        res.end(JSON.stringify(getMatches(eventData, team_filter)));
         return;
     }
 
@@ -144,12 +127,10 @@ const requestListener = async function (req, res) {
         res.writeHead(200);
         //Array of team numbers
         const id = req.headers.id;
-        //Create new array to modify
-        for(const match of eventData.matches) {
-            if(match.id === id) {
-                res.end(JSON.stringify(match));
-                return;
-            }
+        const match = getMatch(eventData, id);
+        if(match != undefined) {
+            res.end(JSON.stringify(match));
+            return;
         }
         //Not found
         res.writeHead(404);
@@ -163,12 +144,8 @@ const requestListener = async function (req, res) {
             //Get match data from query
             const data: MatchResults = JSON.parse(req.headers.jsondata);
             const id: string = req.headers.id;
-            //Filter only matches that are not the same number and section.
-            for(let i = 0; i < eventData.matches.length; i++) {
-                if(eventData.matches[i].id === id) {
-                    eventData.matches[i].results = data;
-                }
-            }
+            //assign the match results
+            getMatch(eventData, id).results = data;
             write();
             res.writeHead(200);
             res.end();
@@ -183,12 +160,8 @@ const requestListener = async function (req, res) {
             const data: MatchTimeline = JSON.parse(req.headers.jsondata);
             const id = req.headers.id;
             const team = req.headers.team;
-            //Filter only matches that are not the same number and section.
-            for(let i = 0; i < eventData.matches.length; i++) {
-                if(eventData.matches[i].id === id) {
-                    eventData.matches[i].timelines[team] = data;
-                }
-            }
+            //assign data
+            getMatch(eventData, id).timelines[team] = data;
             write();
             res.writeHead(200);
             res.end();
@@ -220,9 +193,63 @@ const requestListener = async function (req, res) {
     }
 
 
+    if (req.url == "/timeline") {
+        if (req.method == "GET") {
+
+            const team_matches = getMatches(eventData, season.team);
+
+            res.end(
+                {
+                    "event_match_delay": 123, //Minutes
+                    "cards": [
+                        {
+                            "type": "match",
+                            "id": "somematchidlol",
+                        },
+                        {
+                            "type": "match",
+                            "id": "somematchidlol2",
+                        },
+                        {
+                            "type": "match",
+                            "id": "somematchidlol3",
+                        },
+                        {
+                            "type": "match",
+                            "id": "somematchidlol4",
+                        },
+                    ],
+                }
+            );
+
+        }
+    }
+
+
     res.writeHead(200);
     res.end('Hello, World!');
 }
+
+
+function getMatches(eventData: FrcEvent, teamFilter: number) {
+    //create new array to modify
+    let matches = eventData.matches.slice();
+    if (teamFilter != undefined) {
+        matches = matches.filter(match => [...match.blue, ...match.red].includes(+teamFilter));
+    }
+    return matches;
+}
+
+function getMatch(eventData: FrcEvent, matchid: string) {
+    for (const match of eventData.matches) {
+        if (match.id === matchid) {
+            return match;
+        }
+    }
+}
+
+
+
 
 const server = http.createServer(requestListener);
 server.listen(6749);
