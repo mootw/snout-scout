@@ -20,7 +20,7 @@ Future<dynamic> navigateWithEditLock(
           context: context,
           builder: (context) {
             return AlertDialog(
-              title: Text("This item is being edited"),
+              title: Text("This item is already being edited"),
               actions: <Widget>[
                 TextButton(
                   child: const Text('Edit Anyways'),

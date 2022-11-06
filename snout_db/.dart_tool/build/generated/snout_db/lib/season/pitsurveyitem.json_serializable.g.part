@@ -1,0 +1,22 @@
+// **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+PitSurveyItem _$PitSurveyItemFromJson(Map<String, dynamic> json) =>
+    PitSurveyItem(
+      id: json['id'] as String,
+      type: json['type'] as String,
+      label: json['label'] as String,
+      options:
+          (json['options'] as List<dynamic>?)?.map((e) => e as String).toList(),
+      options_values: json['options_values'] as List<dynamic>?,
+    );
+
+Map<String, dynamic> _$PitSurveyItemToJson(PitSurveyItem instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'label': instance.label,
+      'type': instance.type,
+      'options': instance.options,
+      'options_values': instance.options_values,
+    };

@@ -6,6 +6,12 @@ There is little overlap each year for frc. Generally a list of tools can remain 
 3. event (disabled robot, ball upper, ball miss)
 	1. Counts total quanitity of events for display and their point values
 
+### Data Tools
+1. generate meta-values like for instance AVERAGE TIME BETWEEN SHOTS or DURATION BETWEEN START OF CLIMB AND END OF CLIMB
+
+Compare estimated performance in a match versus their actual performance, or their performance contribution within a match.
+
+
 #### Pit scouting tools
 1. text-box (comments, whatever else)
 2. number (how many balls can it shoot)
@@ -13,8 +19,8 @@ There is little overlap each year for frc. Generally a list of tools can remain 
 4. map-boolean (shooting positions)
 5. map-point (auto start position)
 6. selector (no shooter, low goal, high goal, both)
-8. percent (percentage defense)
 7. picture (robot picture)
+8. percent (percentage defense)
 
 # Data/Network
 1. There will be one authorative server which collects data.
@@ -38,9 +44,6 @@ There is little overlap each year for frc. Generally a list of tools can remain 
 	- {"id": "comments", "type": "text-box",  "label": "Extra comments"}
 ## Match scouting
 {
-"pregame": \[
-	{"id": "start_position", "type": "map-point", "label": "Starting position of the robot"},
-\],
 "auto":  \[ 
 	{"id": "cargo_upper", "label": "Cargo Upper", "type": "event", "points": 4, "rp": 0 },
 	{"id": "cargo_lower", "type": "event", "points": 2, "rp": 0 },

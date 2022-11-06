@@ -1,12 +1,12 @@
-import 'package:app/data/timeline_event.dart';
 import 'package:app/main.dart';
 import 'package:app/screens/match_recorder.dart';
 import 'package:flutter/material.dart';
+import 'package:snout_db/season/matchevent.dart';
 
 //Ratio of width to height
 double mapRatio = 0.5;
 
-double robotSize = 30;
+double robotSize = 31 / 649;
 
 //General display widget for a field.
 ///NOTE: DO NOT constrain this widget, as it will lose its aspect ratio
@@ -15,7 +15,7 @@ class FieldMapViewer extends StatelessWidget {
 
   final RobotPosition? robotPosition;
 
-  final List<TimelineEvent>? events;
+  final List<MatchEvent>? events;
 
   const FieldMapViewer(
       {required this.onTap, this.events, this.robotPosition, Key? key})
@@ -46,12 +46,17 @@ class FieldMapViewer extends StatelessWidget {
                   Container(
                     alignment: Alignment(
                         ((robotPosition!.x * 2) - 1) *
-                            (1 + (robotSize / constraints.maxWidth)),
+                            (1 + ((robotSize * constraints.maxWidth) / constraints.maxWidth)),
                         -((robotPosition!.y * 2) - 1) *
-                            (1 + (robotSize / constraints.maxHeight))),
-                    child: Icon(Icons.smart_toy,
-                        color: Theme.of(context).colorScheme.primary,
-                        size: robotSize),
+                            (1 + ((robotSize * constraints.maxWidth) / constraints.maxHeight))),
+                    child: Container(
+                      width: robotSize * constraints.maxWidth,
+                      height: robotSize * constraints.maxWidth,
+                      color: Colors.black,
+                      child: Icon(Icons.smart_toy,
+                          size: robotSize * constraints.maxWidth - 2,
+                          color: Theme.of(context).colorScheme.primary),
+                    ),
                   ),
                 if (events != null)
                   ...widgetFromEvents(context, events!),
@@ -64,15 +69,15 @@ class FieldMapViewer extends StatelessWidget {
   }
 }
 
-List<Widget> widgetFromEvents(BuildContext context, List<TimelineEvent> events) {
+List<Widget> widgetFromEvents(BuildContext context, List<MatchEvent> events) {
   var widgets = <Widget>[];
 
   RobotPosition? lastEventPosition;
 
   for (final event in events) {
-    if (event.data.type == "robot_position") {
+    if (event.data['type'] == "robot_position") {
       lastEventPosition =
-          RobotPosition(event.data.getNumber("x"), event.data.getNumber("y"));
+          RobotPosition(event.getNumber("x"), event.getNumber("y"));
     }
     if (lastEventPosition != null) {
       widgets.add(Container(

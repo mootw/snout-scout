@@ -1,12 +1,18 @@
 //Data class that handles scouting tool things
 
-import 'package:app/data/season_config.dart';
-import 'package:app/data/scouting_result.dart';
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:snout_db/event/pitscoutresult.dart';
+import 'package:snout_db/season/pitsurveyitem.dart';
+
+double scoutImageSize = 250;
 
 class ScoutingToolWidget extends StatefulWidget {
-  final ScoutingToolData tool;
-  final Survey survey;
+  final PitSurveyItem tool;
+  final PitScoutResult survey;
 
   const ScoutingToolWidget({Key? key, required this.tool, required this.survey})
       : super(key: key);
@@ -18,16 +24,19 @@ class ScoutingToolWidget extends StatefulWidget {
 class _ScoutingToolWidgetState extends State<ScoutingToolWidget> {
   final myController = TextEditingController();
 
+  get value => widget.survey[widget.tool.id];
+  set value (dynamic newValue) => widget.survey[widget.tool.id] = newValue;
+
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    if (widget.tool.type == "toggle" && widget.survey.value == null) {
-      widget.survey.value = false;
+    
+    if (widget.tool.type == "toggle" && value == null) {
+      value = false;
     }
 
     if (widget.tool.type == "text-box" || widget.tool.type == "number") {
-      myController.text = widget.survey.value?.toString() ?? "";
+      myController.text = value?.toString() ?? "";
     }
   }
 
@@ -37,7 +46,11 @@ class _ScoutingToolWidgetState extends State<ScoutingToolWidget> {
       return TextField(
         controller: myController,
         onChanged: (text) {
-          widget.survey.value = text;
+          value = text;
+          //TO prevent previously filled but now unfilled data from showing as empty.
+          if (text == "") {
+            value = null;
+          }
         },
         minLines: 1,
         maxLines: 4,
@@ -52,7 +65,7 @@ class _ScoutingToolWidgetState extends State<ScoutingToolWidget> {
       return TextField(
         controller: myController,
         onChanged: (text) {
-          widget.survey.value = num.tryParse(text);
+          value = num.tryParse(text);
         },
         keyboardType: TextInputType.number,
         decoration: InputDecoration(
@@ -66,15 +79,15 @@ class _ScoutingToolWidgetState extends State<ScoutingToolWidget> {
       return ListTile(
         title: Text(widget.tool.label),
         trailing: DropdownButton<String>(
-          value: widget.survey.value,
+          value: value,
           icon: const Icon(Icons.arrow_downward),
           onChanged: (String? newValue) {
             setState(() {
-              widget.survey.value = newValue!;
+              value = newValue!;
             });
           },
-          items:
-              widget.tool.options.map<DropdownMenuItem<String>>((String value) {
+          items: widget.tool.options!
+              .map<DropdownMenuItem<String>>((String value) {
             return DropdownMenuItem<String>(
               value: value,
               child: Text(value),
@@ -88,12 +101,32 @@ class _ScoutingToolWidgetState extends State<ScoutingToolWidget> {
       return ListTile(
         title: Text(widget.tool.label),
         trailing: Switch(
-            value: widget.survey.value,
+            value: value,
             onChanged: (value) {
               setState(() {
-                widget.survey.value = value;
+                value = value;
               });
             }),
+      );
+    }
+
+    if (widget.tool.type == "picture") {
+      return ListTile(
+        leading: IconButton(
+            icon: const Icon(Icons.camera_alt),
+            onPressed: () async {
+              //TAKE PHOTO
+              final ImagePicker picker = ImagePicker();
+              final XFile? photo = await picker.pickImage(source: ImageSource.camera, maxWidth: scoutImageSize, maxHeight: scoutImageSize);
+              if(photo != null) {
+                Uint8List bytes = await photo.readAsBytes();
+                setState(() {
+                  value = base64Encode(bytes);
+                });
+              }
+            }),
+        title: Text(widget.tool.label),
+        subtitle: value == null ? Text("No Image") : SizedBox(height: scoutImageSize * 1.5, child: Image.memory(Uint8List.fromList(base64Decode(value).cast<int>()), scale: 0.5)),
       );
     }
 

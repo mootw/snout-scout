@@ -1,4 +1,4 @@
-Scout will select the match they want to scout and the team.
+obScout will select the match they want to scout and the team.
 They will be presented with a start button (to be pressed on the start buzzer)
 Match time will automatically be recorded
 

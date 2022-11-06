@@ -1,20 +1,19 @@
 import 'dart:convert';
 
-import 'package:app/api.dart';
-import 'package:app/data/matches.dart';
-import 'package:app/data/timeline_event.dart';
-import 'package:app/data/timeline_results.dart';
 import 'package:app/edit_lock.dart';
 import 'package:app/main.dart';
 import 'package:app/map_viewer.dart';
 import 'package:app/screens/edit_match_results.dart';
 import 'package:app/screens/match_recorder.dart';
 import 'package:flutter/material.dart';
+import 'package:snout_db/event/match.dart';
+import 'package:snout_db/patch.dart';
+import 'package:snout_db/season/matchevent.dart';
 
 class MatchPage extends StatefulWidget {
   const MatchPage({required this.match, Key? key}) : super(key: key);
 
-  final Match match;
+  final FRCMatch match;
 
   @override
   State<MatchPage> createState() => _MatchPageState();
@@ -51,28 +50,21 @@ class _MatchPageState extends State<MatchPage> {
                         style: TextStyle(color: Colors.blueAccent))),
               ],
             ),
-            title: Text("Match ${widget.match.section} ${widget.match.number}"),
+            title: Text("Match ${widget.match.description}"),
           ),
-          body: FutureBuilder<Match>(
-              future: getMatch(widget.match.id),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState != ConnectionState.done) {
-                  return const CircularProgressIndicator.adaptive();
-                }
-                return TabBarView(children: [
-                  _buildMatchView(snapshot.data!, null),
-                  _buildMatchView(snapshot.data!, snapshot.data!.red[0]),
-                  _buildMatchView(snapshot.data!, snapshot.data!.red[1]),
-                  _buildMatchView(snapshot.data!, snapshot.data!.red[2]),
-                  _buildMatchView(snapshot.data!, snapshot.data!.blue[0]),
-                  _buildMatchView(snapshot.data!, snapshot.data!.blue[1]),
-                  _buildMatchView(snapshot.data!, snapshot.data!.blue[2]),
-                ]);
-              }),
+          body: TabBarView(children: [
+            _buildMatchView(widget.match, null),
+            _buildMatchView(widget.match, widget.match.red[0]),
+            _buildMatchView(widget.match, widget.match.red[1]),
+            _buildMatchView(widget.match, widget.match.red[2]),
+            _buildMatchView(widget.match, widget.match.blue[0]),
+            _buildMatchView(widget.match, widget.match.blue[1]),
+            _buildMatchView(widget.match, widget.match.blue[2]),
+          ]),
         ));
   }
 
-  Widget _buildMatchView(Match data, int? teamNumber) {
+  Widget _buildMatchView(FRCMatch data, int? teamNumber) {
     if (teamNumber == null) {
       return Column(
         children: [
@@ -91,7 +83,7 @@ class _MatchPageState extends State<MatchPage> {
                           context,
                           MaterialPageRoute(
                             builder: (context) => EditMatchResults(
-                                match: data, config: snoutData.config!),
+                                match: data, config: snoutData.season!),
                           )));
 
                   if (result == true) {
@@ -111,33 +103,31 @@ class _MatchPageState extends State<MatchPage> {
                     Text("Red"),
                     Text("Blue"),
                   ]),
-                  for (final type in snoutData.config!.matchScouting.results)
+                  for (final type in snoutData.season!.matchscouting.scoring)
                     TableRow(children: [
                       Text(type),
-                      Text(data.results!.red.values[type].toString()),
-                      Text(data.results!.blue.values[type].toString()),
+                      Text(data.results!.red[type].toString()),
+                      Text(data.results!.blue[type].toString()),
                     ]),
                 ],
               ),
             ),
 
+          Text("Display a 'video-like' overview of the map, starting with the robots start positions and includes all events through the match"),
 
-            //Display a 'heatmap' of all of the events
-            FieldMapViewer(
-              events: [
-                for(var timeline in data.timelines.keys)
-                  ...?data.timelines[timeline]?.events,
-              ],
-              onTap: (position) {
-
-              },
-            ),
+          FieldMapViewer(
+            events: [
+              for (var timeline in data.timelines.keys)
+                ...?data.timelines[timeline],
+            ],
+            onTap: (position) {},
+          ),
+          Text("Breakdown of the match including all teams. Metrics where applicable"),
         ],
       );
     }
 
-
-    TimelineResults? timeline = data.timelines[teamNumber.toString()];
+    List<MatchEvent>? timeline = data.timelines[teamNumber.toString()];
 
     return Column(
       children: [
@@ -145,9 +135,11 @@ class _MatchPageState extends State<MatchPage> {
           height: 50,
           child: Center(
             child: ElevatedButton(
-              child: timeline == null ? Text("Record Match") : Text("Edit Timeline"),
+              child: timeline == null
+                  ? Text("Record Match")
+                  : Text("Edit Timeline"),
               onPressed: () async {
-                List<TimelineEvent>? result = await navigateWithEditLock(
+                List<MatchEvent>? result = await navigateWithEditLock(
                     context,
                     "match:${data.id}:$teamNumber:timeline",
                     () => Navigator.push(
@@ -158,37 +150,37 @@ class _MatchPageState extends State<MatchPage> {
                         ));
 
                 if (result != null) {
-                  final data = {
-                    "scout": await getName(),
-                    "time": DateTime.now().toIso8601String(),
-                    "events": result,
-                  };
+                  //TODO save data to the server
 
-                  var asdf = await apiClient.post(
-                      Uri.parse("${await getServer()}/match_timeline"),
-                      headers: {
-                        "jsondata": jsonEncode(data),
-                        "id": widget.match.id,
-                        "team": teamNumber.toString(),
-                      });
-                  setState(() {
-                    
-                  });
+                  Patch patch = Patch(
+                      user: "anon",
+                      time: DateTime.now(),
+                      path: [
+                        'events',
+                        snoutData.selectedEventID!,
+                        'matches',
+                        //Index of the match to modify. This could cause issues if
+                        //the index of the match changes inbetween this database
+                        //being updated and not. Ideally matches should have a unique key
+                        //like their scheduled date to uniquely identify them.
+                        snoutData.currentEvent.matches
+                            .indexOf(widget.match)
+                            .toString(),
+                        'timelines',
+                        teamNumber.toString()
+                      ],
+                      data: jsonEncode(result));
+
+                  await snoutData.addPatch(patch);
+                  setState(() {});
                 }
               },
             ),
           ),
         ),
+
+        Text("Breakdown of the match via this team's specific performance"),
       ],
     );
   }
-}
-
-Future<Match> getMatch(String matchId) async {
-  var res =
-      await apiClient.get(Uri.parse("${await getServer()}/match"), headers: {
-    "id": matchId,
-  });
-  print(res.body);
-  return Match.fromJson(jsonDecode(res.body));
 }

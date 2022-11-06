@@ -1,0 +1,15 @@
+name: snout_db
+publish_to: none
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.16.2 <3.0.0"
+
+dependencies:
+  json_annotation: ^4.7.0
+
+  rfc_6901: ^0.1.1
+
+dev_dependencies:
+  build_runner: ^2.0.5
+  json_serializable: ^6.5.4

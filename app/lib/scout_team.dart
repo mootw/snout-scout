@@ -1,14 +1,17 @@
+import 'dart:convert';
+
 import 'package:app/api.dart';
-import 'package:app/data/season_config.dart';
-import 'package:app/data/scouting_result.dart';
 import 'package:app/main.dart';
 import 'package:app/scouting_tools/scouting_tool.dart';
 import 'package:flutter/material.dart';
+import 'package:snout_db/event/pitscoutresult.dart';
+import 'package:snout_db/patch.dart';
+import 'package:snout_db/snout_db.dart';
 
 class PitScoutTeamPage extends StatefulWidget {
   final int team;
-  final SeasonConfig config;
-  final ScoutingResults? oldData;
+  final Season config;
+  final PitScoutResult? oldData;
 
   const PitScoutTeamPage(
       {Key? key, required this.team, required this.config, this.oldData})
@@ -19,23 +22,16 @@ class PitScoutTeamPage extends StatefulWidget {
 }
 
 class _PitScoutTeamPageState extends State<PitScoutTeamPage> {
-  Map<String, Survey> results = <String, Survey>{};
+
+  PitScoutResult results = {};
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
 
-    //Populate map to ensure non-null
-    for (var item in widget.config.pitScouting.survey) {
-      results[item.id] = Survey(id: item.id, type: item.type, value: null);
-    }
-
-    //populate old data on top
-    if (widget.oldData != null) {
-      for (var survey in widget.oldData!.survey) {
-        results[survey.id] = survey;
-      }
+    //populate existing data to pre-fill.
+    if(widget.oldData != null) {
+      results.addAll(widget.oldData!);
     }
   }
 
@@ -47,40 +43,40 @@ class _PitScoutTeamPageState extends State<PitScoutTeamPage> {
           IconButton(
               onPressed: () async {
                 //Save the scouting results to the server!!
-                var scout_result = ScoutingResults(
-                  team: widget.team,
-                  scout: await getName(),
-                  time: DateTime.now().toIso8601String(),
-                  survey: results.values.toList(),
-                );
 
-                var json = scoutingResultsToJson(scout_result);
-                // print(json);
-                var res = await apiClient.post(
-                    Uri.parse("${await getServer()}/pit_scout"),
-                    headers: {"jsondata": json});
-
-                if (res.statusCode == 200) {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                    content: Text('Saved Scouting Data'),
-                    duration: Duration(seconds: 4),
-                  ));
-                  Navigator.of(context).pop(true);
-                }
+                Patch patch = Patch(
+                    user: "anon",
+                    time: DateTime.now(),
+                    path: [
+                      'events',
+                      snoutData.selectedEventID!,
+                      'pitscouting',
+                      widget.team.toString()
+                    ],
+                    data: jsonEncode(results));
+                
+                var result = await snoutData.addPatch(patch);
+                
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                  content: Text('Saved Scouting Data'),
+                  duration: Duration(seconds: 4),
+                ));
+                Navigator.of(context).pop(true);
+                
               },
-              icon: Icon(Icons.save))
+              icon: const Icon(Icons.save))
         ],
         title: Text("Scouting ${widget.team}"),
       ),
       body: ListView(
         shrinkWrap: true,
         children: [
-          for (var item in widget.config.pitScouting.survey)
+          for (var item in widget.config.pitscouting)
             Container(
-                padding: EdgeInsets.all(12),
+                padding: const EdgeInsets.all(12),
                 child: ScoutingToolWidget(
                   tool: item,
-                  survey: results[item.id]!,
+                  survey: results,
                 )),
         ],
       ),

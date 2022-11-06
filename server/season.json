@@ -1,123 +1,136 @@
 {
     "season": "Rapid React",
     "team": 6749,
-    "pit_scouting": {
-        "survey": [
-            {
-                "id": "auto_high",
-                "type": "number",
-                "label": "Cargo high in autonomous"
-            },
-            {
-                "id": "auto_low",
-                "type": "number",
-                "label": "Cargo low in autonomous"
-            },
-            {
-                "id": "teleop_high",
-                "type": "number",
-                "label": "Cargo high in teleop"
-            },
-            {
-                "id": "teleop_low",
-                "type": "number",
-                "label": "Cargo low in teleop"
-            },
-            {
-                "id": "shooting_positions",
-                "type": "map-boolean",
-                "label": "Positions this robot can shoot from."
-            },
-            {
-                "id": "shooter_type",
-                "type": "selector",
-                "options": [
-                    "No Shooter",
-                    "Low Goal",
-                    "High Goal",
-                    "Any goal"
-                ],
-                "label": "Shooter type"
-            },
-            {
-                "id": "climb",
-                "type": "selector",
-                "options": [
-                    "No Climb",
-                    "Low",
-                    "Medium",
-                    "High",
-                    "Traversal"
-                ],
-                "label": "Climb"
-            },
-            {
-                "id": "climb_time",
-                "type": "number",
-                "label": "Climb time"
-            },
-            {
-                "id": "can_defense",
-                "type": "toggle",
-                "label": "Can this robot play defense?"
-            },
-            {
-                "id": "comments",
-                "type": "text-box",
-                "label": "Extra comments"
-            }
-        ]
-    },
-    "match_scouting": {
-        "pregame": [
-            {
-                "id": "start_position",
-                "type": "map-point",
-                "label": "Starting position of the robot"
-            }
-        ],
+    "pitscouting": [
+        {
+            "id": "robot_name",
+            "type": "text-box",
+            "label": "Robot Name"
+        },
+        {
+            "id": "robot_picture",
+            "type": "picture",
+            "label": "Robot Photo"
+        },
+        {
+            "id": "auto_high",
+            "type": "number",
+            "label": "Cargo high in autonomous"
+        },
+        {
+            "id": "auto_low",
+            "type": "number",
+            "label": "Cargo low in autonomous"
+        },
+        {
+            "id": "teleop_high",
+            "type": "number",
+            "label": "Cargo high in teleop"
+        },
+        {
+            "id": "teleop_low",
+            "type": "number",
+            "label": "Cargo low in teleop"
+        },
+        {
+            "id": "shooting_positions",
+            "type": "map-boolean",
+            "label": "Positions this robot can shoot from."
+        },
+        {
+            "id": "shooter_type",
+            "type": "selector",
+            "options": [
+                "No Shooter",
+                "Low Goal",
+                "High Goal",
+                "Any goal"
+            ],
+            "label": "Shooter type"
+        },
+        {
+            "id": "climb",
+            "type": "selector",
+            "options": [
+                "No Climb",
+                "Low",
+                "Medium",
+                "High",
+                "Traversal"
+            ],
+            "label": "Climb"
+        },
+        {
+            "id": "climb_time",
+            "type": "number",
+            "label": "Climb time"
+        },
+        {
+            "id": "can_defense",
+            "type": "toggle",
+            "label": "Can this robot play defense?"
+        },
+        {
+            "id": "comments",
+            "type": "text-box",
+            "label": "Extra comments"
+        }
+    ],
+    "matchscouting": {
         "auto": [
             {
                 "id": "cargo_intake",
                 "label": "Intake Cargo",
                 "type": "event",
-                "points": 0,
-                "rp": 0
+                "values": {
+                    "points": 0,
+                    "rp": 0
+                }
             },
             {
                 "id": "cargo_upper",
                 "label": "Cargo Upper",
                 "type": "event",
-                "points": 4,
-                "rp": 0
+                "values": {
+                    "points": 4,
+                    "rp": 0
+                }
             },
             {
                 "id": "cargo_lower",
                 "label": "Cargo Lower",
                 "type": "event",
-                "points": 2,
-                "rp": 0
+                "values": {
+                    "points": 2,
+                    "rp": 0
+                }
             },
             {
                 "id": "cargo_miss",
                 "label": "Cargo Miss",
                 "type": "event",
-                "points": 0,
-                "rp": 0
+                "values": {
+                    "points": 0,
+                    "rp": 0
+                }
             },
             {
                 "id": "exit_tarmac",
                 "label": "Exit Tarmac",
                 "type": "event",
-                "points": 2,
-                "rp": 0
+                "values": {
+                    "points": 2,
+                    "rp": 0
+                }
             },
             {
                 "id": "intake_jam",
                 "label": "Intake Jam",
                 "type": "event",
-                "points": 0,
-                "rp": 0,
+                "values": {
+                    "points": 0,
+                    "rp": 0
+                },
                 "visual_priority": 2
             }
         ],
@@ -126,39 +139,49 @@
                 "id": "cargo_intake",
                 "label": "Intake Cargo",
                 "type": "event",
-                "points": 0,
-                "rp": 0
+                "values": {
+                    "points": 0,
+                    "rp": 0
+                }
             },
             {
                 "id": "cargo_upper",
                 "label": "Cargo Upper",
                 "type": "event",
-                "points": 2,
-                "rp": 0,
+                "values": {
+                    "points": 2,
+                    "rp": 0
+                },
                 "visual_priority": 1
             },
             {
                 "id": "cargo_lower",
                 "label": "Cargo Lower",
                 "type": "event",
-                "points": 1,
-                "rp": 0,
+                "values": {
+                    "points": 1,
+                    "rp": 0
+                },
                 "visual_priority": 1
             },
             {
                 "id": "cargo_miss",
                 "label": "Cargo Miss",
                 "type": "event",
-                "points": 0,
-                "rp": 0,
+                "values": {
+                    "points": 0,
+                    "rp": 0
+                },
                 "visual_priority": 1
             },
             {
                 "id": "intake_jam",
                 "label": "Intake Jam",
                 "type": "event",
-                "points": 0,
-                "rp": 0,
+                "values": {
+                    "points": 0,
+                    "rp": 0
+                },
                 "visual_priority": 2
             }
         ],
@@ -167,29 +190,37 @@
                 "id": "climb_low",
                 "label": "Climb Low",
                 "type": "event",
-                "points": 4,
-                "rp": 0
+                "values": {
+                    "points": 4,
+                    "rp": 0
+                }
             },
             {
                 "id": "climb_mid",
                 "label": "Climb Mid",
                 "type": "event",
-                "points": 6,
-                "rp": 0
+                "values": {
+                    "points": 6,
+                    "rp": 0
+                }
             },
             {
                 "id": "climb_high",
                 "label": "Climb High",
                 "type": "event",
-                "points": 10,
-                "rp": 0
+                "values": {
+                    "points": 10,
+                    "rp": 0
+                }
             },
             {
                 "id": "climb_traversal",
                 "label": "Climb Traversal",
                 "type": "event",
-                "points": 15,
-                "rp": 0
+                "values": {
+                    "points": 15,
+                    "rp": 0
+                }
             }
         ],
         "postgame": [
@@ -213,6 +244,7 @@
                 "label": "Climb"
             },
             {
+                "label": "Cargo Bonus",
                 "id": "cargo_bonus",
                 "type": "toggle",
                 "rp": 1
@@ -223,7 +255,7 @@
                 "label": "Extra comments"
             }
         ],
-        "results": [
+        "scoring": [
             "points",
             "rp",
             "penalty",

@@ -1,11 +1,14 @@
 import 'dart:convert';
 
 import 'package:app/api.dart';
-import 'package:app/data/season_config.dart';
+import 'package:app/screens/analysis.dart';
 import 'package:app/screens/matches_page.dart';
 import 'package:app/screens/teams_page.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:snout_db/event/frcevent.dart';
+import 'package:snout_db/patch.dart';
+import 'package:snout_db/snout_db.dart';
 
 void main() async {
   runApp(const MyApp());
@@ -20,47 +23,55 @@ Future<String> getServer() async {
 Future setServer(String newServer) async {
   var prefs = await SharedPreferences.getInstance();
   prefs.setString("server", newServer);
-  await snoutData.loadConfig();
-}
-
-Future<String> getName() async {
-  var prefs = await SharedPreferences.getInstance();
-  String result = prefs.getString("name") ?? "guest";
-  return result;
-}
-
-Future setName(String newName) async {
-  var prefs = await SharedPreferences.getInstance();
-  prefs.setString("name", newName);
+  await snoutData.loadData();
 }
 
 class SnoutScoutData {
+  List<String> get events => db?.events.keys.toList() ?? [];
   String? selectedEventID;
-  List<String> events = [];
 
   String? serverURL;
 
-  SeasonConfig? config;
+  Season? season;
+  SnoutDB? db;
 
-  Future loadConfig() async {
+  FRCEvent get currentEvent => db!.events[selectedEventID]!;
+
+  Future loadData() async {
     serverURL = await getServer();
-    var eventsData =
-        await apiClient.get(Uri.parse("${await getServer()}/events"));
-    print(eventsData.body);
-    events = List<String>.from(jsonDecode(eventsData.body));
-    if(events.isNotEmpty) {
-      selectedEventID = events.first;
+
+    try {
+      var data = await apiClient.get(Uri.parse("$serverURL/season"));
+      season = Season.fromJson(jsonDecode(data.body));
+    } catch (e, s) {
+      print(e);
+      print(s);
     }
 
     try {
-      var data = await apiClient
-          .get(Uri.parse("${await getServer()}/config"));
-      config = seasonConfigFromJson(data.body);
+      var data = await apiClient.get(Uri.parse("$serverURL/data"));
+      db = SnoutDB.fromJson(jsonDecode(data.body));
+      selectedEventID = db!.events.keys.first;
     } catch (e, s) {
       print(e);
       print(s);
     }
   }
+
+
+  //Writes a patch to local disk and submits it to the server.
+  Future addPatch (Patch patch) async {
+    var res = await apiClient.put(
+      Uri.parse("${await getServer()}/data"),
+      body: jsonEncode(patch));
+    
+    if(res.statusCode == 200) {
+      //This was sucessful
+      return true;
+    }
+    snoutData.db = patch.patch(snoutData.db!);
+  }
+
 }
 
 var snoutData = SnoutScoutData();
@@ -101,47 +112,43 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    getStuff();
-  }
-
-  void getStuff() async {
-    print("load data");
-    await snoutData.loadConfig();
-    setState(() {
-      isLoaded = true;
-    });
-    print("loaded data");
+    () async {
+      await snoutData.loadData();
+      setState(() {
+        isLoaded = true;
+      });
+    }();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: snoutData.events.isEmpty ? Text("No events!") : DropdownButton<String>(
-          onChanged: (value) {
-            setState(() {
-              snoutData.selectedEventID = value;
-            });
-          },
-          value: snoutData.selectedEventID,
-          items: snoutData.events
-          .map<DropdownMenuItem<String>>((String value) {
-        return DropdownMenuItem<String>(
-          value: value,
-          child: Text(value),
-        );
-      }).toList(),
-        ),
+        title: isLoaded == false
+            ? Text("Loading")
+            : DropdownButton<String>(
+                onChanged: (value) {
+                  setState(() {
+                    snoutData.selectedEventID = value;
+                  });
+                },
+                value: snoutData.selectedEventID,
+                items: snoutData.events
+                    .map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+              ),
       ),
       body: isLoaded == false
           ? CircularProgressIndicator.adaptive()
           : [
-              Container(),
-              AllTeamsPage(),
               AllMatchesPage(),
-              Container(),
+              AllTeamsPage(),
+              Text("Display a spreadsheet like table with every metric (including performance metrics for ranking like win-loss) and allow sorting and filtering of the data"),
+              AnalysisPage(),
             ][_currentPageIndex],
       drawer: Drawer(
         child: ListView(children: [
@@ -172,30 +179,8 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           ),
           ListTile(
-            title: Text("Name"),
-            subtitle: FutureBuilder<String>(
-                future: getName(),
-                builder: (BuildContext context, var snapshot) {
-                  if (snapshot.hasData) {
-                    return Text(snapshot.data!);
-                  }
-                  return Text("Loading");
-                }),
-            trailing: IconButton(
-              icon: Icon(Icons.edit),
-              onPressed: () async {
-                var result = await showStringInputDialog(
-                    context, "Name", await getName());
-                if (result != null) {
-                  await setName(result);
-                  setState(() {});
-                }
-              },
-            ),
-          ),
-          ListTile(
             title: Text("Season"),
-            subtitle: Text(snoutData.config?.season ?? "Not connected"),
+            subtitle: Text(snoutData.season?.season ?? "not connected"),
           ),
         ]),
       ),
@@ -208,18 +193,19 @@ class _MyHomePageState extends State<MyHomePage> {
         selectedIndex: _currentPageIndex,
         destinations: [
           NavigationDestination(
-            selectedIcon: Icon(Icons.view_timeline),
-            icon: Icon(Icons.view_timeline_outlined),
-            label: 'Timeline',
+            icon: Icon(Icons.bookmark_border),
+            label: 'Matches',
           ),
+          
           NavigationDestination(
             selectedIcon: Icon(Icons.people),
             icon: Icon(Icons.people_alt_outlined),
             label: 'Teams',
           ),
           NavigationDestination(
-            icon: Icon(Icons.bookmark_border),
-            label: 'Matches',
+            selectedIcon: Icon(Icons.table_chart),
+            icon: Icon(Icons.table_chart_outlined),
+            label: 'Data',
           ),
           NavigationDestination(
             selectedIcon: Icon(Icons.analytics),

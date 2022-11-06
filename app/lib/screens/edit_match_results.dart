@@ -1,18 +1,18 @@
-import 'package:app/api.dart';
-import 'package:app/data/match_results.dart';
-import 'package:app/data/matches.dart';
-import 'package:app/data/season_config.dart';
+import 'dart:convert';
+
 import 'package:app/main.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/foundation/key.dart';
-import 'package:flutter/src/widgets/framework.dart';
 import 'package:intl/intl.dart';
+import 'package:snout_db/event/match.dart';
+import 'package:snout_db/event/matchresults.dart';
+import 'package:snout_db/patch.dart';
+import 'package:snout_db/snout_db.dart';
 
 Duration matchLength = const Duration(minutes: 2, seconds: 30);
 
 class EditMatchResults extends StatefulWidget {
-  final SeasonConfig config;
-  final Match match;
+  final Season config;
+  final FRCMatch match;
 
   const EditMatchResults({required this.config, required this.match, Key? key})
       : super(key: key);
@@ -33,24 +33,24 @@ class _EditMatchResultsState extends State<EditMatchResults> {
   void initState() {
     super.initState();
 
-    String? date = widget.match.results?.startTime;
+    DateTime? date = widget.match.results?.time;
     if(date != null) {
-      matchEndTime = DateTime.parse(date).add(matchLength);
+      matchEndTime = date.add(matchLength);
     } else {
       matchEndTime = DateTime.now();
     }
 
     //Pre-fill result scores
-    for (var resultValue in widget.config.matchScouting.results) {
-      _red[resultValue] = TextEditingController(text: widget.match.results?.red.values[resultValue]?.toString());
-      _blue[resultValue] = TextEditingController(text: widget.match.results?.blue.values[resultValue]?.toString());
+    for (var resultValue in widget.config.matchscouting.scoring) {
+      _red[resultValue] = TextEditingController(text: widget.match.results?.red[resultValue]?.toString());
+      _blue[resultValue] = TextEditingController(text: widget.match.results?.blue[resultValue]?.toString());
     }
   }
 
   //Converts text editing controller to number
-  Map<String, double> _mapTo(Map<String, TextEditingController> input) {
+  Map<String, int> _mapTo(Map<String, TextEditingController> input) {
     return input
-        .map((key, value) => MapEntry(key, double.parse(input[key]!.text)));
+        .map((key, value) => MapEntry(key, int.parse(input[key]!.text)));
   }
 
   @override
@@ -64,18 +64,30 @@ class _EditMatchResultsState extends State<EditMatchResults> {
                   //Input is valid
                   //Construct match results object
                   MatchResults results = MatchResults(
-                      scout: await getName(),
-                      time: DateTime.now().toIso8601String(),
-                      startTime:
-                          matchEndTime.subtract(matchLength).toIso8601String(),
-                      red: ResultsNumbers(values: _mapTo(_red)),
-                      blue: ResultsNumbers(values: _mapTo(_blue)),
+                      time: matchEndTime.subtract(matchLength),
+                      red: _mapTo(_red),
+                      blue: _mapTo(_blue),
                     );
+                  Patch patch = Patch(
+                      user: "anon",
+                      time: DateTime.now(),
+                      path: [
+                        'events',
+                        snoutData.selectedEventID!,
+                        'matches',
+                        //Index of the match to modify. This could cause issues if
+                        //the index of the match changes inbetween this database
+                        //being updated and not. Ideally matches should have a unique key
+                        //like their scheduled date to uniquely identify them.
+                        snoutData.currentEvent.matches
+                            .indexOf(widget.match)
+                            .toString(),
+                        'results'
+                      ],
+                      data: jsonEncode(results));
 
-                  var result = apiClient.post(Uri.parse("${await getServer()}/match_results"), headers: {
-                    "jsondata": matchResultsToJson(results),
-                    "id": widget.match.id,
-                  });
+                  await snoutData.addPatch(patch);
+                  setState(() {});
                   
                   Navigator.pop(context, true);
                 }
@@ -83,7 +95,7 @@ class _EditMatchResultsState extends State<EditMatchResults> {
               icon: const Icon(Icons.save)),
         ],
         title:
-            Text("Edit Match ${widget.match.section} ${widget.match.number}"),
+            Text("Results: ${widget.match.description}"),
       ),
       body: Form(
         key: _form,
@@ -131,7 +143,7 @@ class _EditMatchResultsState extends State<EditMatchResults> {
                     Text("Blue"),
                     Text("Red"),
                   ]),
-                  for (final item in widget.config.matchScouting.results)
+                  for (final item in widget.config.matchscouting.scoring)
                     TableRow(
                       children: [
                         //Make the height of the row

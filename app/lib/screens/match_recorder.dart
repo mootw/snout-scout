@@ -1,13 +1,11 @@
 import 'dart:async';
-import 'dart:convert';
 
-import 'package:app/data/matches.dart';
-import 'package:app/data/season_config.dart';
-import 'package:app/data/timeline_event.dart';
 import 'package:app/main.dart';
 import 'package:app/map_viewer.dart';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
+
+import 'package:snout_db/season/matchevent.dart';
 
 class MatchRecorderPage extends StatefulWidget {
   final String title;
@@ -42,7 +40,7 @@ class RobotPosition {
 class _MatchRecorderPageState extends State<MatchRecorderPage> {
   MatchMode _mode = MatchMode.PRE_GAME;
 
-  List<TimelineEvent> events = [];
+  List<MatchEvent> events = [];
 
   RobotPosition? lastRobotPosition;
 
@@ -65,13 +63,14 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
     super.initState();
   }
 
-  Widget getEventButton(ScoutingToolData tool) {
+  Widget getEventButton(MatchEvent tool) {
     return Card(
       child: MaterialButton(
         onPressed: () {
           setState(() {
             if (_mode != MatchMode.PRE_GAME) {
-              events.add(TimelineEvent(time: _time, data: tool));
+              events
+                  .add(MatchEvent.fromEventWithTime(time: _time, event: tool));
             }
           });
         },
@@ -95,9 +94,9 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(item.time.round().toString()),
-              Text(item.data.label),
+              Text(item.label),
               IconButton(
-                color: Theme.of(context).errorColor,
+                color: Theme.of(context).colorScheme.error,
                 icon: const Icon(Icons.remove),
                 onPressed: () {
                   setState(() {
@@ -116,15 +115,15 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
   Widget build(BuildContext context) {
     final scoutingEvents =
         _mode == MatchMode.AUTO || _mode == MatchMode.PRE_GAME
-            ? snoutData.config!.matchScouting.auto
+            ? snoutData.season!.matchscouting.auto
             : _mode == MatchMode.TELEOP
-                ? snoutData.config!.matchScouting.teleop
+                ? snoutData.season!.matchscouting.teleop
                 : [];
 
     return Scaffold(
       appBar: AppBar(
         title: Text(
-            "${widget.title} - ${_mode == MatchMode.PRE_GAME ? "Waiting to start" : _mode == MatchMode.AUTO ? "Auto" : _mode == MatchMode.TELEOP ? "Teleop" : _mode == MatchMode.FINISHED ? "Finished" : "Unknown State"} - ${_time}"),
+            "${widget.title}"),
         actions: [
           IconButton(
               onPressed: () {
@@ -147,7 +146,6 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
           const SizedBox(height: 16),
           Container(
             constraints: BoxConstraints(maxHeight: 300),
-            padding: EdgeInsets.only(left: 8, right: 8),
             child: Transform.rotate(
               angle: mapRotation,
               child: FieldMapViewer(
@@ -157,100 +155,102 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                   lastRobotPosition = robotPosition;
                   setState(() {
                     for (final event in events.toList()) {
-                      if (event.data.type == "robot_position") {
+                      if (event.id == "robot_position") {
                         //Is position event
                         if (event.time == _time) {
+                          print("time is the same");
                           //Event is the same time, overrwite
                           events.remove(event);
                         }
                       }
                     }
-                    events.add(TimelineEvent(
-                        time: _time,
-                        data: ScoutingToolData.fromPosition(
-                            robotPosition.x, robotPosition.y)));
+                    events.add(MatchEvent.robotPositionEvent(
+                        time: _time, x: robotPosition.x, y: robotPosition.y));
                   });
                 },
               ),
             ),
           ),
-          const SizedBox(height: 16),
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text("Time: $_time"),
+                const SizedBox(width: 12),
+                Text(_mode == MatchMode.PRE_GAME ? "Waiting to start" : _mode == MatchMode.AUTO ? "Auto" : _mode == MatchMode.TELEOP ? "Teleop" : _mode == MatchMode.FINISHED ? "Finished" : "Unknown State"),
+                const SizedBox(width: 12),
+                FilledButton.tonal(
+                  onPressed: () {
+                    ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(
+                        content: Text("Long press to move to next section")));
+                  },
+                  onLongPress: () async {
+                    print(_mode);
+                    if (_mode == MatchMode.FINISHED) {
+                      //Submit results to server
+                      Navigator.pop(context, events);
+                    }
+                    if (_mode == MatchMode.TELEOP) {
+                      //Stop timer
+                      t?.cancel();
+                      _mode = MatchMode.FINISHED;
+                      for (var event in events) {
+                        //Scale times between 15 seconds and 150 seconds
+                        if (event.time > 15) {
+                          num offsetTime = event.time - 15;
+                          event.time =
+                              (15 + ((offsetTime / (_time - 15)) * 135))
+                                  .round();
+                        }
+                      }
+          
+                      _time = 150;
+                    }
+                    if (_mode == MatchMode.AUTO) {
+                      _mode = MatchMode.TELEOP;
+                      //Scale auto times
+                      for (var event in events) {
+                        //Scale times to 15 seconds
+                        event.time = ((event.time / _time) * 15).round();
+                      }
+                      //Set time to 15 if auto was recorded faster than real time.
+                      if (_time < 15) {
+                        _time = 15;
+                      }
+                    }
+                    if (_mode == MatchMode.PRE_GAME) {
+                      _mode = MatchMode.AUTO;
+                      _time = 1; //Second 0 is reserved for pre-game events
+                      //Start timer
+                      t = Timer.periodic(const Duration(seconds: 1), (timer) {
+                        if (_mode != MatchMode.FINISHED) {
+                          setState(() {
+                            _time++;
+                          });
+                        }
+                      });
+                    }
+                    setState(() {});
+                  },
+                  //Start recording
+                  //Teleop
+                  //Finish recording
+                  child: Text(
+                      "${_mode == MatchMode.PRE_GAME ? "Start Recording" : _mode == MatchMode.AUTO ? "Teleop" : _mode == MatchMode.TELEOP ? "Finish Recordig" : "Save"}"),
+                ),
+              ],
+            ),
+          ),
           Wrap(
             children: [
               for (int i = 0; i < scoutingEvents.length; i++)
                 SizedBox(
-                  height: 80,
-                  width: MediaQuery.of(context).size.width / 3,
+                  height: 69,
+                  width: (MediaQuery.of(context).size.width / 3) - 1, // -1 for some layout padding.
                   child: getEventButton(scoutingEvents[i]),
                 ),
             ],
-          ),
-          Container(
-            margin: const EdgeInsets.all(16),
-            // color: Colors.amber,
-            child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(
-                          content: Text("Long press to move to next section")));
-                    },
-                    onLongPress: () async {
-                      print(_mode);
-                      if (_mode == MatchMode.FINISHED) {
-                        //Submit results to server
-                        Navigator.pop(context, events);
-                      }
-                      if (_mode == MatchMode.TELEOP) {
-                        //Stop timer
-                        t?.cancel();
-                        _mode = MatchMode.FINISHED;
-                        for (var event in events) {
-                          //Scale times between 15 seconds and 150 seconds
-                          if (event.time > 15) {
-                            num offsetTime = event.time - 15;
-                            event.time =
-                                (15 + ((offsetTime / (_time - 15)) * 135))
-                                    .round();
-                          }
-                        }
-
-                        _time = 150;
-                      }
-                      if (_mode == MatchMode.AUTO) {
-                        _mode = MatchMode.TELEOP;
-                        //Scale auto times
-                        for (var event in events) {
-                          //Scale times to 15 seconds
-                          event.time = ((event.time / _time) * 15).round();
-                        }
-                        //Set time to 15 if auto was recorded faster than real time.
-                        if (_time < 15) {
-                          _time = 15;
-                        }
-                      }
-                      if (_mode == MatchMode.PRE_GAME) {
-                        _mode = MatchMode.AUTO;
-                        _time = 1; //Second 0 is reserved for pre-game events
-                        //Start timer
-                        t = Timer.periodic(const Duration(seconds: 1), (timer) {
-                          if (_mode != MatchMode.FINISHED) {
-                            setState(() {
-                              _time++;
-                            });
-                          }
-                        });
-                      }
-                      setState(() {});
-                    },
-                    //Start recording
-                    //Teleop
-                    //Finish recording
-                    child: Text(
-                        "Next segment: ${_mode == MatchMode.PRE_GAME ? "Start Recording" : _mode == MatchMode.AUTO ? "Teleop" : _mode == MatchMode.TELEOP ? "Finish Recordig" : "Save"}"),
-                  ),
-                ]),
           ),
         ],
       ),

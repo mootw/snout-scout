@@ -1,13 +1,15 @@
-import 'package:app/api.dart';
-import 'package:app/data/matches.dart';
-import 'package:app/data/season_config.dart';
-import 'package:app/data/scouting_result.dart';
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:app/edit_lock.dart';
 import 'package:app/main.dart';
 import 'package:app/match_card.dart';
-import 'package:app/screens/matches_page.dart';
 import 'package:app/scout_team.dart';
+import 'package:app/scouting_tools/scouting_tool.dart';
 import 'package:flutter/material.dart';
+import 'package:snout_db/event/pitscoutresult.dart';
+import 'package:snout_db/patch.dart';
+import 'package:snout_db/season/pitsurveyitem.dart';
 
 class TeamViewPage extends StatefulWidget {
   final int number;
@@ -24,53 +26,27 @@ class _TeamViewPageState extends State<TeamViewPage> {
     return Scaffold(
         appBar: AppBar(
           actions: [
-            IconButton(
+            TextButton(
                 onPressed: () async {
                   //Get existing scouting data.
-                  var res = await apiClient.get(
-                      Uri.parse("${await getServer()}/pit_scout"),
-                      headers: {"team": widget.number.toString()});
-
-                  ScoutingResults? results;
-                  if (res.statusCode == 200) {
-                    results = scoutingResultsFromJson(res.body);
-                  }
-
-                  var config = snoutData.config;
-                  if (config != null) {
-
-                    var result = await navigateWithEditLock(context, "scoutteam:${widget.number}",
-                    () => Navigator.push(
+                  var result = await navigateWithEditLock(
                       context,
-                      MaterialPageRoute(
-                          builder: (context) => PitScoutTeamPage(
-                              team: widget.number,
-                              config: config,
-                              oldData: results)),
-                    )
-                    );
-
-                    // var result = await Navigator.push(
-                    //   context,
-                    //   MaterialPageRoute(
-                    //       builder: (context) => PitScoutTeamPage(
-                    //           team: widget.number,
-                    //           config: config,
-                    //           oldData: results)),
-                    // );
-                    if (result == true) {
-                      //We should setState and update
-                      print("data saved");
-                      setState(() {});
-                    }
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                      content: Text('scouting config not loaded'),
-                      duration: Duration(seconds: 4),
-                    ));
+                      "scoutteam:${widget.number}",
+                      () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => PitScoutTeamPage(
+                                    team: widget.number,
+                                    config: snoutData.season!,
+                                    oldData: snoutData.currentEvent.pitscouting[
+                                        widget.number.toString()])),
+                          ));
+                  if (result != null) {
+                    //Data has been saved
+                    setState(() {});
                   }
                 },
-                icon: Icon(Icons.edit_attributes))
+                child: Text("Scout"))
           ],
           title: Text("Team ${widget.number}"),
         ),
@@ -81,9 +57,11 @@ class _TeamViewPageState extends State<TeamViewPage> {
             Divider(height: 32),
             TeamMatchesViewer(team: widget.number),
             Divider(height: 32),
-            Text("Performance Summary"),
+            Text("Performance Summary like min-max-average metrics over all games"),
             Divider(height: 32),
-            Text("Graphs"),
+            Text("Graphs like performance of specific metrics over multiple matches"),
+            Divider(height: 32),
+            Text("Maps like heatmap of positions across all games, events (like shooting positions) heat map, and starting position heatmap"),
           ],
         ));
   }
@@ -95,66 +73,49 @@ class ScoutingResultsViewer extends StatelessWidget {
   const ScoutingResultsViewer({Key? key, required this.teamNumber})
       : super(key: key);
 
-  Future<ScoutingResults?> getScoutingResults() async {
-    var res = await apiClient.get(Uri.parse("${await getServer()}/pit_scout"),
-        headers: {"team": teamNumber.toString()});
-    if (res.statusCode != 200) {
-      return null;
-    }
-    return scoutingResultsFromJson(res.body);
-  }
-
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<ScoutingResults?>(
-        future: getScoutingResults(),
-        builder: ((context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
-            if (snapshot.data == null) {
-              return ListTile(title: Text("Team has no pit scouting data"));
-            }
+    var data = snoutData.currentEvent.pitscouting[teamNumber.toString()];
 
-            var list = <Widget>[];
-
-            for (var item in snapshot.data!.survey) {
-              if (item.value != null) {
-                list.add(ScoutingResult(result: item));
-              }
-            }
-
-            return Column(
-              children: [
-                ...list,
-              ],
-            );
-          }
-          return CircularProgressIndicator.adaptive();
-        }));
+    if (data == null) {
+      return ListTile(title: Text("Team has no pit scouting data"));
+    }
+    
+    return Column(
+      children: [for (var item in snoutData.season!.pitscouting) ScoutingResult(item: item, survey: data)],
+    );
   }
 }
 
 class ScoutingResult extends StatelessWidget {
-  final Survey result;
 
-  const ScoutingResult({Key? key, required this.result}) : super(key: key);
+  final PitSurveyItem item;
+  final PitScoutResult survey;
+
+  const ScoutingResult({Key? key, required this.item, required this.survey}) : super(key: key);
+
+  dynamic get value => survey[item.id];
 
   @override
   Widget build(BuildContext context) {
-    if (result.value == null) {
+    if (value == null) {
       return Container();
     }
 
-    var config = snoutData.config;
-    if (config == null) {
-      return const Text("Season config is null");
+    if (item.type == "picture") {
+      return ListTile(
+        title: Text(item.label),
+        subtitle: SizedBox(
+            height: scoutImageSize * 1.5,
+            child: Image.memory(
+              Uint8List.fromList(base64Decode(value).cast<int>()),
+              scale: 0.5,
+            )),
+      );
     }
 
-    ScoutingToolData item = config.pitScouting.survey
-        .where((element) => element.id == result.id)
-        .first;
-
     return ListTile(
-      title: Text(result.value.toString()),
+      title: Text(value.toString()),
       subtitle: Text(item.label),
     );
   }
@@ -171,18 +132,11 @@ class TeamMatchesViewer extends StatefulWidget {
 class _TeamMatchesViewerState extends State<TeamMatchesViewer> {
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-        future: getMatches(teamFilter: widget.team),
-        builder: (context, AsyncSnapshot snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
-            return Column(
-              children: [
-                for (var match in snapshot.data!)
-                  MatchCard(match: match, focusTeam: widget.team),
-              ],
-            );
-          }
-          return CircularProgressIndicator.adaptive();
-        });
+    return Column(
+      children: [
+        for (var match in snoutData.currentEvent.matchesWithTeam(widget.team))
+          MatchCard(match: match, focusTeam: widget.team),
+      ],
+    );
   }
 }
