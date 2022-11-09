@@ -9,9 +9,6 @@ class APIClient extends http.BaseClient {
 
   @override
   Future<http.StreamedResponse> send(http.BaseRequest request) async {
-
-    print(request.headers);
-
     return _inner.send(request);
   }
 }

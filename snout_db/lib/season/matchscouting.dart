@@ -6,16 +6,18 @@ part 'matchscouting.g.dart';
 
 @JsonSerializable()
 class MatchScouting {
-  
   List<MatchEvent> auto;
   List<MatchEvent> teleop;
-  List<MatchEvent> endgame;
   List<PitSurveyItem> postgame;
   List<String> scoring;
 
-  MatchScouting({required this.auto, required this.teleop,
-  required this.endgame, required this.postgame, required this.scoring});
+  MatchScouting(
+      {required this.auto,
+      required this.teleop,
+      required this.postgame,
+      required this.scoring});
 
-  factory MatchScouting.fromJson(Map<String, dynamic> json) => _$MatchScoutingFromJson(json);
+  factory MatchScouting.fromJson(Map<String, dynamic> json) =>
+      _$MatchScoutingFromJson(json);
   Map<String, dynamic> toJson() => _$MatchScoutingToJson(this);
 }

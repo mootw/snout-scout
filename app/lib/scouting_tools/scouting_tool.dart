@@ -8,7 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:snout_db/event/pitscoutresult.dart';
 import 'package:snout_db/season/pitsurveyitem.dart';
 
-double scoutImageSize = 250;
+double scoutImageSize = 300;
 
 class ScoutingToolWidget extends StatefulWidget {
   final PitSurveyItem tool;
@@ -102,9 +102,9 @@ class _ScoutingToolWidgetState extends State<ScoutingToolWidget> {
         title: Text(widget.tool.label),
         trailing: Switch(
             value: value,
-            onChanged: (value) {
+            onChanged: (newValue) {
               setState(() {
-                value = value;
+                value = newValue;
               });
             }),
       );

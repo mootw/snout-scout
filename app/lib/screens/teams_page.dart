@@ -4,32 +4,47 @@ import 'dart:typed_data';
 import 'package:app/main.dart';
 import 'package:app/screens/view_team_page.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class AllTeamsPage extends StatefulWidget {
   const AllTeamsPage({Key? key}) : super(key: key);
 
   @override
-  State<AllTeamsPage> createState() => All_TeamsPageState();
+  State<AllTeamsPage> createState() => _AllTeamsPageState();
 }
 
-class All_TeamsPageState extends State<AllTeamsPage> {
+class _AllTeamsPageState extends State<AllTeamsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-          shrinkWrap: true,
-          children: [
-            for (var team in snoutData.currentEvent.teams)
-              TeamListTile(teamNumber: team),
-          ],
-        );
+    return Consumer<SnoutScoutData>(
+      builder: (context, snoutData, child) {
+        return ListView(
+              shrinkWrap: true,
+              children: [
+                for (var team in snoutData.currentEvent.teams)
+                  TeamListTile(teamNumber: team, snoutData: snoutData),
+
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Center(
+                    child: FilledButton.tonal(onPressed: () {
+                  
+                    }, child: Text("Edit Teams")),
+                  ),
+                )
+              ],
+            );
+      }
+    );
   }
 }
 
 class TeamListTile extends StatelessWidget {
   final int teamNumber;
+  final SnoutScoutData snoutData;
 
-  const TeamListTile({Key? key, required this.teamNumber}) : super(key: key);
+  const TeamListTile({Key? key, required this.teamNumber, required this.snoutData}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +66,7 @@ class TeamListTile extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) => TeamViewPage(number: teamNumber)),
+              builder: (context) => TeamViewPage(teamNumber: teamNumber)),
         );
       },
     );

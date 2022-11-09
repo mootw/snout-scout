@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:app/main.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:snout_db/event/match.dart';
 import 'package:snout_db/event/matchresults.dart';
 import 'package:snout_db/patch.dart';
@@ -61,6 +62,8 @@ class _EditMatchResultsState extends State<EditMatchResults> {
           IconButton(
               onPressed: () async {
                 if (_form.currentState?.validate() ?? false) {
+                  //TODO this is probably not the right way to do this.
+                  final snoutData = Provider.of<SnoutScoutData>(context, listen: false);
                   //Input is valid
                   //Construct match results object
                   MatchResults results = MatchResults(
@@ -73,7 +76,7 @@ class _EditMatchResultsState extends State<EditMatchResults> {
                       time: DateTime.now(),
                       path: [
                         'events',
-                        snoutData.selectedEventID!,
+                        snoutData.selectedEventID,
                         'matches',
                         //Index of the match to modify. This could cause issues if
                         //the index of the match changes inbetween this database
@@ -134,32 +137,29 @@ class _EditMatchResultsState extends State<EditMatchResults> {
                 },
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Table(
-                children: [
-                  const TableRow(children: [
-                    Text("Point type"),
-                    Text("Blue"),
-                    Text("Red"),
-                  ]),
+            DataTable(
+              columns: [
+                DataColumn(label: Text("Score")),
+                DataColumn(label: Text("Red")),
+                DataColumn(label: Text("Blue")),
+              ],
+                rows: [
                   for (final item in widget.config.matchscouting.scoring)
-                    TableRow(
-                      children: [
-                        //Make the height of the row
-                        Center(child: Text(item)),
-                        TextFormField(
-                          controller: _blue[item],
-                          validator: checkIsNumber,
-                        ),
-                        TextFormField(
-                          controller: _red[item],
-                          validator: checkIsNumber,
-                        ),
-                      ],
-                    )
-                ],
-              ),
+                  DataRow(
+                    cells: [
+                      DataCell(Text(item)),
+                      DataCell(TextFormField(
+                        controller: _blue[item],
+                        validator: checkIsNumber,
+                      )),
+                      DataCell(TextFormField(
+                        controller: _red[item],
+                        validator: checkIsNumber,
+                      )),
+                    ],
+                  )
+                
+              ],
             ),
           ],
         ),

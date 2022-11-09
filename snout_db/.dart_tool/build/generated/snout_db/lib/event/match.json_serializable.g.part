@@ -12,12 +12,9 @@ FRCMatch _$FRCMatchFromJson(Map<String, dynamic> json) => FRCMatch(
       results: json['results'] == null
           ? null
           : MatchResults.fromJson(json['results'] as Map<String, dynamic>),
-      timelines: (json['timelines'] as Map<String, dynamic>).map(
-        (k, e) => MapEntry(
-            k,
-            (e as List<dynamic>)
-                .map((e) => MatchEvent.fromJson(e as Map<String, dynamic>))
-                .toList()),
+      robot: (json['robot'] as Map<String, dynamic>).map(
+        (k, e) =>
+            MapEntry(k, RobotMatchResult.fromJson(e as Map<String, dynamic>)),
       ),
     );
 
@@ -29,7 +26,7 @@ Map<String, dynamic> _$FRCMatchToJson(FRCMatch instance) => <String, dynamic>{
       'blue': instance.blue,
       'red': instance.red,
       'results': instance.results,
-      'timelines': instance.timelines,
+      'robot': instance.robot,
     };
 
 const _$TournamentLevelEnumMap = {

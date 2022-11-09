@@ -11,7 +11,7 @@ Future<dynamic> navigateWithEditLock(
   //Check if this key is being edited
   try {
     var isLocked = await apiClient.get(
-        Uri.parse("${await getServer()}/edit_lock"),
+        Uri.parse("$serverURL/edit_lock"),
         headers: {"key": key});
 
     if (isLocked.body == "true") {
@@ -20,7 +20,7 @@ Future<dynamic> navigateWithEditLock(
           context: context,
           builder: (context) {
             return AlertDialog(
-              title: Text("This item is already being edited"),
+              title: const Text("This item is already being edited"),
               actions: <Widget>[
                 TextButton(
                   child: const Text('Edit Anyways'),
@@ -43,13 +43,13 @@ Future<dynamic> navigateWithEditLock(
       }
     } else {
       //Apply lock
-      await apiClient.post(Uri.parse("${await getServer()}/edit_lock"),
+      await apiClient.post(Uri.parse("$serverURL}/edit_lock"),
           headers: {"key": key});
       //Navigate
       var result = await navigteFunction();
       //Clear lock
       try {
-        await apiClient.delete(Uri.parse("${await getServer()}/edit_lock"),
+        await apiClient.delete(Uri.parse("$serverURL/edit_lock"),
             headers: {"key": key});
       } catch (e) {}
       //Return data

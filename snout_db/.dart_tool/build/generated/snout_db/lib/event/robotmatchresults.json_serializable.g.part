@@ -1,0 +1,19 @@
+// **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+RobotMatchResult _$RobotMatchResultFromJson(Map<String, dynamic> json) =>
+    RobotMatchResult(
+      timeline: (json['timeline'] as List<dynamic>)
+          .map((e) => MatchEvent.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      survey: (json['survey'] as List<dynamic>)
+          .map((e) => e as Map<String, dynamic>)
+          .toList(),
+    );
+
+Map<String, dynamic> _$RobotMatchResultToJson(RobotMatchResult instance) =>
+    <String, dynamic>{
+      'timeline': instance.timeline,
+      'survey': instance.survey,
+    };

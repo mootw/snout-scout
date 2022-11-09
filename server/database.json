@@ -21,7 +21,7 @@
                 {
                     "level": "Qualification",
                     "number": 1,
-                    "scheduledTime": "2022-05-05T14:30:00.000Z",
+                    "scheduledTime": "2022-11-08T22:35:00.000Z",
                     "blue": [
                         1816,
                         2052,
@@ -34,8 +34,7 @@
                     ],
                     "description": "Qualification 1",
                     "results": {
-                        "scout": "guest",
-                        "time": "2022-07-02T15:42:30.000",
+                        "time": "2022-11-08T22:39:00.000Z",
                         "red": {
                             "points": 74,
                             "rp": 1,
@@ -53,12 +52,12 @@
                             "hangar": 46
                         }
                     },
-                    "timelines": {}
+                    "robot": {}
                 },
                 {
                     "level": "Qualification",
                     "number": 2,
-                    "scheduledTime": "2022-05-05T14:38:00.000Z",
+                    "scheduledTime": "2022-11-08T23:40:00.000Z",
                     "blue": [
                         2169,
                         2220,
@@ -70,32 +69,12 @@
                         6453
                     ],
                     "description": "Qualification 2",
-                    "results": {
-                        "scout": "guest",
-                        "time": "2022-07-02T15:46:30.000",
-                        "red": {
-                            "points": 120,
-                            "rp": 2,
-                            "penalty": 23,
-                            "taxi": 23,
-                            "cargo": 23,
-                            "hangar": 23
-                        },
-                        "blue": {
-                            "points": 69,
-                            "rp": 1,
-                            "penalty": 23,
-                            "taxi": 23,
-                            "cargo": 23,
-                            "hangar": 23
-                        }
-                    },
-                    "timelines": {}
+                    "robot": {}
                 },
                 {
                     "level": "Qualification",
                     "number": 3,
-                    "scheduledTime": "2022-05-05T14:46:00.000Z",
+                    "scheduledTime": "2022-11-08T23:45:00.000Z",
                     "blue": [
                         2470,
                         5914,
@@ -107,12 +86,12 @@
                         7541
                     ],
                     "description": "Qualification 3",
-                    "timelines": {}
+                    "robot": {}
                 },
                 {
                     "level": "Qualification",
                     "number": 4,
-                    "scheduledTime": "2022-05-05T14:54:00.000Z",
+                    "scheduledTime": "2022-11-09T12:58:00.000Z",
                     "blue": [
                         5914,
                         6453,
@@ -124,7 +103,7 @@
                         8516
                     ],
                     "description": "Qualification 4",
-                    "timelines": {}
+                    "robot": {}
                 }
             ],
             "pitscouting": {

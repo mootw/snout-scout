@@ -6,7 +6,7 @@ String formatDuration (Duration duration) {
 
   int mins = duration.inMinutes.abs();
   if(mins > 0) {
-    s = "$mins hour${mins != 1 ? "s" : ""}";
+    s = "$mins min${mins != 1 ? "s" : ""}";
   }
   int hours = duration.inHours.abs();
   if(hours > 0) {
@@ -17,15 +17,16 @@ String formatDuration (Duration duration) {
     s = "$days day${days != 1 ? "s" : ""}";
   }
 
-  
-
   if(duration.inMinutes == 0) {
-    return "0 mins";
+    return "now";
   }
   if(duration.isNegative) {
     return "$s ago";
   } else {
     return "in $s";
   }
-  
+}
+
+String offsetDurationInMins(Duration duration) {
+  return "${duration.isNegative == true ? "-" : "+"}${duration.inMinutes} min${duration.inMinutes == 1 ? "" : "s"}";
 }

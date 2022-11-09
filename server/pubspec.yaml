@@ -11,4 +11,7 @@ dependencies:
 
   rfc_6901: ^0.1.1
 
+  shelf: ^1.4.0
+  shelf_web_socket: ^1.0.3
+
 dev_dependencies:

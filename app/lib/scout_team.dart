@@ -1,9 +1,9 @@
 import 'dart:convert';
 
-import 'package:app/api.dart';
 import 'package:app/main.dart';
 import 'package:app/scouting_tools/scouting_tool.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:snout_db/event/pitscoutresult.dart';
 import 'package:snout_db/patch.dart';
 import 'package:snout_db/snout_db.dart';
@@ -42,19 +42,21 @@ class _PitScoutTeamPageState extends State<PitScoutTeamPage> {
         actions: [
           IconButton(
               onPressed: () async {
-                //Save the scouting results to the server!!
+                //TODO this is probably not the right way to do state managment
+                var snoutData = Provider.of<SnoutScoutData>(context, listen: false);
 
                 Patch patch = Patch(
                     user: "anon",
                     time: DateTime.now(),
                     path: [
                       'events',
-                      snoutData.selectedEventID!,
+                      snoutData.selectedEventID,
                       'pitscouting',
                       widget.team.toString()
                     ],
                     data: jsonEncode(results));
                 
+                //Save the scouting results to the server!!
                 var result = await snoutData.addPatch(patch);
                 
                 ScaffoldMessenger.of(context).showSnackBar(const SnackBar(

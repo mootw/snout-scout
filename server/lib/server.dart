@@ -9,20 +9,27 @@ import 'dart:io';
 late SnoutDB db;
 late Season season;
 
+//TODO use environment to define port number
+int serverPort = 6749;
+
 EditLock editLock = EditLock();
 
+List<WebSocket> patchListeners = [];
+
 void main(List<String> args) async {
-  //TODO use environment to define port number
-  HttpServer server = await HttpServer.bind(InternetAddress.anyIPv4, 6749);
+  HttpServer server =
+      await HttpServer.bind(InternetAddress.anyIPv4, serverPort);
   print('Server started: ${server.address} port ${server.port}');
 
   String databaseText = await File('database.json').readAsString();
   db = SnoutDB.fromJson(jsonDecode(databaseText));
   String seasonData = await File('season.json').readAsString();
   season = Season.fromJson(jsonDecode(seasonData));
-  
+
   //Listen for requests
   server.listen((HttpRequest request) async {
+    print(request.uri);
+
     //Cors stuff
     request.response.headers.add('Access-Control-Allow-Origin', '*');
     request.response.headers.add('Access-Control-Allow-Headers', '*');
@@ -30,6 +37,14 @@ void main(List<String> args) async {
     request.response.headers.add('Access-Control-Request-Method', '*');
     if (request.method == "OPTIONS") {
       request.response.close();
+      return;
+    }
+
+    //Handle patch listener requests
+    if (request.uri.toString() == "/patchlistener") {
+      WebSocketTransformer.upgrade(request).then((WebSocket websocket) {
+        patchListeners.add(websocket);
+      });
       return;
     }
 
@@ -45,13 +60,22 @@ void main(List<String> args) async {
       return;
     }
 
-    if(request.uri.toString() == "/data" && request.method == "PUT") {
+    if (request.uri.toString() == "/data" && request.method == "PUT") {
       //Patch the database
       String content = await utf8.decodeStream(request);
       try {
         Patch patch = Patch.fromJson(jsonDecode(content));
         db = patch.patch(db);
         request.response.close();
+
+        //Clean up closed connections
+        patchListeners.removeWhere((element) => element.closeCode != null);
+
+        //Successful patch, send this update to all listeners
+        for (var listener in patchListeners) {
+          listener.add(jsonEncode(patch));
+        }
+
         return;
       } catch (e) {
         print(e);
@@ -75,10 +99,11 @@ void main(List<String> args) async {
           new ContentType("application", "json");
 
       var dbJson = jsonDecode(jsonEncode(db));
-      final pointer = JsonPointer(request.uri.toString().replaceRange(0, 2, ''));
+      final pointer =
+          JsonPointer(request.uri.toString().replaceRange(0, 2, ''));
       print(request.uri.toString().replaceRange(0, 2, ''));
       dbJson = pointer.read(dbJson);
-    
+
       request.response.write(jsonEncode(dbJson));
       request.response.close();
       return;
@@ -89,13 +114,11 @@ void main(List<String> args) async {
       var data = await image.readAsBytes();
       request.response.headers.set('Content-Type', 'image/png');
       request.response.headers.set('Content-Length', data.length);
+      request.response.headers.set('Cache-Control', 'max-age=604800');
       request.response.add(data);
       request.response.close();
       return;
     }
-
-
-    
 
     request.response.statusCode = 404;
     request.response.write("Not Found");

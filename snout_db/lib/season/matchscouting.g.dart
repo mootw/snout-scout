@@ -14,9 +14,6 @@ MatchScouting _$MatchScoutingFromJson(Map<String, dynamic> json) =>
       teleop: (json['teleop'] as List<dynamic>)
           .map((e) => MatchEvent.fromJson(e as Map<String, dynamic>))
           .toList(),
-      endgame: (json['endgame'] as List<dynamic>)
-          .map((e) => MatchEvent.fromJson(e as Map<String, dynamic>))
-          .toList(),
       postgame: (json['postgame'] as List<dynamic>)
           .map((e) => PitSurveyItem.fromJson(e as Map<String, dynamic>))
           .toList(),
@@ -28,7 +25,6 @@ Map<String, dynamic> _$MatchScoutingToJson(MatchScouting instance) =>
     <String, dynamic>{
       'auto': instance.auto,
       'teleop': instance.teleop,
-      'endgame': instance.endgame,
       'postgame': instance.postgame,
       'scoring': instance.scoring,
     };

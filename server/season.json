@@ -115,6 +115,15 @@
                 }
             },
             {
+                "id": "cargo_drop",
+                "label": "Cargo Drop",
+                "type": "event",
+                "values": {
+                    "points": 0,
+                    "rp": 0
+                }
+            },
+            {
                 "id": "exit_tarmac",
                 "label": "Exit Tarmac",
                 "type": "event",
@@ -122,19 +131,45 @@
                     "points": 2,
                     "rp": 0
                 }
-            },
+            }
+        ],
+        "teleop": [
             {
-                "id": "intake_jam",
-                "label": "Intake Jam",
+                "id": "climb_start",
+                "label": "Climb Start",
                 "type": "event",
                 "values": {
                     "points": 0,
                     "rp": 0
-                },
-                "visual_priority": 2
-            }
-        ],
-        "teleop": [
+                }
+            },
+            {
+                "id": "climb_end",
+                "label": "Climb Finish",
+                "type": "event",
+                "values": {
+                    "points": 0,
+                    "rp": 0
+                }
+            },
+            {
+                "id": "climb_fall",
+                "label": "Climb Fall",
+                "type": "event",
+                "values": {
+                    "points": 0,
+                    "rp": 0
+                }
+            },
+            {
+                "id": "defense",
+                "label": "Defense Move",
+                "type": "event",
+                "values": {
+                    "points": 0,
+                    "rp": 0
+                }
+            },
             {
                 "id": "cargo_intake",
                 "label": "Intake Cargo",
@@ -151,8 +186,7 @@
                 "values": {
                     "points": 2,
                     "rp": 0
-                },
-                "visual_priority": 1
+                }
             },
             {
                 "id": "cargo_lower",
@@ -161,8 +195,7 @@
                 "values": {
                     "points": 1,
                     "rp": 0
-                },
-                "visual_priority": 1
+                }
             },
             {
                 "id": "cargo_miss",
@@ -171,54 +204,14 @@
                 "values": {
                     "points": 0,
                     "rp": 0
-                },
-                "visual_priority": 1
+                }
             },
             {
-                "id": "intake_jam",
-                "label": "Intake Jam",
+                "id": "cargo_drop",
+                "label": "Cargo Drop",
                 "type": "event",
                 "values": {
                     "points": 0,
-                    "rp": 0
-                },
-                "visual_priority": 2
-            }
-        ],
-        "endgame": [
-            {
-                "id": "climb_low",
-                "label": "Climb Low",
-                "type": "event",
-                "values": {
-                    "points": 4,
-                    "rp": 0
-                }
-            },
-            {
-                "id": "climb_mid",
-                "label": "Climb Mid",
-                "type": "event",
-                "values": {
-                    "points": 6,
-                    "rp": 0
-                }
-            },
-            {
-                "id": "climb_high",
-                "label": "Climb High",
-                "type": "event",
-                "values": {
-                    "points": 10,
-                    "rp": 0
-                }
-            },
-            {
-                "id": "climb_traversal",
-                "label": "Climb Traversal",
-                "type": "event",
-                "values": {
-                    "points": 15,
                     "rp": 0
                 }
             }
@@ -229,6 +222,7 @@
                 "type": "selector",
                 "options": [
                     "No Climb",
+                    "Attempted but fell",
                     "Low",
                     "Medium",
                     "High",
@@ -236,23 +230,44 @@
                 ],
                 "options_values": [
                     0,
+                    0,
                     4,
                     6,
                     10,
                     15
                 ],
-                "label": "Climb"
+                "label": "Scored Climb"
             },
             {
-                "label": "Cargo Bonus",
-                "id": "cargo_bonus",
+                "id": "intake_issue",
                 "type": "toggle",
-                "rp": 1
+                "label": "Did this robot have intake issues?"
+            },
+            {
+                "id": "electrical_issue",
+                "type": "toggle",
+                "label": "Did this robot have electrical issues?"
             },
             {
                 "id": "comments",
                 "type": "text-box",
                 "label": "Extra comments"
+            }
+        ],
+        "results": [
+            {
+                "id": "cargo_bonus",
+                "type": "toggle",
+                "values": {
+                    "rp": 1
+                }
+            },
+            {
+                "id": "hangar_bonus",
+                "type": "toggle",
+                "values": {
+                    "rp": 1
+                }
             }
         ],
         "scoring": [
@@ -263,5 +278,24 @@
             "cargo",
             "hangar"
         ]
+    },
+    "event_metrics": {
+        "all_cargo_shot": {
+            "label": "All Cargo Shot",
+            "type": "sum",
+            "of": ["cargo_upper", "cargo_lower", "cargo_miss"]
+        },
+        "shot_accuracy": {
+            "label": "Shot Accuracy",
+            "type": "percent",
+            "n": "cargo_miss",
+            "d": "all_cargo_shot"
+        },
+        "climb_time": {
+            "label": "Duration of climb",
+            "type": "duration",
+            "start": "climb_start",
+            "end": "climb_end"
+        }
     }
 }

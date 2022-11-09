@@ -2,18 +2,20 @@ import 'dart:convert';
 
 import 'package:app/edit_lock.dart';
 import 'package:app/main.dart';
-import 'package:app/map_viewer.dart';
 import 'package:app/screens/edit_match_results.dart';
 import 'package:app/screens/match_recorder.dart';
+import 'package:app/screens/view_team_page.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:snout_db/event/match.dart';
 import 'package:snout_db/patch.dart';
 import 'package:snout_db/season/matchevent.dart';
 
 class MatchPage extends StatefulWidget {
-  const MatchPage({required this.match, Key? key}) : super(key: key);
+  const MatchPage({required this.matchid, Key? key}) : super(key: key);
 
-  final FRCMatch match;
+  final int matchid;
 
   @override
   State<MatchPage> createState() => _MatchPageState();
@@ -22,107 +24,114 @@ class MatchPage extends StatefulWidget {
 class _MatchPageState extends State<MatchPage> {
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-        length: 7,
-        child: Scaffold(
-          appBar: AppBar(
-            bottom: TabBar(
-              isScrollable: true,
-              tabs: [
-                Tab(icon: Icon(Icons.videogame_asset)),
-                Tab(
-                    child: Text("${widget.match.red[0]}",
-                        style: TextStyle(color: Colors.redAccent))),
-                Tab(
-                    child: Text("${widget.match.red[1]}",
-                        style: TextStyle(color: Colors.redAccent))),
-                Tab(
-                    child: Text("${widget.match.red[2]}",
-                        style: TextStyle(color: Colors.redAccent))),
-                Tab(
-                    child: Text("${widget.match.blue[0]}",
-                        style: TextStyle(color: Colors.blueAccent))),
-                Tab(
-                    child: Text("${widget.match.blue[1]}",
-                        style: TextStyle(color: Colors.blueAccent))),
-                Tab(
-                    child: Text("${widget.match.blue[2]}",
-                        style: TextStyle(color: Colors.blueAccent))),
+    return Consumer<SnoutScoutData>(builder: (context, snoutData, child) {
+      FRCMatch match = snoutData.currentEvent.matches[widget.matchid];
+
+      return DefaultTabController(
+          length: 7,
+          child: Scaffold(
+            appBar: AppBar(
+              bottom: TabBar(
+                isScrollable: true,
+                tabs: [
+                  Tab(icon: Icon(Icons.videogame_asset)),
+                  Tab(
+                      child: Text("${match.red[0]}",
+                          style: TextStyle(color: Colors.redAccent))),
+                  Tab(
+                      child: Text("${match.red[1]}",
+                          style: TextStyle(color: Colors.redAccent))),
+                  Tab(
+                      child: Text("${match.red[2]}",
+                          style: TextStyle(color: Colors.redAccent))),
+                  Tab(
+                      child: Text("${match.blue[0]}",
+                          style: TextStyle(color: Colors.blueAccent))),
+                  Tab(
+                      child: Text("${match.blue[1]}",
+                          style: TextStyle(color: Colors.blueAccent))),
+                  Tab(
+                      child: Text("${match.blue[2]}",
+                          style: TextStyle(color: Colors.blueAccent))),
+                ],
+              ),
+              title: Text(match.description),
+              actions: [
+                TextButton(
+                  child: match.results == null
+                      ? Text("Add Results")
+                      : Text("Edit results"),
+                  onPressed: () async {
+                    var result = await navigateWithEditLock(
+                        context,
+                        "match:${match.id}:results",
+                        () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => EditMatchResults(
+                                  match: match, config: snoutData.season),
+                            )));
+
+                    if (result == true) {
+                      setState(() {});
+                    }
+                  },
+                )
               ],
             ),
-            title: Text("Match ${widget.match.description}"),
-          ),
-          body: TabBarView(children: [
-            _buildMatchView(widget.match, null),
-            _buildMatchView(widget.match, widget.match.red[0]),
-            _buildMatchView(widget.match, widget.match.red[1]),
-            _buildMatchView(widget.match, widget.match.red[2]),
-            _buildMatchView(widget.match, widget.match.blue[0]),
-            _buildMatchView(widget.match, widget.match.blue[1]),
-            _buildMatchView(widget.match, widget.match.blue[2]),
-          ]),
-        ));
+            body: TabBarView(children: [
+              _buildMatchView(snoutData, match, null),
+              _buildMatchView(snoutData, match, match.red[0]),
+              _buildMatchView(snoutData, match, match.red[1]),
+              _buildMatchView(snoutData, match, match.red[2]),
+              _buildMatchView(snoutData, match, match.blue[0]),
+              _buildMatchView(snoutData, match, match.blue[1]),
+              _buildMatchView(snoutData, match, match.blue[2]),
+            ]),
+          ));
+    });
   }
 
-  Widget _buildMatchView(FRCMatch data, int? teamNumber) {
+  Widget _buildMatchView(
+      SnoutScoutData snoutData, FRCMatch data, int? teamNumber) {
     if (teamNumber == null) {
-      return Column(
+      return ListView(
         children: [
-          SizedBox(
-            height: 50,
-            child: Center(
-              child: ElevatedButton(
-                child: data.results == null
-                    ? Text("Add Results")
-                    : Text("Edit results"),
-                onPressed: () async {
-                  var result = await navigateWithEditLock(
-                      context,
-                      "match:${data.id}:results",
-                      () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => EditMatchResults(
-                                match: data, config: snoutData.season!),
-                          )));
-
-                  if (result == true) {
-                    setState(() {});
-                  }
-                },
-              ),
-            ),
+          ListTile(
+            title: Text("Scheduled Time"),
+            subtitle: Text(
+                DateFormat.jm().add_yMd().format(data.scheduledTime.toLocal())),
           ),
           if (data.results != null)
-            SizedBox(
-              width: 200,
-              child: Table(
-                children: [
-                  TableRow(children: [
-                    Text(""),
-                    Text("Red"),
-                    Text("Blue"),
-                  ]),
-                  for (final type in snoutData.season!.matchscouting.scoring)
-                    TableRow(children: [
-                      Text(type),
-                      Text(data.results!.red[type].toString()),
-                      Text(data.results!.blue[type].toString()),
+            ListTile(
+              title: Text("Actual Time"),
+              subtitle: Text(DateFormat.jm()
+                  .add_yMd()
+                  .format(data.results!.time.toLocal())),
+            ),
+          if (data.results != null)
+            Align(
+              alignment: Alignment.center,
+              child: DataTable(
+                columns: [
+                  DataColumn(label: Text("Results")),
+                  DataColumn(label: Text("Red")),
+                  DataColumn(label: Text("Blue")),
+                ],
+                rows: [
+                  for (final type in snoutData.season.matchscouting.scoring)
+                    DataRow(cells: [
+                      DataCell(Text(type)),
+                      DataCell(Text(data.results!.red[type].toString())),
+                      DataCell(Text(data.results!.blue[type].toString())),
                     ]),
                 ],
               ),
             ),
-
-          Text("Display a 'video-like' overview of the map, starting with the robots start positions and includes all events through the match"),
-
-          FieldMapViewer(
-            events: [
-              for (var timeline in data.timelines.keys)
-                ...?data.timelines[timeline],
-            ],
-            onTap: (position) {},
-          ),
-          Text("Breakdown of the match including all teams. Metrics where applicable"),
+          Text(
+              "Display a 'video-like' overview of the map, starting with the robots start positions and includes all events through the match"),
+          Text(
+              "Breakdown of the match including all teams. Metrics where applicable"),
         ],
       );
     }
@@ -131,6 +140,15 @@ class _MatchPageState extends State<MatchPage> {
 
     return Column(
       children: [
+        FilledButton.tonal(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => TeamViewPage(teamNumber: teamNumber)),
+              );
+            },
+            child: Text("Scout $teamNumber")),
         SizedBox(
           height: 50,
           child: Center(
@@ -157,15 +175,13 @@ class _MatchPageState extends State<MatchPage> {
                       time: DateTime.now(),
                       path: [
                         'events',
-                        snoutData.selectedEventID!,
+                        snoutData.selectedEventID,
                         'matches',
                         //Index of the match to modify. This could cause issues if
                         //the index of the match changes inbetween this database
                         //being updated and not. Ideally matches should have a unique key
                         //like their scheduled date to uniquely identify them.
-                        snoutData.currentEvent.matches
-                            .indexOf(widget.match)
-                            .toString(),
+                        snoutData.currentEvent.matches.indexOf(data).toString(),
                         'timelines',
                         teamNumber.toString()
                       ],
@@ -178,7 +194,6 @@ class _MatchPageState extends State<MatchPage> {
             ),
           ),
         ),
-
         Text("Breakdown of the match via this team's specific performance"),
       ],
     );

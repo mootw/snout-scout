@@ -1,9 +1,11 @@
 import 'dart:async';
 
 import 'package:app/main.dart';
-import 'package:app/map_viewer.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'dart:math' as math;
+
 
 import 'package:snout_db/season/matchevent.dart';
 
@@ -42,10 +44,13 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
 
   List<MatchEvent> events = [];
 
-  RobotPosition? lastRobotPosition;
+  get scoutingEvents => _mode == MatchMode.AUTO || _mode == MatchMode.PRE_GAME
+      ? Provider.of<SnoutScoutData>(context, listen: false).season.matchscouting.auto
+      : _mode == MatchMode.TELEOP
+          ? Provider.of<SnoutScoutData>(context, listen: false).season.matchscouting.teleop
+          : [];
 
-  //Time = 0 is reserved for pre-game
-  //
+  //Time = 0 is reserved for pre-game like robot position.
   int _time = 0;
 
   double mapRotation = 0;
@@ -81,11 +86,18 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
 
   List<Widget> getTimeline() {
     return [
+      IconButton(
+          onPressed: () {
+            setState(() {
+              mapRotation += math.pi;
+            });
+          },
+          icon: Icon(Icons.rotate_right)),
       Container(
           width: double.infinity,
           height: 50,
           alignment: Alignment.center,
-          child: const Text("Start of timeline")),
+          child: const Text("Start of Timeline")),
       for (final item in events.toList()) ...[
         const Divider(height: 0),
         Padding(
@@ -113,26 +125,9 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
 
   @override
   Widget build(BuildContext context) {
-    final scoutingEvents =
-        _mode == MatchMode.AUTO || _mode == MatchMode.PRE_GAME
-            ? snoutData.season!.matchscouting.auto
-            : _mode == MatchMode.TELEOP
-                ? snoutData.season!.matchscouting.teleop
-                : [];
-
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-            "${widget.title}"),
-        actions: [
-          IconButton(
-              onPressed: () {
-                setState(() {
-                  mapRotation += math.pi;
-                });
-              },
-              icon: Icon(Icons.rotate_right)),
-        ],
+        title: Text("${widget.title}"),
       ),
       body: Flex(
         direction: Axis.vertical,
@@ -145,14 +140,17 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
           ),
           const SizedBox(height: 16),
           Container(
-            constraints: BoxConstraints(maxHeight: 300),
+            constraints: const BoxConstraints(maxHeight: 300),
             child: Transform.rotate(
               angle: mapRotation,
               child: FieldMapViewer(
-                robotPosition: lastRobotPosition,
+                robotPosition: () {
+                  MatchEvent? lastMoveEvent = events.toList().lastWhereOrNull((event) => event.id == "robot_position");
+                  if(lastMoveEvent != null) {
+                    return RobotPosition(lastMoveEvent.getNumber("x"), lastMoveEvent.getNumber("y"));
+                  }
+                }(),
                 onTap: (robotPosition) {
-                  print("${robotPosition.x} ${robotPosition.y}");
-                  lastRobotPosition = robotPosition;
                   setState(() {
                     for (final event in events.toList()) {
                       if (event.id == "robot_position") {
@@ -178,7 +176,15 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
               children: [
                 Text("Time: $_time"),
                 const SizedBox(width: 12),
-                Text(_mode == MatchMode.PRE_GAME ? "Waiting to start" : _mode == MatchMode.AUTO ? "Auto" : _mode == MatchMode.TELEOP ? "Teleop" : _mode == MatchMode.FINISHED ? "Finished" : "Unknown State"),
+                Text(_mode == MatchMode.PRE_GAME
+                    ? "Waiting to start"
+                    : _mode == MatchMode.AUTO
+                        ? "Auto"
+                        : _mode == MatchMode.TELEOP
+                            ? "Teleop"
+                            : _mode == MatchMode.FINISHED
+                                    ? "Finished"
+                                    : "Unknown State"),
                 const SizedBox(width: 12),
                 FilledButton.tonal(
                   onPressed: () {
@@ -204,7 +210,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                                   .round();
                         }
                       }
-          
+
                       _time = 150;
                     }
                     if (_mode == MatchMode.AUTO) {
@@ -247,13 +253,79 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
               for (int i = 0; i < scoutingEvents.length; i++)
                 SizedBox(
                   height: 69,
-                  width: (MediaQuery.of(context).size.width / 3) - 1, // -1 for some layout padding.
+                  width: (MediaQuery.of(context).size.width / 3) -
+                      1, // -1 for some layout padding.
                   child: getEventButton(scoutingEvents[i]),
                 ),
             ],
           ),
         ],
       ),
+    );
+  }
+}
+
+
+
+
+//Ratio of width to height
+double mapRatio = 0.5;
+
+double robotSize = 32 / 649;
+
+//General display widget for a field.
+///NOTE: DO NOT constrain this widget, as it will lose its aspect ratio
+class FieldMapViewer extends StatelessWidget {
+  final Function(RobotPosition) onTap;
+
+  final RobotPosition? robotPosition;
+
+  const FieldMapViewer(
+      {required this.onTap, this.robotPosition, Key? key})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    //Limit the view to the aspect ratio of the map
+    //to prevent layout or touch detection oddity.
+    return AspectRatio(
+      aspectRatio: 1 / mapRatio,
+      child: LayoutBuilder(builder: (context, constraints) {
+        return SizedBox(
+          child: GestureDetector(
+            onTapDown: (details) {
+              onTap(RobotPosition(
+                  details.localPosition.dx / constraints.maxWidth,
+                  1 -
+                      details.localPosition.dy /
+                          (constraints.maxWidth * mapRatio)));
+            },
+            child: Stack(
+              children: [
+                Center(
+                  child: Image.network("$serverURL/field_map.png"),
+                ),
+                if (robotPosition != null)
+                  Container(
+                    alignment: Alignment(
+                        ((robotPosition!.x * 2) - 1) *
+                            (1 + ((robotSize * constraints.maxWidth) / constraints.maxWidth)),
+                        -((robotPosition!.y * 2) - 1) *
+                            (1 + ((robotSize * constraints.maxWidth) / constraints.maxHeight))),
+                    child: Container(
+                      width: robotSize * constraints.maxWidth,
+                      height: robotSize * constraints.maxWidth,
+                      color: Colors.black,
+                      child: Icon(Icons.smart_toy,
+                          size: robotSize * constraints.maxWidth - 2,
+                          color: Theme.of(context).colorScheme.primary),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        );
+      }),
     );
   }
 }

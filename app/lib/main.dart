@@ -5,76 +5,158 @@ import 'package:app/screens/analysis.dart';
 import 'package:app/screens/matches_page.dart';
 import 'package:app/screens/teams_page.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:snout_db/event/frcevent.dart';
 import 'package:snout_db/patch.dart';
 import 'package:snout_db/snout_db.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
 
-void main() async {
-  runApp(const MyApp());
-}
-
-Future<String> getServer() async {
-  var prefs = await SharedPreferences.getInstance();
-  String result = prefs.getString("server") ?? "http://localhost:6749";
-  return result;
-}
+late String serverURL;
 
 Future setServer(String newServer) async {
   var prefs = await SharedPreferences.getInstance();
   prefs.setString("server", newServer);
-  await snoutData.loadData();
+  serverURL = newServer;
 }
 
-class SnoutScoutData {
-  List<String> get events => db?.events.keys.toList() ?? [];
-  String? selectedEventID;
+void main() async {
+  //Load data and initialize the app
+  var prefs = await SharedPreferences.getInstance();
+  serverURL = prefs.getString("server") ?? "http://localhost:6749";
 
-  String? serverURL;
+  Season season;
+  SnoutDB db;
+  bool connected = false;
 
-  Season? season;
-  SnoutDB? db;
+  print(serverURL);
 
-  FRCEvent get currentEvent => db!.events[selectedEventID]!;
+  try {
+    //Load season config from server
+    var data = await apiClient.get(Uri.parse("$serverURL/season"));
+    season = Season.fromJson(jsonDecode(data.body));
+    prefs.setString("season", data.body);
 
-  Future loadData() async {
-    serverURL = await getServer();
-
+    //Load database from server
+    var dbData = await apiClient.get(Uri.parse("$serverURL/data"));
+    db = SnoutDB.fromJson(jsonDecode(dbData.body));
+    prefs.setString("db", dbData.body);
+  } catch (e) {
+    connected = false;
     try {
-      var data = await apiClient.get(Uri.parse("$serverURL/season"));
-      season = Season.fromJson(jsonDecode(data.body));
-    } catch (e, s) {
-      print(e);
-      print(s);
-    }
-
-    try {
-      var data = await apiClient.get(Uri.parse("$serverURL/data"));
-      db = SnoutDB.fromJson(jsonDecode(data.body));
-      selectedEventID = db!.events.keys.first;
-    } catch (e, s) {
-      print(e);
-      print(s);
+      //Load from cache
+      String? seasonCache = prefs.getString("season");
+      season = Season.fromJson(jsonDecode(seasonCache!));
+      String? dbCache = prefs.getString("db");
+      db = SnoutDB.fromJson(jsonDecode(dbCache!));
+      print("got data from cache");
+    } catch (e) {
+      //Really bad we have no cache or server connection
+      runApp(SetupApp());
+      return;
     }
   }
 
+  SnoutScoutData data = SnoutScoutData(season, db, connected);
+
+  runApp(ChangeNotifierProvider(
+    create: (context) => data,
+    child: const MyApp(),
+  ));
+}
+
+class SetupApp extends StatefulWidget {
+  const SetupApp({super.key});
+
+  @override
+  State<SetupApp> createState() => _SetupAppState();
+}
+
+class _SetupAppState extends State<SetupApp> {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Snout Scout',
+      theme: defaultTheme,
+      home: SetupAppScree(),
+    );
+  }
+}
+
+class SetupAppScree extends StatelessWidget {
+  const SetupAppScree({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(
+          title: Text("Error Connecting"),
+        ),
+        body: ListView(
+          children: [
+            ListTile(
+              title: Text("Server"),
+              subtitle: Text(serverURL),
+              trailing: IconButton(
+                icon: Icon(Icons.edit),
+                onPressed: () async {
+                  print("pressed");
+                  var result =
+                      await showStringInputDialog(context, "Server", serverURL);
+                  if (result != null) {
+                    await setServer(result);
+                  }
+                },
+              ),
+            ),
+          ],
+        ),
+      );
+  }
+}
+
+
+class SnoutScoutData extends ChangeNotifier {
+  List<String> get events => db.events.keys.toList();
+
+  late String selectedEventID;
+
+  Season season;
+  SnoutDB db;
+  bool connected;
+
+  FRCEvent get currentEvent => db.events[selectedEventID]!;
+
+  SnoutScoutData(this.season, this.db, this.connected) {
+    selectedEventID = db.events.keys.first;
+
+    late WebSocketChannel channel;
+    channel = WebSocketChannel.connect(
+        Uri.parse('ws://${Uri.parse(serverURL).host}:${Uri.parse(serverURL).port}/patchlistener'));
+    channel.stream.listen((event) {
+      print("new patch, applying to local db");
+      db = Patch.fromJson(jsonDecode(event)).patch(db);
+
+      notifyListeners();
+    });
+
+
+  }
 
   //Writes a patch to local disk and submits it to the server.
-  Future addPatch (Patch patch) async {
-    var res = await apiClient.put(
-      Uri.parse("${await getServer()}/data"),
-      body: jsonEncode(patch));
-    
-    if(res.statusCode == 200) {
+  Future addPatch(Patch patch) async {
+    var res = await apiClient.put(Uri.parse("$serverURL/data"),
+        body: jsonEncode(patch));
+
+    if (res.statusCode == 200) {
       //This was sucessful
       return true;
     }
-    snoutData.db = patch.patch(snoutData.db!);
+    db = patch.patch(db);
+
+    notifyListeners();
   }
-
 }
-
-var snoutData = SnoutScoutData();
 
 //Set up theme
 const primaryColor = Color.fromARGB(255, 49, 219, 43);
@@ -90,7 +172,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Snout Scout',
       theme: defaultTheme,
       home: const MyHomePage(),
     );
@@ -107,114 +189,89 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _currentPageIndex = 0;
 
-  bool isLoaded = false;
-
-  @override
-  void initState() {
-    super.initState();
-    () async {
-      await snoutData.loadData();
-      setState(() {
-        isLoaded = true;
-      });
-    }();
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: isLoaded == false
-            ? Text("Loading")
-            : DropdownButton<String>(
-                onChanged: (value) {
-                  setState(() {
-                    snoutData.selectedEventID = value;
-                  });
-                },
-                value: snoutData.selectedEventID,
-                items: snoutData.events
-                    .map<DropdownMenuItem<String>>((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
-              ),
-      ),
-      body: isLoaded == false
-          ? CircularProgressIndicator.adaptive()
-          : [
-              AllMatchesPage(),
-              AllTeamsPage(),
-              Text("Display a spreadsheet like table with every metric (including performance metrics for ranking like win-loss) and allow sorting and filtering of the data"),
-              AnalysisPage(),
-            ][_currentPageIndex],
-      drawer: Drawer(
-        child: ListView(children: [
-          SizedBox(height: 32),
-          ListTile(
-            title: Text("Config"),
+    return Consumer<SnoutScoutData>(builder: (context, snoutData, child) {
+      return Scaffold(
+        appBar: AppBar(
+          title: DropdownButton<String>(
+            onChanged: (value) {
+              setState(() {
+                snoutData.selectedEventID = value!;
+              });
+            },
+            value: snoutData.selectedEventID,
+            items:
+                snoutData.events.map<DropdownMenuItem<String>>((String value) {
+              return DropdownMenuItem<String>(
+                value: value,
+                child: Text(value),
+              );
+            }).toList(),
           ),
-          ListTile(
-            title: Text("Server"),
-            subtitle: FutureBuilder<String>(
-                future: getServer(),
-                builder: (BuildContext context, var snapshot) {
-                  if (snapshot.hasData) {
-                    return Text(snapshot.data!);
+        ),
+        body: [
+          AllMatchesPage(),
+          AllTeamsPage(),
+          Text(
+              "Display a spreadsheet like table with every metric (including performance metrics for ranking like win-loss) and allow sorting and filtering of the data"),
+          AnalysisPage(),
+        ][_currentPageIndex],
+        drawer: Drawer(
+          child: ListView(children: [
+            ListTile(
+              title: Text("Server"),
+              subtitle: Text(serverURL),
+              trailing: IconButton(
+                icon: Icon(Icons.edit),
+                onPressed: () async {
+                  var result =
+                      await showStringInputDialog(context, "Server", serverURL);
+                  if (result != null) {
+                    await setServer(result);
+                    setState(() {});
                   }
-                  return Text("Loading");
-                }),
-            trailing: IconButton(
-              icon: Icon(Icons.edit),
-              onPressed: () async {
-                var result = await showStringInputDialog(
-                    context, "Server", await getServer());
-                if (result != null) {
-                  await setServer(result);
-                  setState(() {});
-                }
-              },
+                },
+              ),
             ),
-          ),
-          ListTile(
-            title: Text("Season"),
-            subtitle: Text(snoutData.season?.season ?? "not connected"),
-          ),
-        ]),
-      ),
-      bottomNavigationBar: NavigationBar(
-        onDestinationSelected: (int index) {
-          setState(() {
-            _currentPageIndex = index;
-          });
-        },
-        selectedIndex: _currentPageIndex,
-        destinations: [
-          NavigationDestination(
-            icon: Icon(Icons.bookmark_border),
-            label: 'Matches',
-          ),
-          
-          NavigationDestination(
-            selectedIcon: Icon(Icons.people),
-            icon: Icon(Icons.people_alt_outlined),
-            label: 'Teams',
-          ),
-          NavigationDestination(
-            selectedIcon: Icon(Icons.table_chart),
-            icon: Icon(Icons.table_chart_outlined),
-            label: 'Data',
-          ),
-          NavigationDestination(
-            selectedIcon: Icon(Icons.analytics),
-            icon: Icon(Icons.analytics_outlined),
-            label: 'Analysis',
-          ),
-        ],
-      ),
-    );
+            ListTile(
+              title: Text("Season Config"),
+              subtitle: Text(snoutData.season.season),
+            ),
+          ]),
+        ),
+        bottomNavigationBar: NavigationBar(
+          onDestinationSelected: (int index) {
+            setState(() {
+              _currentPageIndex = index;
+            });
+          },
+          selectedIndex: _currentPageIndex,
+          destinations: [
+            NavigationDestination(
+              selectedIcon: Icon(Icons.table_rows),
+              icon: Icon(Icons.table_rows_outlined),
+              label: 'Schedule',
+            ),
+            NavigationDestination(
+              selectedIcon: Icon(Icons.people),
+              icon: Icon(Icons.people_alt_outlined),
+              label: 'Teams',
+            ),
+            NavigationDestination(
+              selectedIcon: Icon(Icons.table_chart),
+              icon: Icon(Icons.table_chart_outlined),
+              label: 'Data',
+            ),
+            NavigationDestination(
+              selectedIcon: Icon(Icons.analytics),
+              icon: Icon(Icons.analytics_outlined),
+              label: 'Analysis',
+            ),
+          ],
+        ),
+      );
+    });
   }
 }
 

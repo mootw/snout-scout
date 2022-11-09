@@ -30,10 +30,13 @@ dependencies:
   flutter:
     sdk: flutter
 
+  provider: ^6.0.4
+  collection: 1.16.0
   intl: 0.17.0
   shared_preferences: 2.0.15
   http: 0.13.5
   image_picker: ^0.8.6
+  web_socket_channel: ^2.2.0
 
   snout_db:
     path: ../snout_db
