@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:snout_db/event/match.dart';
+import 'package:snout_db/event/robotmatchresults.dart';
 import 'package:snout_db/patch.dart';
 import 'package:snout_db/season/matchevent.dart';
 
@@ -136,7 +137,9 @@ class _MatchPageState extends State<MatchPage> {
       );
     }
 
-    List<MatchEvent>? timeline = data.timelines[teamNumber.toString()];
+    RobotMatchResults? timeline = data.robot[teamNumber.toString()];
+
+    final survey = data.robot[teamNumber.toString()]?.survey;
 
     return Column(
       children: [
@@ -157,7 +160,7 @@ class _MatchPageState extends State<MatchPage> {
                   ? Text("Record Match")
                   : Text("Edit Timeline"),
               onPressed: () async {
-                List<MatchEvent>? result = await navigateWithEditLock(
+                RobotMatchResults? result = await navigateWithEditLock(
                     context,
                     "match:${data.id}:$teamNumber:timeline",
                     () => Navigator.push(
@@ -182,7 +185,7 @@ class _MatchPageState extends State<MatchPage> {
                         //being updated and not. Ideally matches should have a unique key
                         //like their scheduled date to uniquely identify them.
                         snoutData.currentEvent.matches.indexOf(data).toString(),
-                        'timelines',
+                        'robot',
                         teamNumber.toString()
                       ],
                       data: jsonEncode(result));
@@ -194,6 +197,14 @@ class _MatchPageState extends State<MatchPage> {
             ),
           ),
         ),
+        Text("Post Match Survey for $teamNumber", style: Theme.of(context).textTheme.titleMedium),
+        if (survey != null)
+          Column(
+            children: [
+              for (final item in snoutData.season.matchscouting.postgame)
+                ScoutingResult(item: item, survey: survey),
+            ],
+          ),
         Text("Breakdown of the match via this team's specific performance"),
       ],
     );

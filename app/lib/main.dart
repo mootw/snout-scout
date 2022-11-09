@@ -133,9 +133,13 @@ class SnoutScoutData extends ChangeNotifier {
     late WebSocketChannel channel;
     channel = WebSocketChannel.connect(
         Uri.parse('ws://${Uri.parse(serverURL).host}:${Uri.parse(serverURL).port}/patchlistener'));
-    channel.stream.listen((event) {
+    channel.stream.listen((event) async {
       print("new patch, applying to local db");
       db = Patch.fromJson(jsonDecode(event)).patch(db);
+
+      final prefs = await SharedPreferences.getInstance();
+      //Save the database to disk
+      prefs.setString("db", jsonEncode(db));
 
       notifyListeners();
     });

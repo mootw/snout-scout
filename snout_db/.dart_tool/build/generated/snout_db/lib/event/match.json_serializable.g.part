@@ -14,7 +14,7 @@ FRCMatch _$FRCMatchFromJson(Map<String, dynamic> json) => FRCMatch(
           : MatchResults.fromJson(json['results'] as Map<String, dynamic>),
       robot: (json['robot'] as Map<String, dynamic>).map(
         (k, e) =>
-            MapEntry(k, RobotMatchResult.fromJson(e as Map<String, dynamic>)),
+            MapEntry(k, RobotMatchResults.fromJson(e as Map<String, dynamic>)),
       ),
     );
 

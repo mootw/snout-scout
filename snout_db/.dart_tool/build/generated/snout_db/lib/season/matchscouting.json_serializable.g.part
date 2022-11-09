@@ -11,7 +11,7 @@ MatchScouting _$MatchScoutingFromJson(Map<String, dynamic> json) =>
           .map((e) => MatchEvent.fromJson(e as Map<String, dynamic>))
           .toList(),
       postgame: (json['postgame'] as List<dynamic>)
-          .map((e) => PitSurveyItem.fromJson(e as Map<String, dynamic>))
+          .map((e) => SurveyItem.fromJson(e as Map<String, dynamic>))
           .toList(),
       scoring:
           (json['scoring'] as List<dynamic>).map((e) => e as String).toList(),

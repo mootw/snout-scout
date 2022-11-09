@@ -6,12 +6,12 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:snout_db/event/pitscoutresult.dart';
-import 'package:snout_db/season/pitsurveyitem.dart';
+import 'package:snout_db/season/surveyitem.dart';
 
 double scoutImageSize = 300;
 
 class ScoutingToolWidget extends StatefulWidget {
-  final PitSurveyItem tool;
+  final SurveyItem tool;
   final PitScoutResult survey;
 
   const ScoutingToolWidget({Key? key, required this.tool, required this.survey})

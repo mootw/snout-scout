@@ -9,7 +9,7 @@ import 'package:app/scouting_tools/scouting_tool.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:snout_db/event/pitscoutresult.dart';
-import 'package:snout_db/season/pitsurveyitem.dart';
+import 'package:snout_db/season/surveyitem.dart';
 
 class TeamViewPage extends StatefulWidget {
   final int teamNumber;
@@ -107,7 +107,7 @@ class ScoutingResultsViewer extends StatelessWidget {
 }
 
 class ScoutingResult extends StatelessWidget {
-  final PitSurveyItem item;
+  final SurveyItem item;
   final PitScoutResult survey;
 
   const ScoutingResult({Key? key, required this.item, required this.survey})

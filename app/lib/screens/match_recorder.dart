@@ -1,9 +1,12 @@
 import 'dart:async';
 
 import 'package:app/main.dart';
+import 'package:app/scouting_tools/scouting_tool.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:snout_db/event/pitscoutresult.dart';
+import 'package:snout_db/event/robotmatchresults.dart';
 import 'dart:math' as math;
 
 
@@ -43,6 +46,8 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
   MatchMode _mode = MatchMode.PRE_GAME;
 
   List<MatchEvent> events = [];
+
+  PitScoutResult postGameSurvey = {};
 
   get scoutingEvents => _mode == MatchMode.AUTO || _mode == MatchMode.PRE_GAME
       ? Provider.of<SnoutScoutData>(context, listen: false).season.matchscouting.auto
@@ -195,7 +200,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                     print(_mode);
                     if (_mode == MatchMode.FINISHED) {
                       //Submit results to server
-                      Navigator.pop(context, events);
+                      Navigator.pop(context, RobotMatchResults(timeline: events, survey: postGameSurvey));
                     }
                     if (_mode == MatchMode.TELEOP) {
                       //Stop timer
@@ -259,6 +264,19 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                 ),
             ],
           ),
+          if(_mode == MatchMode.FINISHED)
+            ListView(
+        shrinkWrap: true,
+        children: [
+          for (var item in Provider.of<SnoutScoutData>(context, listen: false).season.matchscouting.postgame)
+            Container(
+                padding: const EdgeInsets.all(12),
+                child: ScoutingToolWidget(
+                  tool: item,
+                  survey: postGameSurvey,
+                )),
+        ],
+      )
         ],
       ),
     );

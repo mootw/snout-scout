@@ -1,9 +1,12 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'surveyitem.dart';
+
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-PitSurveyItem _$PitSurveyItemFromJson(Map<String, dynamic> json) =>
-    PitSurveyItem(
+SurveyItem _$SurveyItemFromJson(Map<String, dynamic> json) => SurveyItem(
       id: json['id'] as String,
       type: json['type'] as String,
       label: json['label'] as String,
@@ -12,7 +15,7 @@ PitSurveyItem _$PitSurveyItemFromJson(Map<String, dynamic> json) =>
       options_values: json['options_values'] as List<dynamic>?,
     );
 
-Map<String, dynamic> _$PitSurveyItemToJson(PitSurveyItem instance) =>
+Map<String, dynamic> _$SurveyItemToJson(SurveyItem instance) =>
     <String, dynamic>{
       'id': instance.id,
       'label': instance.label,

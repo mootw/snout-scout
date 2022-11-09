@@ -6,7 +6,7 @@ Season _$SeasonFromJson(Map<String, dynamic> json) => Season(
       team: json['team'] as int,
       season: json['season'] as String,
       pitscouting: (json['pitscouting'] as List<dynamic>)
-          .map((e) => PitSurveyItem.fromJson(e as Map<String, dynamic>))
+          .map((e) => SurveyItem.fromJson(e as Map<String, dynamic>))
           .toList(),
       matchscouting:
           MatchScouting.fromJson(json['matchscouting'] as Map<String, dynamic>),

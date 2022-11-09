@@ -1,6 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:snout_db/season/matchscouting.dart';
-import 'package:snout_db/season/pitsurveyitem.dart';
+import 'package:snout_db/season/surveyitem.dart';
 
 part 'season.g.dart';
 
@@ -10,7 +10,7 @@ class Season {
 
   String season;
   int team;
-  List<PitSurveyItem> pitscouting;
+  List<SurveyItem> pitscouting;
   MatchScouting matchscouting;
 
   Season({required this.team, required this.season, required this.pitscouting, required this.matchscouting});

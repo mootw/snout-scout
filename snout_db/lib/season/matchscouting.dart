@@ -1,6 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:snout_db/season/matchevent.dart';
-import 'package:snout_db/season/pitsurveyitem.dart';
+import 'package:snout_db/season/surveyitem.dart';
 
 part 'matchscouting.g.dart';
 
@@ -8,7 +8,7 @@ part 'matchscouting.g.dart';
 class MatchScouting {
   List<MatchEvent> auto;
   List<MatchEvent> teleop;
-  List<PitSurveyItem> postgame;
+  List<SurveyItem> postgame;
   List<String> scoring;
 
   MatchScouting(
