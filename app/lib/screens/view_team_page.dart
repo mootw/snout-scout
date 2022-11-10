@@ -4,7 +4,7 @@ import 'dart:typed_data';
 import 'package:app/edit_lock.dart';
 import 'package:app/main.dart';
 import 'package:app/match_card.dart';
-import 'package:app/scout_team.dart';
+import 'package:app/screens/scout_team.dart';
 import 'package:app/scouting_tools/scouting_tool.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -125,10 +125,9 @@ class ScoutingResult extends StatelessWidget {
       return ListTile(
         title: Text(item.label),
         subtitle: SizedBox(
-            height: scoutImageSize * 1.5,
+            height: scoutImageSize,
             child: Image.memory(
               Uint8List.fromList(base64Decode(value).cast<int>()),
-              scale: 0.5,
             )),
       );
     }

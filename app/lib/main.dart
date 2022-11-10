@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:app/api.dart';
 import 'package:app/screens/analysis.dart';
+import 'package:app/screens/datapage.dart';
 import 'package:app/screens/matches_page.dart';
 import 'package:app/screens/teams_page.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +22,8 @@ Future setServer(String newServer) async {
 }
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
   //Load data and initialize the app
   var prefs = await SharedPreferences.getInstance();
   serverURL = prefs.getString("server") ?? "http://localhost:6749";
@@ -217,8 +220,7 @@ class _MyHomePageState extends State<MyHomePage> {
         body: [
           AllMatchesPage(),
           AllTeamsPage(),
-          Text(
-              "Display a spreadsheet like table with every metric (including performance metrics for ranking like win-loss) and allow sorting and filtering of the data"),
+          DataTablePage(),
           AnalysisPage(),
         ][_currentPageIndex],
         drawer: Drawer(

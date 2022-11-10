@@ -16,16 +16,15 @@ class FRCEvent {
   List<FRCMatch> matches;
   Map<String, PitScoutResult> pitscouting;
 
-
-  //Returns sorted matches
-  get sortedMatches => matches.sort((a, b) => a.scheduledTime.difference(b.scheduledTime).inMilliseconds);
-
   FRCEvent({required this.name, required this.teams, required this.matches, required this.pitscouting});
 
   factory FRCEvent.fromJson(Map<String, dynamic> json) => _$FRCEventFromJson(json);
   Map<String, dynamic> toJson() => _$FRCEventToJson(this);
 
+  //Returns sorted matches
+  get sortedMatches => matches.sort((a, b) => a.scheduledTime.difference(b.scheduledTime).inMilliseconds);
   
+  /// returns matches with a specific team in them
   List<FRCMatch> matchesWithTeam (int team) => matches.where((match) => match.hasTeam(team)).toList();
   //returns the match after the last match with results
   FRCMatch? get nextMatch => matches.reversed.lastWhereOrNull((match) => match.results == null);

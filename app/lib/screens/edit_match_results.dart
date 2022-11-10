@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:app/confirm_exit_dialog.dart';
 import 'package:app/main.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -56,112 +57,114 @@ class _EditMatchResultsState extends State<EditMatchResults> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        actions: [
-          IconButton(
-              onPressed: () async {
-                if (_form.currentState?.validate() ?? false) {
-                  //TODO this is probably not the right way to do this.
-                  final snoutData = Provider.of<SnoutScoutData>(context, listen: false);
-                  //Input is valid
-                  //Construct match results object
-                  MatchResults results = MatchResults(
-                      time: matchEndTime.subtract(matchLength),
-                      red: _mapTo(_red),
-                      blue: _mapTo(_blue),
-                    );
-                  Patch patch = Patch(
-                      user: "anon",
-                      time: DateTime.now(),
-                      path: [
-                        'events',
-                        snoutData.selectedEventID,
-                        'matches',
-                        //Index of the match to modify. This could cause issues if
-                        //the index of the match changes inbetween this database
-                        //being updated and not. Ideally matches should have a unique key
-                        //like their scheduled date to uniquely identify them.
-                        snoutData.currentEvent.matches
-                            .indexOf(widget.match)
-                            .toString(),
-                        'results'
-                      ],
-                      data: jsonEncode(results));
-
-                  await snoutData.addPatch(patch);
-                  setState(() {});
-                  
-                  Navigator.pop(context, true);
-                }
-              },
-              icon: const Icon(Icons.save)),
-        ],
-        title:
-            Text("Results: ${widget.match.description}"),
-      ),
-      body: Form(
-        key: _form,
-        child: ListView(
-          children: [
-            ListTile(
-              title: Text("Match End Time"),
-              subtitle: Text(DateFormat.Hm().add_yMd().format(matchEndTime)),
-              trailing: IconButton(
-                icon: Icon(Icons.edit),
+    return ConfirmExitDialog(
+      child: Scaffold(
+        appBar: AppBar(
+          actions: [
+            IconButton(
                 onPressed: () async {
-                  DateTime? d = await showDatePicker(
-                      context: context,
-                      firstDate: DateTime(1992),
-                      lastDate: DateTime.now(),
-                      initialDate: matchEndTime);
-                  if (d != null) {
-                    matchEndTime = DateTime(d.year, d.month, d.day,
-                        matchEndTime.hour, matchEndTime.minute);
+                  if (_form.currentState?.validate() ?? false) {
+                    //TODO this is probably not the right way to do this.
+                    final snoutData = Provider.of<SnoutScoutData>(context, listen: false);
+                    //Input is valid
+                    //Construct match results object
+                    MatchResults results = MatchResults(
+                        time: matchEndTime.subtract(matchLength),
+                        red: _mapTo(_red),
+                        blue: _mapTo(_blue),
+                      );
+                    Patch patch = Patch(
+                        user: "anon",
+                        time: DateTime.now(),
+                        path: [
+                          'events',
+                          snoutData.selectedEventID,
+                          'matches',
+                          //Index of the match to modify. This could cause issues if
+                          //the index of the match changes inbetween this database
+                          //being updated and not. Ideally matches should have a unique key
+                          //like their scheduled date to uniquely identify them.
+                          snoutData.currentEvent.matches
+                              .indexOf(widget.match)
+                              .toString(),
+                          'results'
+                        ],
+                        data: jsonEncode(results));
+    
+                    await snoutData.addPatch(patch);
+                    setState(() {});
+                    
+                    Navigator.pop(context, true);
                   }
-
-                  TimeOfDay? time = await showTimePicker(
-                      context: context,
-                      initialTime: TimeOfDay(
-                          hour: matchEndTime.hour,
-                          minute: matchEndTime.minute));
-                  if (time != null) {
-                    matchEndTime = DateTime(
-                        matchEndTime.year,
-                        matchEndTime.month,
-                        matchEndTime.day,
-                        time.hour,
-                        time.minute);
-                  }
-                  setState(() {});
                 },
-              ),
-            ),
-            DataTable(
-              columns: [
-                DataColumn(label: Text("Score")),
-                DataColumn(label: Text("Red")),
-                DataColumn(label: Text("Blue")),
-              ],
-                rows: [
-                  for (final item in widget.config.matchscouting.scoring)
-                  DataRow(
-                    cells: [
-                      DataCell(Text(item)),
-                      DataCell(TextFormField(
-                        controller: _blue[item],
-                        validator: checkIsNumber,
-                      )),
-                      DataCell(TextFormField(
-                        controller: _red[item],
-                        validator: checkIsNumber,
-                      )),
-                    ],
-                  )
-                
-              ],
-            ),
+                icon: const Icon(Icons.save)),
           ],
+          title:
+              Text("Results: ${widget.match.description}"),
+        ),
+        body: Form(
+          key: _form,
+          child: ListView(
+            children: [
+              ListTile(
+                title: Text("Match End Time"),
+                subtitle: Text(DateFormat.Hm().add_yMd().format(matchEndTime)),
+                trailing: IconButton(
+                  icon: Icon(Icons.edit),
+                  onPressed: () async {
+                    DateTime? d = await showDatePicker(
+                        context: context,
+                        firstDate: DateTime(1992),
+                        lastDate: DateTime.now(),
+                        initialDate: matchEndTime);
+                    if (d != null) {
+                      matchEndTime = DateTime(d.year, d.month, d.day,
+                          matchEndTime.hour, matchEndTime.minute);
+                    }
+    
+                    TimeOfDay? time = await showTimePicker(
+                        context: context,
+                        initialTime: TimeOfDay(
+                            hour: matchEndTime.hour,
+                            minute: matchEndTime.minute));
+                    if (time != null) {
+                      matchEndTime = DateTime(
+                          matchEndTime.year,
+                          matchEndTime.month,
+                          matchEndTime.day,
+                          time.hour,
+                          time.minute);
+                    }
+                    setState(() {});
+                  },
+                ),
+              ),
+              DataTable(
+                columns: [
+                  DataColumn(label: Text("Score")),
+                  DataColumn(label: Text("Red")),
+                  DataColumn(label: Text("Blue")),
+                ],
+                  rows: [
+                    for (final item in widget.config.matchscouting.scoring)
+                    DataRow(
+                      cells: [
+                        DataCell(Text(item)),
+                        DataCell(TextFormField(
+                          controller: _blue[item],
+                          validator: checkIsNumber,
+                        )),
+                        DataCell(TextFormField(
+                          controller: _red[item],
+                          validator: checkIsNumber,
+                        )),
+                      ],
+                    )
+                  
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

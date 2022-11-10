@@ -135,33 +135,6 @@
         ],
         "teleop": [
             {
-                "id": "climb_start",
-                "label": "Climb Start",
-                "type": "event",
-                "values": {
-                    "points": 0,
-                    "rp": 0
-                }
-            },
-            {
-                "id": "climb_end",
-                "label": "Climb Finish",
-                "type": "event",
-                "values": {
-                    "points": 0,
-                    "rp": 0
-                }
-            },
-            {
-                "id": "climb_fall",
-                "label": "Climb Fall",
-                "type": "event",
-                "values": {
-                    "points": 0,
-                    "rp": 0
-                }
-            },
-            {
                 "id": "defense",
                 "label": "Defense Move",
                 "type": "event",
@@ -239,6 +212,26 @@
                 "label": "Scored Climb"
             },
             {
+                "id": "driving_skill",
+                "type": "selector",
+                "options": [
+                    "Low",
+                    "Medium",
+                    "High"
+                ],
+                "label": "Driving Skill"
+            },
+            {
+                "id": "driving_awareness",
+                "type": "selector",
+                "options": [
+                    "Low",
+                    "Medium",
+                    "High"
+                ],
+                "label": "Driving Awareness"
+            },
+            {
                 "id": "intake_issue",
                 "type": "toggle",
                 "label": "Did this robot have intake issues?"
@@ -247,6 +240,11 @@
                 "id": "electrical_issue",
                 "type": "toggle",
                 "label": "Did this robot have electrical issues?"
+            },
+            {
+                "id": "defense",
+                "type": "toggle",
+                "label": "Did this robot play defense?"
             },
             {
                 "id": "comments",
@@ -290,12 +288,6 @@
             "type": "percent",
             "n": "cargo_miss",
             "d": "all_cargo_shot"
-        },
-        "climb_time": {
-            "label": "Duration of climb",
-            "type": "duration",
-            "start": "climb_start",
-            "end": "climb_end"
         }
     }
 }

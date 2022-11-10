@@ -8,7 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:snout_db/event/pitscoutresult.dart';
 import 'package:snout_db/season/surveyitem.dart';
 
-double scoutImageSize = 300;
+double scoutImageSize = 512;
 
 class ScoutingToolWidget extends StatefulWidget {
   final SurveyItem tool;
@@ -30,11 +30,9 @@ class _ScoutingToolWidgetState extends State<ScoutingToolWidget> {
   @override
   void initState() {
     super.initState();
-    
-    if (widget.tool.type == "toggle" && value == null) {
+    if (value == null && widget.tool.type == "toggle") {
       value = false;
     }
-
     if (widget.tool.type == "text-box" || widget.tool.type == "number") {
       myController.text = value?.toString() ?? "";
     }
@@ -117,7 +115,7 @@ class _ScoutingToolWidgetState extends State<ScoutingToolWidget> {
             onPressed: () async {
               //TAKE PHOTO
               final ImagePicker picker = ImagePicker();
-              final XFile? photo = await picker.pickImage(source: ImageSource.camera, maxWidth: scoutImageSize, maxHeight: scoutImageSize);
+              final XFile? photo = await picker.pickImage(source: ImageSource.camera, maxWidth: scoutImageSize, maxHeight: scoutImageSize, imageQuality: 50);
               if(photo != null) {
                 Uint8List bytes = await photo.readAsBytes();
                 setState(() {
@@ -126,7 +124,7 @@ class _ScoutingToolWidgetState extends State<ScoutingToolWidget> {
               }
             }),
         title: Text(widget.tool.label),
-        subtitle: value == null ? Text("No Image") : SizedBox(height: scoutImageSize * 1.5, child: Image.memory(Uint8List.fromList(base64Decode(value).cast<int>()), scale: 0.5)),
+        subtitle: value == null ? Text("No Image") : SizedBox(height: scoutImageSize, child: Image.memory(Uint8List.fromList(base64Decode(value).cast<int>()))),
       );
     }
 

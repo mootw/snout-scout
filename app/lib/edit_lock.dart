@@ -43,7 +43,7 @@ Future<dynamic> navigateWithEditLock(
       }
     } else {
       //Apply lock
-      await apiClient.post(Uri.parse("$serverURL}/edit_lock"),
+      await apiClient.post(Uri.parse("$serverURL/edit_lock"),
           headers: {"key": key});
       //Navigate
       var result = await navigteFunction();

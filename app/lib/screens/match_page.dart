@@ -11,7 +11,6 @@ import 'package:provider/provider.dart';
 import 'package:snout_db/event/match.dart';
 import 'package:snout_db/event/robotmatchresults.dart';
 import 'package:snout_db/patch.dart';
-import 'package:snout_db/season/matchevent.dart';
 
 class MatchPage extends StatefulWidget {
   const MatchPage({required this.matchid, Key? key}) : super(key: key);
@@ -37,31 +36,86 @@ class _MatchPageState extends State<MatchPage> {
                 tabs: [
                   Tab(icon: Icon(Icons.videogame_asset)),
                   Tab(
-                      child: Text("${match.red[0]}",
-                          style: TextStyle(color: Colors.redAccent))),
+                      child: GestureDetector(
+                          child: Text("${match.red[0]}",
+                              style: TextStyle(color: Colors.redAccent)),
+                          onLongPress: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      TeamViewPage(teamNumber: match.red[0])),
+                            );
+                          })),
                   Tab(
-                      child: Text("${match.red[1]}",
-                          style: TextStyle(color: Colors.redAccent))),
+                      child: GestureDetector(
+                          child: Text("${match.red[1]}",
+                              style: TextStyle(color: Colors.redAccent)),
+                          onLongPress: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      TeamViewPage(teamNumber: match.red[1])),
+                            );
+                          })),
                   Tab(
-                      child: Text("${match.red[2]}",
-                          style: TextStyle(color: Colors.redAccent))),
+                      child: GestureDetector(
+                          child: Text("${match.red[2]}",
+                              style: TextStyle(color: Colors.redAccent)),
+                          onLongPress: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      TeamViewPage(teamNumber: match.red[2])),
+                            );
+                          })),
                   Tab(
-                      child: Text("${match.blue[0]}",
-                          style: TextStyle(color: Colors.blueAccent))),
+                      child: GestureDetector(
+                          child: Text("${match.blue[0]}",
+                              style: TextStyle(color: Colors.blueAccent)),
+                          onLongPress: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      TeamViewPage(teamNumber: match.blue[0])),
+                            );
+                          })),
                   Tab(
-                      child: Text("${match.blue[1]}",
-                          style: TextStyle(color: Colors.blueAccent))),
+                      child: GestureDetector(
+                          child: Text("${match.blue[1]}",
+                              style: TextStyle(color: Colors.blueAccent)),
+                          onLongPress: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      TeamViewPage(teamNumber: match.blue[1])),
+                            );
+                          })),
                   Tab(
-                      child: Text("${match.blue[2]}",
-                          style: TextStyle(color: Colors.blueAccent))),
+                      child: GestureDetector(
+                          child: Text("${match.blue[2]}",
+                              style: TextStyle(color: Colors.blueAccent)),
+                          onLongPress: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      TeamViewPage(teamNumber: match.blue[2])),
+                            );
+                          })),
                 ],
               ),
               title: Text(match.description),
               actions: [
+                Text(DefaultTabController.of(context)?.index.toString() ?? ""),
                 TextButton(
                   child: match.results == null
                       ? Text("Add Results")
-                      : Text("Edit results"),
+                      : Text("Edit Results"),
                   onPressed: () async {
                     var result = await navigateWithEditLock(
                         context,
@@ -141,63 +195,52 @@ class _MatchPageState extends State<MatchPage> {
 
     final survey = data.robot[teamNumber.toString()]?.survey;
 
-    return Column(
+    return ListView(
       children: [
-        FilledButton.tonal(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => TeamViewPage(teamNumber: teamNumber)),
-              );
+        Center(
+          child: FilledButton.tonal(
+            child:
+                timeline == null ? Text("Record Match") : Text("Edit Timeline"),
+            onPressed: () async {
+              RobotMatchResults? result = await navigateWithEditLock(
+                  context,
+                  "match:${data.id}:$teamNumber:timeline",
+                  () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                MatchRecorderPage(team: teamNumber)),
+                      ));
+
+              if (result != null) {
+                //TODO save data to the server
+
+                Patch patch = Patch(
+                    user: "anon",
+                    time: DateTime.now(),
+                    path: [
+                      'events',
+                      snoutData.selectedEventID,
+                      'matches',
+                      //Index of the match to modify. This could cause issues if
+                      //the index of the match changes inbetween this database
+                      //being updated and not. Ideally matches should have a unique key
+                      //like their scheduled date to uniquely identify them.
+                      snoutData.currentEvent.matches.indexOf(data).toString(),
+                      'robot',
+                      teamNumber.toString()
+                    ],
+                    data: jsonEncode(result));
+
+                await snoutData.addPatch(patch);
+                setState(() {});
+              }
             },
-            child: Text("Scout $teamNumber")),
-        SizedBox(
-          height: 50,
-          child: Center(
-            child: ElevatedButton(
-              child: timeline == null
-                  ? Text("Record Match")
-                  : Text("Edit Timeline"),
-              onPressed: () async {
-                RobotMatchResults? result = await navigateWithEditLock(
-                    context,
-                    "match:${data.id}:$teamNumber:timeline",
-                    () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) =>
-                                  MatchRecorderPage(title: "Team $teamNumber")),
-                        ));
-
-                if (result != null) {
-                  //TODO save data to the server
-
-                  Patch patch = Patch(
-                      user: "anon",
-                      time: DateTime.now(),
-                      path: [
-                        'events',
-                        snoutData.selectedEventID,
-                        'matches',
-                        //Index of the match to modify. This could cause issues if
-                        //the index of the match changes inbetween this database
-                        //being updated and not. Ideally matches should have a unique key
-                        //like their scheduled date to uniquely identify them.
-                        snoutData.currentEvent.matches.indexOf(data).toString(),
-                        'robot',
-                        teamNumber.toString()
-                      ],
-                      data: jsonEncode(result));
-
-                  await snoutData.addPatch(patch);
-                  setState(() {});
-                }
-              },
-            ),
           ),
         ),
-        Text("Post Match Survey for $teamNumber", style: Theme.of(context).textTheme.titleMedium),
+        if (survey != null)
+          Text("Post Match Survey",
+              style: Theme.of(context).textTheme.titleMedium),
         if (survey != null)
           Column(
             children: [
