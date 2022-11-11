@@ -228,6 +228,7 @@ class _MatchPageState extends State<MatchPage> {
                       teamNumber.toString()
                     ],
                     data: jsonEncode(result));
+                await snoutData.addPatch(patch);
               }
             },
           ),
