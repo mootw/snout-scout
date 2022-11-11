@@ -1,4 +1,6 @@
+import 'package:collection/collection.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:snout_db/snout_db.dart';
 
 part 'matchevent.g.dart';
 
@@ -46,4 +48,12 @@ class MatchEvent {
   Map<String, dynamic> toJson() => _$MatchEventToJson(this);
 
   double getNumber(String key) => data[key].toDouble();
+
+  RobotPosition? getEventPosition (List<MatchEvent> events) {
+    final event = events.lastWhereOrNull((event) => event.time <= time && event.id == "robot_position");
+    if(event != null) {
+      return RobotPosition.fromMatchEvent(event);
+    }
+    return null;
+  }
 }

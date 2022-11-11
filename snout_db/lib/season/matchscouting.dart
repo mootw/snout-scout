@@ -20,4 +20,7 @@ class MatchScouting {
   factory MatchScouting.fromJson(Map<String, dynamic> json) =>
       _$MatchScoutingFromJson(json);
   Map<String, dynamic> toJson() => _$MatchScoutingToJson(this);
+
+
+  Set<String> get uniqueEventIds =>  Set.from([...auto.map((e) => e.id), ...teleop.map((e) => e.id)]);
 }

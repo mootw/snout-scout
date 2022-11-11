@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:app/edit_lock.dart';
+import 'package:app/fieldwidget.dart';
 import 'package:app/main.dart';
 import 'package:app/screens/edit_match_results.dart';
 import 'package:app/screens/match_recorder.dart';
@@ -183,8 +184,7 @@ class _MatchPageState extends State<MatchPage> {
                 ],
               ),
             ),
-          Text(
-              "Display a 'video-like' overview of the map, starting with the robots start positions and includes all events through the match"),
+          FieldTimelineViewer(match: data),
           Text(
               "Breakdown of the match including all teams. Metrics where applicable"),
         ],
@@ -192,7 +192,6 @@ class _MatchPageState extends State<MatchPage> {
     }
 
     RobotMatchResults? timeline = data.robot[teamNumber.toString()];
-
     final survey = data.robot[teamNumber.toString()]?.survey;
 
     return ListView(

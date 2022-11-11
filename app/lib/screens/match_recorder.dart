@@ -1,18 +1,19 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:app/confirm_exit_dialog.dart';
+import 'package:app/fieldwidget.dart';
 import 'package:app/main.dart';
 import 'package:app/scouting_tools/scouting_tool.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:snout_db/event/pitscoutresult.dart';
 import 'package:snout_db/event/robotmatchresults.dart';
 import 'dart:math' as math;
 
 import 'package:snout_db/season/matchevent.dart';
+import 'package:snout_db/snout_db.dart';
 
 class MatchRecorderPage extends StatefulWidget {
   final int team;
@@ -23,52 +24,39 @@ class MatchRecorderPage extends StatefulWidget {
   State<MatchRecorderPage> createState() => _MatchRecorderPageState();
 }
 
-//Match duration = 150
-//The delay between teleop and auto are ignored
-//because the time resolution is 1 second.
+//TODO move this from the UI to snout_db
+Duration matchLength = const Duration(minutes: 2, seconds: 31);
+//0 seconds is reserved for events before the match starts like starting pos
+//1 to 16 seconds are for auto (15 seconds)
+//17; the delay between teleop and auto is ignored and treated as auto
+//for scoring and scouting UI purposes. It is better that the scout records
+//an auto event outside of auto than to miss the transition messing up the
+//entire match recording
+//18 to 153 are teleop
+//because the time resolution is 1 second internally to snout-scout
 
-enum MatchMode { PRE_GAME, AUTO, TELEOP, FINISHED }
-
-//Number between 0 and 1 on both axis
-//Positive X is towards the opposing alliance.
-//Positive Y is along the alliance wall
-//Map is the field boundry.
-// (0, 0) is the corner to the left and closest
-// to the scoring table.
-class RobotPosition {
-  double x;
-  double y;
-
-  RobotPosition(double posX, double posY)
-      : x = (posX * 1000).roundToDouble() / 1000,
-        y = (posY * 1000).roundToDouble() / 1000;
-}
+enum MatchMode { setup, playing, finished }
 
 class _MatchRecorderPageState extends State<MatchRecorderPage> {
-  MatchMode _mode = MatchMode.PRE_GAME;
-
+  MatchMode _mode = MatchMode.setup;
   List<MatchEvent> events = [];
-
   PitScoutResult postGameSurvey = {};
+  int _time = 0;
+  double mapRotation = 0;
+  Timer? t;
 
-  get scoutingEvents => _mode == MatchMode.AUTO || _mode == MatchMode.PRE_GAME
+  MatchEvent? get lastMoveEvent => events.toList().lastWhereOrNull((event) => event.id == "robot_position");
+  RobotPosition? get robotPosition => lastMoveEvent == null ? null : RobotPosition.fromMatchEvent(lastMoveEvent!);
+
+  get scoutingEvents => _time <= 17
       ? Provider.of<SnoutScoutData>(context, listen: false)
           .season
           .matchscouting
           .auto
-      : _mode == MatchMode.TELEOP
-          ? Provider.of<SnoutScoutData>(context, listen: false)
-              .season
-              .matchscouting
-              .teleop
-          : [];
-
-  //Time = 0 is reserved for pre-game like robot position.
-  int _time = 0;
-
-  double mapRotation = 0;
-
-  Timer? t;
+      : Provider.of<SnoutScoutData>(context, listen: false)
+          .season
+          .matchscouting
+          .teleop;
 
   @override
   void dispose() {
@@ -76,17 +64,13 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
     super.dispose();
   }
 
-  @override
-  void initState() {
-    super.initState();
-  }
-
   Widget getEventButton(MatchEvent tool) {
     return Card(
       child: MaterialButton(
-        onPressed: () {
+        onPressed: lastMoveEvent == null || _time - lastMoveEvent!.time > 3 ? null : () {
+          HapticFeedback.mediumImpact();
           setState(() {
-            if (_mode != MatchMode.PRE_GAME) {
+            if (_mode != MatchMode.setup) {
               events
                   .add(MatchEvent.fromEventWithTime(time: _time, event: tool));
             }
@@ -99,6 +83,9 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
 
   List<Widget> getTimeline() {
     return [
+      const Center(
+          child: Text("Press 'start' when you hear the field buzzer. It is more important to know the location of each event rather than the position of the robot at all times. Event buttons will disable if no position has been recently input.")),
+      const SizedBox(height: 32),
       const Center(
           child: SizedBox(height: 32, child: Text("Start of Timeline"))),
       for (final item in events.toList()) ...[
@@ -128,9 +115,10 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isHorizontal = MediaQuery.of(context).size.aspectRatio > 1;
+    //Allow slightly wide to be considered vertical for foldable devices or near-square devices
+    final isHorizontal = MediaQuery.of(context).size.aspectRatio > 1.2;
 
-    if (_mode == MatchMode.FINISHED) {
+    if (_mode == MatchMode.finished) {
       return ConfirmExitDialog(
         child: Scaffold(
           appBar: AppBar(
@@ -171,93 +159,63 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
         child: Scaffold(
           appBar: AppBar(
             title: Text("Team ${widget.team}"),
+            actions: [statusAndToolBar()],
           ),
           body: Row(
             children: [
-              Expanded(
-                child: Flex(
-                  direction: Axis.vertical,
+              SizedBox(
+                width: 130 * 3,
+                child: Column(
                   children: [
-                    Flexible(
+                    Expanded(
                       child: ListView(
                         reverse: true,
                         shrinkWrap: true,
                         children: getTimeline().reversed.toList(),
                       ),
                     ),
-                    Flexible(
-                      child: Wrap(
-                        children: [
-                          for (int i = 0; i < scoutingEvents.length; i++)
-                            SizedBox(
-                              height: 69,
-                              width: (MediaQuery.of(context).size.width / 8) -
-                                  1, // -1 for some layout padding.
-                              child: getEventButton(scoutingEvents[i]),
-                            ),
-                        ],
-                      ),
+                    Wrap(
+                      children: [
+                        for (int i = 0; i < scoutingEvents.length; i++)
+                          SizedBox(
+                            height: 60,
+                            width: 130, // -1 for some layout padding.
+                            child: getEventButton(scoutingEvents[i]),
+                          ),
+                      ],
                     ),
-                    if (_mode == MatchMode.FINISHED)
-                      ListView(
-                        shrinkWrap: true,
-                        children: [
-                          for (var item in Provider.of<SnoutScoutData>(context,
-                                  listen: false)
-                              .season
-                              .matchscouting
-                              .postgame)
-                            Container(
-                                padding: const EdgeInsets.all(12),
-                                child: ScoutingToolWidget(
-                                  tool: item,
-                                  survey: postGameSurvey,
-                                )),
-                        ],
-                      ),
                   ],
                 ),
               ),
-              Column(
-                children: [
-                  statusAndToolBar(),
-                  Container(
-                    constraints: const BoxConstraints(maxWidth: 500),
-                    alignment: Alignment.centerRight,
-                    child: Transform.rotate(
-                      angle: mapRotation,
-                      child: FieldMapViewer(
-                        robotPosition: () {
-                          MatchEvent? lastMoveEvent = events
-                              .toList()
-                              .lastWhereOrNull(
-                                  (event) => event.id == "robot_position");
-                          if (lastMoveEvent != null) {
-                            return RobotPosition(lastMoveEvent.getNumber("x"),
-                                lastMoveEvent.getNumber("y"));
-                          }
-                        }(),
-                        onTap: (robotPosition) {
-                          setState(() {
-                            for (final event in events.toList()) {
-                              if (event.id == "robot_position") {
-                                //Is position event
-                                if (event.time == _time) {
-                                  //Event is the same time, overrwite
-                                  events.remove(event);
-                                }
+              Expanded(
+                child: Container(
+                  constraints: const BoxConstraints(maxWidth: 600),
+                  alignment: Alignment.bottomRight,
+                  child: Transform.rotate(
+                    angle: mapRotation,
+                    child: FieldPositionSelector(
+                      robotPosition: robotPosition,
+                      onTap: (robotPosition) {
+                        HapticFeedback.lightImpact();
+                        setState(() {
+                          for (final event in events.toList()) {
+                            if (event.id == "robot_position") {
+                              //Is position event
+                              if (event.time == _time) {
+                                //Event is the same time, overrwite
+                                events.remove(event);
                               }
                             }
-                            events.add(MatchEvent.robotPositionEvent(
-                                time: _time,
-                                x: robotPosition.x,
-                                y: robotPosition.y));
-                          });
-                        },
-                      ),
+                          }
+                          events.add(MatchEvent.robotPositionEvent(
+                              time: _time,
+                              x: robotPosition.x,
+                              y: robotPosition.y));
+                        });
+                      },
                     ),
                   ),
-                ],
+                ),
               ),
             ],
           ),
@@ -273,51 +231,39 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
         body: Flex(
           direction: Axis.vertical,
           children: [
-            if (_mode != MatchMode.FINISHED)
-              Expanded(
-                child: ListView(
-                  reverse: true,
-                  children: getTimeline().reversed.toList(),
-                ),
+            Expanded(
+              child: ListView(
+                reverse: true,
+                children: getTimeline().reversed.toList(),
               ),
-            if (_mode != MatchMode.FINISHED) statusAndToolBar(),
-            if (_mode != MatchMode.FINISHED)
-              Container(
-                width: 600,
-                alignment: Alignment.bottomRight,
-                child: Transform.rotate(
-                  angle: mapRotation,
-                  child: FieldMapViewer(
-                    robotPosition: () {
-                      MatchEvent? lastMoveEvent = events
-                          .toList()
-                          .lastWhereOrNull(
-                              (event) => event.id == "robot_position");
-                      if (lastMoveEvent != null) {
-                        return RobotPosition(lastMoveEvent.getNumber("x"),
-                            lastMoveEvent.getNumber("y"));
-                      }
-                    }(),
-                    onTap: (robotPosition) {
-                      setState(() {
-                        for (final event in events.toList()) {
-                          if (event.id == "robot_position") {
-                            //Is position event
-                            if (event.time == _time) {
-                              //Event is the same time, overrwite
-                              events.remove(event);
-                            }
+            ),
+            statusAndToolBar(),
+            Container(
+              width: 600,
+              alignment: Alignment.bottomRight,
+              child: Transform.rotate(
+                angle: mapRotation,
+                child: FieldPositionSelector(
+                  robotPosition: robotPosition,
+                  onTap: (robotPosition) {
+                      HapticFeedback.lightImpact();
+                    setState(() {
+                      for (final event in events.toList()) {
+                        if (event.id == "robot_position") {
+                          //Is position event
+                          if (event.time == _time) {
+                            //Event is the same time, overrwite
+                            events.remove(event);
                           }
                         }
-                        events.add(MatchEvent.robotPositionEvent(
-                            time: _time,
-                            x: robotPosition.x,
-                            y: robotPosition.y));
-                      });
-                    },
-                  ),
+                      }
+                      events.add(MatchEvent.robotPositionEvent(
+                          time: _time, x: robotPosition.x, y: robotPosition.y));
+                    });
+                  },
                 ),
               ),
+            ),
             Wrap(
               children: [
                 for (int i = 0; i < scoutingEvents.length; i++)
@@ -337,7 +283,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
 
   Widget statusAndToolBar() {
     return Padding(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -349,21 +295,17 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                 });
               },
               icon: Icon(Icons.rotate_right)),
+          const SizedBox(width: 12),
           Text("Time: $_time"),
+          const SizedBox(width: 12),
           Text(
-              "${_mode == MatchMode.PRE_GAME ? "Waiting" : _mode == MatchMode.AUTO ? "Auto" : _mode == MatchMode.TELEOP ? "Teleop" : ""}"),
+              "${_mode == MatchMode.setup ? "Waiting" : _mode == MatchMode.playing ? "${_time > 17 ? "teleop" : "auto"}" : ""}"),
+          const SizedBox(width: 12),
           FilledButton.icon(
-            icon: Icon(Icons.arrow_forward),
-            onPressed: () {
-              ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(
-                  content: Text("Long press to move to next section")));
-            },
-            onLongPress: handleNextSection,
-            //Start recording
-            //Teleop
-            //Finish recording
+            icon: const Icon(Icons.arrow_forward),
+            onPressed: handleNextSection,
             label: Text(
-                "${_mode == MatchMode.PRE_GAME ? "Start" : _mode == MatchMode.AUTO ? "Teleop" : _mode == MatchMode.TELEOP ? "End" : ""}"),
+                "${_mode == MatchMode.setup ? "Start" : _mode == MatchMode.playing ? "End" : ""}"),
           ),
         ],
       ),
@@ -371,109 +313,40 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
   }
 
   void handleNextSection() {
-    if (_mode == MatchMode.TELEOP) {
+    HapticFeedback.heavyImpact();
+    if (_mode == MatchMode.playing) {
       //Stop timer
       t?.cancel();
-      _mode = MatchMode.FINISHED;
-      for (var event in events) {
-        //Scale times between 15 seconds and 150 seconds
-        if (event.time > 15) {
-          num offsetTime = event.time - 15;
-          event.time = (15 + ((offsetTime / (_time - 15)) * 135)).round();
-        }
-      }
-
-      _time = 150;
-    }
-    if (_mode == MatchMode.AUTO) {
-      _mode = MatchMode.TELEOP;
+      _mode = MatchMode.finished;
       //Scale auto times
       for (var event in events) {
         //Scale times to 15 seconds
-        event.time = ((event.time / _time) * 15).round();
+        event.time = ((event.time / _time) * matchLength.inSeconds).round();
       }
-      //Set time to 15 if auto was recorded faster than real time.
-      if (_time < 15) {
-        _time = 15;
-      }
+      _time = matchLength.inSeconds;
     }
-    if (_mode == MatchMode.PRE_GAME) {
-      _mode = MatchMode.AUTO;
+    if (_mode == MatchMode.setup) {
+      _mode = MatchMode.playing;
       _time = 1; //Second 0 is reserved for pre-game events
       //Start timer
       t = Timer.periodic(const Duration(seconds: 1), (timer) {
-        if (_mode != MatchMode.FINISHED) {
+        if (_mode != MatchMode.finished) {
           setState(() {
             _time++;
+            if (_time == 16) {
+              //Buzz the device for end of auto
+              HapticFeedback.heavyImpact();
+              Timer(const Duration(milliseconds: 500), () {
+                HapticFeedback.heavyImpact();
+              });
+              Timer(const Duration(milliseconds: 1000), () {
+                HapticFeedback.heavyImpact();
+              });
+            }
           });
         }
       });
     }
     setState(() {});
-  }
-}
-
-//Ratio of width to height
-double mapRatio = 0.5;
-
-double robotSize = 32 / 649;
-
-//General display widget for a field.
-///NOTE: DO NOT constrain this widget, as it will lose its aspect ratio
-class FieldMapViewer extends StatelessWidget {
-  final Function(RobotPosition) onTap;
-
-  final RobotPosition? robotPosition;
-
-  const FieldMapViewer({required this.onTap, this.robotPosition, Key? key})
-      : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    //Limit the view to the aspect ratio of the map
-    //to prevent layout or touch detection oddity.
-    return AspectRatio(
-      aspectRatio: 1 / mapRatio,
-      child: LayoutBuilder(builder: (context, constraints) {
-        return SizedBox(
-          child: GestureDetector(
-            onTapDown: (details) {
-              onTap(RobotPosition(
-                  details.localPosition.dx / constraints.maxWidth,
-                  1 -
-                      details.localPosition.dy /
-                          (constraints.maxWidth * mapRatio)));
-            },
-            child: Stack(
-              children: [
-                Center(
-                  child: Image.network("$serverURL/field_map.png"),
-                ),
-                if (robotPosition != null)
-                  Container(
-                    alignment: Alignment(
-                        ((robotPosition!.x * 2) - 1) *
-                            (1 +
-                                ((robotSize * constraints.maxWidth) /
-                                    constraints.maxWidth)),
-                        -((robotPosition!.y * 2) - 1) *
-                            (1 +
-                                ((robotSize * constraints.maxWidth) /
-                                    constraints.maxHeight))),
-                    child: Container(
-                      width: robotSize * constraints.maxWidth,
-                      height: robotSize * constraints.maxWidth,
-                      color: Colors.black,
-                      child: Icon(Icons.smart_toy,
-                          size: robotSize * constraints.maxWidth - 2,
-                          color: Theme.of(context).colorScheme.primary),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        );
-      }),
-    );
   }
 }

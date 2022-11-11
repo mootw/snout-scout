@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:app/main.dart';
+import 'package:app/screens/view_team_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -27,16 +28,47 @@ class _DataTablePageState extends State<DataTablePage> {
                 columns: [
                   DataColumn(label: Text("Team")),
                   DataColumn(label: Text("Played")),
+                  for (final eventType
+                      in snoutData.season.matchscouting.uniqueEventIds)
+                    DataColumn(label: Text("avg $eventType")),
                 ],
                 rows: [
                   for (final team in snoutData.currentEvent.teams)
                     DataRow(cells: [
-                      DataCell(Text(team.toString())),
+                      DataCell(TextButton(child: Text(team.toString()), onPressed: () {
+                        //Open this teams scouting page
+                        Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        TeamViewPage(teamNumber: team)),
+                              );
+                      },)),
                       DataCell(Text(snoutData.currentEvent
                           .matchesWithTeam(team)
                           .where((element) => element.results != null)
                           .length
                           .toString())),
+                      for (final eventType
+                          in snoutData.season.matchscouting.uniqueEventIds)
+                        DataCell(Text(numDisplay((snoutData.currentEvent
+                                    .matchesWithTeam(team)
+                                    .fold<int>(
+                                        0,
+                                        (previousValue, match) =>
+                                            previousValue +
+                                            (match.robot[team.toString()]
+                                                    ?.timeline
+                                                    .where((event) =>
+                                                        event.id == eventType)
+                                                    .length ??
+                                                0)) /
+                                snoutData.currentEvent
+                                    .matchesWithTeam(team)
+                                    .where((element) =>
+                                        element.robot[team.toString()] != null)
+                                    .length)
+                            ))),
                     ])
                 ],
               ),
@@ -46,6 +78,13 @@ class _DataTablePageState extends State<DataTablePage> {
       );
     });
   }
+}
+
+String numDisplay (double? input) {
+  if(input == null || input.isNaN) {
+    return "No Data";
+  }
+  return input.round().toString();
 }
 
 class MyCustomScrollBehavior extends MaterialScrollBehavior {

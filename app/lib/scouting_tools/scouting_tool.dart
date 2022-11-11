@@ -8,7 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:snout_db/event/pitscoutresult.dart';
 import 'package:snout_db/season/surveyitem.dart';
 
-double scoutImageSize = 512;
+double scoutImageSize = 420;
 
 class ScoutingToolWidget extends StatefulWidget {
   final SurveyItem tool;

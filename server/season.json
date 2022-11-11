@@ -135,15 +135,6 @@
         ],
         "teleop": [
             {
-                "id": "defense",
-                "label": "Defense Move",
-                "type": "event",
-                "values": {
-                    "points": 0,
-                    "rp": 0
-                }
-            },
-            {
                 "id": "cargo_intake",
                 "label": "Intake Cargo",
                 "type": "event",
@@ -182,6 +173,33 @@
             {
                 "id": "cargo_drop",
                 "label": "Cargo Drop",
+                "type": "event",
+                "values": {
+                    "points": 0,
+                    "rp": 0
+                }
+            },
+            {
+                "id": "defense",
+                "label": "Defense Move",
+                "type": "event",
+                "values": {
+                    "points": 0,
+                    "rp": 0
+                }
+            },
+            {
+                "id": "climb_start",
+                "label": "Climb Start",
+                "type": "event",
+                "values": {
+                    "points": 0,
+                    "rp": 0
+                }
+            },
+            {
+                "id": "climb_end",
+                "label": "Climb End",
                 "type": "event",
                 "values": {
                     "points": 0,

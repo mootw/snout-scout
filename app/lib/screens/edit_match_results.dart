@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:app/confirm_exit_dialog.dart';
 import 'package:app/main.dart';
+import 'package:app/screens/match_recorder.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -9,8 +10,6 @@ import 'package:snout_db/event/match.dart';
 import 'package:snout_db/event/matchresults.dart';
 import 'package:snout_db/patch.dart';
 import 'package:snout_db/snout_db.dart';
-
-Duration matchLength = const Duration(minutes: 2, seconds: 30);
 
 class EditMatchResults extends StatefulWidget {
   final Season config;
