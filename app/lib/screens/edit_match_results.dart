@@ -62,7 +62,6 @@ class _EditMatchResultsState extends State<EditMatchResults> {
             IconButton(
                 onPressed: () async {
                   if (_form.currentState?.validate() ?? false) {
-                    //TODO this is probably not the right way to do this.
                     final snoutData = Provider.of<SnoutScoutData>(context, listen: false);
                     //Input is valid
                     //Construct match results object
@@ -90,9 +89,10 @@ class _EditMatchResultsState extends State<EditMatchResults> {
                         data: jsonEncode(results));
     
                     await snoutData.addPatch(patch);
-                    setState(() {});
                     
-                    Navigator.pop(context, true);
+                    if(mounted) {
+                      Navigator.pop(context, true);
+                    }
                   }
                 },
                 icon: const Icon(Icons.save)),

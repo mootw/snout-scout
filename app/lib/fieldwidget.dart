@@ -1,5 +1,6 @@
 //Ratio of width to height
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:app/main.dart';
 import 'package:collection/collection.dart';
@@ -254,7 +255,8 @@ class HeatMap extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    Paint p = Paint()..color = Colors.red.withOpacity(0.33);
+    Paint p = Paint()..color = Colors.green;
+    p.maskFilter = MaskFilter.blur(BlurStyle.normal, math.min(events.length * 0.5, 10));
 
     for (final event in events) {
       canvas.drawCircle(

@@ -2,7 +2,6 @@ import 'package:json_annotation/json_annotation.dart';
 import 'package:snout_db/event/matchresults.dart';
 import 'package:snout_db/event/robotmatchresults.dart';
 import 'package:snout_db/game.dart';
-import 'package:snout_db/season/matchevent.dart';
 
 part 'match.g.dart';
 

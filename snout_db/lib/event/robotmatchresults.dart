@@ -1,4 +1,3 @@
-import 'package:collection/collection.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:snout_db/event/pitscoutresult.dart';
 import 'package:snout_db/season/matchevent.dart';
@@ -18,7 +17,6 @@ class RobotMatchResults {
   factory RobotMatchResults.fromJson(Map<String, dynamic> json) => _$RobotMatchResultsFromJson(json);
   Map<String, dynamic> toJson() => _$RobotMatchResultsToJson(this);
 
-
   List<MatchEvent> timelineInterpolated () {
     var interpolated = timeline.toList();
 
@@ -37,7 +35,6 @@ class RobotMatchResults {
           x: lerp(pos1.time.toDouble(), pos1.x, pos2.time.toDouble(), pos2.x, newTime.toDouble()),
           y: lerp(pos1.time.toDouble(), pos1.y, pos2.time.toDouble(), pos2.y, newTime.toDouble())));
       }
-      
     }
     return interpolated..sort((a, b) => a.time - b.time);
   }

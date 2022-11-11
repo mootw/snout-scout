@@ -23,7 +23,6 @@ class PitScoutTeamPage extends StatefulWidget {
 }
 
 class _PitScoutTeamPageState extends State<PitScoutTeamPage> {
-
   PitScoutResult results = {};
 
   @override
@@ -31,7 +30,7 @@ class _PitScoutTeamPageState extends State<PitScoutTeamPage> {
     super.initState();
 
     //populate existing data to pre-fill.
-    if(widget.oldData != null) {
+    if (widget.oldData != null) {
       results.addAll(widget.oldData!);
     }
   }
@@ -44,9 +43,9 @@ class _PitScoutTeamPageState extends State<PitScoutTeamPage> {
           actions: [
             IconButton(
                 onPressed: () async {
-                  //TODO this is probably not the right way to do state managment
-                  var snoutData = Provider.of<SnoutScoutData>(context, listen: false);
-    
+                  var snoutData =
+                      Provider.of<SnoutScoutData>(context, listen: false);
+
                   Patch patch = Patch(
                       user: "anon",
                       time: DateTime.now(),
@@ -57,16 +56,16 @@ class _PitScoutTeamPageState extends State<PitScoutTeamPage> {
                         widget.team.toString()
                       ],
                       data: jsonEncode(results));
-                  
+
                   //Save the scouting results to the server!!
-                  var result = await snoutData.addPatch(patch);
-                  
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                    content: Text('Saved Scouting Data'),
-                    duration: Duration(seconds: 4),
-                  ));
-                  Navigator.of(context).pop(true);
-                  
+                  await snoutData.addPatch(patch);
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                      content: Text('Saved Scouting Data'),
+                      duration: Duration(seconds: 4),
+                    ));
+                    Navigator.of(context).pop(true);
+                  }
                 },
                 icon: const Icon(Icons.save))
           ],

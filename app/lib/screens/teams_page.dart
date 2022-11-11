@@ -85,19 +85,5 @@ class TeamListTile extends StatelessWidget {
         ],
       ),
     );
-
-    return ListTile(
-      //Make it as large as possible
-      visualDensity: const VisualDensity(vertical: 4),
-      leading: image,
-      title: Text(teamNumber.toString()),
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => TeamViewPage(teamNumber: teamNumber)),
-        );
-      },
-    );
   }
 }
