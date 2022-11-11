@@ -18,7 +18,7 @@ class _DataTablePageState extends State<DataTablePage> {
     return Consumer<SnoutScoutData>(builder: (context, snoutData, child) {
       return ListView(
         children: [
-          Text(
+          const Text(
               "Display a spreadsheet like table with every metric (including performance metrics for ranking like win-loss) and allow sorting and filtering of the data"),
           ScrollConfiguration(
             behavior: MyCustomScrollBehavior(),
@@ -26,8 +26,8 @@ class _DataTablePageState extends State<DataTablePage> {
               scrollDirection: Axis.horizontal,
               child: DataTable(
                 columns: [
-                  DataColumn(label: Text("Team")),
-                  DataColumn(label: Text("Played")),
+                  const DataColumn(label: Text("Team")),
+                  const DataColumn(label: Text("Played")),
                   for (final eventType
                       in snoutData.season.matchscouting.uniqueEventIds)
                     DataColumn(label: Text("avg $eventType")),
@@ -84,7 +84,7 @@ String numDisplay (double? input) {
   if(input == null || input.isNaN) {
     return "No Data";
   }
-  return input.round().toString();
+  return ((input * 10).round() / 10).toString();
 }
 
 class MyCustomScrollBehavior extends MaterialScrollBehavior {

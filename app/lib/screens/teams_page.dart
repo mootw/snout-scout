@@ -4,7 +4,6 @@ import 'dart:typed_data';
 import 'package:app/main.dart';
 import 'package:app/screens/view_team_page.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
 
 class AllTeamsPage extends StatefulWidget {
@@ -36,7 +35,7 @@ class _AllTeamsPageState extends State<AllTeamsPage> {
                     child: Center(
                       child: FilledButton.tonal(onPressed: () {
                     
-                      }, child: Text("Edit Teams")),
+                      }, child: const Text("Edit Teams")),
                     ),
                   )
                 ],
@@ -79,9 +78,9 @@ class TeamListTile extends StatelessWidget {
             width: 150,
             height: 150,
             color: Colors.black38,
-            child: image ?? Center(child: Text("No Image")),
+            child: image ?? const Center(child: Text("No Image")),
           ),
-          SizedBox(height: 4),
+          const SizedBox(height: 4),
           Text(teamNumber.toString(), style: Theme.of(context).textTheme.titleMedium)
         ],
       ),

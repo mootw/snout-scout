@@ -24,16 +24,6 @@ class MatchRecorderPage extends StatefulWidget {
   State<MatchRecorderPage> createState() => _MatchRecorderPageState();
 }
 
-//TODO move this from the UI to snout_db
-Duration matchLength = const Duration(minutes: 2, seconds: 31);
-//0 seconds is reserved for events before the match starts like starting pos
-//1 to 16 seconds are for auto (15 seconds)
-//17; the delay between teleop and auto is ignored and treated as auto
-//for scoring and scouting UI purposes. It is better that the scout records
-//an auto event outside of auto than to miss the transition messing up the
-//entire match recording
-//18 to 153 are teleop
-//because the time resolution is 1 second internally to snout-scout
 
 enum MatchMode { setup, playing, finished }
 
@@ -46,7 +36,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
   Timer? t;
 
   MatchEvent? get lastMoveEvent => events.toList().lastWhereOrNull((event) => event.id == "robot_position");
-  RobotPosition? get robotPosition => lastMoveEvent == null ? null : RobotPosition.fromMatchEvent(lastMoveEvent!);
+  RobotPosition? get robotPosition => lastMoveEvent?.position;
 
   get scoutingEvents => _time <= 17
       ? Provider.of<SnoutScoutData>(context, listen: false)
@@ -70,9 +60,9 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
         onPressed: lastMoveEvent == null || _time - lastMoveEvent!.time > 3 ? null : () {
           HapticFeedback.mediumImpact();
           setState(() {
-            if (_mode != MatchMode.setup) {
+            if (_mode != MatchMode.setup && robotPosition != null) {
               events
-                  .add(MatchEvent.fromEventWithTime(time: _time, event: tool));
+                  .add(MatchEvent.fromEventWithTime(time: _time, event: tool, position: robotPosition!));
             }
           });
         },
@@ -84,7 +74,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
   List<Widget> getTimeline() {
     return [
       const Center(
-          child: Text("Press 'start' when you hear the field buzzer. It is more important to know the location of each event rather than the position of the robot at all times. Event buttons will disable if no position has been recently input.")),
+          child: Text("Press 'start' when you hear the field buzzer and see the field lights. It is more important to know the location of each event rather than the position of the robot at all times. Event buttons will disable if no position has been recently input.")),
       const SizedBox(height: 32),
       const Center(
           child: SizedBox(height: 32, child: Text("Start of Timeline"))),
@@ -294,18 +284,18 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                   mapRotation += math.pi;
                 });
               },
-              icon: Icon(Icons.rotate_right)),
+              icon: const Icon(Icons.rotate_right)),
           const SizedBox(width: 12),
           Text("Time: $_time"),
           const SizedBox(width: 12),
           Text(
-              "${_mode == MatchMode.setup ? "Waiting" : _mode == MatchMode.playing ? "${_time > 17 ? "teleop" : "auto"}" : ""}"),
+              _mode == MatchMode.setup ? "Waiting" : _mode == MatchMode.playing ? _time > 17 ? "teleop" : "auto" : ""),
           const SizedBox(width: 12),
           FilledButton.icon(
             icon: const Icon(Icons.arrow_forward),
             onPressed: handleNextSection,
             label: Text(
-                "${_mode == MatchMode.setup ? "Start" : _mode == MatchMode.playing ? "End" : ""}"),
+                _mode == MatchMode.setup ? "Start" : _mode == MatchMode.playing ? "End" : ""),
           ),
         ],
       ),

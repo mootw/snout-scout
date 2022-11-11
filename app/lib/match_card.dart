@@ -42,7 +42,7 @@ class MatchCard extends StatelessWidget {
                 child: Column(
                   children: [
                     Text(match.description,
-                        style: TextStyle(fontWeight: FontWeight.bold)),
+                        style: const TextStyle(fontWeight: FontWeight.bold)),
                     if (match.results != null)
                       TimeDuration(time: match.results!.time),
                     if (match.results == null)
@@ -58,7 +58,7 @@ class MatchCard extends StatelessWidget {
                       for (var team in match.red)
                         TextButton(
                             style: TextButton.styleFrom(
-                              minimumSize: Size(0, 42),
+                              minimumSize: const Size(0, 42),
                               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                             ),
                             onPressed: () {
@@ -94,7 +94,7 @@ class MatchCard extends StatelessWidget {
                       for (var team in match.blue)
                         TextButton(
                             style: TextButton.styleFrom(
-                              minimumSize: Size(0, 42),
+                              minimumSize: const Size(0, 42),
                               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                             ),
                             onPressed: () {

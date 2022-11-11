@@ -1,6 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:snout_db/event/matchresults.dart';
 import 'package:snout_db/event/robotmatchresults.dart';
+import 'package:snout_db/game.dart';
 import 'package:snout_db/season/matchevent.dart';
 
 part 'match.g.dart';
@@ -36,9 +37,7 @@ class FRCMatch {
 
   //Helpers
   bool hasTeam (int team) => red.contains(team) || blue.contains(team);
-
-  String getTeamColor (int team) => red.contains(team) ? "red" : "blue";
-
+  Alliance getAllianceOf (int team) => red.contains(team) ? Alliance.red : Alliance.blue;
   Duration? get scheduleDelay => results?.time.difference(scheduledTime);
 }
 

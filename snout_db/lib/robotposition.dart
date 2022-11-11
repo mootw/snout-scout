@@ -1,7 +1,5 @@
 import 'dart:math' as math;
 
-import 'package:snout_db/season/matchevent.dart';
-
 //Number between 0 and 1 on both axis
 //Positive X is towards the opposing alliance.
 //Positive Y is along the alliance wall
@@ -16,7 +14,4 @@ class RobotPosition {
       : x = math.max(0, math.min(1, (posX * 1000).roundToDouble() / 1000)),
         y = math.max(0, math.min(1, (posY * 1000).roundToDouble() / 1000));
 
-  RobotPosition.fromMatchEvent(MatchEvent event)
-      : x = event.getNumber("x"),
-        y = event.getNumber("y");
 }

@@ -35,11 +35,11 @@ class _MatchPageState extends State<MatchPage> {
               bottom: TabBar(
                 isScrollable: true,
                 tabs: [
-                  Tab(icon: Icon(Icons.videogame_asset)),
+                  const Tab(icon: Icon(Icons.videogame_asset)),
                   Tab(
                       child: GestureDetector(
                           child: Text("${match.red[0]}",
-                              style: TextStyle(color: Colors.redAccent)),
+                              style: const TextStyle(color: Colors.redAccent)),
                           onLongPress: () {
                             Navigator.push(
                               context,
@@ -51,7 +51,7 @@ class _MatchPageState extends State<MatchPage> {
                   Tab(
                       child: GestureDetector(
                           child: Text("${match.red[1]}",
-                              style: TextStyle(color: Colors.redAccent)),
+                              style: const TextStyle(color: Colors.redAccent)),
                           onLongPress: () {
                             Navigator.push(
                               context,
@@ -63,7 +63,7 @@ class _MatchPageState extends State<MatchPage> {
                   Tab(
                       child: GestureDetector(
                           child: Text("${match.red[2]}",
-                              style: TextStyle(color: Colors.redAccent)),
+                              style: const TextStyle(color: Colors.redAccent)),
                           onLongPress: () {
                             Navigator.push(
                               context,
@@ -75,7 +75,7 @@ class _MatchPageState extends State<MatchPage> {
                   Tab(
                       child: GestureDetector(
                           child: Text("${match.blue[0]}",
-                              style: TextStyle(color: Colors.blueAccent)),
+                              style: const TextStyle(color: Colors.blueAccent)),
                           onLongPress: () {
                             Navigator.push(
                               context,
@@ -87,7 +87,7 @@ class _MatchPageState extends State<MatchPage> {
                   Tab(
                       child: GestureDetector(
                           child: Text("${match.blue[1]}",
-                              style: TextStyle(color: Colors.blueAccent)),
+                              style: const TextStyle(color: Colors.blueAccent)),
                           onLongPress: () {
                             Navigator.push(
                               context,
@@ -99,7 +99,7 @@ class _MatchPageState extends State<MatchPage> {
                   Tab(
                       child: GestureDetector(
                           child: Text("${match.blue[2]}",
-                              style: TextStyle(color: Colors.blueAccent)),
+                              style: const TextStyle(color: Colors.blueAccent)),
                           onLongPress: () {
                             Navigator.push(
                               context,
@@ -115,8 +115,8 @@ class _MatchPageState extends State<MatchPage> {
                 Text(DefaultTabController.of(context)?.index.toString() ?? ""),
                 TextButton(
                   child: match.results == null
-                      ? Text("Add Results")
-                      : Text("Edit Results"),
+                      ? const Text("Add Results")
+                      : const Text("Edit Results"),
                   onPressed: () async {
                     var result = await navigateWithEditLock(
                         context,
@@ -154,13 +154,13 @@ class _MatchPageState extends State<MatchPage> {
       return ListView(
         children: [
           ListTile(
-            title: Text("Scheduled Time"),
+            title: const Text("Scheduled Time"),
             subtitle: Text(
                 DateFormat.jm().add_yMd().format(data.scheduledTime.toLocal())),
           ),
           if (data.results != null)
             ListTile(
-              title: Text("Actual Time"),
+              title: const Text("Actual Time"),
               subtitle: Text(DateFormat.jm()
                   .add_yMd()
                   .format(data.results!.time.toLocal())),
@@ -169,7 +169,7 @@ class _MatchPageState extends State<MatchPage> {
             Align(
               alignment: Alignment.center,
               child: DataTable(
-                columns: [
+                columns: const [
                   DataColumn(label: Text("Results")),
                   DataColumn(label: Text("Red")),
                   DataColumn(label: Text("Blue")),
@@ -185,7 +185,7 @@ class _MatchPageState extends State<MatchPage> {
               ),
             ),
           FieldTimelineViewer(match: data),
-          Text(
+          const Text(
               "Breakdown of the match including all teams. Metrics where applicable"),
         ],
       );
@@ -199,7 +199,7 @@ class _MatchPageState extends State<MatchPage> {
         Center(
           child: FilledButton.tonal(
             child:
-                timeline == null ? Text("Record Match") : Text("Edit Timeline"),
+                timeline == null ? const Text("Record Match") : const Text("Edit Timeline"),
             onPressed: () async {
               RobotMatchResults? result = await navigateWithEditLock(
                   context,
@@ -212,8 +212,6 @@ class _MatchPageState extends State<MatchPage> {
                       ));
 
               if (result != null) {
-                //TODO save data to the server
-
                 Patch patch = Patch(
                     user: "anon",
                     time: DateTime.now(),
@@ -230,9 +228,6 @@ class _MatchPageState extends State<MatchPage> {
                       teamNumber.toString()
                     ],
                     data: jsonEncode(result));
-
-                await snoutData.addPatch(patch);
-                setState(() {});
               }
             },
           ),
@@ -247,7 +242,7 @@ class _MatchPageState extends State<MatchPage> {
                 ScoutingResult(item: item, survey: survey),
             ],
           ),
-        Text("Breakdown of the match via this team's specific performance"),
+        const Text("Breakdown of the match via this team's specific performance"),
       ],
     );
   }

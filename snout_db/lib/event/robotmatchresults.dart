@@ -34,15 +34,14 @@ class RobotMatchResults {
         final newTime = pos1.time + x;
         interpolated.add(MatchEvent.robotPositionEvent(
           time: newTime,
-          x: lerp(pos1.time.toDouble(), pos1.getNumber("x"), pos2.time.toDouble(), pos2.getNumber("x"), newTime.toDouble()),
-          y: lerp(pos1.time.toDouble(), pos1.getNumber("y"), pos2.time.toDouble(), pos2.getNumber("y"), newTime.toDouble())));
+          x: lerp(pos1.time.toDouble(), pos1.x, pos2.time.toDouble(), pos2.x, newTime.toDouble()),
+          y: lerp(pos1.time.toDouble(), pos1.y, pos2.time.toDouble(), pos2.y, newTime.toDouble())));
       }
       
     }
     return interpolated..sort((a, b) => a.time - b.time);
   }
 }
-
 
 double lerp (double xa, double ya, double xb, double yb, double t) {
   return ya + ((yb - ya) * ((t - xa) / (xb - xa)));

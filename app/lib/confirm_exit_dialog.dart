@@ -12,16 +12,16 @@ class ConfirmExitDialog extends StatelessWidget {
           return (await showDialog(
                 context: context,
                 builder: (context) => AlertDialog(
-                  title: Text('Are you sure?'),
-                  content: Text('Leave without saving'),
+                  title: const Text('Are you sure?'),
+                  content: const Text('Leave without saving'),
                   actions: <Widget>[
                     TextButton(
                       onPressed: () => Navigator.of(context).pop(false),
-                      child: Text('No'),
+                      child: const Text('No'),
                     ),
                     TextButton(
                       onPressed: () => Navigator.of(context).pop(true),
-                      child: Text('Yes'),
+                      child: const Text('Yes'),
                     ),
                   ],
                 ),

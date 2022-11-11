@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:app/edit_lock.dart';
+import 'package:app/fieldwidget.dart';
 import 'package:app/main.dart';
 import 'package:app/match_card.dart';
 import 'package:app/screens/scout_team.dart';
@@ -48,7 +49,7 @@ class _TeamViewPageState extends State<TeamViewPage> {
                       setState(() {});
                     }
                   },
-                  child: Text("Scout"))
+                  child: const Text("Scout"))
             ],
             title: Text("Team ${widget.teamNumber}"),
           ),
@@ -57,24 +58,65 @@ class _TeamViewPageState extends State<TeamViewPage> {
             children: [
               ScoutingResultsViewer(
                   teamNumber: widget.teamNumber, snoutData: snoutData),
-              Divider(height: 32),
+              const Divider(height: 32),
               //Display this teams matches
               Column(
                 children: [
-                  for (var match
-                      in snoutData.currentEvent.matchesWithTeam(widget.teamNumber))
+                  for (var match in snoutData.currentEvent
+                      .matchesWithTeam(widget.teamNumber))
                     MatchCard(match: match, focusTeam: widget.teamNumber),
                 ],
               ),
-              Divider(height: 32),
-              Text(
+              const Divider(height: 32),
+              const Text(
                   "Performance Summary like min-max-average metrics over all games"),
-              Divider(height: 32),
-              Text(
+              const Divider(height: 32),
+              const Text(
                   "Graphs like performance of specific metrics over multiple matches"),
-              Divider(height: 32),
-              Text(
-                  "Maps like heatmap of positions across all games, events (like shooting positions) heat map, and starting position heatmap"),
+              const Divider(height: 32),
+
+              Column(
+                  children: [
+                    Text("Starting Positions",
+                        style: Theme.of(context).textTheme.titleMedium),
+                    FieldHeatMap(
+                        events: snoutData.currentEvent
+                            .matchesWithTeam(widget.teamNumber)
+                            .fold(
+                                [],
+                                (previousValue, element) => [
+                                      ...previousValue,
+                                      ...?element
+                                          .robot[widget.teamNumber.toString()]
+                                          ?.timeline
+                                          .where((event) =>
+                                              event.id == "robot_position" &&
+                                              event.time == 0)
+                                          .toList()
+                                    ])),
+                    const SizedBox(height: 32),
+                    for (final eventType
+                        in snoutData.season.matchscouting.uniqueEventIds) ...[
+                      Text(eventType,
+                          style: Theme.of(context).textTheme.titleMedium),
+                      FieldHeatMap(
+                          events: snoutData.currentEvent
+                              .matchesWithTeam(widget.teamNumber)
+                              .fold(
+                                  [],
+                                  (previousValue, element) => [
+                                        ...previousValue,
+                                        ...?element
+                                            .robot[widget.teamNumber.toString()]
+                                            ?.timeline
+                                            .where(
+                                                (event) => event.id == eventType)
+                                            .toList()
+                                      ])),
+                      const SizedBox(height: 32),
+                    ],
+                  ],
+                ),
             ],
           ));
     });
@@ -94,7 +136,7 @@ class ScoutingResultsViewer extends StatelessWidget {
     var data = snoutData.currentEvent.pitscouting[teamNumber.toString()];
 
     if (data == null) {
-      return ListTile(title: Text("Team has no pit scouting data"));
+      return const ListTile(title: Text("Team has no pit scouting data"));
     }
 
     return Column(

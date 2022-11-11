@@ -55,7 +55,7 @@ void main() async {
       print("got data from cache");
     } catch (e) {
       //Really bad we have no cache or server connection
-      runApp(SetupApp());
+      runApp(const SetupApp());
       return;
     }
   }
@@ -81,7 +81,7 @@ class _SetupAppState extends State<SetupApp> {
     return MaterialApp(
       title: 'Snout Scout',
       theme: defaultTheme,
-      home: SetupAppScree(),
+      home: const SetupAppScree(),
     );
   }
 }
@@ -93,15 +93,15 @@ class SetupAppScree extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text("Error Connecting"),
+          title: const Text("Error Connecting"),
         ),
         body: ListView(
           children: [
             ListTile(
-              title: Text("Server"),
+              title: const Text("Server"),
               subtitle: Text(serverURL),
               trailing: IconButton(
-                icon: Icon(Icons.edit),
+                icon: const Icon(Icons.edit),
                 onPressed: () async {
                   print("pressed");
                   var result =
@@ -218,18 +218,18 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ),
         body: [
-          AllMatchesPage(),
-          AllTeamsPage(),
-          DataTablePage(),
-          AnalysisPage(),
+          const AllMatchesPage(),
+          const AllTeamsPage(),
+          const DataTablePage(),
+          const AnalysisPage(),
         ][_currentPageIndex],
         drawer: Drawer(
           child: ListView(children: [
             ListTile(
-              title: Text("Server"),
+              title: const Text("Server"),
               subtitle: Text(serverURL),
               trailing: IconButton(
-                icon: Icon(Icons.edit),
+                icon: const Icon(Icons.edit),
                 onPressed: () async {
                   var result =
                       await showStringInputDialog(context, "Server", serverURL);
@@ -241,7 +241,7 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
             ListTile(
-              title: Text("Season Config"),
+              title: const Text("Season Config"),
               subtitle: Text(snoutData.season.season),
             ),
           ]),
@@ -253,7 +253,7 @@ class _MyHomePageState extends State<MyHomePage> {
             });
           },
           selectedIndex: _currentPageIndex,
-          destinations: [
+          destinations: const [
             NavigationDestination(
               selectedIcon: Icon(Icons.table_rows),
               icon: Icon(Icons.table_rows_outlined),

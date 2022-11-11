@@ -2,10 +2,10 @@
 import 'dart:async';
 
 import 'package:app/main.dart';
-import 'package:app/screens/match_recorder.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:snout_db/event/match.dart';
+import 'package:snout_db/season/matchevent.dart';
 import 'package:snout_db/snout_db.dart';
 
 double mapRatio = 0.5;
@@ -83,7 +83,7 @@ class _FieldTimelineViewerState extends State<FieldTimelineViewer> {
       //Increment the animation right away, this makes things feel more responsive.
       _animationTime++;
       _playTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-        if (_animationTime < matchLength.inSeconds) {
+        if (_animationTime < matchLength.inSeconds && mounted) {
           setState(() {
             _animationTime++;
           });
@@ -170,7 +170,7 @@ class RobotMapEventView extends StatelessWidget {
       //A position event is required to show the robot on the timeline
       return const SizedBox();
     }
-    RobotPosition robotPosition = RobotPosition.fromMatchEvent(posEvent);
+    RobotPosition robotPosition = posEvent.position;
 
     final allRecentEvents = match.robot[team]!.timelineInterpolated().where(
         (event) =>
@@ -199,7 +199,7 @@ class RobotMapEventView extends StatelessWidget {
                 alignment: Alignment.center,
                 width: robotSize * constraints.maxWidth,
                 height: robotSize * constraints.maxWidth,
-                color: match.getTeamColor(int.parse(team)) == "red"
+                color: match.getAllianceOf(int.parse(team)) == Alliance.red
                     ? Colors.red
                     : Colors.blue,
                 child: Text(team,
@@ -210,16 +210,61 @@ class RobotMapEventView extends StatelessWidget {
             for (final event in allRecentEvents)
               Align(
                 alignment: Alignment(
-                    ((event.getEventPosition(match.robot[team]!.timeline)!.x *
+                    ((event.position.x *
                             2) -
                         1),
-                    -((event.getEventPosition(match.robot[team]!.timeline)!.y *
+                    -((event.position.y *
                             2) -
                         1)),
                 child: Text(event.label,
-                    style: TextStyle(backgroundColor: Colors.black)),
+                    style: const TextStyle(backgroundColor: Colors.black)),
               ),
           ]);
         });
   }
+}
+
+class FieldHeatMap extends StatelessWidget {
+  final List<MatchEvent> events;
+
+  const FieldHeatMap({super.key, required this.events});
+
+  @override
+  Widget build(BuildContext context) {
+    return AspectRatio(
+        aspectRatio: 1 / mapRatio,
+        child: LayoutBuilder(builder: (context, constraints) {
+          return Stack(
+            children: [
+              Image.network("$serverURL/field_map.png"),
+              CustomPaint(
+                size: Size.infinite,
+                painter: HeatMap(events: events),
+              )
+            ],
+          );
+        }));
+  }
+}
+
+class HeatMap extends CustomPainter {
+  List<MatchEvent> events;
+
+  HeatMap({required this.events});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    Paint p = Paint()..color = Colors.red.withOpacity(0.33);
+
+    for (final event in events) {
+      canvas.drawCircle(
+          Offset(event.position.x * size.width,
+              (1 - event.position.y) * size.height),
+          10,
+          p);
+    }
+  }
+
+  @override
+  bool shouldRepaint(HeatMap oldDelegate) => false;
 }

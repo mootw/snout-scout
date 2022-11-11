@@ -6,6 +6,7 @@ import 'package:app/timeduration.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:snout_db/event/match.dart';
+import 'package:snout_db/snout_db.dart';
 
 class AllMatchesPage extends StatefulWidget {
   const AllMatchesPage({Key? key}) : super(key: key);
@@ -33,7 +34,7 @@ class _AllMatchesPageState extends State<AllMatchesPage> {
                   padding: const EdgeInsets.all(8.0),
                   child: Center(
                     child: FilledButton.tonal(
-                        onPressed: () {}, child: Text("Edit Schedule")),
+                        onPressed: () {}, child: const Text("Edit Schedule")),
                   ),
                 )
               ],
@@ -55,7 +56,7 @@ class _AllMatchesPageState extends State<AllMatchesPage> {
                         Center(
                             child: Text("Next Match",
                                 style: Theme.of(context).textTheme.titleSmall)),
-                        Center(child: Text("Your Next Match")),
+                        const Center(child: Text("Your Next Match")),
                       ]),
                       TableRow(children: [
                         Row(
@@ -70,7 +71,7 @@ class _AllMatchesPageState extends State<AllMatchesPage> {
                                           MatchPage(matchid: snoutData.currentEvent.matches.indexOf(nextMatch))),
                                 );
                               },
-                              child: Text("${nextMatch.description}"),
+                              child: Text(nextMatch.description),
                             ),
                             TimeDuration(
                                 time:
@@ -91,11 +92,11 @@ class _AllMatchesPageState extends State<AllMatchesPage> {
                                 );
                               },
                               child: Text(
-                                "${teamNextMatch.description}",
+                                teamNextMatch.description,
                                 style: TextStyle(
-                                    color: teamNextMatch.getTeamColor(
+                                    color: teamNextMatch.getAllianceOf(
                                                 snoutData.season.team) ==
-                                            "red"
+                                            Alliance.red
                                         ? Colors.red
                                         : Colors.blue),
                               ),

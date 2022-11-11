@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:app/confirm_exit_dialog.dart';
 import 'package:app/main.dart';
-import 'package:app/screens/match_recorder.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -106,10 +105,10 @@ class _EditMatchResultsState extends State<EditMatchResults> {
           child: ListView(
             children: [
               ListTile(
-                title: Text("Match End Time"),
+                title: const Text("Match End Time"),
                 subtitle: Text(DateFormat.Hm().add_yMd().format(matchEndTime)),
                 trailing: IconButton(
-                  icon: Icon(Icons.edit),
+                  icon: const Icon(Icons.edit),
                   onPressed: () async {
                     DateTime? d = await showDatePicker(
                         context: context,
@@ -139,7 +138,7 @@ class _EditMatchResultsState extends State<EditMatchResults> {
                 ),
               ),
               DataTable(
-                columns: [
+                columns: const [
                   DataColumn(label: Text("Score")),
                   DataColumn(label: Text("Red")),
                   DataColumn(label: Text("Blue")),
@@ -151,11 +150,11 @@ class _EditMatchResultsState extends State<EditMatchResults> {
                         DataCell(Text(item)),
                         DataCell(TextFormField(
                           controller: _blue[item],
-                          validator: checkIsNumber,
+                          validator: _checkIsNumber,
                         )),
                         DataCell(TextFormField(
                           controller: _red[item],
-                          validator: checkIsNumber,
+                          validator: _checkIsNumber,
                         )),
                       ],
                     )
@@ -170,8 +169,9 @@ class _EditMatchResultsState extends State<EditMatchResults> {
   }
 }
 
-String? checkIsNumber(String? input) {
+String? _checkIsNumber(String? input) {
   if (input == null || num.tryParse(input) == null) {
     return "Input must be a number";
   }
+  return null;
 }

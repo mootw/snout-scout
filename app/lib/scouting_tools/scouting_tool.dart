@@ -54,7 +54,7 @@ class _ScoutingToolWidgetState extends State<ScoutingToolWidget> {
         maxLines: 4,
         decoration: InputDecoration(
           label: Text(widget.tool.label),
-          border: OutlineInputBorder(),
+          border: const OutlineInputBorder(),
         ),
       );
     }
@@ -68,7 +68,7 @@ class _ScoutingToolWidgetState extends State<ScoutingToolWidget> {
         keyboardType: TextInputType.number,
         decoration: InputDecoration(
           label: Text(widget.tool.label),
-          border: OutlineInputBorder(),
+          border: const OutlineInputBorder(),
         ),
       );
     }
@@ -124,7 +124,7 @@ class _ScoutingToolWidgetState extends State<ScoutingToolWidget> {
               }
             }),
         title: Text(widget.tool.label),
-        subtitle: value == null ? Text("No Image") : SizedBox(height: scoutImageSize, child: Image.memory(Uint8List.fromList(base64Decode(value).cast<int>()))),
+        subtitle: value == null ? const Text("No Image") : SizedBox(height: scoutImageSize, child: Image.memory(Uint8List.fromList(base64Decode(value).cast<int>()))),
       );
     }
 
