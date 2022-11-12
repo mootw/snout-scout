@@ -32,8 +32,6 @@ void main() async {
   SnoutDB db;
   bool connected = false;
 
-  print(serverURL);
-
   try {
     //Load season config from server
     var data = await apiClient.get(Uri.parse("$serverURL/season"));
@@ -60,7 +58,7 @@ void main() async {
     }
   }
 
-  SnoutScoutData data = SnoutScoutData(season, db, connected);
+  SnoutScoutData data = SnoutScoutData(season, db);
 
   runApp(ChangeNotifierProvider(
     create: (context) => data,
@@ -81,13 +79,13 @@ class _SetupAppState extends State<SetupApp> {
     return MaterialApp(
       title: 'Snout Scout',
       theme: defaultTheme,
-      home: const SetupAppScree(),
+      home: const SetupAppScreen(),
     );
   }
 }
 
-class SetupAppScree extends StatelessWidget {
-  const SetupAppScree({super.key});
+class SetupAppScreen extends StatelessWidget {
+  const SetupAppScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -126,27 +124,29 @@ class SnoutScoutData extends ChangeNotifier {
 
   Season season;
   SnoutDB db;
-  bool connected;
+
+  //Edit mode shows options to edit things like adding/removing
+  //events, matches, teams, match scheduled times...
+  bool editMode = false;
 
   FRCEvent get currentEvent => db.events[selectedEventID]!;
 
-  SnoutScoutData(this.season, this.db, this.connected) {
+  SnoutScoutData(this.season, this.db) {
     selectedEventID = db.events.keys.first;
 
     late WebSocketChannel channel;
     channel = WebSocketChannel.connect(
-        Uri.parse('ws://${Uri.parse(serverURL).host}:${Uri.parse(serverURL).port}/patchlistener'));
+        Uri.parse('${serverURL.startsWith("https") ? "wss" : "ws"}://${Uri.parse(serverURL).host}:${Uri.parse(serverURL).port}/patchlistener'));
     channel.stream.listen((event) async {
-      print("new patch, applying to local db");
       db = Patch.fromJson(jsonDecode(event)).patch(db);
-
       final prefs = await SharedPreferences.getInstance();
       //Save the database to disk
       prefs.setString("db", jsonEncode(db));
-
       notifyListeners();
     });
+  }
 
+  void setEditMode () {
 
   }
 

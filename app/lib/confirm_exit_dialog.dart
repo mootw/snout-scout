@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+
+///Wrapping a widget with this will prompt for a confirm if
+///the scope is popped. This should be used for edit menus
 class ConfirmExitDialog extends StatelessWidget {
   final Widget child;
 
@@ -14,7 +17,7 @@ class ConfirmExitDialog extends StatelessWidget {
                 builder: (context) => AlertDialog(
                   title: const Text('Are you sure?'),
                   content: const Text('Leave without saving'),
-                  actions: <Widget>[
+                  actions: [
                     TextButton(
                       onPressed: () => Navigator.of(context).pop(false),
                       child: const Text('No'),

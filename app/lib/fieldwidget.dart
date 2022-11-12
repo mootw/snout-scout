@@ -6,13 +6,14 @@ import 'dart:math' as math;
 import 'package:app/main.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:simple_cluster/simple_cluster.dart';
 import 'package:snout_db/event/match.dart';
 import 'package:snout_db/season/matchevent.dart';
 import 'package:snout_db/snout_db.dart';
 
 double mapRatio = 0.5;
-
-double robotSize = 32 / 649;
+double fieldWidthSizeInches = 649;
+double robotPorportionalSize = 32 / fieldWidthSizeInches;
 
 class FieldPositionSelector extends StatelessWidget {
   const FieldPositionSelector(
@@ -44,18 +45,18 @@ class FieldPositionSelector extends StatelessWidget {
                   alignment: Alignment(
                       robotPosition!.x *
                           (1 +
-                              ((robotSize * constraints.maxWidth) /
+                              ((robotPorportionalSize * constraints.maxWidth) /
                                   constraints.maxWidth)),
                       -robotPosition!.y *
                           (1 +
-                              ((robotSize * constraints.maxWidth) /
+                              ((robotPorportionalSize * constraints.maxWidth) /
                                   constraints.maxHeight))),
                   child: Container(
-                    width: robotSize * constraints.maxWidth,
-                    height: robotSize * constraints.maxWidth,
+                    width: robotPorportionalSize * constraints.maxWidth,
+                    height: robotPorportionalSize * constraints.maxWidth,
                     color: Colors.black,
                     child: Icon(Icons.smart_toy,
-                        size: robotSize * constraints.maxWidth - 2,
+                        size: robotPorportionalSize * constraints.maxWidth - 2,
                         color: Theme.of(context).colorScheme.primary),
                   ),
                 ),
@@ -193,16 +194,16 @@ class RobotMapEventView extends StatelessWidget {
               alignment: Alignment(
                   robotPosition.x *
                       (1 +
-                          ((robotSize * constraints.maxWidth) /
+                          ((robotPorportionalSize * constraints.maxWidth) /
                               constraints.maxWidth)),
                   -robotPosition.y *
                       (1 +
-                          ((robotSize * constraints.maxWidth) /
+                          ((robotPorportionalSize * constraints.maxWidth) /
                               constraints.maxHeight))),
               child: Container(
                 alignment: Alignment.center,
-                width: robotSize * constraints.maxWidth,
-                height: robotSize * constraints.maxWidth,
+                width: robotPorportionalSize * constraints.maxWidth,
+                height: robotPorportionalSize * constraints.maxWidth,
                 color: match.getAllianceOf(int.parse(team)) == Alliance.red
                     ? Colors.red
                     : Colors.blue,
@@ -226,7 +227,8 @@ class FieldHeatMap extends StatelessWidget {
   final List<MatchEvent> events;
   final bool useRedNormalized;
 
-  const FieldHeatMap({super.key, required this.events, required this.useRedNormalized});
+  const FieldHeatMap(
+      {super.key, required this.events, required this.useRedNormalized});
 
   @override
   Widget build(BuildContext context) {
@@ -236,9 +238,12 @@ class FieldHeatMap extends StatelessWidget {
           return Stack(
             children: [
               Image.network("$serverURL/field_map.png"),
+              //Darken the map slightly to create more contrast against the heatmap
+              Container(width: double.infinity, height: double.infinity, color: Colors.black26),
               CustomPaint(
                 size: Size.infinite,
-                painter: HeatMap(events: events, useRedNormalized: useRedNormalized),
+                painter:
+                    HeatMap(events: events, useRedNormalized: useRedNormalized),
               )
             ],
           );
@@ -254,35 +259,46 @@ class HeatMap extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    Map<Offset, int> map = {};
-    for (final event in events) {
-      double x = (((useRedNormalized
-                          ? event.positionTeamNormalized.x
-                          : event.position.x) +
-                      1) /
-                  2) *
-              size.width;
-      double y = (1 -
-                  (((useRedNormalized
-                              ? event.positionTeamNormalized.y
-                              : event.position.y) +
-                          1) /
-                      2)) *
-              size.height;
-      Offset rounded = Offset((x * 0.1).round() / 0.1, (y * 0.1).round() /0.1);
-      //Increment
-      map[rounded] = (map[rounded] ?? 0) + 1;
-    }
+    DBSCAN dbscan = DBSCAN(
+      epsilon: robotPorportionalSize / 3 * size.width,
+      //Allow for clusters of single points
+      minPoints: 1,
+    );
 
-        
-    for(final offset in map.keys) {
-      for(int i = 0; i < map[offset]!; i++) {
-        Paint p = Paint()..color = Colors.green;
-        p.maskFilter =
-        MaskFilter.blur(BlurStyle.normal, i + 2);
-        //Draw more and more green circles with increasing opacity
-        canvas.drawCircle(offset, 8 + math.sqrt(i), p);
-      }
+    List<List<double>> ls = List.generate(
+        events.length,
+        (index) => [
+              (((useRedNormalized
+                              ? events[index].positionTeamNormalized.x
+                              : events[index].position.x) +
+                          1) /
+                      2) *
+                  size.width,
+              (1 -
+                      (((useRedNormalized
+                                  ? events[index].positionTeamNormalized.y
+                                  : events[index].position.y) +
+                              1) /
+                          2)) *
+                  size.height
+            ]);
+
+    final result = dbscan.run(ls);
+    //Sort so the smallest render first
+    result.sort((a, b) => a.length - b.length);
+
+    //Max group length with a minimum of 4 (to prevent single elements from being red hot)
+    int maxGroupLength = result.fold(0, (previousValue, element) => math.max(previousValue, element.length));
+
+    for (final group in result) {
+      //group contains the index of each element in that group
+
+      Paint p = Paint();
+      p.maskFilter = MaskFilter.blur(BlurStyle.normal, math.sqrt(group.length) + 2);
+      p.color =
+          HSVColor.fromAHSV(1, (1 - (group.length / maxGroupLength)) * 225, 1, 1).toColor();
+      //Draw more and more green circles with increasing opacity
+      canvas.drawCircle(Offset(ls[group[0]][0], ls[group[0]][1]), 6 + math.sqrt(group.length * 3), p);
     }
   }
 

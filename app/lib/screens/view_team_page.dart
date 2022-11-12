@@ -97,6 +97,23 @@ class _TeamViewPageState extends State<TeamViewPage> {
                                               event.time == 0)
                                           .toList()
                                     ])),
+                    Text("Positions",
+                        style: Theme.of(context).textTheme.titleMedium),
+                    FieldHeatMap(
+                        useRedNormalized: true,
+                        events: snoutData.currentEvent
+                            .matchesWithTeam(widget.teamNumber)
+                            .fold(
+                                [],
+                                (previousValue, element) => [
+                                      ...previousValue,
+                                      ...?element
+                                          .robot[widget.teamNumber.toString()]
+                                          ?.timelineInterpolated()
+                                          .where((event) =>
+                                              event.id == "robot_position")
+                                          .toList()
+                                    ])),
                     const SizedBox(height: 16),
                     for (final eventType
                         in snoutData.season.matchscouting.uniqueEventIds) ...[

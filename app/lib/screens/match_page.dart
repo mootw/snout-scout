@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:app/edit_lock.dart';
 import 'package:app/fieldwidget.dart';
 import 'package:app/main.dart';
+import 'package:app/screens/datapage.dart';
 import 'package:app/screens/edit_match_results.dart';
 import 'package:app/screens/match_recorder.dart';
 import 'package:app/screens/view_team_page.dart';
@@ -191,7 +192,7 @@ class _MatchPageState extends State<MatchPage> {
       );
     }
 
-    RobotMatchResults? timeline = data.robot[teamNumber.toString()];
+    RobotMatchResults? matchTeamData = data.robot[teamNumber.toString()];
     final survey = data.robot[teamNumber.toString()]?.survey;
 
     return ListView(
@@ -199,7 +200,7 @@ class _MatchPageState extends State<MatchPage> {
         Center(
           child: FilledButton.tonal(
             child:
-                timeline == null ? const Text("Record Match") : const Text("Edit Timeline"),
+                matchTeamData == null ? const Text("Record Match") : const Text("Edit Timeline"),
             onPressed: () async {
               RobotMatchResults? result = await navigateWithEditLock(
                   context,
@@ -234,8 +235,10 @@ class _MatchPageState extends State<MatchPage> {
           ),
         ),
         if (survey != null)
-          Text("Post Match Survey",
-              style: Theme.of(context).textTheme.titleMedium),
+          Center(
+            child: Text("Post Match Survey",
+                style: Theme.of(context).textTheme.titleMedium),
+          ),
         if (survey != null)
           Column(
             children: [
@@ -243,7 +246,14 @@ class _MatchPageState extends State<MatchPage> {
                 ScoutingResult(item: item, survey: survey),
             ],
           ),
-        const Text("Breakdown of the match via this team's specific performance"),
+        Center(child: Text("Robot Performance",
+                style: Theme.of(context).textTheme.titleMedium)),
+        if(matchTeamData != null)
+          for(final item in snoutData.season.matchscouting.uniqueEventIds)
+            ListTile(
+              title: Text(matchTeamData.timeline.where((event) => event.id == item).length.toString()),
+              subtitle: Text(item),
+            )
       ],
     );
   }
