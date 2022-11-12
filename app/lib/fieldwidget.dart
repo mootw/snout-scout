@@ -1,5 +1,6 @@
 //Ratio of width to height
 import 'dart:async';
+import 'dart:html';
 import 'dart:math' as math;
 
 import 'package:app/main.dart';
@@ -253,26 +254,35 @@ class HeatMap extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    Paint p = Paint()..color = Colors.green;
-    p.maskFilter =
-        MaskFilter.blur(BlurStyle.normal, math.min(events.length * 0.5, 10));
-
+    Map<Offset, int> map = {};
     for (final event in events) {
-      Offset offset = Offset(
-          (((useRedNormalized
+      double x = (((useRedNormalized
                           ? event.positionTeamNormalized.x
                           : event.position.x) +
                       1) /
                   2) *
-              size.width,
-          (1 -
+              size.width;
+      double y = (1 -
                   (((useRedNormalized
                               ? event.positionTeamNormalized.y
                               : event.position.y) +
                           1) /
                       2)) *
-              size.height);
-      canvas.drawCircle(offset, 5 + math.min(events.length.toDouble(), 10), p);
+              size.height;
+      Offset rounded = Offset((x * 0.1).round() / 0.1, (y * 0.1).round() /0.1);
+      //Increment
+      map[rounded] = (map[rounded] ?? 0) + 1;
+    }
+
+        
+    for(final offset in map.keys) {
+      for(int i = 0; i < map[offset]!; i++) {
+        Paint p = Paint()..color = Colors.green;
+        p.maskFilter =
+        MaskFilter.blur(BlurStyle.normal, i + 2);
+        //Draw more and more green circles with increasing opacity
+        canvas.drawCircle(offset, 8 + math.sqrt(i), p);
+      }
     }
   }
 
