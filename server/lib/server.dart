@@ -9,6 +9,9 @@ import 'dart:io';
 late SnoutDB db;
 late Season season;
 
+String databaseName = "database.json";
+String seasonConfigName = "season.json";
+
 //TODO use environment to define port number
 int serverPort = 6749;
 
@@ -21,9 +24,9 @@ void main(List<String> args) async {
       await HttpServer.bind(InternetAddress.anyIPv4, serverPort);
   print('Server started: ${server.address} port ${server.port}');
 
-  String databaseText = await File('database.json').readAsString();
+  String databaseText = await File(databaseName).readAsString();
   db = SnoutDB.fromJson(jsonDecode(databaseText));
-  String seasonData = await File('season.json').readAsString();
+  String seasonData = await File(seasonConfigName).readAsString();
   season = Season.fromJson(jsonDecode(seasonData));
 
   //Listen for requests
@@ -66,16 +69,15 @@ void main(List<String> args) async {
       try {
         Patch patch = Patch.fromJson(jsonDecode(content));
         db = patch.patch(db);
-        request.response.close();
+        //Write the new DB to disk
+        await File(databaseName).writeAsString(jsonEncode(db));
 
-        //Clean up closed connections
-        patchListeners.removeWhere((element) => element.closeCode != null);
+        request.response.close();
 
         //Successful patch, send this update to all listeners
         for (var listener in patchListeners) {
           listener.add(jsonEncode(patch));
         }
-
         return;
       } catch (e) {
         print(e);
