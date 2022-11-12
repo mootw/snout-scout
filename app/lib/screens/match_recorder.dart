@@ -17,13 +17,14 @@ import 'package:snout_db/snout_db.dart';
 
 class MatchRecorderPage extends StatefulWidget {
   final int team;
+  final Alliance teamAlliance;
 
-  const MatchRecorderPage({required this.team, Key? key}) : super(key: key);
+  const MatchRecorderPage(
+      {super.key, required this.team, required this.teamAlliance});
 
   @override
   State<MatchRecorderPage> createState() => _MatchRecorderPageState();
 }
-
 
 enum MatchMode { setup, playing, finished }
 
@@ -35,8 +36,9 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
   double mapRotation = 0;
   Timer? t;
 
-  MatchEvent? get lastMoveEvent => events.toList().lastWhereOrNull((event) => event.id == "robot_position");
-  RobotPosition? get robotPosition => lastMoveEvent?.position;
+  MatchEvent? get lastMoveEvent =>
+      events.toList().lastWhereOrNull((event) => event.id == "robot_position");
+  FieldPosition? get robotPosition => lastMoveEvent?.position;
 
   get scoutingEvents => _time <= 17
       ? Provider.of<SnoutScoutData>(context, listen: false)
@@ -57,15 +59,23 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
   Widget getEventButton(MatchEvent tool) {
     return Card(
       child: MaterialButton(
-        onPressed: lastMoveEvent == null || _time - lastMoveEvent!.time > 3 ? null : () {
-          HapticFeedback.mediumImpact();
-          setState(() {
-            if (_mode != MatchMode.setup && robotPosition != null) {
-              events
-                  .add(MatchEvent.fromEventWithTime(time: _time, event: tool, position: robotPosition!));
-            }
-          });
-        },
+        onPressed: lastMoveEvent == null || _time - lastMoveEvent!.time > 3
+            ? null
+            : () {
+                HapticFeedback.mediumImpact();
+                setState(() {
+                  if (_mode != MatchMode.setup && robotPosition != null) {
+                    events.add(MatchEvent.fromEventWithTime(
+                        time: _time,
+                        event: tool,
+                        position: robotPosition!,
+                        redNormalizedPosition:
+                            widget.teamAlliance == Alliance.red
+                                ? robotPosition!
+                                : robotPosition!.inverted));
+                  }
+                });
+              },
         child: Text(tool.label),
       ),
     );
@@ -74,7 +84,8 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
   List<Widget> getTimeline() {
     return [
       const Center(
-          child: Text("Press 'start' when you hear the field buzzer and see the field lights. It is more important to know the location of each event rather than the position of the robot at all times. Event buttons will disable if no position has been recently input.")),
+          child: Text(
+              "Press 'start' when you hear the field buzzer and see the field lights. It is more important to know the location of each event rather than the position of the robot at all times. Event buttons will disable if no position has been recently input.")),
       const SizedBox(height: 32),
       const Center(
           child: SizedBox(height: 32, child: Text("Start of Timeline"))),
@@ -199,8 +210,11 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                           }
                           events.add(MatchEvent.robotPositionEvent(
                               time: _time,
-                              x: robotPosition.x,
-                              y: robotPosition.y));
+                              position: robotPosition,
+                              redNormalizedPosition:
+                                  widget.teamAlliance == Alliance.red
+                                      ? robotPosition
+                                      : robotPosition.inverted));
                         });
                       },
                     ),
@@ -236,7 +250,8 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                 child: FieldPositionSelector(
                   robotPosition: robotPosition,
                   onTap: (robotPosition) {
-                      HapticFeedback.lightImpact();
+                        print(robotPosition.toString());
+                    HapticFeedback.lightImpact();
                     setState(() {
                       for (final event in events.toList()) {
                         if (event.id == "robot_position") {
@@ -248,7 +263,12 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                         }
                       }
                       events.add(MatchEvent.robotPositionEvent(
-                          time: _time, x: robotPosition.x, y: robotPosition.y));
+                          time: _time,
+                          position: robotPosition,
+                          redNormalizedPosition:
+                              widget.teamAlliance == Alliance.red
+                                  ? robotPosition
+                                  : robotPosition.inverted));
                     });
                   },
                 ),
@@ -288,14 +308,22 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
           const SizedBox(width: 12),
           Text("Time: $_time"),
           const SizedBox(width: 12),
-          Text(
-              _mode == MatchMode.setup ? "Waiting" : _mode == MatchMode.playing ? _time > 17 ? "teleop" : "auto" : ""),
+          Text(_mode == MatchMode.setup
+              ? "Waiting"
+              : _mode == MatchMode.playing
+                  ? _time > 17
+                      ? "teleop"
+                      : "auto"
+                  : ""),
           const SizedBox(width: 12),
           FilledButton.icon(
             icon: const Icon(Icons.arrow_forward),
             onPressed: handleNextSection,
-            label: Text(
-                _mode == MatchMode.setup ? "Start" : _mode == MatchMode.playing ? "End" : ""),
+            label: Text(_mode == MatchMode.setup
+                ? "Start"
+                : _mode == MatchMode.playing
+                    ? "End"
+                    : ""),
           ),
         ],
       ),

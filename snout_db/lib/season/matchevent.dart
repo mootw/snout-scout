@@ -13,9 +13,9 @@ class MatchEvent {
   //x, y position on the field
   double x;
   double y;
-  //team normalized x y position on the field
-  double? xn;
-  double? yn;
+  //red team normalized x y position on the field
+  double nx;
+  double ny;
 
   Map<String, dynamic> data; //This depends on the type value
 
@@ -25,8 +25,8 @@ class MatchEvent {
       {this.time = 0,
       this.x = 0,
       this.y = 0,
-      this.xn = 0,
-      this.yn = 0,
+      this.nx = 0,
+      this.ny = 0,
       required this.id,
       required this.label,
       required this.values,
@@ -36,21 +36,26 @@ class MatchEvent {
 
   MatchEvent.fromEventWithTime(
       {required MatchEvent event,
-      required RobotPosition position,
+      required FieldPosition position,
+      required FieldPosition redNormalizedPosition,
       required this.time,
       this.data = const <String, dynamic>{}})
       : id = event.id,
         label = event.label,
         x = position.x,
         y = position.y,
+        nx = redNormalizedPosition.x,
+        ny = redNormalizedPosition.y,
         values = event.values;
 
   MatchEvent.robotPositionEvent(
-      {required this.time, required double x, required double y})
+      {required this.time, required FieldPosition position, required FieldPosition redNormalizedPosition})
       : id = "robot_position",
         label = "Robot Position",
-        x = x,
-        y = y,
+        x = position.x,
+        y = position.y,
+        nx = redNormalizedPosition.x,
+        ny = redNormalizedPosition.y,
         data = {},
         values = {};
 
@@ -60,6 +65,6 @@ class MatchEvent {
 
   double getDataNumber(String key) => data[key].toDouble();
 
-  RobotPosition get position => RobotPosition(x, y);
-  RobotPosition? get positionTeamNormalized => xn != null && yn != null ? RobotPosition(xn!, yn!) : null;
+  FieldPosition get position => FieldPosition(x, y);
+  FieldPosition get positionTeamNormalized => FieldPosition(nx, ny);
 }

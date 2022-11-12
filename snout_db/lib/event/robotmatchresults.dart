@@ -1,5 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:snout_db/event/pitscoutresult.dart';
+import 'package:snout_db/fieldposition.dart';
 import 'package:snout_db/season/matchevent.dart';
 
 part 'robotmatchresults.g.dart';
@@ -32,8 +33,14 @@ class RobotMatchResults {
         final newTime = pos1.time + x;
         interpolated.add(MatchEvent.robotPositionEvent(
           time: newTime,
-          x: lerp(pos1.time.toDouble(), pos1.x, pos2.time.toDouble(), pos2.x, newTime.toDouble()),
-          y: lerp(pos1.time.toDouble(), pos1.y, pos2.time.toDouble(), pos2.y, newTime.toDouble())));
+          redNormalizedPosition: FieldPosition(
+            lerp(pos1.time.toDouble(), pos1.positionTeamNormalized.x, pos2.time.toDouble(), pos2.positionTeamNormalized.x, newTime.toDouble()),
+            lerp(pos1.time.toDouble(), pos1.positionTeamNormalized.y, pos2.time.toDouble(), pos2.positionTeamNormalized.y, newTime.toDouble())
+          ),
+          position: FieldPosition(
+            lerp(pos1.time.toDouble(), pos1.position.x, pos2.time.toDouble(), pos2.position.x, newTime.toDouble()),
+            lerp(pos1.time.toDouble(), pos1.position.y, pos2.time.toDouble(), pos2.position.y, newTime.toDouble()))
+          ));
       }
     }
     return interpolated..sort((a, b) => a.time - b.time);

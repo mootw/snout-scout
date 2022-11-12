@@ -5,6 +5,7 @@ import 'package:snout_db/event/match.dart';
 import 'package:app/screens/match_page.dart';
 import 'package:app/screens/view_team_page.dart';
 import 'package:flutter/material.dart';
+import 'package:snout_db/snout_db.dart';
 
 const TextStyle whiteText = TextStyle(color: Colors.white70);
 const TextStyle whiteTextBold =
@@ -80,8 +81,8 @@ class MatchCard extends StatelessWidget {
                           match.results?.red['points'] != null
                               ? match.results!.red['points'].toString()
                               : "?",
-                          style: match.results?.winner == "red" ||
-                                  match.results?.winner == "tie"
+                          style: match.results?.winner == Alliance.red ||
+                                  match.results?.winner == Alliance.tie
                               ? whiteTextBold
                               : whiteText,
                         ),
@@ -116,8 +117,8 @@ class MatchCard extends StatelessWidget {
                             match.results?.blue['points'] != null
                                 ? match.results!.blue['points'].toString()
                                 : "?",
-                            style: match.results?.winner == "blue" ||
-                                    match.results?.winner == "tie"
+                            style: match.results?.winner == Alliance.blue ||
+                                    match.results?.winner == Alliance.tie
                                 ? whiteTextBold
                                 : whiteText),
                       ),

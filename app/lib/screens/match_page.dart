@@ -208,7 +208,7 @@ class _MatchPageState extends State<MatchPage> {
                         context,
                         MaterialPageRoute(
                             builder: (context) =>
-                                MatchRecorderPage(team: teamNumber)),
+                                MatchRecorderPage(team: teamNumber, teamAlliance: data.getAllianceOf(teamNumber))),
                       ));
 
               if (result != null) {

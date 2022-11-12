@@ -77,9 +77,12 @@ class _TeamViewPageState extends State<TeamViewPage> {
 
               Column(
                   children: [
+                    Text("Event heatmaps normalized to red alliance", style: Theme.of(context).textTheme.headlineSmall),
+
                     Text("Starting Positions",
                         style: Theme.of(context).textTheme.titleMedium),
                     FieldHeatMap(
+                        useRedNormalized: true,
                         events: snoutData.currentEvent
                             .matchesWithTeam(widget.teamNumber)
                             .fold(
@@ -94,12 +97,13 @@ class _TeamViewPageState extends State<TeamViewPage> {
                                               event.time == 0)
                                           .toList()
                                     ])),
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 16),
                     for (final eventType
                         in snoutData.season.matchscouting.uniqueEventIds) ...[
                       Text(eventType,
                           style: Theme.of(context).textTheme.titleMedium),
                       FieldHeatMap(
+                        useRedNormalized: true,
                           events: snoutData.currentEvent
                               .matchesWithTeam(widget.teamNumber)
                               .fold(
@@ -113,7 +117,7 @@ class _TeamViewPageState extends State<TeamViewPage> {
                                                 (event) => event.id == eventType)
                                             .toList()
                                       ])),
-                      const SizedBox(height: 32),
+                      const SizedBox(height: 16),
                     ],
                   ],
                 ),

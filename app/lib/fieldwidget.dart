@@ -17,8 +17,8 @@ class FieldPositionSelector extends StatelessWidget {
   const FieldPositionSelector(
       {super.key, required this.onTap, required this.robotPosition});
 
-  final Function(RobotPosition) onTap;
-  final RobotPosition? robotPosition;
+  final Function(FieldPosition) onTap;
+  final FieldPosition? robotPosition;
 
   @override
   Widget build(BuildContext context) {
@@ -27,11 +27,13 @@ class FieldPositionSelector extends StatelessWidget {
       child: LayoutBuilder(builder: (context, constraints) {
         return GestureDetector(
           onTapDown: (details) {
-            onTap(RobotPosition(
-                details.localPosition.dx / constraints.maxWidth,
-                1 -
-                    details.localPosition.dy /
-                        (constraints.maxWidth * mapRatio)));
+            onTap(FieldPosition(
+                (details.localPosition.dx / constraints.maxWidth * 2) - 1,
+                ((1 -
+                            details.localPosition.dy /
+                                (constraints.maxWidth * mapRatio)) *
+                        2) -
+                    1));
           },
           child: Stack(
             children: [
@@ -39,11 +41,11 @@ class FieldPositionSelector extends StatelessWidget {
               if (robotPosition != null)
                 Container(
                   alignment: Alignment(
-                      ((robotPosition!.x * 2) - 1) *
+                      robotPosition!.x *
                           (1 +
                               ((robotSize * constraints.maxWidth) /
                                   constraints.maxWidth)),
-                      -((robotPosition!.y * 2) - 1) *
+                      -robotPosition!.y *
                           (1 +
                               ((robotSize * constraints.maxWidth) /
                                   constraints.maxHeight))),
@@ -171,7 +173,7 @@ class RobotMapEventView extends StatelessWidget {
       //A position event is required to show the robot on the timeline
       return const SizedBox();
     }
-    RobotPosition robotPosition = posEvent.position;
+    FieldPosition robotPosition = posEvent.position;
 
     final allRecentEvents = match.robot[team]!.timelineInterpolated().where(
         (event) =>
@@ -188,11 +190,11 @@ class RobotMapEventView extends StatelessWidget {
                   ? const Duration(milliseconds: 1000)
                   : const Duration(milliseconds: 100),
               alignment: Alignment(
-                  ((robotPosition.x * 2) - 1) *
+                  robotPosition.x *
                       (1 +
                           ((robotSize * constraints.maxWidth) /
                               constraints.maxWidth)),
-                  -((robotPosition.y * 2) - 1) *
+                  -robotPosition.y *
                       (1 +
                           ((robotSize * constraints.maxWidth) /
                               constraints.maxHeight))),
@@ -210,13 +212,7 @@ class RobotMapEventView extends StatelessWidget {
             ),
             for (final event in allRecentEvents)
               Align(
-                alignment: Alignment(
-                    ((event.position.x *
-                            2) -
-                        1),
-                    -((event.position.y *
-                            2) -
-                        1)),
+                alignment: Alignment(event.position.x, -event.position.y),
                 child: Text(event.label,
                     style: const TextStyle(backgroundColor: Colors.black)),
               ),
@@ -227,8 +223,9 @@ class RobotMapEventView extends StatelessWidget {
 
 class FieldHeatMap extends StatelessWidget {
   final List<MatchEvent> events;
+  final bool useRedNormalized;
 
-  const FieldHeatMap({super.key, required this.events});
+  const FieldHeatMap({super.key, required this.events, required this.useRedNormalized});
 
   @override
   Widget build(BuildContext context) {
@@ -240,7 +237,7 @@ class FieldHeatMap extends StatelessWidget {
               Image.network("$serverURL/field_map.png"),
               CustomPaint(
                 size: Size.infinite,
-                painter: HeatMap(events: events),
+                painter: HeatMap(events: events, useRedNormalized: useRedNormalized),
               )
             ],
           );
@@ -250,20 +247,32 @@ class FieldHeatMap extends StatelessWidget {
 
 class HeatMap extends CustomPainter {
   List<MatchEvent> events;
+  bool useRedNormalized;
 
-  HeatMap({required this.events});
+  HeatMap({required this.events, required this.useRedNormalized});
 
   @override
   void paint(Canvas canvas, Size size) {
     Paint p = Paint()..color = Colors.green;
-    p.maskFilter = MaskFilter.blur(BlurStyle.normal, math.min(events.length * 0.5, 10));
+    p.maskFilter =
+        MaskFilter.blur(BlurStyle.normal, math.min(events.length * 0.5, 10));
 
     for (final event in events) {
-      canvas.drawCircle(
-          Offset(event.position.x * size.width,
-              (1 - event.position.y) * size.height),
-          10,
-          p);
+      Offset offset = Offset(
+          (((useRedNormalized
+                          ? event.positionTeamNormalized.x
+                          : event.position.x) +
+                      1) /
+                  2) *
+              size.width,
+          (1 -
+                  (((useRedNormalized
+                              ? event.positionTeamNormalized.y
+                              : event.position.y) +
+                          1) /
+                      2)) *
+              size.height);
+      canvas.drawCircle(offset, 5 + math.min(events.length.toDouble(), 10), p);
     }
   }
 

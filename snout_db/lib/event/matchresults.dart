@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:snout_db/game.dart';
 
 part 'matchresults.g.dart';
 
@@ -15,19 +16,18 @@ class MatchResults {
   factory MatchResults.fromJson(Map<String, dynamic> json) => _$MatchResultsFromJson(json);
   Map<String, dynamic> toJson() => _$MatchResultsToJson(this);
 
-  get winner {
+  Alliance get winner {
     int redPts = red['points']!;
     int bluePts = blue['points']!;
     if(redPts == bluePts) {
-      return "tie";
+      return Alliance.tie;
     }
     if(redPts > bluePts) {
-      return "red";
+      return Alliance.red;
     } else {
-      return "blue";
+      return Alliance.blue;
     }
   }
 }
 
 
-enum TournamentLevel { None, Practice, Qualification, Playoff }
