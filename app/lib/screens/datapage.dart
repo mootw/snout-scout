@@ -21,7 +21,7 @@ class _DataTablePageState extends State<DataTablePage> {
           const Text(
               "Display a spreadsheet like table with every metric (including performance metrics for ranking like win-loss) and allow sorting and filtering of the data"),
           ScrollConfiguration(
-            behavior: MyCustomScrollBehavior(),
+            behavior: MouseInteractableScrollBehavior(),
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: DataTable(
@@ -31,6 +31,10 @@ class _DataTablePageState extends State<DataTablePage> {
                   for (final eventType
                       in snoutData.season.matchscouting.uniqueEventIds)
                     DataColumn(label: Text("avg $eventType")),
+
+                  for (final pitSurvey
+                      in snoutData.season.pitscouting.where((element) => element.type != "picture"))
+                    DataColumn(label: Text("Pit Scouting:\n${pitSurvey.label}")),
                 ],
                 rows: [
                   for (final team in snoutData.currentEvent.teams)
@@ -69,6 +73,9 @@ class _DataTablePageState extends State<DataTablePage> {
                                         element.robot[team.toString()] != null)
                                     .length)
                             ))),
+                      for (final pitSurvey
+                        in snoutData.season.pitscouting.where((element) => element.type != "picture"))
+                          DataCell(Text(snoutData.currentEvent.pitscouting[team.toString()]?[pitSurvey.id]?.toString() ?? "No Data")),
                     ])
                 ],
               ),
@@ -87,7 +94,7 @@ String numDisplay (double? input) {
   return ((input * 10).round() / 10).toString();
 }
 
-class MyCustomScrollBehavior extends MaterialScrollBehavior {
+class MouseInteractableScrollBehavior extends MaterialScrollBehavior {
   // Override behavior methods and getters like dragDevices
   @override
   Set<PointerDeviceKind> get dragDevices => {

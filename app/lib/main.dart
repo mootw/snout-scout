@@ -32,6 +32,8 @@ void main() async {
   SnoutDB db;
   bool connected = false;
 
+  
+
   try {
     //Load season config from server
     var data = await apiClient.get(Uri.parse("$serverURL/season"));

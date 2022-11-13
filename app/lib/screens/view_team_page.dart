@@ -5,6 +5,8 @@ import 'package:app/edit_lock.dart';
 import 'package:app/fieldwidget.dart';
 import 'package:app/main.dart';
 import 'package:app/match_card.dart';
+import 'package:app/screens/datapage.dart';
+import 'package:app/screens/match_page.dart';
 import 'package:app/screens/scout_team.dart';
 import 'package:app/scouting_tools/scouting_tool.dart';
 import 'package:flutter/material.dart';
@@ -68,19 +70,129 @@ class _TeamViewPageState extends State<TeamViewPage> {
                 ],
               ),
               const Divider(height: 32),
-              const Text(
-                  "Performance Summary like min-max-average metrics over all games"),
+
+              for (final eventType
+                  in snoutData.season.matchscouting.uniqueEventIds)
+                ListTile(
+                  title: Text('avg $eventType'),
+                  subtitle: Text(numDisplay((snoutData.currentEvent
+                          .matchesWithTeam(widget.teamNumber)
+                          .fold<int>(
+                              0,
+                              (previousValue, match) =>
+                                  previousValue +
+                                  (match.robot[widget.teamNumber.toString()]
+                                          ?.timeline
+                                          .where(
+                                              (event) => event.id == eventType)
+                                          .length ??
+                                      0)) /
+                      snoutData.currentEvent
+                          .matchesWithTeam(widget.teamNumber)
+                          .where((element) =>
+                              element.robot[widget.teamNumber.toString()] !=
+                              null)
+                          .length))),
+                ),
+
               const Divider(height: 32),
-              const Text(
-                  "Graphs like performance of specific metrics over multiple matches"),
+
+              ScrollConfiguration(
+                behavior: MouseInteractableScrollBehavior(),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: DataTable(
+                    columns: [
+                      const DataColumn(label: Text("Match")),
+                      for (final event
+                          in snoutData.season.matchscouting.uniqueEventIds)
+                        DataColumn(label: Text(event)),
+                      for (final pitSurvey in snoutData
+                          .season.matchscouting.postgame
+                          .where((element) => element.type != "picture"))
+                        DataColumn(label: Text(pitSurvey.label)),
+                    ],
+                    rows: [
+                      for (final match in snoutData.currentEvent
+                          .matchesWithTeam(widget.teamNumber).reversed)
+                        DataRow(cells: [
+                          DataCell(TextButton(
+                            onPressed: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          MatchPage(matchid: snoutData.currentEvent.matches.indexOf(match))),
+                                );
+                            },
+                            child: Text(match.description))),
+                          for (final eventId
+                              in snoutData.season.matchscouting.uniqueEventIds)
+                            DataCell(Text(numDisplay(match
+                                .robot[widget.teamNumber.toString()]?.timeline
+                                .where((event) => event.id == eventId)
+                                .length
+                                .toDouble()))),
+                          for (final pitSurvey in snoutData
+                              .season.matchscouting.postgame
+                              .where((element) => element.type != "picture"))
+                            DataCell(Text(match
+                                    .robot[widget.teamNumber.toString()]
+                                    ?.survey[pitSurvey.id]
+                                    ?.toString() ??
+                                "No Data")),
+                        ])
+                    ],
+                  ),
+                ),
+              ),
+
               const Divider(height: 32),
 
               Column(
-                  children: [
-                    Text("Event heatmaps normalized to red alliance", style: Theme.of(context).textTheme.headlineSmall),
-
-                    Text("Starting Positions",
-                        style: Theme.of(context).textTheme.titleMedium),
+                children: [
+                  Text("Starting Positions",
+                      style: Theme.of(context).textTheme.titleLarge),
+                  FieldHeatMap(
+                      useRedNormalized: true,
+                      events: snoutData.currentEvent
+                          .matchesWithTeam(widget.teamNumber)
+                          .fold(
+                              [],
+                              (previousValue, element) => [
+                                    ...previousValue,
+                                    ...?element
+                                        .robot[widget.teamNumber.toString()]
+                                        ?.timeline
+                                        .where((event) =>
+                                            event.id == "robot_position" &&
+                                            event.time == 0)
+                                        .toList()
+                                  ])),
+                  const SizedBox(height: 16),
+                  Text("Auto Positions",
+                      style: Theme.of(context).textTheme.titleLarge),
+                  FieldHeatMap(
+                      useRedNormalized: true,
+                      events: snoutData.currentEvent
+                          .matchesWithTeam(widget.teamNumber)
+                          .fold(
+                              [],
+                              (previousValue, element) => [
+                                    ...previousValue,
+                                    ...?element
+                                        .robot[widget.teamNumber.toString()]
+                                        ?.timelineInterpolated()
+                                        .where((event) =>
+                                            event.id == "robot_position" &&
+                                            event.isInAuto)
+                                        .toList()
+                                  ])),
+                  const SizedBox(height: 16),
+                  for (final eventType
+                      in snoutData.season.matchscouting.uniqueEventIds) ...[
+                    Text(eventType,
+                        style: Theme.of(context).textTheme.titleLarge),
                     FieldHeatMap(
                         useRedNormalized: true,
                         events: snoutData.currentEvent
@@ -92,52 +204,14 @@ class _TeamViewPageState extends State<TeamViewPage> {
                                       ...?element
                                           .robot[widget.teamNumber.toString()]
                                           ?.timeline
-                                          .where((event) =>
-                                              event.id == "robot_position" &&
-                                              event.time == 0)
-                                          .toList()
-                                    ])),
-                    Text("Positions",
-                        style: Theme.of(context).textTheme.titleMedium),
-                    FieldHeatMap(
-                        useRedNormalized: true,
-                        events: snoutData.currentEvent
-                            .matchesWithTeam(widget.teamNumber)
-                            .fold(
-                                [],
-                                (previousValue, element) => [
-                                      ...previousValue,
-                                      ...?element
-                                          .robot[widget.teamNumber.toString()]
-                                          ?.timelineInterpolated()
-                                          .where((event) =>
-                                              event.id == "robot_position")
+                                          .where(
+                                              (event) => event.id == eventType)
                                           .toList()
                                     ])),
                     const SizedBox(height: 16),
-                    for (final eventType
-                        in snoutData.season.matchscouting.uniqueEventIds) ...[
-                      Text(eventType,
-                          style: Theme.of(context).textTheme.titleMedium),
-                      FieldHeatMap(
-                        useRedNormalized: true,
-                          events: snoutData.currentEvent
-                              .matchesWithTeam(widget.teamNumber)
-                              .fold(
-                                  [],
-                                  (previousValue, element) => [
-                                        ...previousValue,
-                                        ...?element
-                                            .robot[widget.teamNumber.toString()]
-                                            ?.timeline
-                                            .where(
-                                                (event) => event.id == eventType)
-                                            .toList()
-                                      ])),
-                      const SizedBox(height: 16),
-                    ],
                   ],
-                ),
+                ],
+              ),
             ],
           ));
     });

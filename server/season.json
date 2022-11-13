@@ -13,31 +13,6 @@
             "label": "Robot Photo"
         },
         {
-            "id": "auto_high",
-            "type": "number",
-            "label": "Cargo high in autonomous"
-        },
-        {
-            "id": "auto_low",
-            "type": "number",
-            "label": "Cargo low in autonomous"
-        },
-        {
-            "id": "teleop_high",
-            "type": "number",
-            "label": "Cargo high in teleop"
-        },
-        {
-            "id": "teleop_low",
-            "type": "number",
-            "label": "Cargo low in teleop"
-        },
-        {
-            "id": "shooting_positions",
-            "type": "map-boolean",
-            "label": "Positions this robot can shoot from."
-        },
-        {
             "id": "shooter_type",
             "type": "selector",
             "options": [
@@ -66,9 +41,24 @@
             "label": "Climb time"
         },
         {
+            "id": "auto",
+            "type": "text-box",
+            "label": "Describe autos"
+        },
+        {
             "id": "can_defense",
             "type": "toggle",
-            "label": "Can this robot play defense?"
+            "label": "Can play defense?"
+        },
+        {
+            "id": "pick",
+            "type": "selector",
+            "options": [
+                "Definitely not",
+                "Potentially",
+                "Top Pick"
+            ],
+            "label": "Should We Pick?"
         },
         {
             "id": "comments",
@@ -263,6 +253,16 @@
                 "id": "defense",
                 "type": "toggle",
                 "label": "Did this robot play defense?"
+            },
+            {
+                "id": "defense_skill",
+                "type": "selector",
+                "options": [
+                    "Low",
+                    "Medium",
+                    "High"
+                ],
+                "label": "Defense Skill"
             },
             {
                 "id": "comments",

@@ -17,10 +17,16 @@ double robotPorportionalSize = 32 / fieldWidthSizeInches;
 
 class FieldPositionSelector extends StatelessWidget {
   const FieldPositionSelector(
-      {super.key, required this.onTap, required this.robotPosition});
+      {super.key,
+      required this.onTap,
+      required this.robotPosition,
+      required this.alliance,
+      required this.teamNumber});
 
   final Function(FieldPosition) onTap;
   final FieldPosition? robotPosition;
+  final Alliance alliance;
+  final int teamNumber;
 
   @override
   Widget build(BuildContext context) {
@@ -52,13 +58,14 @@ class FieldPositionSelector extends StatelessWidget {
                               ((robotPorportionalSize * constraints.maxWidth) /
                                   constraints.maxHeight))),
                   child: Container(
-                    width: robotPorportionalSize * constraints.maxWidth,
-                    height: robotPorportionalSize * constraints.maxWidth,
-                    color: Colors.black,
-                    child: Icon(Icons.smart_toy,
-                        size: robotPorportionalSize * constraints.maxWidth - 2,
-                        color: Theme.of(context).colorScheme.primary),
-                  ),
+                    alignment: Alignment.center,
+                      width: robotPorportionalSize * constraints.maxWidth,
+                      height: robotPorportionalSize * constraints.maxWidth,
+                      color:
+                          alliance == Alliance.red ? Colors.red : Colors.blue,
+                      child: Text(teamNumber.toString(),
+                          style: TextStyle(
+                              fontSize: 13 * (constraints.maxWidth / fieldWidthSizeInches)))),
                 ),
             ],
           ),
@@ -209,7 +216,7 @@ class RobotMapEventView extends StatelessWidget {
                     : Colors.blue,
                 child: Text(team,
                     style:
-                        TextStyle(fontSize: 10 * (constraints.maxWidth / 500))),
+                        TextStyle(fontSize: 13 * (constraints.maxWidth / fieldWidthSizeInches))),
               ),
             ),
             for (final event in allRecentEvents)
@@ -239,7 +246,10 @@ class FieldHeatMap extends StatelessWidget {
             children: [
               Image.network("$serverURL/field_map.png"),
               //Darken the map slightly to create more contrast against the heatmap
-              Container(width: double.infinity, height: double.infinity, color: Colors.black26),
+              Container(
+                  width: double.infinity,
+                  height: double.infinity,
+                  color: Colors.black26),
               CustomPaint(
                 size: Size.infinite,
                 painter:
@@ -288,17 +298,21 @@ class HeatMap extends CustomPainter {
     result.sort((a, b) => a.length - b.length);
 
     //Max group length with a minimum of 4 (to prevent single elements from being red hot)
-    int maxGroupLength = result.fold(0, (previousValue, element) => math.max(previousValue, element.length));
+    int maxGroupLength = result.fold(
+        0, (previousValue, element) => math.max(previousValue, element.length));
 
     for (final group in result) {
       //group contains the index of each element in that group
 
       Paint p = Paint();
-      p.maskFilter = MaskFilter.blur(BlurStyle.normal, math.sqrt(group.length) + 2);
-      p.color =
-          HSVColor.fromAHSV(1, (1 - (group.length / maxGroupLength)) * 225, 1, 1).toColor();
+      p.maskFilter =
+          MaskFilter.blur(BlurStyle.normal, math.sqrt(group.length) + 2);
+      p.color = HSVColor.fromAHSV(
+              1, (1 - (group.length / maxGroupLength)) * 225, 1, 1)
+          .toColor();
       //Draw more and more green circles with increasing opacity
-      canvas.drawCircle(Offset(ls[group[0]][0], ls[group[0]][1]), 6 + math.sqrt(group.length * 3), p);
+      canvas.drawCircle(Offset(ls[group[0]][0], ls[group[0]][1]),
+          6 + math.sqrt(group.length * 3), p);
     }
   }
 

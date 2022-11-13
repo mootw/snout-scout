@@ -67,4 +67,6 @@ class MatchEvent {
 
   FieldPosition get position => FieldPosition(x, y);
   FieldPosition get positionTeamNormalized => FieldPosition(nx, ny);
+  
+  bool get isInAuto => time <= 17;
 }

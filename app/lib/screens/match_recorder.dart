@@ -195,6 +195,8 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                   child: Transform.rotate(
                     angle: mapRotation,
                     child: FieldPositionSelector(
+                      teamNumber: widget.team,
+                      alliance: widget.teamAlliance,
                       robotPosition: robotPosition,
                       onTap: (robotPosition) {
                         HapticFeedback.lightImpact();
@@ -248,6 +250,8 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
               child: Transform.rotate(
                 angle: mapRotation,
                 child: FieldPositionSelector(
+                  teamNumber: widget.team,
+                  alliance: widget.teamAlliance,
                   robotPosition: robotPosition,
                   onTap: (robotPosition) {
                         print(robotPosition.toString());
