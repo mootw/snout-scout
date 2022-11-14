@@ -6,7 +6,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:snout_db/event/pitscoutresult.dart';
-import 'package:snout_db/season/surveyitem.dart';
+import 'package:snout_db/config/surveyitem.dart';
 
 double scoutImageSize = 420;
 
@@ -30,17 +30,17 @@ class _ScoutingToolWidgetState extends State<ScoutingToolWidget> {
   @override
   void initState() {
     super.initState();
-    if (value == null && widget.tool.type == "toggle") {
+    if (value == null && widget.tool.type == SurveyItemType.toggle) {
       value = false;
     }
-    if (widget.tool.type == "text-box" || widget.tool.type == "number") {
+    if (widget.tool.type == SurveyItemType.text || widget.tool.type == SurveyItemType.number) {
       myController.text = value?.toString() ?? "";
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (widget.tool.type == "text-box") {
+    if (widget.tool.type == SurveyItemType.text) {
       return TextField(
         controller: myController,
         onChanged: (text) {
@@ -59,7 +59,7 @@ class _ScoutingToolWidgetState extends State<ScoutingToolWidget> {
       );
     }
 
-    if (widget.tool.type == "number") {
+    if (widget.tool.type == SurveyItemType.number) {
       return TextField(
         controller: myController,
         onChanged: (text) {
@@ -73,7 +73,7 @@ class _ScoutingToolWidgetState extends State<ScoutingToolWidget> {
       );
     }
 
-    if (widget.tool.type == "selector") {
+    if (widget.tool.type == SurveyItemType.selector) {
       return ListTile(
         title: Text(widget.tool.label),
         trailing: DropdownButton<String>(
@@ -95,7 +95,7 @@ class _ScoutingToolWidgetState extends State<ScoutingToolWidget> {
       );
     }
 
-    if (widget.tool.type == "toggle") {
+    if (widget.tool.type == SurveyItemType.toggle) {
       return ListTile(
         title: Text(widget.tool.label),
         trailing: Switch(
@@ -108,7 +108,7 @@ class _ScoutingToolWidgetState extends State<ScoutingToolWidget> {
       );
     }
 
-    if (widget.tool.type == "picture") {
+    if (widget.tool.type == SurveyItemType.picture) {
       return ListTile(
         leading: IconButton(
             icon: const Icon(Icons.camera_alt),

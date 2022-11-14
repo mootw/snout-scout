@@ -8,11 +8,12 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:snout_db/config/matcheventconfig.dart';
+import 'package:snout_db/event/matchevent.dart';
 import 'package:snout_db/event/pitscoutresult.dart';
 import 'package:snout_db/event/robotmatchresults.dart';
 import 'dart:math' as math;
 
-import 'package:snout_db/season/matchevent.dart';
 import 'package:snout_db/snout_db.dart';
 
 class MatchRecorderPage extends StatefulWidget {
@@ -42,13 +43,18 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
 
   get scoutingEvents => _time <= 17
       ? Provider.of<SnoutScoutData>(context, listen: false)
-          .season
+          .db
+          .config
           .matchscouting
-          .auto
+          .events
+          .where((element) =>
+              element.mode == MatchSegment.auto ||
+              element.mode == MatchSegment.both)
       : Provider.of<SnoutScoutData>(context, listen: false)
-          .season
+          .db
+          .config
           .matchscouting
-          .teleop;
+          .events;
 
   @override
   void dispose() {
@@ -56,7 +62,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
     super.dispose();
   }
 
-  Widget getEventButton(MatchEvent tool) {
+  Widget getEventButton(MatchEventConfig tool) {
     return Card(
       child: MaterialButton(
         onPressed: lastMoveEvent == null || _time - lastMoveEvent!.time > 3
@@ -65,7 +71,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                 HapticFeedback.mediumImpact();
                 setState(() {
                   if (_mode != MatchMode.setup && robotPosition != null) {
-                    events.add(MatchEvent.fromEventWithTime(
+                    events.add(MatchEvent.fromEventConfig(
                         time: _time,
                         event: tool,
                         position: robotPosition!,
@@ -140,7 +146,8 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
             children: [
               for (var item
                   in Provider.of<SnoutScoutData>(context, listen: false)
-                      .season
+                      .db
+                      .config
                       .matchscouting
                       .postgame)
                 Container(
@@ -254,7 +261,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                   alliance: widget.teamAlliance,
                   robotPosition: robotPosition,
                   onTap: (robotPosition) {
-                        print(robotPosition.toString());
+                    print(robotPosition.toString());
                     HapticFeedback.lightImpact();
                     setState(() {
                       for (final event in events.toList()) {

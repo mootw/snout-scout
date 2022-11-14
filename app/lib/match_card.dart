@@ -29,7 +29,7 @@ class MatchCard extends StatelessWidget {
             MaterialPageRoute(
                 builder: (context) => MatchPage(
                     matchid: Provider.of<SnoutScoutData>(context, listen: false)
-                        .currentEvent
+                        .db
                         .matches
                         .indexOf(match))),
           );

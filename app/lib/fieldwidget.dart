@@ -1,6 +1,5 @@
 //Ratio of width to height
 import 'dart:async';
-import 'dart:html';
 import 'dart:math' as math;
 
 import 'package:app/main.dart';
@@ -8,7 +7,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:simple_cluster/simple_cluster.dart';
 import 'package:snout_db/event/match.dart';
-import 'package:snout_db/season/matchevent.dart';
+import 'package:snout_db/event/matchevent.dart';
 import 'package:snout_db/snout_db.dart';
 
 double mapRatio = 0.5;
@@ -45,7 +44,7 @@ class FieldPositionSelector extends StatelessWidget {
           },
           child: Stack(
             children: [
-              Image.network("$serverURL/field_map.png"),
+              Image.asset("field_map.png"),
               if (robotPosition != null)
                 Container(
                   alignment: Alignment(
@@ -115,7 +114,7 @@ class _FieldTimelineViewerState extends State<FieldTimelineViewer> {
             child: LayoutBuilder(builder: (context, constraints) {
               return Stack(
                 children: [
-                  Image.network("$serverURL/field_map.png"),
+                  Image.asset("field_map.png"),
                   for (final robot in widget.match.robot.keys)
                     RobotMapEventView(
                         time: _animationTime,
@@ -244,7 +243,7 @@ class FieldHeatMap extends StatelessWidget {
         child: LayoutBuilder(builder: (context, constraints) {
           return Stack(
             children: [
-              Image.network("$serverURL/field_map.png"),
+              Image.asset("field_map.png"),
               //Darken the map slightly to create more contrast against the heatmap
               Container(
                   width: double.infinity,

@@ -5,13 +5,13 @@ import 'package:app/main.dart';
 import 'package:app/scouting_tools/scouting_tool.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:snout_db/config/eventconfig.dart';
 import 'package:snout_db/event/pitscoutresult.dart';
 import 'package:snout_db/patch.dart';
-import 'package:snout_db/snout_db.dart';
 
 class PitScoutTeamPage extends StatefulWidget {
   final int team;
-  final Season config;
+  final EventConfig config;
   final PitScoutResult? oldData;
 
   const PitScoutTeamPage(
@@ -50,8 +50,6 @@ class _PitScoutTeamPageState extends State<PitScoutTeamPage> {
                       user: "anon",
                       time: DateTime.now(),
                       path: [
-                        'events',
-                        snoutData.selectedEventID,
                         'pitscouting',
                         widget.team.toString()
                       ],

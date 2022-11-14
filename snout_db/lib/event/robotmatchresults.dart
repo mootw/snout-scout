@@ -1,7 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:snout_db/event/pitscoutresult.dart';
 import 'package:snout_db/fieldposition.dart';
-import 'package:snout_db/season/matchevent.dart';
+import 'package:snout_db/event/matchevent.dart';
 
 part 'robotmatchresults.g.dart';
 

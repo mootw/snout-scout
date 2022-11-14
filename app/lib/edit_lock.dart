@@ -8,11 +8,12 @@ import 'package:flutter/material.dart';
 //This function will not throw an exception and always fail safe by navigating to the other page.
 Future<dynamic> navigateWithEditLock(
     BuildContext context, String key, Function navigteFunction) async {
+
+  Uri editLockUri = Uri.parse("${Uri.parse(serverURL).scheme}://${Uri.parse(serverURL).host}:${Uri.parse(serverURL).port}/edit_lock");
   //Check if this key is being edited
   try {
-    var isLocked = await apiClient.get(
-        Uri.parse("$serverURL/edit_lock"),
-        headers: {"key": key});
+    var isLocked = await apiClient
+        .get(editLockUri, headers: {"key": key}).timeout(const Duration(seconds: 1));
 
     if (isLocked.body == "true") {
       //Warn that this key is locked
@@ -43,15 +44,24 @@ Future<dynamic> navigateWithEditLock(
       }
     } else {
       //Apply lock
-      await apiClient.post(Uri.parse("$serverURL/edit_lock"),
-          headers: {"key": key});
+      try {
+        await apiClient
+            .post(editLockUri, headers: {"key": key}).timeout(const Duration(seconds: 1));
+      } catch (e) {
+        print(e);
+      }
+
       //Navigate
       var result = await navigteFunction();
       //Clear lock
+
       try {
-        await apiClient.delete(Uri.parse("$serverURL/edit_lock"),
-            headers: {"key": key});
-      } catch (e) {}
+        await apiClient
+            .delete(editLockUri, headers: {"key": key}).timeout(const Duration(seconds: 1));
+      } catch (e) {
+        print(e);
+      }
+
       //Return data
       return result;
     }

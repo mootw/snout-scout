@@ -3,11 +3,13 @@ import 'dart:convert';
 import 'package:app/api.dart';
 import 'package:app/screens/analysis.dart';
 import 'package:app/screens/datapage.dart';
+import 'package:app/screens/edit_json.dart';
 import 'package:app/screens/matches_page.dart';
 import 'package:app/screens/teams_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:snout_db/config/eventconfig.dart';
 import 'package:snout_db/event/frcevent.dart';
 import 'package:snout_db/patch.dart';
 import 'package:snout_db/snout_db.dart';
@@ -23,35 +25,24 @@ Future setServer(String newServer) async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   //Load data and initialize the app
   var prefs = await SharedPreferences.getInstance();
   serverURL = prefs.getString("server") ?? "http://localhost:6749";
 
-  Season season;
-  SnoutDB db;
-  bool connected = false;
-
-  
+  FRCEvent event;
 
   try {
     //Load season config from server
-    var data = await apiClient.get(Uri.parse("$serverURL/season"));
-    season = Season.fromJson(jsonDecode(data.body));
-    prefs.setString("season", data.body);
+    var data = await apiClient.get(Uri.parse("$serverURL"));
+    event = FRCEvent.fromJson(jsonDecode(data.body));
+    prefs.setString("$serverURL", data.body);
 
-    //Load database from server
-    var dbData = await apiClient.get(Uri.parse("$serverURL/data"));
-    db = SnoutDB.fromJson(jsonDecode(dbData.body));
-    prefs.setString("db", dbData.body);
   } catch (e) {
-    connected = false;
     try {
       //Load from cache
-      String? seasonCache = prefs.getString("season");
-      season = Season.fromJson(jsonDecode(seasonCache!));
-      String? dbCache = prefs.getString("db");
-      db = SnoutDB.fromJson(jsonDecode(dbCache!));
+      String? dbCache = prefs.getString("$serverURL");
+      event = FRCEvent.fromJson(jsonDecode(dbCache!));
       print("got data from cache");
     } catch (e) {
       //Really bad we have no cache or server connection
@@ -60,7 +51,7 @@ void main() async {
     }
   }
 
-  SnoutScoutData data = SnoutScoutData(season, db);
+  SnoutScoutData data = SnoutScoutData(event);
 
   runApp(ChangeNotifierProvider(
     create: (context) => data,
@@ -92,54 +83,50 @@ class SetupAppScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: const Text("Error Connecting"),
-        ),
-        body: ListView(
-          children: [
-            ListTile(
-              title: const Text("Server"),
-              subtitle: Text(serverURL),
-              trailing: IconButton(
-                icon: const Icon(Icons.edit),
-                onPressed: () async {
-                  print("pressed");
-                  var result =
-                      await showStringInputDialog(context, "Server", serverURL);
-                  if (result != null) {
-                    await setServer(result);
-                  }
-                },
-              ),
+      appBar: AppBar(
+        title: const Text("Error Connecting"),
+      ),
+      body: ListView(
+        children: [
+          ListTile(
+            title: const Text("Server"),
+            subtitle: Text(serverURL),
+            trailing: IconButton(
+              icon: const Icon(Icons.edit),
+              onPressed: () async {
+                print("pressed");
+                var result =
+                    await showStringInputDialog(context, "Server", serverURL);
+                if (result != null) {
+                  await setServer(result);
+                }
+              },
             ),
-          ],
-        ),
-      );
+          ),
+        ],
+      ),
+    );
   }
 }
 
-
 class SnoutScoutData extends ChangeNotifier {
-  List<String> get events => db.events.keys.toList();
-
-  late String selectedEventID;
-
-  Season season;
-  SnoutDB db;
 
   //Edit mode shows options to edit things like adding/removing
   //events, matches, teams, match scheduled times...
   bool editMode = false;
 
-  FRCEvent get currentEvent => db.events[selectedEventID]!;
+  FRCEvent db;
 
-  SnoutScoutData(this.season, this.db) {
-    selectedEventID = db.events.keys.first;
+  SnoutScoutData(this.db) {
 
     late WebSocketChannel channel;
-    channel = WebSocketChannel.connect(
-        Uri.parse('${serverURL.startsWith("https") ? "wss" : "ws"}://${Uri.parse(serverURL).host}:${Uri.parse(serverURL).port}/patchlistener'));
+    Uri serverUri = Uri.parse(serverURL);
+    channel = WebSocketChannel.connect(Uri.parse(
+        '${serverURL.startsWith("https") ? "wss" : "ws"}://${serverUri.host}:${serverUri.port}/listen/${serverUri.pathSegments[1]}'));
     channel.stream.listen((event) async {
+
+      print("got notification");
+
       db = Patch.fromJson(jsonDecode(event)).patch(db);
       final prefs = await SharedPreferences.getInstance();
       //Save the database to disk
@@ -148,13 +135,11 @@ class SnoutScoutData extends ChangeNotifier {
     });
   }
 
-  void setEditMode () {
-
-  }
+  void setEditMode() {}
 
   //Writes a patch to local disk and submits it to the server.
   Future addPatch(Patch patch) async {
-    var res = await apiClient.put(Uri.parse("$serverURL/data"),
+    var res = await apiClient.put(Uri.parse("$serverURL"),
         body: jsonEncode(patch));
 
     if (res.statusCode == 200) {
@@ -203,21 +188,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return Consumer<SnoutScoutData>(builder: (context, snoutData, child) {
       return Scaffold(
         appBar: AppBar(
-          title: DropdownButton<String>(
-            onChanged: (value) {
-              setState(() {
-                snoutData.selectedEventID = value!;
-              });
-            },
-            value: snoutData.selectedEventID,
-            items:
-                snoutData.events.map<DropdownMenuItem<String>>((String value) {
-              return DropdownMenuItem<String>(
-                value: value,
-                child: Text(value),
-              );
-            }).toList(),
-          ),
+          title: Text(snoutData.db.name),
         ),
         body: [
           const AllMatchesPage(),
@@ -243,8 +214,29 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
             ListTile(
-              title: const Text("Season Config"),
-              subtitle: Text(snoutData.season.season),
+              title: const Text("Event Config"),
+              subtitle: Text(snoutData.db.config.season),
+              trailing: IconButton(
+                  onPressed: () async {
+                    final result = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => JSONEditor(validate: EventConfig.fromJson, source: const JsonEncoder.withIndent("    ").convert(Provider.of<SnoutScoutData>(context, listen: false).db.config),),
+                        ));
+
+                    if(result != null) {
+                      Patch patch = Patch(
+                      user: "anon",
+                      time: DateTime.now(),
+                      path: [
+                        'config'
+                      ],
+                      data: result);
+                      //Save the scouting results to the server!!
+                      await snoutData.addPatch(patch);
+                    }
+                  },
+                  icon: const Icon(Icons.edit)),
             ),
           ]),
         ),

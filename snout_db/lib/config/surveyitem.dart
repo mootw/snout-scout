@@ -7,7 +7,7 @@ class SurveyItem {
 
   String id;
   String label;
-  String type;
+  SurveyItemType type;
 
   //Used by the selector type
   List<String>? options;
@@ -18,3 +18,6 @@ class SurveyItem {
   factory SurveyItem.fromJson(Map<String, dynamic> json) => _$SurveyItemFromJson(json);
   Map<String, dynamic> toJson() => _$SurveyItemToJson(this);
 }
+
+
+enum SurveyItemType {selector, picture, toggle, number, text}

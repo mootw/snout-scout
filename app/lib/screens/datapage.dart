@@ -4,6 +4,7 @@ import 'package:app/main.dart';
 import 'package:app/screens/view_team_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:snout_db/config/surveyitem.dart';
 
 class DataTablePage extends StatefulWidget {
   const DataTablePage({super.key});
@@ -29,15 +30,15 @@ class _DataTablePageState extends State<DataTablePage> {
                   const DataColumn(label: Text("Team")),
                   const DataColumn(label: Text("Played")),
                   for (final eventType
-                      in snoutData.season.matchscouting.uniqueEventIds)
-                    DataColumn(label: Text("avg $eventType")),
+                      in snoutData.db.config.matchscouting.events)
+                    DataColumn(label: Text("avg\n${eventType.label}")),
 
                   for (final pitSurvey
-                      in snoutData.season.pitscouting.where((element) => element.type != "picture"))
+                      in snoutData.db.config.pitscouting.where((element) => element.type != SurveyItemType.picture))
                     DataColumn(label: Text("Pit Scouting:\n${pitSurvey.label}")),
                 ],
                 rows: [
-                  for (final team in snoutData.currentEvent.teams)
+                  for (final team in snoutData.db.teams)
                     DataRow(cells: [
                       DataCell(TextButton(child: Text(team.toString()), onPressed: () {
                         //Open this teams scouting page
@@ -48,14 +49,14 @@ class _DataTablePageState extends State<DataTablePage> {
                                         TeamViewPage(teamNumber: team)),
                               );
                       },)),
-                      DataCell(Text(snoutData.currentEvent
+                      DataCell(Text(snoutData.db
                           .matchesWithTeam(team)
                           .where((element) => element.results != null)
                           .length
                           .toString())),
                       for (final eventType
-                          in snoutData.season.matchscouting.uniqueEventIds)
-                        DataCell(Text(numDisplay((snoutData.currentEvent
+                          in snoutData.db.config.matchscouting.events)
+                        DataCell(Text(numDisplay((snoutData.db
                                     .matchesWithTeam(team)
                                     .fold<int>(
                                         0,
@@ -64,18 +65,18 @@ class _DataTablePageState extends State<DataTablePage> {
                                             (match.robot[team.toString()]
                                                     ?.timeline
                                                     .where((event) =>
-                                                        event.id == eventType)
+                                                        event.id == eventType.id)
                                                     .length ??
                                                 0)) /
-                                snoutData.currentEvent
+                                snoutData.db
                                     .matchesWithTeam(team)
                                     .where((element) =>
                                         element.robot[team.toString()] != null)
                                     .length)
                             ))),
                       for (final pitSurvey
-                        in snoutData.season.pitscouting.where((element) => element.type != "picture"))
-                          DataCell(Text(snoutData.currentEvent.pitscouting[team.toString()]?[pitSurvey.id]?.toString() ?? "No Data")),
+                        in snoutData.db.config.pitscouting.where((element) => element.type != SurveyItemType.picture))
+                          DataCell(Text(snoutData.db.pitscouting[team.toString()]?[pitSurvey.id]?.toString() ?? "No Data")),
                     ])
                 ],
               ),

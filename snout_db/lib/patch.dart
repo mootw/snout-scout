@@ -4,7 +4,7 @@ import 'dart:convert';
 
 import 'package:json_annotation/json_annotation.dart';
 import 'package:rfc_6901/rfc_6901.dart';
-import 'package:snout_db/event/snout_db.dart';
+import 'package:snout_db/event/frcevent.dart';
 
 part 'patch.g.dart';
 
@@ -26,11 +26,11 @@ class Patch {
   Map<String, dynamic> toJson() => _$PatchToJson(this);
 
   //Patches a given database, throws an error if there is an issue.
-  SnoutDB patch (SnoutDB database) {
+  FRCEvent patch (FRCEvent database) {
     var dbJson = jsonDecode(jsonEncode(database));
     final pointer = JsonPointer.build(path);
     dbJson = pointer.write(dbJson, jsonDecode(data));
-    return SnoutDB.fromJson(jsonDecode(jsonEncode(dbJson)));
+    return FRCEvent.fromJson(jsonDecode(jsonEncode(dbJson)));
   }
 
 }

@@ -1,12 +1,12 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'season.dart';
+part of 'eventconfig.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-Season _$SeasonFromJson(Map<String, dynamic> json) => Season(
+EventConfig _$EventConfigFromJson(Map<String, dynamic> json) => EventConfig(
       team: json['team'] as int,
       season: json['season'] as String,
       pitscouting: (json['pitscouting'] as List<dynamic>)
@@ -16,7 +16,8 @@ Season _$SeasonFromJson(Map<String, dynamic> json) => Season(
           MatchScouting.fromJson(json['matchscouting'] as Map<String, dynamic>),
     );
 
-Map<String, dynamic> _$SeasonToJson(Season instance) => <String, dynamic>{
+Map<String, dynamic> _$EventConfigToJson(EventConfig instance) =>
+    <String, dynamic>{
       'season': instance.season,
       'team': instance.team,
       'pitscouting': instance.pitscouting,

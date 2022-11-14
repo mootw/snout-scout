@@ -11,7 +11,7 @@ import 'package:snout_db/patch.dart';
 import 'package:snout_db/snout_db.dart';
 
 class EditMatchResults extends StatefulWidget {
-  final Season config;
+  final EventConfig config;
   final FRCMatch match;
 
   const EditMatchResults({required this.config, required this.match, Key? key})
@@ -74,14 +74,12 @@ class _EditMatchResultsState extends State<EditMatchResults> {
                         user: "anon",
                         time: DateTime.now(),
                         path: [
-                          'events',
-                          snoutData.selectedEventID,
                           'matches',
                           //Index of the match to modify. This could cause issues if
                           //the index of the match changes inbetween this database
                           //being updated and not. Ideally matches should have a unique key
                           //like their scheduled date to uniquely identify them.
-                          snoutData.currentEvent.matches
+                          snoutData.db.matches
                               .indexOf(widget.match)
                               .toString(),
                           'results'

@@ -1,4 +1,5 @@
-export 'package:snout_db/event/snout_db.dart';
-export 'package:snout_db/season/season.dart';
+library snout_db;
+
+export 'package:snout_db/config/eventconfig.dart';
 export 'package:snout_db/fieldposition.dart';
 export 'package:snout_db/game.dart';

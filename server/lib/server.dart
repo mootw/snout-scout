@@ -1,33 +1,23 @@
 import 'dart:convert';
 
 import 'package:rfc_6901/rfc_6901.dart';
-import 'package:snout_db/patch.dart';
-import 'package:snout_db/snout_db.dart';
+import 'package:snout_db/event/frcevent.dart';
 import 'package:server/edit_lock.dart';
 import 'dart:io';
 
-late SnoutDB db;
-late Season season;
-
-String databaseName = "database.json";
-String seasonConfigName = "season.json";
+import 'package:snout_db/patch.dart';
 
 //TODO use environment to define port number
 int serverPort = 6749;
 
 EditLock editLock = EditLock();
 
-List<WebSocket> patchListeners = [];
+Map<String, List<WebSocket>> patchListeners = {};
 
 void main(List<String> args) async {
   HttpServer server =
       await HttpServer.bind(InternetAddress.anyIPv4, serverPort);
   print('Server started: ${server.address} port ${server.port}');
-
-  String databaseText = await File(databaseName).readAsString();
-  db = SnoutDB.fromJson(jsonDecode(databaseText));
-  String seasonData = await File(seasonConfigName).readAsString();
-  season = Season.fromJson(jsonDecode(seasonData));
 
   //Listen for requests
   server.listen((HttpRequest request) async {
@@ -43,10 +33,14 @@ void main(List<String> args) async {
       return;
     }
 
-    //Handle patch listener requests
-    if (request.uri.toString() == "/patchlistener") {
+    //Handle listener requests
+    if (request.uri.pathSegments[0] == 'listen' &&
+        request.uri.pathSegments.length > 1) {
       WebSocketTransformer.upgrade(request).then((WebSocket websocket) {
-        patchListeners.add(websocket);
+        final event = request.uri.pathSegments[1];
+        patchListeners[event] ??= [];
+        patchListeners[event]!.add(websocket);
+        print(patchListeners[event]);
       });
       return;
     }
@@ -55,70 +49,76 @@ void main(List<String> args) async {
       return handleEditLockRequest(request);
     }
 
-    if (request.uri.toString() == "/season") {
-      request.response.headers.contentType =
-          new ContentType("application", "json");
-      request.response.write(jsonEncode(season));
-      request.response.close();
-      return;
-    }
-
-    if (request.uri.toString() == "/data" && request.method == "PUT") {
-      //Patch the database
-      String content = await utf8.decodeStream(request);
-      try {
-        Patch patch = Patch.fromJson(jsonDecode(content));
-        db = patch.patch(db);
-        //Write the new DB to disk
-        await File(databaseName).writeAsString(jsonEncode(db));
-
-        request.response.close();
-
-        //Successful patch, send this update to all listeners
-        for (var listener in patchListeners) {
-          listener.add(jsonEncode(patch));
-        }
-        return;
-      } catch (e) {
-        print(e);
-        request.response.statusCode = 500;
-        request.response.write(e);
+    // event/some_name
+    if (request.uri.pathSegments[0] == 'event' &&
+        request.uri.pathSegments.length > 1) {
+      final eventID = request.uri.pathSegments[1];
+      File f = File('$eventID.json');
+      if (await f.exists() == false) {
+        request.response.statusCode = 404;
+        request.response.write('Event not found');
         request.response.close();
         return;
       }
-    }
+      var event = FRCEvent.fromJson(jsonDecode(await f.readAsString()));
 
-    if (request.uri.toString() == "/data") {
-      request.response.headers.contentType =
-          new ContentType("application", "json");
-      request.response.write(jsonEncode(db));
-      request.response.close();
-      return;
-    }
+      if (request.method == 'GET') {
+        if (request.uri.pathSegments.length > 2 &&
+            request.uri.pathSegments[2] != "") {
+          //query was for a specific sub-item. Path segments with a trailing zero need to be filtered
+          //event/2022mnmi2 is not the same as event/2022mnmi2/
+          try {
+            var dbJson = jsonDecode(jsonEncode(event));
+            final pointer = JsonPointer(
+                '/${request.uri.pathSegments.sublist(2).join("/")}');
+            dbJson = pointer.read(dbJson);
+            request.response.headers.contentType =
+                new ContentType('application', 'json');
+            request.response.write(jsonEncode(dbJson));
+            request.response.close();
+            return;
+          } catch (e) {
+            print(e);
+            request.response.statusCode = 500;
+            request.response.write(e);
+            request.response.close();
+            return;
+          }
+        }
 
-    if (request.uri.toString().startsWith("/q/")) {
-      request.response.headers.contentType =
-          new ContentType("application", "json");
+        request.response.headers.contentType =
+            new ContentType('application', 'json');
+        request.response.write(jsonEncode(event));
+        request.response.close();
+        return;
+      }
 
-      var dbJson = jsonDecode(jsonEncode(db));
-      final pointer =
-          JsonPointer(request.uri.toString().replaceRange(0, 2, ''));
-      print(request.uri.toString().replaceRange(0, 2, ''));
-      dbJson = pointer.read(dbJson);
+      if (request.method == "PUT") {
+        try {
+          String content = await utf8.decodeStream(request);
+          Patch patch = Patch.fromJson(jsonDecode(content));
 
-      request.response.write(jsonEncode(dbJson));
-      request.response.close();
-      return;
-    }
+          event = patch.patch(event);
+          //Write the new DB to disk
+          await f.writeAsString(jsonEncode(event));
+          request.response.close();
 
-    if (request.uri.toString() == "/field_map.png") {
-      File image = new File("field_map.png");
-      var data = await image.readAsBytes();
-      request.response.headers.set('Content-Type', 'image/png');
-      request.response.headers.set('Content-Length', data.length);
-      request.response.headers.set('Cache-Control', 'max-age=604800');
-      request.response.add(data);
-      request.response.close();
+          print(jsonEncode(patch));
+
+          //Successful patch, send this update to all listeners
+          for (final listener in patchListeners[eventID] ?? []) {
+            listener.add(jsonEncode(patch));
+          }
+
+          return;
+        } catch (e) {
+          print(e);
+          request.response.statusCode = 500;
+          request.response.write(e);
+          request.response.close();
+          return;
+        }
+      }
       return;
     }
 

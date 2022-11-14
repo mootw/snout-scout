@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:app/edit_lock.dart';
 import 'package:app/fieldwidget.dart';
 import 'package:app/main.dart';
-import 'package:app/screens/datapage.dart';
 import 'package:app/screens/edit_match_results.dart';
 import 'package:app/screens/match_recorder.dart';
 import 'package:app/screens/view_team_page.dart';
@@ -27,7 +26,7 @@ class _MatchPageState extends State<MatchPage> {
   @override
   Widget build(BuildContext context) {
     return Consumer<SnoutScoutData>(builder: (context, snoutData, child) {
-      FRCMatch match = snoutData.currentEvent.matches[widget.matchid];
+      FRCMatch match = snoutData.db.matches[widget.matchid];
 
       return DefaultTabController(
           length: 7,
@@ -126,7 +125,7 @@ class _MatchPageState extends State<MatchPage> {
                             context,
                             MaterialPageRoute(
                               builder: (context) => EditMatchResults(
-                                  match: match, config: snoutData.season),
+                                  match: match, config: snoutData.db.config),
                             )));
 
                     if (result == true) {
@@ -176,7 +175,7 @@ class _MatchPageState extends State<MatchPage> {
                   DataColumn(label: Text("Blue")),
                 ],
                 rows: [
-                  for (final type in snoutData.season.matchscouting.scoring)
+                  for (final type in snoutData.db.config.matchscouting.scoring)
                     DataRow(cells: [
                       DataCell(Text(type)),
                       DataCell(Text(data.results!.red[type].toString())),
@@ -217,14 +216,12 @@ class _MatchPageState extends State<MatchPage> {
                     user: "anon",
                     time: DateTime.now(),
                     path: [
-                      'events',
-                      snoutData.selectedEventID,
                       'matches',
                       //Index of the match to modify. This could cause issues if
                       //the index of the match changes inbetween this database
                       //being updated and not. Ideally matches should have a unique key
                       //like their scheduled date to uniquely identify them.
-                      snoutData.currentEvent.matches.indexOf(data).toString(),
+                      snoutData.db.matches.indexOf(data).toString(),
                       'robot',
                       teamNumber.toString()
                     ],
@@ -242,17 +239,17 @@ class _MatchPageState extends State<MatchPage> {
         if (survey != null)
           Column(
             children: [
-              for (final item in snoutData.season.matchscouting.postgame)
+              for (final item in snoutData.db.config.matchscouting.postgame)
                 ScoutingResult(item: item, survey: survey),
             ],
           ),
         Center(child: Text("Robot Performance",
                 style: Theme.of(context).textTheme.titleMedium)),
         if(matchTeamData != null)
-          for(final item in snoutData.season.matchscouting.uniqueEventIds)
+          for(final item in snoutData.db.config.matchscouting.events)
             ListTile(
-              title: Text(matchTeamData.timeline.where((event) => event.id == item).length.toString()),
-              subtitle: Text(item),
+              title: Text(matchTeamData.timeline.where((event) => event.id == item.id).length.toString()),
+              subtitle: Text(item.label),
             )
       ],
     );

@@ -12,7 +12,7 @@ import 'package:app/scouting_tools/scouting_tool.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:snout_db/event/pitscoutresult.dart';
-import 'package:snout_db/season/surveyitem.dart';
+import 'package:snout_db/config/surveyitem.dart';
 
 class TeamViewPage extends StatefulWidget {
   final int teamNumber;
@@ -41,9 +41,9 @@ class _TeamViewPageState extends State<TeamViewPage> {
                               MaterialPageRoute(
                                   builder: (context) => PitScoutTeamPage(
                                       team: widget.teamNumber,
-                                      config: snoutData.season,
+                                      config: snoutData.db.config,
                                       oldData:
-                                          snoutData.currentEvent.pitscouting[
+                                          snoutData.db.pitscouting[
                                               widget.teamNumber.toString()])),
                             ));
                     if (result != null) {
@@ -62,20 +62,22 @@ class _TeamViewPageState extends State<TeamViewPage> {
                   teamNumber: widget.teamNumber, snoutData: snoutData),
               const Divider(height: 32),
               //Display this teams matches
+              Center(child: Text("Match Schedule", style: Theme.of(context).textTheme.titleLarge)),
               Column(
                 children: [
-                  for (var match in snoutData.currentEvent
+                  for (var match in snoutData.db
                       .matchesWithTeam(widget.teamNumber))
                     MatchCard(match: match, focusTeam: widget.teamNumber),
                 ],
               ),
               const Divider(height: 32),
 
+              Center(child: Text("Average Metrics", style: Theme.of(context).textTheme.titleLarge)),
               for (final eventType
-                  in snoutData.season.matchscouting.uniqueEventIds)
+                  in snoutData.db.config.matchscouting.events)
                 ListTile(
-                  title: Text('avg $eventType'),
-                  subtitle: Text(numDisplay((snoutData.currentEvent
+                  title: Text(eventType.label),
+                  subtitle: Text(numDisplay((snoutData.db
                           .matchesWithTeam(widget.teamNumber)
                           .fold<int>(
                               0,
@@ -84,10 +86,10 @@ class _TeamViewPageState extends State<TeamViewPage> {
                                   (match.robot[widget.teamNumber.toString()]
                                           ?.timeline
                                           .where(
-                                              (event) => event.id == eventType)
+                                              (event) => event.id == eventType.id)
                                           .length ??
                                       0)) /
-                      snoutData.currentEvent
+                      snoutData.db
                           .matchesWithTeam(widget.teamNumber)
                           .where((element) =>
                               element.robot[widget.teamNumber.toString()] !=
@@ -105,16 +107,16 @@ class _TeamViewPageState extends State<TeamViewPage> {
                     columns: [
                       const DataColumn(label: Text("Match")),
                       for (final event
-                          in snoutData.season.matchscouting.uniqueEventIds)
-                        DataColumn(label: Text(event)),
+                          in snoutData.db.config.matchscouting.events)
+                        DataColumn(label: Text(event.label)),
                       for (final pitSurvey in snoutData
-                          .season.matchscouting.postgame
-                          .where((element) => element.type != "picture"))
+                          .db.config.matchscouting.postgame
+                          .where((element) => element.type != SurveyItemType.picture))
                         DataColumn(label: Text(pitSurvey.label)),
                     ],
                     rows: [
-                      for (final match in snoutData.currentEvent
-                          .matchesWithTeam(widget.teamNumber).reversed)
+                      for (final match in snoutData.db
+                          .matchesWithTeam(widget.teamNumber).where((match) => match.results != null).toList().reversed)
                         DataRow(cells: [
                           DataCell(TextButton(
                             onPressed: () {
@@ -122,20 +124,20 @@ class _TeamViewPageState extends State<TeamViewPage> {
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) =>
-                                          MatchPage(matchid: snoutData.currentEvent.matches.indexOf(match))),
+                                          MatchPage(matchid: snoutData.db.matches.indexOf(match))),
                                 );
                             },
                             child: Text(match.description))),
                           for (final eventId
-                              in snoutData.season.matchscouting.uniqueEventIds)
+                              in snoutData.db.config.matchscouting.events)
                             DataCell(Text(numDisplay(match
                                 .robot[widget.teamNumber.toString()]?.timeline
-                                .where((event) => event.id == eventId)
+                                .where((event) => event.id == eventId.id)
                                 .length
                                 .toDouble()))),
                           for (final pitSurvey in snoutData
-                              .season.matchscouting.postgame
-                              .where((element) => element.type != "picture"))
+                              .db.config.matchscouting.postgame
+                              .where((element) => element.type != SurveyItemType.picture))
                             DataCell(Text(match
                                     .robot[widget.teamNumber.toString()]
                                     ?.survey[pitSurvey.id]
@@ -155,7 +157,7 @@ class _TeamViewPageState extends State<TeamViewPage> {
                       style: Theme.of(context).textTheme.titleLarge),
                   FieldHeatMap(
                       useRedNormalized: true,
-                      events: snoutData.currentEvent
+                      events: snoutData.db
                           .matchesWithTeam(widget.teamNumber)
                           .fold(
                               [],
@@ -174,7 +176,7 @@ class _TeamViewPageState extends State<TeamViewPage> {
                       style: Theme.of(context).textTheme.titleLarge),
                   FieldHeatMap(
                       useRedNormalized: true,
-                      events: snoutData.currentEvent
+                      events: snoutData.db
                           .matchesWithTeam(widget.teamNumber)
                           .fold(
                               [],
@@ -190,12 +192,12 @@ class _TeamViewPageState extends State<TeamViewPage> {
                                   ])),
                   const SizedBox(height: 16),
                   for (final eventType
-                      in snoutData.season.matchscouting.uniqueEventIds) ...[
-                    Text(eventType,
+                      in snoutData.db.config.matchscouting.events) ...[
+                    Text(eventType.label,
                         style: Theme.of(context).textTheme.titleLarge),
                     FieldHeatMap(
                         useRedNormalized: true,
-                        events: snoutData.currentEvent
+                        events: snoutData.db
                             .matchesWithTeam(widget.teamNumber)
                             .fold(
                                 [],
@@ -205,7 +207,7 @@ class _TeamViewPageState extends State<TeamViewPage> {
                                           .robot[widget.teamNumber.toString()]
                                           ?.timeline
                                           .where(
-                                              (event) => event.id == eventType)
+                                              (event) => event.id == eventType.id)
                                           .toList()
                                     ])),
                     const SizedBox(height: 16),
@@ -228,7 +230,7 @@ class ScoutingResultsViewer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var data = snoutData.currentEvent.pitscouting[teamNumber.toString()];
+    var data = snoutData.db.pitscouting[teamNumber.toString()];
 
     if (data == null) {
       return const ListTile(title: Text("Team has no pit scouting data"));
@@ -236,7 +238,7 @@ class ScoutingResultsViewer extends StatelessWidget {
 
     return Column(
       children: [
-        for (var item in snoutData.season.pitscouting)
+        for (var item in snoutData.db.config.pitscouting)
           ScoutingResult(item: item, survey: data)
       ],
     );
@@ -244,6 +246,7 @@ class ScoutingResultsViewer extends StatelessWidget {
 }
 
 class ScoutingResult extends StatelessWidget {
+
   final SurveyItem item;
   final PitScoutResult survey;
 
@@ -258,7 +261,9 @@ class ScoutingResult extends StatelessWidget {
       return Container();
     }
 
-    if (item.type == "picture") {
+    print(item.type);
+
+    if (item.type == SurveyItemType.picture) {
       return ListTile(
         title: Text(item.label),
         subtitle: SizedBox(

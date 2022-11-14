@@ -4,7 +4,7 @@
     "pitscouting": [
         {
             "id": "robot_name",
-            "type": "text-box",
+            "type": "text",
             "label": "Robot Name"
         },
         {
@@ -42,7 +42,7 @@
         },
         {
             "id": "auto",
-            "type": "text-box",
+            "type": "text",
             "label": "Describe autos"
         },
         {
@@ -62,7 +62,7 @@
         },
         {
             "id": "comments",
-            "type": "text-box",
+            "type": "text",
             "label": "Extra comments"
         }
     ],
@@ -242,17 +242,17 @@
             {
                 "id": "intake_issue",
                 "type": "toggle",
-                "label": "Did this robot have intake issues?"
+                "label": "Intake issues?"
             },
             {
                 "id": "electrical_issue",
                 "type": "toggle",
-                "label": "Did this robot have electrical issues?"
+                "label": "Electrical issues?"
             },
             {
                 "id": "defense",
                 "type": "toggle",
-                "label": "Did this robot play defense?"
+                "label": "Did they play defense?"
             },
             {
                 "id": "defense_skill",
@@ -266,7 +266,7 @@
             },
             {
                 "id": "comments",
-                "type": "text-box",
+                "type": "text",
                 "label": "Extra comments"
             }
         ],
@@ -296,6 +296,11 @@
         ]
     },
     "event_metrics": {
+        "cargo_scored": {
+            "label": "Cargo Scored",
+            "type": "sum",
+            "of": ["cargo_upper", "cargo_lower"]
+        },
         "all_cargo_shot": {
             "label": "All Cargo Shot",
             "type": "sum",

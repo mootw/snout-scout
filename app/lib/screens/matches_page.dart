@@ -19,17 +19,17 @@ class _AllMatchesPageState extends State<AllMatchesPage> {
   @override
   Widget build(BuildContext context) {
     return Consumer<SnoutScoutData>(builder: (context, snoutData, child) {
-      FRCMatch? nextMatch = snoutData.currentEvent.nextMatch;
+      FRCMatch? nextMatch = snoutData.db.nextMatch;
       FRCMatch? teamNextMatch =
-          snoutData.currentEvent.nextMatchForTeam(snoutData.season.team);
-      Duration? scheduleDelay = snoutData.currentEvent.scheduleDelay;
+          snoutData.db.nextMatchForTeam(snoutData.db.config.team);
+      Duration? scheduleDelay = snoutData.db.scheduleDelay;
       return Column(
         children: [
           Expanded(
             child: ListView(
               children: [
-                for (var match in snoutData.currentEvent.matches)
-                  MatchCard(match: match, focusTeam: snoutData.season.team),
+                for (var match in snoutData.db.matches)
+                  MatchCard(match: match, focusTeam: snoutData.db.config.team),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Center(
@@ -68,7 +68,7 @@ class _AllMatchesPageState extends State<AllMatchesPage> {
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) =>
-                                          MatchPage(matchid: snoutData.currentEvent.matches.indexOf(nextMatch))),
+                                          MatchPage(matchid: snoutData.db.matches.indexOf(nextMatch))),
                                 );
                               },
                               child: Text(nextMatch.description),
@@ -88,14 +88,14 @@ class _AllMatchesPageState extends State<AllMatchesPage> {
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) =>
-                                          MatchPage(matchid: snoutData.currentEvent.matches.indexOf(teamNextMatch))),
+                                          MatchPage(matchid: snoutData.db.matches.indexOf(teamNextMatch))),
                                 );
                               },
                               child: Text(
                                 teamNextMatch.description,
                                 style: TextStyle(
                                     color: teamNextMatch.getAllianceOf(
-                                                snoutData.season.team) ==
+                                                snoutData.db.config.team) ==
                                             Alliance.red
                                         ? Colors.red
                                         : Colors.blue),
