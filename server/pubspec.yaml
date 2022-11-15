@@ -10,8 +10,7 @@ dependencies:
     path: ../snout_db
 
   rfc_6901: ^0.1.1
-
-  shelf: ^1.4.0
-  shelf_web_socket: ^1.0.3
+  dotenv: ^4.0.1
+  http: ^0.13.5
 
 dev_dependencies:

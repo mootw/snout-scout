@@ -288,11 +288,7 @@
         ],
         "scoring": [
             "points",
-            "rp",
-            "penalty",
-            "taxi",
-            "cargo",
-            "hangar"
+            "rp"
         ]
     },
     "event_metrics": {

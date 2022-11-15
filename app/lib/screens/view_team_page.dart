@@ -124,7 +124,7 @@ class _TeamViewPageState extends State<TeamViewPage> {
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) =>
-                                          MatchPage(matchid: snoutData.db.matches.indexOf(match))),
+                                          MatchPage(matchid: snoutData.db.matchIDFromMatch(match))),
                                 );
                             },
                             child: Text(match.description))),

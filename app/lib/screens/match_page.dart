@@ -16,7 +16,7 @@ import 'package:snout_db/patch.dart';
 class MatchPage extends StatefulWidget {
   const MatchPage({required this.matchid, Key? key}) : super(key: key);
 
-  final int matchid;
+  final String matchid;
 
   @override
   State<MatchPage> createState() => _MatchPageState();
@@ -26,7 +26,7 @@ class _MatchPageState extends State<MatchPage> {
   @override
   Widget build(BuildContext context) {
     return Consumer<SnoutScoutData>(builder: (context, snoutData, child) {
-      FRCMatch match = snoutData.db.matches[widget.matchid];
+      FRCMatch match = snoutData.db.matches[widget.matchid]!;
 
       return DefaultTabController(
           length: 7,
@@ -120,16 +120,26 @@ class _MatchPageState extends State<MatchPage> {
                   onPressed: () async {
                     var result = await navigateWithEditLock(
                         context,
-                        "match:${match.id}:results",
+                        "match:${match.description}:results",
                         () => Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder: (context) => EditMatchResults(
-                                  match: match, config: snoutData.db.config),
+                                  results: match.results, config: snoutData.db.config),
                             )));
 
-                    if (result == true) {
-                      setState(() {});
+                    if (result != null) {
+                      Patch patch = Patch(
+                        user: "anon",
+                        time: DateTime.now(),
+                        path: [
+                          'matches',
+                          widget.matchid,
+                          'results'
+                        ],
+                        data: jsonEncode(result));
+    
+                        await snoutData.addPatch(patch);
                     }
                   },
                 )
@@ -203,7 +213,7 @@ class _MatchPageState extends State<MatchPage> {
             onPressed: () async {
               RobotMatchResults? result = await navigateWithEditLock(
                   context,
-                  "match:${data.id}:$teamNumber:timeline",
+                  "match:${data.description}:$teamNumber:timeline",
                   () => Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -217,11 +227,7 @@ class _MatchPageState extends State<MatchPage> {
                     time: DateTime.now(),
                     path: [
                       'matches',
-                      //Index of the match to modify. This could cause issues if
-                      //the index of the match changes inbetween this database
-                      //being updated and not. Ideally matches should have a unique key
-                      //like their scheduled date to uniquely identify them.
-                      snoutData.db.matches.indexOf(data).toString(),
+                      widget.matchid,
                       'robot',
                       teamNumber.toString()
                     ],

@@ -7,8 +7,7 @@ part 'match.g.dart';
 
 @JsonSerializable()
 class FRCMatch {
-  
-  get id => "$level$number";
+
   ///The number of this match in the series
   int number;
   //The level that this match is at

@@ -7,6 +7,7 @@ part 'eventconfig.g.dart';
 @JsonSerializable()
 class EventConfig {
 
+  //name for the season. Doesn't particularly matter
   String season;
   int team;
   List<SurveyItem> pitscouting;

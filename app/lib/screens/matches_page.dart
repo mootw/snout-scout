@@ -1,6 +1,7 @@
 import 'package:app/durationformat.dart';
 import 'package:app/main.dart';
 import 'package:app/match_card.dart';
+import 'package:app/screens/edit_schedule.dart';
 import 'package:app/screens/match_page.dart';
 import 'package:app/timeduration.dart';
 import 'package:flutter/material.dart';
@@ -28,13 +29,20 @@ class _AllMatchesPageState extends State<AllMatchesPage> {
           Expanded(
             child: ListView(
               children: [
-                for (var match in snoutData.db.matches)
+                for (var match in snoutData.db.matches.values)
                   MatchCard(match: match, focusTeam: snoutData.db.config.team),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Center(
                     child: FilledButton.tonal(
-                        onPressed: () {}, child: const Text("Edit Schedule")),
+                        onPressed: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => EditSchedulePage(matches: snoutData.db.matches),
+                              ));
+                        },
+                        child: const Text("Edit Schedule")),
                   ),
                 )
               ],
@@ -67,8 +75,8 @@ class _AllMatchesPageState extends State<AllMatchesPage> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) =>
-                                          MatchPage(matchid: snoutData.db.matches.indexOf(nextMatch))),
+                                      builder: (context) => MatchPage(
+                                          matchid: snoutData.db.matchIDFromMatch(nextMatch))),
                                 );
                               },
                               child: Text(nextMatch.description),
@@ -87,8 +95,8 @@ class _AllMatchesPageState extends State<AllMatchesPage> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) =>
-                                          MatchPage(matchid: snoutData.db.matches.indexOf(teamNextMatch))),
+                                      builder: (context) => MatchPage(
+                                          matchid: snoutData.db.matchIDFromMatch(teamNextMatch))),
                                 );
                               },
                               child: Text(

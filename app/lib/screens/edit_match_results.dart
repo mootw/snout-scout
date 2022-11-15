@@ -5,16 +5,14 @@ import 'package:app/main.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:snout_db/event/match.dart';
 import 'package:snout_db/event/matchresults.dart';
-import 'package:snout_db/patch.dart';
 import 'package:snout_db/snout_db.dart';
 
 class EditMatchResults extends StatefulWidget {
   final EventConfig config;
-  final FRCMatch match;
+  final MatchResults? results;
 
-  const EditMatchResults({required this.config, required this.match, Key? key})
+  const EditMatchResults({required this.config, required this.results, Key? key})
       : super(key: key);
 
   @override
@@ -33,7 +31,7 @@ class _EditMatchResultsState extends State<EditMatchResults> {
   void initState() {
     super.initState();
 
-    DateTime? date = widget.match.results?.time;
+    DateTime? date = widget.results?.time;
     if(date != null) {
       matchEndTime = date.add(matchLength);
     } else {
@@ -42,8 +40,8 @@ class _EditMatchResultsState extends State<EditMatchResults> {
 
     //Pre-fill result scores
     for (var resultValue in widget.config.matchscouting.scoring) {
-      _red[resultValue] = TextEditingController(text: widget.match.results?.red[resultValue]?.toString());
-      _blue[resultValue] = TextEditingController(text: widget.match.results?.blue[resultValue]?.toString());
+      _red[resultValue] = TextEditingController(text: widget.results?.red[resultValue]?.toString());
+      _blue[resultValue] = TextEditingController(text: widget.results?.blue[resultValue]?.toString());
     }
   }
 
@@ -60,9 +58,8 @@ class _EditMatchResultsState extends State<EditMatchResults> {
         appBar: AppBar(
           actions: [
             IconButton(
-                onPressed: () async {
+                onPressed: () {
                   if (_form.currentState?.validate() ?? false) {
-                    final snoutData = Provider.of<SnoutScoutData>(context, listen: false);
                     //Input is valid
                     //Construct match results object
                     MatchResults results = MatchResults(
@@ -70,33 +67,13 @@ class _EditMatchResultsState extends State<EditMatchResults> {
                         red: _mapTo(_red),
                         blue: _mapTo(_blue),
                       );
-                    Patch patch = Patch(
-                        user: "anon",
-                        time: DateTime.now(),
-                        path: [
-                          'matches',
-                          //Index of the match to modify. This could cause issues if
-                          //the index of the match changes inbetween this database
-                          //being updated and not. Ideally matches should have a unique key
-                          //like their scheduled date to uniquely identify them.
-                          snoutData.db.matches
-                              .indexOf(widget.match)
-                              .toString(),
-                          'results'
-                        ],
-                        data: jsonEncode(results));
-    
-                    await snoutData.addPatch(patch);
-                    
-                    if(mounted) {
-                      Navigator.pop(context, true);
-                    }
+                      Navigator.pop(context, results);
                   }
                 },
                 icon: const Icon(Icons.save)),
           ],
           title:
-              Text("Results: ${widget.match.description}"),
+              Text("Edit Results"),
         ),
         body: Form(
           key: _form,

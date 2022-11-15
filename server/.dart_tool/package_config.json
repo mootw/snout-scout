@@ -2,6 +2,12 @@
   "configVersion": 2,
   "packages": [
     {
+      "name": "args",
+      "rootUri": "file:///home/spencer/.pub-cache/hosted/pub.dartlang.org/args-2.3.1",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
       "name": "async",
       "rootUri": "file:///home/spencer/.pub-cache/hosted/pub.dartlang.org/async-2.10.0",
       "packageUri": "lib/",
@@ -14,8 +20,14 @@
       "languageVersion": "2.12"
     },
     {
-      "name": "crypto",
-      "rootUri": "file:///home/spencer/.pub-cache/hosted/pub.dartlang.org/crypto-3.0.2",
+      "name": "dotenv",
+      "rootUri": "file:///home/spencer/.pub-cache/hosted/pub.dartlang.org/dotenv-4.0.1",
+      "packageUri": "lib/",
+      "languageVersion": "2.16"
+    },
+    {
+      "name": "http",
+      "rootUri": "file:///home/spencer/.pub-cache/hosted/pub.dartlang.org/http-0.13.5",
       "packageUri": "lib/",
       "languageVersion": "2.14"
     },
@@ -50,18 +62,6 @@
       "languageVersion": "2.15"
     },
     {
-      "name": "shelf",
-      "rootUri": "file:///home/spencer/.pub-cache/hosted/pub.dartlang.org/shelf-1.4.0",
-      "packageUri": "lib/",
-      "languageVersion": "2.17"
-    },
-    {
-      "name": "shelf_web_socket",
-      "rootUri": "file:///home/spencer/.pub-cache/hosted/pub.dartlang.org/shelf_web_socket-1.0.3",
-      "packageUri": "lib/",
-      "languageVersion": "2.17"
-    },
-    {
       "name": "snout_db",
       "rootUri": "../../snout_db",
       "packageUri": "lib/",
@@ -70,18 +70,6 @@
     {
       "name": "source_span",
       "rootUri": "file:///home/spencer/.pub-cache/hosted/pub.dartlang.org/source_span-1.9.1",
-      "packageUri": "lib/",
-      "languageVersion": "2.14"
-    },
-    {
-      "name": "stack_trace",
-      "rootUri": "file:///home/spencer/.pub-cache/hosted/pub.dartlang.org/stack_trace-1.11.0",
-      "packageUri": "lib/",
-      "languageVersion": "2.18"
-    },
-    {
-      "name": "stream_channel",
-      "rootUri": "file:///home/spencer/.pub-cache/hosted/pub.dartlang.org/stream_channel-2.1.1",
       "packageUri": "lib/",
       "languageVersion": "2.14"
     },
@@ -104,19 +92,13 @@
       "languageVersion": "2.12"
     },
     {
-      "name": "web_socket_channel",
-      "rootUri": "file:///home/spencer/.pub-cache/hosted/pub.dartlang.org/web_socket_channel-2.2.0",
-      "packageUri": "lib/",
-      "languageVersion": "2.12"
-    },
-    {
       "name": "server",
       "rootUri": "../",
       "packageUri": "lib/",
       "languageVersion": "2.16"
     }
   ],
-  "generated": "2022-11-08T18:34:55.418334Z",
+  "generated": "2022-11-15T05:08:35.808325Z",
   "generator": "pub",
   "generatorVersion": "2.19.0-255.2.beta"
 }

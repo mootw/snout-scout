@@ -41,7 +41,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
       events.toList().lastWhereOrNull((event) => event.id == "robot_position");
   FieldPosition? get robotPosition => lastMoveEvent?.position;
 
-  get scoutingEvents => _time <= 17
+  List<MatchEventConfig> get scoutingEvents => _time <= 17
       ? Provider.of<SnoutScoutData>(context, listen: false)
           .db
           .config
@@ -49,12 +49,12 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
           .events
           .where((element) =>
               element.mode == MatchSegment.auto ||
-              element.mode == MatchSegment.both)
+              element.mode == MatchSegment.both).toList()
       : Provider.of<SnoutScoutData>(context, listen: false)
           .db
           .config
           .matchscouting
-          .events;
+          .events.toList();
 
   @override
   void dispose() {
