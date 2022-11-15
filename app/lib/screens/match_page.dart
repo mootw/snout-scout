@@ -101,7 +101,7 @@ class _MatchPageState extends State<MatchPage> {
                       DataCell(FilledButton.tonal(
             child: match.robot[team.toString()] == null
                 ? const Text("Record")
-                : const Text("Record (rewrite)"),
+                : const Text("Re-record"),
             onPressed: () async {
               RobotMatchResults? result = await navigateWithEditLock(
                   context,
@@ -148,7 +148,7 @@ class _MatchPageState extends State<MatchPage> {
                     ]),
                 ]),
               )),
-
+          const SizedBox(height: 16),
           FieldTimelineViewer(match: match),
           ListTile(
             title: const Text("Scheduled Time"),

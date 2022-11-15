@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:snout_db/config/surveyitem.dart';
 
+//TODO make this non-repetitive. It generates a sorting table, columns, and data seprately in the same way.
+
 class DataTablePage extends StatefulWidget {
   const DataTablePage({super.key});
 
@@ -14,9 +16,68 @@ class DataTablePage extends StatefulWidget {
 }
 
 class _DataTablePageState extends State<DataTablePage> {
+  int _currentSortColumn = 0;
+  bool _sortAscending = true;
+
+  void updateSort(columnIndex, ascending) {
+    setState(() {
+      _currentSortColumn = columnIndex;
+      _sortAscending = ascending;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<SnoutScoutData>(builder: (context, snoutData, child) {
+      //TODO fix ugly sorting code
+      List<int> teamsSorted = snoutData.db.teams.toList();
+
+      List<List<double>> sortValues = List.generate(
+        2 +
+            snoutData.db.config.matchscouting.events.length,
+        (column) {
+          //Column
+          return List.generate(teamsSorted.length, (row) {
+            //Row
+            double value = <Function(int)>[
+              //Team Row
+              (team) => team,
+              //Matches
+              (team) => snoutData.db
+                  .matchesWithTeam(team)
+                  .where((element) => element.results != null)
+                  .length,
+              for (final eventType in snoutData.db.config.matchscouting.events)
+                (team) => (snoutData.db.matchesWithTeam(team).fold<int>(
+                        0,
+                        (previousValue, match) =>
+                            previousValue +
+                            (match.robot[team.toString()]?.timeline
+                                    .where((event) => event.id == eventType.id)
+                                    .length ??
+                                0)) /
+                    snoutData.db
+                        .matchesWithTeam(team)
+                        .where(
+                            (element) => element.robot[team.toString()] != null)
+                        .length),
+            ][column](teamsSorted[row]);
+            if (value.isNaN) {
+              //Less than zero value to stort all the way at the bottom
+              return -1;
+            } else {
+              return value;
+            }
+          });
+        },
+      );
+
+      teamsSorted.sort((a, b) => _sortAscending
+          ? sortValues[_currentSortColumn][sortValues[0].indexOf(a.toDouble())].round() -
+              sortValues[_currentSortColumn][sortValues[0].indexOf(b.toDouble())].round()
+          : sortValues[_currentSortColumn][sortValues[0].indexOf(b.toDouble())].round() -
+              sortValues[_currentSortColumn][sortValues[0].indexOf(a.toDouble())].round());
+
       return ListView(
         children: [
           const Text(
@@ -26,29 +87,36 @@ class _DataTablePageState extends State<DataTablePage> {
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: DataTable(
+                sortAscending: _sortAscending,
+                sortColumnIndex: _currentSortColumn,
                 columns: [
-                  const DataColumn(label: Text("Team")),
-                  const DataColumn(label: Text("Played")),
+                  DataColumn(label: Text("Team"), onSort: updateSort),
+                  DataColumn(label: Text("Played"), onSort: updateSort),
                   for (final eventType
                       in snoutData.db.config.matchscouting.events)
-                    DataColumn(label: Text("avg\n${eventType.label}")),
-
-                  for (final pitSurvey
-                      in snoutData.db.config.pitscouting.where((element) => element.type != SurveyItemType.picture))
-                    DataColumn(label: Text("Pit Scouting:\n${pitSurvey.label}")),
+                    DataColumn(
+                        label: Text("avg\n${eventType.label}"),
+                        onSort: updateSort),
+                  for (final pitSurvey in snoutData.db.config.pitscouting.where(
+                      (element) => element.type != SurveyItemType.picture))
+                    DataColumn(
+                        label: Text("Pit Scouting:\n${pitSurvey.label}")),
                 ],
                 rows: [
-                  for (final team in snoutData.db.teams)
+                  for (final team in teamsSorted)
                     DataRow(cells: [
-                      DataCell(TextButton(child: Text(team.toString()), onPressed: () {
-                        //Open this teams scouting page
-                        Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        TeamViewPage(teamNumber: team)),
-                              );
-                      },)),
+                      DataCell(TextButton(
+                        child: Text(team.toString()),
+                        onPressed: () {
+                          //Open this teams scouting page
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    TeamViewPage(teamNumber: team)),
+                          );
+                        },
+                      )),
                       DataCell(Text(snoutData.db
                           .matchesWithTeam(team)
                           .where((element) => element.results != null)
@@ -57,26 +125,28 @@ class _DataTablePageState extends State<DataTablePage> {
                       for (final eventType
                           in snoutData.db.config.matchscouting.events)
                         DataCell(Text(numDisplay((snoutData.db
-                                    .matchesWithTeam(team)
-                                    .fold<int>(
-                                        0,
-                                        (previousValue, match) =>
-                                            previousValue +
-                                            (match.robot[team.toString()]
-                                                    ?.timeline
-                                                    .where((event) =>
-                                                        event.id == eventType.id)
-                                                    .length ??
-                                                0)) /
-                                snoutData.db
-                                    .matchesWithTeam(team)
-                                    .where((element) =>
-                                        element.robot[team.toString()] != null)
-                                    .length)
-                            ))),
-                      for (final pitSurvey
-                        in snoutData.db.config.pitscouting.where((element) => element.type != SurveyItemType.picture))
-                          DataCell(Text(snoutData.db.pitscouting[team.toString()]?[pitSurvey.id]?.toString() ?? "No Data")),
+                                .matchesWithTeam(team)
+                                .fold<int>(
+                                    0,
+                                    (previousValue, match) =>
+                                        previousValue +
+                                        (match.robot[team.toString()]?.timeline
+                                                .where((event) =>
+                                                    event.id == eventType.id)
+                                                .length ??
+                                            0)) /
+                            snoutData.db
+                                .matchesWithTeam(team)
+                                .where((element) =>
+                                    element.robot[team.toString()] != null)
+                                .length)))),
+                      for (final pitSurvey in snoutData.db.config.pitscouting
+                          .where((element) =>
+                              element.type != SurveyItemType.picture))
+                        DataCell(Text(snoutData
+                                .db.pitscouting[team.toString()]?[pitSurvey.id]
+                                ?.toString() ??
+                            "No Data")),
                     ])
                 ],
               ),
@@ -88,8 +158,8 @@ class _DataTablePageState extends State<DataTablePage> {
   }
 }
 
-String numDisplay (double? input) {
-  if(input == null || input.isNaN) {
+String numDisplay(double? input) {
+  if (input == null || input.isNaN) {
     return "No Data";
   }
   return ((input * 10).round() / 10).toString();
