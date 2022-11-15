@@ -39,11 +39,11 @@ class MatchCard extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   SizedBox(
-                    width: 140,
+                    width: 120,
                     child: Column(
                       children: [
                         Text(match.description,
-                            style: const TextStyle(fontWeight: FontWeight.bold)),
+                            style: const TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.center),
                         if (match.results != null)
                           TimeDuration(time: match.results!.time),
                         if (match.results == null)

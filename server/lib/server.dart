@@ -49,11 +49,6 @@ void main(List<String> args) async {
 
   await loadEvents();
 
-  //Periodic tasks timer
-  Timer.periodic(Duration(minutes: 3), (timer) async {
-    print("periodic work started");
-  });
-
   HttpServer server =
       await HttpServer.bind(InternetAddress.anyIPv4, serverPort);
   print('Server started: ${server.address} port ${server.port}');
@@ -259,8 +254,6 @@ Future loadScheduleFromFRCAPI(
     ...jsonDecode(responsePlayoff.body)['Schedule']
   ];
 
-  Map<String, FRCMatch> newMatches = {};
-
   for (var match in matches) {
     String description = match['description'];
     DateTime startTime = DateTime.parse(match['startTime']);
@@ -278,11 +271,11 @@ Future loadScheduleFromFRCAPI(
         blue.add(teams[i]['teamNumber']);
       }
     }
-    print(eventData.matches.keys.toList());
+
     //ONLY modify matches that do not exist yet to prevent damage
     if (eventData.matches.keys.toList().contains(description) == false) {
-      print("match ${description} does not exist adding...");
-      newMatches[description] = FRCMatch(
+      print("match ${description} does not exist; adding...");
+      FRCMatch newMatch = FRCMatch(
           level: tournamentLevel,
           description: description,
           number: matchNumber,
@@ -291,74 +284,20 @@ Future loadScheduleFromFRCAPI(
           red: red,
           results: null,
           robot: {});
+
+          Patch patch = Patch(
+            user: "anon",
+            time: DateTime.now(),
+            path: [
+              'matches',
+              newMatch.description,
+            ],
+            data: jsonEncode(newMatch));
+
+          print(jsonEncode(patch));
+
+          var res = await http.put(Uri.parse("http://localhost:$serverPort/event/$eventID"),
+              body: jsonEncode(patch));
     }
   }
-
-  if(newMatches.isEmpty) {
-    //Do nothing if we do not need to make a change
-    return;
-  }
-
-  //Create a patch with the old events and new events.
-    final matchPatch = Map.from(eventData.matches)..addAll(newMatches);
-
-
-    Patch patch = Patch(
-      user: "anon",
-      time: DateTime.now(),
-      path: [
-        'matches',
-      ],
-      data: jsonEncode(matchPatch));
-
-    print(jsonEncode(patch));
-
-    var res = await http.put(Uri.parse("http://localhost:$serverPort/event/$eventID"),
-        body: jsonEncode(patch));
-
-  // print(jsonEncode(matches));
 }
-
-//Example response from 2022
-/*
-{
-      "description": "Qualification 1",
-      "level": null,
-      "startTime": "2022-04-08T09:00:00",
-      "matchNumber": 1,
-      "field": "Primary",
-      "tournamentLevel": "Qualification",
-      "teams": [
-        {
-          "teamNumber": 8234,
-          "station": "Red1",
-          "surrogate": false
-        },
-        {
-          "teamNumber": 4648,
-          "station": "Red2",
-          "surrogate": false
-        },
-        {
-          "teamNumber": 4277,
-          "station": "Red3",
-          "surrogate": false
-        },
-        {
-          "teamNumber": 4663,
-          "station": "Blue1",
-          "surrogate": false
-        },
-        {
-          "teamNumber": 2654,
-          "station": "Blue2",
-          "surrogate": false
-        },
-        {
-          "teamNumber": 2177,
-          "station": "Blue3",
-          "surrogate": false
-        }
-      ]
-    },
-    */
