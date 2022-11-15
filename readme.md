@@ -1,4 +1,5 @@
 Design Goals:
+- make scouting have real time impact for match planning with completely automated digests.
 - game agnostic; the app is fully configurable using a json file (available in the UI)
 - all data processing is/can be done on client for offline support
 - server only handles autorizaton (TBD) and data handling.

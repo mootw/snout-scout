@@ -22,7 +22,6 @@ class MatchCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<SnoutScoutData>(
       builder: (context, snoutData, child) {
-
         return Padding(
           padding: const EdgeInsets.only(top: 4, bottom: 4),
           child: InkWell(

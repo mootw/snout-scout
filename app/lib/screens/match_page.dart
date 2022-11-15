@@ -3,15 +3,18 @@ import 'dart:convert';
 import 'package:app/edit_lock.dart';
 import 'package:app/fieldwidget.dart';
 import 'package:app/main.dart';
+import 'package:app/screens/datapage.dart';
 import 'package:app/screens/edit_match_results.dart';
 import 'package:app/screens/match_recorder.dart';
 import 'package:app/screens/view_team_page.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:snout_db/config/surveyitem.dart';
 import 'package:snout_db/event/match.dart';
 import 'package:snout_db/event/robotmatchresults.dart';
 import 'package:snout_db/patch.dart';
+import 'package:snout_db/snout_db.dart';
 
 class MatchPage extends StatefulWidget {
   const MatchPage({required this.matchid, Key? key}) : super(key: key);
@@ -32,84 +35,6 @@ class _MatchPageState extends State<MatchPage> {
           length: 7,
           child: Scaffold(
             appBar: AppBar(
-              bottom: TabBar(
-                isScrollable: true,
-                tabs: [
-                  const Tab(icon: Icon(Icons.videogame_asset)),
-                  Tab(
-                      child: GestureDetector(
-                          child: Text("${match.red[0]}",
-                              style: const TextStyle(color: Colors.redAccent)),
-                          onLongPress: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      TeamViewPage(teamNumber: match.red[0])),
-                            );
-                          })),
-                  Tab(
-                      child: GestureDetector(
-                          child: Text("${match.red[1]}",
-                              style: const TextStyle(color: Colors.redAccent)),
-                          onLongPress: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      TeamViewPage(teamNumber: match.red[1])),
-                            );
-                          })),
-                  Tab(
-                      child: GestureDetector(
-                          child: Text("${match.red[2]}",
-                              style: const TextStyle(color: Colors.redAccent)),
-                          onLongPress: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      TeamViewPage(teamNumber: match.red[2])),
-                            );
-                          })),
-                  Tab(
-                      child: GestureDetector(
-                          child: Text("${match.blue[0]}",
-                              style: const TextStyle(color: Colors.blueAccent)),
-                          onLongPress: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      TeamViewPage(teamNumber: match.blue[0])),
-                            );
-                          })),
-                  Tab(
-                      child: GestureDetector(
-                          child: Text("${match.blue[1]}",
-                              style: const TextStyle(color: Colors.blueAccent)),
-                          onLongPress: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      TeamViewPage(teamNumber: match.blue[1])),
-                            );
-                          })),
-                  Tab(
-                      child: GestureDetector(
-                          child: Text("${match.blue[2]}",
-                              style: const TextStyle(color: Colors.blueAccent)),
-                          onLongPress: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      TeamViewPage(teamNumber: match.blue[2])),
-                            );
-                          })),
-                ],
-              ),
               title: Text(match.description),
               actions: [
                 Text(DefaultTabController.of(context)?.index.toString() ?? ""),
@@ -125,57 +50,119 @@ class _MatchPageState extends State<MatchPage> {
                             context,
                             MaterialPageRoute(
                               builder: (context) => EditMatchResults(
-                                  results: match.results, config: snoutData.db.config),
+                                  results: match.results,
+                                  config: snoutData.db.config),
                             )));
 
                     if (result != null) {
                       Patch patch = Patch(
-                        user: "anon",
-                        time: DateTime.now(),
-                        path: [
-                          'matches',
-                          widget.matchid,
-                          'results'
-                        ],
-                        data: jsonEncode(result));
-    
-                        await snoutData.addPatch(patch);
+                          user: "anon",
+                          time: DateTime.now(),
+                          path: ['matches', widget.matchid, 'results'],
+                          data: jsonEncode(result));
+
+                      await snoutData.addPatch(patch);
                     }
                   },
                 )
               ],
             ),
-            body: TabBarView(children: [
-              _buildMatchView(snoutData, match, null),
-              _buildMatchView(snoutData, match, match.red[0]),
-              _buildMatchView(snoutData, match, match.red[1]),
-              _buildMatchView(snoutData, match, match.red[2]),
-              _buildMatchView(snoutData, match, match.blue[0]),
-              _buildMatchView(snoutData, match, match.blue[1]),
-              _buildMatchView(snoutData, match, match.blue[2]),
-            ]),
-          ));
-    });
-  }
-
-  Widget _buildMatchView(
-      SnoutScoutData snoutData, FRCMatch data, int? teamNumber) {
-    if (teamNumber == null) {
-      return ListView(
+            body: ListView(
         children: [
+
+          ScrollConfiguration(
+              behavior: MouseInteractableScrollBehavior(),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: DataTable(columns: [
+                  const DataColumn(label: Text("Team")),
+                  const DataColumn(label: Text("Timeline")),
+                  for (final item in snoutData.db.config.matchscouting.events)
+                    DataColumn(label: Text(item.label)),
+                  for (final item in snoutData.db.config.matchscouting.postgame)
+                    DataColumn(label: Text(item.label)),
+                  // for(final item in snoutData.db.config.matchscouting.events)
+                ], rows: [
+                  for (final team in [...match.red, ...match.blue])
+                    DataRow(cells: [
+                      DataCell(TextButton(
+                        child: Text(team.toString(), style: TextStyle(color: match.getAllianceOf(team) == Alliance.red ? Colors.red : Colors.blue)),
+                        onPressed: () {
+                          //Open this teams scouting page
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    TeamViewPage(teamNumber: team)),
+                          );
+                        },
+                      )),
+
+                      DataCell(FilledButton.tonal(
+            child: match.robot[team.toString()] == null
+                ? const Text("Record")
+                : const Text("Record (rewrite)"),
+            onPressed: () async {
+              RobotMatchResults? result = await navigateWithEditLock(
+                  context,
+                  "match:${match.description}:$team:timeline",
+                  () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => MatchRecorderPage(
+                                team: team,
+                                teamAlliance: match.getAllianceOf(team))),
+                      ));
+
+              if (result != null) {
+                Patch patch = Patch(
+                    user: "anon",
+                    time: DateTime.now(),
+                    path: [
+                      'matches',
+                      widget.matchid,
+                      'robot',
+                      team.toString()
+                    ],
+                    data: jsonEncode(result));
+                await snoutData.addPatch(patch);
+              }
+            },
+          )),
+
+                      for (final item
+                          in snoutData.db.config.matchscouting.events)
+                            DataCell(Text(numDisplay(match
+                                .robot[team.toString()]?.timeline
+                                .where((event) => event.id == item.id)
+                                .length
+                                .toDouble()))),
+                      for (final item in snoutData
+                              .db.config.matchscouting.postgame
+                              .where((element) => element.type != SurveyItemType.picture))
+                            DataCell(Text(match
+                                    .robot[team.toString()]
+                                    ?.survey[item.id]
+                                    ?.toString() ??
+                                "No Data")),
+                    ]),
+                ]),
+              )),
+
+          FieldTimelineViewer(match: match),
           ListTile(
             title: const Text("Scheduled Time"),
             subtitle: Text(
-                DateFormat.jm().add_yMd().format(data.scheduledTime.toLocal())),
+                DateFormat.jm().add_yMd().format(match.scheduledTime.toLocal())),
           ),
-          if (data.results != null)
+          if (match.results != null)
             ListTile(
               title: const Text("Actual Time"),
               subtitle: Text(DateFormat.jm()
                   .add_yMd()
-                  .format(data.results!.time.toLocal())),
+                  .format(match.results!.time.toLocal())),
             ),
-          if (data.results != null)
+          if (match.results != null)
             Align(
               alignment: Alignment.center,
               child: DataTable(
@@ -188,76 +175,16 @@ class _MatchPageState extends State<MatchPage> {
                   for (final type in snoutData.db.config.matchscouting.scoring)
                     DataRow(cells: [
                       DataCell(Text(type)),
-                      DataCell(Text(data.results!.red[type].toString())),
-                      DataCell(Text(data.results!.blue[type].toString())),
+                      DataCell(Text(match.results!.red[type].toString())),
+                      DataCell(Text(match.results!.blue[type].toString())),
                     ]),
                 ],
               ),
             ),
-          FieldTimelineViewer(match: data),
-          const Text(
-              "Breakdown of the match including all teams. Metrics where applicable"),
         ],
-      );
-    }
-
-    RobotMatchResults? matchTeamData = data.robot[teamNumber.toString()];
-    final survey = data.robot[teamNumber.toString()]?.survey;
-
-    return ListView(
-      children: [
-        Center(
-          child: FilledButton.tonal(
-            child:
-                matchTeamData == null ? const Text("Record Match") : const Text("Edit Timeline"),
-            onPressed: () async {
-              RobotMatchResults? result = await navigateWithEditLock(
-                  context,
-                  "match:${data.description}:$teamNumber:timeline",
-                  () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) =>
-                                MatchRecorderPage(team: teamNumber, teamAlliance: data.getAllianceOf(teamNumber))),
-                      ));
-
-              if (result != null) {
-                Patch patch = Patch(
-                    user: "anon",
-                    time: DateTime.now(),
-                    path: [
-                      'matches',
-                      widget.matchid,
-                      'robot',
-                      teamNumber.toString()
-                    ],
-                    data: jsonEncode(result));
-                await snoutData.addPatch(patch);
-              }
-            },
-          ),
-        ),
-        if (survey != null)
-          Center(
-            child: Text("Post Match Survey",
-                style: Theme.of(context).textTheme.titleMedium),
-          ),
-        if (survey != null)
-          Column(
-            children: [
-              for (final item in snoutData.db.config.matchscouting.postgame)
-                ScoutingResult(item: item, survey: survey),
-            ],
-          ),
-        Center(child: Text("Robot Performance",
-                style: Theme.of(context).textTheme.titleMedium)),
-        if(matchTeamData != null)
-          for(final item in snoutData.db.config.matchscouting.events)
-            ListTile(
-              title: Text(matchTeamData.timeline.where((event) => event.id == item.id).length.toString()),
-              subtitle: Text(item.label),
-            )
-      ],
-    );
+      ),
+          ));
+    });
   }
+
 }
