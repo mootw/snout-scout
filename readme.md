@@ -9,10 +9,6 @@ Design Goals:
 - heavily normalized database
 - client saves patches (changes) locally until it can sync with the server
 
-Potentially: ???
-- match predictions (predict the results of a match that has not happened)
-- alliance selection
-
 Snout-scout is NOT designed to:
 - check standings or scores directly
 - analyse multiple events at once (multiple events can be queried at the server level)
