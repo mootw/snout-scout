@@ -2,7 +2,6 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:app/main.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:simple_cluster/simple_cluster.dart';

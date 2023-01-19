@@ -226,7 +226,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
                     if(result != null) {
                       Patch patch = Patch(
-                      user: "anon",
                       time: DateTime.now(),
                       path: [
                         'config'

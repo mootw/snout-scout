@@ -38,6 +38,3 @@ class FRCMatch {
   Alliance getAllianceOf (int team) => red.contains(team) ? Alliance.red : Alliance.blue;
   Duration? get scheduleDelay => results?.time.difference(scheduledTime);
 }
-
-
-enum TournamentLevel { None, Practice, Qualification, Playoff }

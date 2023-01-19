@@ -47,7 +47,6 @@ class _PitScoutTeamPageState extends State<PitScoutTeamPage> {
                       Provider.of<SnoutScoutData>(context, listen: false);
 
                   Patch patch = Patch(
-                      user: "anon",
                       time: DateTime.now(),
                       path: [
                         'pitscouting',

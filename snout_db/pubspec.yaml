@@ -12,5 +12,5 @@ dependencies:
   rfc_6901: ^0.1.1
 
 dev_dependencies:
-  build_runner: ^2.0.5
+  build_runner: ^2.3.3
   json_serializable: ^6.5.4

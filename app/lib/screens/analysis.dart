@@ -15,9 +15,9 @@ class _AnalysisPageState extends State<AnalysisPage> {
     return ListView(
       shrinkWrap: true,
       children: [
-        // FilledButton.tonal(onPressed: () {
-        //   launchUrlString("https://www.thebluealliance.com/event/2022mnmi2#rankings");
-        // }, child: Text("View rankings on TBA")),
+        FilledButton.tonal(onPressed: () {
+          launchUrlString("https://www.thebluealliance.com/event/2022mnmi2#rankings");
+        }, child: Text("View rankings on TBA")),
         Text("Scoreboard (shows average value of all metrics for each team, like heatmaps) - Metrics Explorer - Match Predictor - Maybe allow for more 'sql' like queries here?? Performance comparison between two teams and their relative score when matched against each-other"),
       ],
     );

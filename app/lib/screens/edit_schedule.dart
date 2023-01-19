@@ -1,13 +1,13 @@
 import 'dart:convert';
 
 import 'package:app/api.dart';
-import 'package:app/confirm_exit_dialog.dart';
 import 'package:app/main.dart';
 import 'package:app/screens/edit_json.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:snout_db/event/match.dart';
 import 'package:snout_db/patch.dart';
+import 'package:snout_db/snout_db.dart';
 
 class EditSchedulePage extends StatefulWidget {
   const EditSchedulePage({super.key, required this.matches});
@@ -72,7 +72,6 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
                     matchesWithRemoved.remove(match.key);
 
                     Patch patch = Patch(
-                        user: "anon",
                         time: DateTime.now(),
                         path: [
                           'matches',
@@ -116,7 +115,6 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
     if (result != null) {
       FRCMatch resultMatch = FRCMatch.fromJson(jsonDecode(result));
       Patch patch = Patch(
-          user: "anon",
           time: DateTime.now(),
           path: [
             'matches',

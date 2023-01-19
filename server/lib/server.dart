@@ -9,6 +9,7 @@ import 'dart:io';
 
 import 'package:http/http.dart' as http;
 import 'package:snout_db/event/match.dart';
+import 'package:snout_db/game.dart';
 
 import 'package:snout_db/patch.dart';
 
@@ -286,7 +287,6 @@ Future loadScheduleFromFRCAPI(
           robot: {});
 
           Patch patch = Patch(
-            user: "anon",
             time: DateTime.now(),
             path: [
               'matches',

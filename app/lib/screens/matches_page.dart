@@ -17,6 +17,23 @@ class AllMatchesPage extends StatefulWidget {
 }
 
 class _AllMatchesPageState extends State<AllMatchesPage> {
+  final ScrollController _controller = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+
+    //Scroll to the next match automatically if it is not null.
+    SnoutScoutData data = context.read<SnoutScoutData>();
+    final nextMatch = data.db.nextMatch;
+    if (nextMatch != null) {
+      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+        _controller.jumpTo(data.db.matches.values.toList().indexOf(nextMatch) *
+            matchCardHeight);
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<SnoutScoutData>(builder: (context, snoutData, child) {
@@ -28,6 +45,7 @@ class _AllMatchesPageState extends State<AllMatchesPage> {
         children: [
           Expanded(
             child: ListView(
+              controller: _controller,
               children: [
                 for (var match in snoutData.db.matches.values)
                   MatchCard(match: match, focusTeam: snoutData.db.config.team),
@@ -39,7 +57,8 @@ class _AllMatchesPageState extends State<AllMatchesPage> {
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => EditSchedulePage(matches: snoutData.db.matches),
+                                builder: (context) => EditSchedulePage(
+                                    matches: snoutData.db.matches),
                               ));
                         },
                         child: const Text("Edit Schedule")),
@@ -48,6 +67,7 @@ class _AllMatchesPageState extends State<AllMatchesPage> {
               ],
             ),
           ),
+
           if (nextMatch != null &&
               teamNextMatch != null &&
               scheduleDelay != null)
@@ -76,7 +96,8 @@ class _AllMatchesPageState extends State<AllMatchesPage> {
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) => MatchPage(
-                                          matchid: snoutData.db.matchIDFromMatch(nextMatch))),
+                                          matchid: snoutData.db
+                                              .matchIDFromMatch(nextMatch))),
                                 );
                               },
                               child: Text(nextMatch.description),
@@ -96,7 +117,9 @@ class _AllMatchesPageState extends State<AllMatchesPage> {
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) => MatchPage(
-                                          matchid: snoutData.db.matchIDFromMatch(teamNextMatch))),
+                                          matchid: snoutData.db
+                                              .matchIDFromMatch(
+                                                  teamNextMatch))),
                                 );
                               },
                               child: Text(

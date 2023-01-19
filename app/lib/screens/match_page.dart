@@ -37,7 +37,7 @@ class _MatchPageState extends State<MatchPage> {
             appBar: AppBar(
               title: Text(match.description),
               actions: [
-                Text(DefaultTabController.of(context)?.index.toString() ?? ""),
+                // Text(DefaultTabController.of(context).index.toString()),
                 TextButton(
                   child: match.results == null
                       ? const Text("Add Results")
@@ -56,7 +56,6 @@ class _MatchPageState extends State<MatchPage> {
 
                     if (result != null) {
                       Patch patch = Patch(
-                          user: "anon",
                           time: DateTime.now(),
                           path: ['matches', widget.matchid, 'results'],
                           data: jsonEncode(result));
@@ -116,7 +115,6 @@ class _MatchPageState extends State<MatchPage> {
 
               if (result != null) {
                 Patch patch = Patch(
-                    user: "anon",
                     time: DateTime.now(),
                     path: [
                       'matches',

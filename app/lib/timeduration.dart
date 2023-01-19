@@ -1,6 +1,3 @@
-
-
-
 import 'dart:async';
 
 import 'package:app/durationformat.dart';
@@ -8,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class TimeDuration extends StatefulWidget {
-
-  const TimeDuration({super.key, required this.time, this.displayDurationDefault = false});
+  const TimeDuration(
+      {super.key, required this.time, this.displayDurationDefault = false});
 
   final DateTime time;
   final bool displayDurationDefault;
@@ -19,13 +16,16 @@ class TimeDuration extends StatefulWidget {
 }
 
 class _TimeDurationState extends State<TimeDuration> {
-
   late Timer t;
 
   @override
   void initState() {
     super.initState();
-    t = Timer.periodic(const Duration(seconds: 5), (timer) => setState(() {}));
+    t = Timer.periodic(const Duration(seconds: 5), (timer) {
+      if (widget.displayDurationDefault) {
+        setState(() {});
+      }
+    });
   }
 
   @override
@@ -36,11 +36,10 @@ class _TimeDurationState extends State<TimeDuration> {
 
   @override
   Widget build(BuildContext context) {
-
     String primaryText = "";
     String secondaryText = "";
 
-    if(widget.displayDurationDefault) {
+    if (widget.displayDurationDefault) {
       secondaryText = DateFormat.jm().format(widget.time.toLocal());
       primaryText = formatDuration(widget.time.difference(DateTime.now()));
     } else {

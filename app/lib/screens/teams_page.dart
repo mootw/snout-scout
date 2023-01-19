@@ -44,7 +44,6 @@ class _AllTeamsPageState extends State<AllTeamsPage> {
 
                     if(result != null) {
                       Patch patch = Patch(
-                      user: "anon",
                       time: DateTime.now(),
                       path: [
                         'teams'

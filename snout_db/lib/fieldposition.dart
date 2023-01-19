@@ -22,6 +22,11 @@ class FieldPosition {
   /// on one side of the field. Important for analysing things like starting positions.
   FieldPosition get inverted => FieldPosition(-x, -y); 
 
+  /// Returns a new position mirrored across the center of the field dividing the alliances
+  /// This can be used to normalize recorded positions to always be as if it was
+  /// on one side of the field. Important for analysing things like starting positions.
+  FieldPosition get mirrored => FieldPosition(-x, y); 
+
   @override
   String toString () => "$x, $y";
 

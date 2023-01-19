@@ -11,8 +11,6 @@ part 'patch.g.dart';
 @JsonSerializable()
 class Patch {
 
-  //Change author
-  String user;
   //Time of the change
   DateTime time;
   //Where was the data changed??
@@ -20,7 +18,7 @@ class Patch {
   //JSON encoded data that this path should be patched with
   String data;
 
-  Patch({required this.user, required this.time, required this.path, required this.data});
+  Patch({required this.time, required this.path, required this.data});
 
   factory Patch.fromJson(Map<String, dynamic> json) => _$PatchFromJson(json);
   Map<String, dynamic> toJson() => _$PatchToJson(this);
