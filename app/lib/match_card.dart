@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:snout_db/event/match.dart';
 import 'package:snout_db/snout_db.dart';
 
-const double matchCardHeight = 80;
+const double matchCardHeight = 69;
 
 const TextStyle whiteText = TextStyle(color: Colors.white70);
 const TextStyle whiteTextBold =
@@ -22,10 +22,10 @@ class MatchCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<SnoutScoutData>(builder: (context, snoutData, child) {
-      return SizedBox(
-        height: matchCardHeight,
-        child: InkWell(
+    return SizedBox(
+      height: matchCardHeight,
+      child: Consumer<SnoutScoutData>(builder: (context, snoutData, child) {
+        return InkWell(
           onTap: () {
             Navigator.push(
               context,
@@ -43,7 +43,6 @@ class MatchCard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(match.description,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
                         textAlign: TextAlign.center),
                     if (match.results != null)
                       TimeDuration(time: match.results!.time),
@@ -61,7 +60,7 @@ class MatchCard extends StatelessWidget {
                       for (var team in match.red)
                         TextButton(
                             style: TextButton.styleFrom(
-                              minimumSize: const Size(0, 42),
+                              minimumSize: const Size(0, 40),
                               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                             ),
                             onPressed: () {
@@ -97,7 +96,7 @@ class MatchCard extends StatelessWidget {
                       for (var team in match.blue)
                         TextButton(
                             style: TextButton.styleFrom(
-                              minimumSize: const Size(0, 42),
+                              minimumSize: const Size(0, 40),
                               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                             ),
                             onPressed: () {
@@ -130,8 +129,8 @@ class MatchCard extends StatelessWidget {
               ),
             ],
           ),
-        ),
-      );
-    });
+        );
+      }),
+    );
   }
 }

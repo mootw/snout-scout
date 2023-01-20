@@ -20,7 +20,7 @@
 # TODO:
 - [ ] Add creating a new event file in client
 - [ ] Add available events query??
-- [ ] Client stores all year's maps; and loads the one based on the season config.
+- [X] Client stores all year's maps; and loads the one based on the season config.
 - [ ] Add authentication to server and client
 - [ ] Add raw data export to client (aka the json database)
 - [ ] Add csv export for tables in client

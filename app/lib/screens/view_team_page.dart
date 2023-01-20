@@ -13,6 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:snout_db/event/pitscoutresult.dart';
 import 'package:snout_db/config/surveyitem.dart';
+import 'package:snout_db/snout_db.dart';
 
 class TeamViewPage extends StatefulWidget {
   final int teamNumber;
@@ -62,15 +63,6 @@ class _TeamViewPageState extends State<TeamViewPage> {
                   teamNumber: widget.teamNumber, snoutData: snoutData),
               const Divider(height: 32),
               //Display this teams matches
-              Center(child: Text("Match Schedule", style: Theme.of(context).textTheme.titleLarge)),
-              Column(
-                children: [
-                  for (var match in snoutData.db
-                      .matchesWithTeam(widget.teamNumber))
-                    MatchCard(match: match, focusTeam: widget.teamNumber),
-                ],
-              ),
-              const Divider(height: 32),
 
               Center(child: Text("Average Metrics", style: Theme.of(context).textTheme.titleLarge)),
               for (final eventType
@@ -99,6 +91,8 @@ class _TeamViewPageState extends State<TeamViewPage> {
 
               const Divider(height: 32),
 
+              Center(child: Text("Per Match Metrics", style: Theme.of(context).textTheme.titleLarge)),
+
               ScrollConfiguration(
                 behavior: MouseInteractableScrollBehavior(),
                 child: SingleChildScrollView(
@@ -116,7 +110,7 @@ class _TeamViewPageState extends State<TeamViewPage> {
                     ],
                     rows: [
                       for (final match in snoutData.db
-                          .matchesWithTeam(widget.teamNumber).where((match) => match.results != null).toList().reversed)
+                          .matchesWithTeam(widget.teamNumber))
                         DataRow(cells: [
                           DataCell(TextButton(
                             onPressed: () {
@@ -169,7 +163,6 @@ class _TeamViewPageState extends State<TeamViewPage> {
                                         .where((event) =>
                                             event.id == "robot_position" &&
                                             event.time == 0)
-                                        .toList()
                                   ])),
                   const SizedBox(height: 16),
                   Text("Auto Positions",
@@ -188,11 +181,11 @@ class _TeamViewPageState extends State<TeamViewPage> {
                                         .where((event) =>
                                             event.id == "robot_position" &&
                                             event.isInAuto)
-                                        .toList()
                                   ])),
                   const SizedBox(height: 16),
                   for (final eventType
                       in snoutData.db.config.matchscouting.events) ...[
+                    const SizedBox(height: 16),
                     Text(eventType.label,
                         style: Theme.of(context).textTheme.titleLarge),
                     FieldHeatMap(
@@ -208,10 +201,13 @@ class _TeamViewPageState extends State<TeamViewPage> {
                                           ?.timeline
                                           .where(
                                               (event) => event.id == eventType.id)
-                                          .toList()
                                     ])),
-                    const SizedBox(height: 16),
                   ],
+                  const Divider(height: 32),
+                     Center(child: Text("Schedule", style: Theme.of(context).textTheme.titleLarge)),
+                  for (var match in snoutData.db
+                          .matchesWithTeam(widget.teamNumber)) 
+                      MatchCard(match: match, focusTeam: widget.teamNumber),
                 ],
               ),
             ],
