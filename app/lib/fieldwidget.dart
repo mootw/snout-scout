@@ -2,8 +2,10 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:app/main.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:simple_cluster/simple_cluster.dart';
 import 'package:snout_db/event/match.dart';
 import 'package:snout_db/event/matchevent.dart';
@@ -43,7 +45,7 @@ class FieldPositionSelector extends StatelessWidget {
           },
           child: Stack(
             children: [
-              Image.asset("assets/field_map.png"),
+              FieldMapWidget(),
               if (robotPosition != null)
                 Container(
                   alignment: Alignment(
@@ -113,7 +115,7 @@ class _FieldTimelineViewerState extends State<FieldTimelineViewer> {
             child: LayoutBuilder(builder: (context, constraints) {
               return Stack(
                 children: [
-                  Image.asset("assets/field_map.png"),
+                  FieldMapWidget(),
                   for (final robot in widget.match.robot.keys)
                     RobotMapEventView(
                         time: _animationTime,
@@ -242,7 +244,7 @@ class FieldHeatMap extends StatelessWidget {
         child: LayoutBuilder(builder: (context, constraints) {
           return Stack(
             children: [
-              Image.asset("assets/field_map.png"),
+              FieldMapWidget(),
               //Darken the map slightly to create more contrast against the heatmap
               Container(
                   width: double.infinity,
@@ -316,4 +318,14 @@ class HeatMap extends CustomPainter {
 
   @override
   bool shouldRepaint(HeatMap oldDelegate) => false;
+}
+
+
+class FieldMapWidget extends StatelessWidget {
+  const FieldMapWidget({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Image.asset("assets/field_map/${Provider.of<SnoutScoutData>(context, listen: false).db.config.season}.png");
+  }
 }

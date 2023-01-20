@@ -215,7 +215,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             ListTile(
               title: const Text("Event Config"),
-              subtitle: Text(snoutData.db.config.season),
+              subtitle: Text(snoutData.db.name),
               trailing: IconButton(
                   onPressed: () async {
                     final result = await Navigator.push(

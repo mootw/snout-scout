@@ -24,6 +24,7 @@ class MatchEvent {
       {required this.time,
       required this.x,
       required this.y,
+      //TODO instead of storing the normalized position, store the team?
       required this.nx,
       required this.ny,
       required this.id,

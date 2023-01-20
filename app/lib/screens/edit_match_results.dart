@@ -1,10 +1,8 @@
-import 'dart:convert';
+
 
 import 'package:app/confirm_exit_dialog.dart';
-import 'package:app/main.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
 import 'package:snout_db/event/matchresults.dart';
 import 'package:snout_db/snout_db.dart';
 

@@ -8,7 +8,7 @@ part of 'eventconfig.dart';
 
 EventConfig _$EventConfigFromJson(Map<String, dynamic> json) => EventConfig(
       team: json['team'] as int,
-      season: json['season'] as String,
+      season: json['season'] as int,
       fieldStyle: $enumDecode(_$FieldStyleEnumMap, json['fieldStyle']),
       pitscouting: (json['pitscouting'] as List<dynamic>)
           .map((e) => SurveyItem.fromJson(e as Map<String, dynamic>))

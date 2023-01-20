@@ -49,12 +49,14 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
           .events
           .where((element) =>
               element.mode == MatchSegment.auto ||
-              element.mode == MatchSegment.both).toList()
+              element.mode == MatchSegment.both)
+          .toList()
       : Provider.of<SnoutScoutData>(context, listen: false)
           .db
           .config
           .matchscouting
-          .events.toList();
+          .events
+          .toList();
 
   @override
   void dispose() {
@@ -63,6 +65,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
   }
 
   Widget getEventButton(MatchEventConfig tool) {
+    final fieldStyle = Provider.of<SnoutScoutData>(context, listen: false).db.config.fieldStyle;
     return Card(
       child: MaterialButton(
         onPressed: lastMoveEvent == null || _time - lastMoveEvent!.time > 3
@@ -78,7 +81,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                         redNormalizedPosition:
                             widget.teamAlliance == Alliance.red
                                 ? robotPosition!
-                                : robotPosition!.inverted));
+                                : fieldStyle == FieldStyle.rotated ? robotPosition!.inverted : robotPosition!.mirrored));
                   }
                 });
               },
@@ -124,6 +127,8 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
   Widget build(BuildContext context) {
     //Allow slightly wide to be considered vertical for foldable devices or near-square devices
     final isHorizontal = MediaQuery.of(context).size.aspectRatio > 1.2;
+    //used to normalize the field position
+    final fieldStyle = Provider.of<SnoutScoutData>(context, listen: false).db.config.fieldStyle;
 
     if (_mode == MatchMode.finished) {
       return ConfirmExitDialog(
@@ -223,7 +228,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                               redNormalizedPosition:
                                   widget.teamAlliance == Alliance.red
                                       ? robotPosition
-                                      : robotPosition.inverted));
+                                      : fieldStyle == FieldStyle.rotated ? robotPosition.inverted : robotPosition.mirrored));
                         });
                       },
                     ),
@@ -279,7 +284,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                           redNormalizedPosition:
                               widget.teamAlliance == Alliance.red
                                   ? robotPosition
-                                  : robotPosition.inverted));
+                                  : fieldStyle == FieldStyle.rotated ? robotPosition.inverted : robotPosition.mirrored));
                     });
                   },
                 ),

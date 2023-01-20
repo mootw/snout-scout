@@ -7,8 +7,8 @@ part 'eventconfig.g.dart';
 @JsonSerializable()
 class EventConfig {
 
-  //name for the season. Doesn't particularly matter
-  String season;
+  //year for this season; used to determine which field to display
+  int season;
   //Determines how the app will normalize event positions
   FieldStyle fieldStyle;
   //Your team number
