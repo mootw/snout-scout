@@ -9,10 +9,9 @@ class MatchEventConfig {
   String id;
   String label;
   MatchSegment mode;
+  
 
   MatchEventConfig(
-      //Default match event time to zero to allow for defining an event in the season config
-      //without a time, since that wouldn't make sense.
       {
       required this.id,
       required this.mode,

@@ -41,22 +41,12 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
       events.toList().lastWhereOrNull((event) => event.id == "robot_position");
   FieldPosition? get robotPosition => lastMoveEvent?.position;
 
-  List<MatchEventConfig> get scoutingEvents => _time <= 17
-      ? Provider.of<EventDB>(context, listen: false)
+  List<MatchEventConfig> get scoutingEvents =>
+      Provider.of<EventDB>(context, listen: false)
           .db
           .config
           .matchscouting
-          .events
-          .where((element) =>
-              element.mode == MatchSegment.auto ||
-              element.mode == MatchSegment.both)
-          .toList()
-      : Provider.of<EventDB>(context, listen: false)
-          .db
-          .config
-          .matchscouting
-          .events
-          .toList();
+          .events;
 
   @override
   void dispose() {
@@ -65,10 +55,24 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
   }
 
   Widget getEventButton(MatchEventConfig tool) {
-    final fieldStyle = Provider.of<EventDB>(context, listen: false).db.config.fieldStyle;
+    final fieldStyle =
+        Provider.of<EventDB>(context, listen: false).db.config.fieldStyle;
+
+    //Disable the button if it is for teleop ONLY during the auto phase.
+    final bool disabledForAuto = _time <= 17 && tool.mode == MatchSegment.teleop
+        ? true
+        : false;
+    
+    //Disable the button if it is for teleop ONLY during the auto phase.
+    final bool disabledForTeleop = _time > 17 && tool.mode == MatchSegment.auto
+        ? true
+        : false;
+
     return Card(
       child: MaterialButton(
-        onPressed: lastMoveEvent == null || _time - lastMoveEvent!.time > 3
+        onPressed: disabledForAuto || disabledForTeleop ||
+                lastMoveEvent == null ||
+                _time - lastMoveEvent!.time > 3
             ? null
             : () {
                 HapticFeedback.mediumImpact();
@@ -81,7 +85,9 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                         redNormalizedPosition:
                             widget.teamAlliance == Alliance.red
                                 ? robotPosition!
-                                : fieldStyle == FieldStyle.rotated ? robotPosition!.inverted : robotPosition!.mirrored));
+                                : fieldStyle == FieldStyle.rotated
+                                    ? robotPosition!.inverted
+                                    : robotPosition!.mirrored));
                   }
                 });
               },
@@ -128,7 +134,8 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
     //Allow slightly wide to be considered vertical for foldable devices or near-square devices
     final isHorizontal = MediaQuery.of(context).size.aspectRatio > 1.2;
     //used to normalize the field position
-    final fieldStyle = Provider.of<EventDB>(context, listen: false).db.config.fieldStyle;
+    final fieldStyle =
+        Provider.of<EventDB>(context, listen: false).db.config.fieldStyle;
 
     if (_mode == MatchMode.finished) {
       return ConfirmExitDialog(
@@ -149,12 +156,11 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
           body: ListView(
             shrinkWrap: true,
             children: [
-              for (var item
-                  in Provider.of<EventDB>(context, listen: false)
-                      .db
-                      .config
-                      .matchscouting
-                      .postgame)
+              for (var item in Provider.of<EventDB>(context, listen: false)
+                  .db
+                  .config
+                  .matchscouting
+                  .postgame)
                 Container(
                     padding: const EdgeInsets.all(12),
                     child: ScoutingToolWidget(
@@ -228,7 +234,9 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                               redNormalizedPosition:
                                   widget.teamAlliance == Alliance.red
                                       ? robotPosition
-                                      : fieldStyle == FieldStyle.rotated ? robotPosition.inverted : robotPosition.mirrored));
+                                      : fieldStyle == FieldStyle.rotated
+                                          ? robotPosition.inverted
+                                          : robotPosition.mirrored));
                         });
                       },
                     ),
@@ -283,7 +291,9 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                           redNormalizedPosition:
                               widget.teamAlliance == Alliance.red
                                   ? robotPosition
-                                  : fieldStyle == FieldStyle.rotated ? robotPosition.inverted : robotPosition.mirrored));
+                                  : fieldStyle == FieldStyle.rotated
+                                      ? robotPosition.inverted
+                                      : robotPosition.mirrored));
                     });
                   },
                 ),
@@ -333,7 +343,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
           const SizedBox(width: 12),
           FilledButton.icon(
             icon: const Icon(Icons.arrow_forward),
-            onPressed: handleNextSection,
+            onPressed: lastMoveEvent == null ? null : handleNextSection,
             label: Text(_mode == MatchMode.setup
                 ? "Start"
                 : _mode == MatchMode.playing

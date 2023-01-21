@@ -12,7 +12,6 @@ SurveyItem _$SurveyItemFromJson(Map<String, dynamic> json) => SurveyItem(
       label: json['label'] as String,
       options:
           (json['options'] as List<dynamic>?)?.map((e) => e as String).toList(),
-      options_values: json['options_values'] as List<dynamic>?,
     );
 
 Map<String, dynamic> _$SurveyItemToJson(SurveyItem instance) =>
@@ -21,7 +20,6 @@ Map<String, dynamic> _$SurveyItemToJson(SurveyItem instance) =>
       'label': instance.label,
       'type': _$SurveyItemTypeEnumMap[instance.type]!,
       'options': instance.options,
-      'options_values': instance.options_values,
     };
 
 const _$SurveyItemTypeEnumMap = {
