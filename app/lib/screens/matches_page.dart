@@ -24,7 +24,7 @@ class _AllMatchesPageState extends State<AllMatchesPage> {
     super.initState();
 
     //Scroll to the next match automatically if it is not null.
-    SnoutScoutData data = context.read<SnoutScoutData>();
+    EventDB data = context.read<EventDB>();
     final nextMatch = data.db.nextMatch;
     if (nextMatch != null) {
       WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
@@ -36,7 +36,7 @@ class _AllMatchesPageState extends State<AllMatchesPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<SnoutScoutData>(builder: (context, snoutData, child) {
+    return Consumer<EventDB>(builder: (context, snoutData, child) {
       FRCMatch? teamNextMatch =
           snoutData.db.nextMatchForTeam(snoutData.db.config.team);
       Duration? scheduleDelay = snoutData.db.scheduleDelay;
@@ -48,13 +48,10 @@ class _AllMatchesPageState extends State<AllMatchesPage> {
               children: [
                 //Iterate through all of the matches and add them to the list
                 //if a match is equal to the next match; highlight it!
-                for (var match in snoutData.db.matches.values) ...[
-                  if (match == snoutData.db.nextMatch)
-                    Center(
-                        child: Text("Next Match",
-                            style: Theme.of(context).textTheme.titleLarge)),
-                  MatchCard(match: match, focusTeam: snoutData.db.config.team),
-                ],
+                for (var match in snoutData.db.matches.values)
+                  Container(
+                    color: match == snoutData.db.nextMatch ? Theme.of(context).colorScheme.onPrimary : null,
+                    child: MatchCard(match: match, focusTeam: snoutData.db.config.team)),
 
                 Padding(
                   padding: const EdgeInsets.all(8.0),
@@ -76,51 +73,41 @@ class _AllMatchesPageState extends State<AllMatchesPage> {
           ),
           if (teamNextMatch != null && scheduleDelay != null)
             Container(
-              color: Theme.of(context).colorScheme.background,
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              child: Table(
+              color: Theme.of(context).colorScheme.surfaceVariant,
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Column(
                 children: [
-                  TableRow(children: [
-                    Center(
-                        child: Text("Schedule Delay",
-                            style: Theme.of(context).textTheme.titleSmall)),
-                    const Center(child: Text("Your Next Match")),
-                  ]),
-                  TableRow(children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [Text(offsetDurationInMins(scheduleDelay))],
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        TextButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => MatchPage(
-                                      matchid: snoutData.db
-                                          .matchIDFromMatch(teamNextMatch))),
-                            );
-                          },
-                          child: Text(
-                            teamNextMatch.description,
-                            style: TextStyle(
-                                color: teamNextMatch.getAllianceOf(
-                                            snoutData.db.config.team) ==
-                                        Alliance.red
-                                    ? Colors.red
-                                    : Colors.blue),
-                          ),
+                  Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Center(child: Text("Next Match")),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => MatchPage(
+                                          matchid: snoutData.db
+                                              .matchIDFromMatch(teamNextMatch))),
+                                );
+                              },
+                              child: Text(
+                                teamNextMatch.description,
+                                style: TextStyle(
+                                    color: teamNextMatch.getAllianceOf(
+                                                snoutData.db.config.team) ==
+                                            Alliance.red
+                                        ? Colors.red
+                                        : Colors.blue),
+                              ),
+                            ),
+                            TimeDuration(
+                                time:
+                                    teamNextMatch.scheduledTime.add(scheduleDelay),
+                                displayDurationDefault: true),
+                          ],
                         ),
-                        TimeDuration(
-                            time:
-                                teamNextMatch.scheduledTime.add(scheduleDelay),
-                            displayDurationDefault: true),
-                      ],
-                    ),
-                  ]),
+                  Text("delay: ${offsetDurationInMins(scheduleDelay)}"),
                 ],
               ),
             )

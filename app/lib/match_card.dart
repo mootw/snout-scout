@@ -9,9 +9,9 @@ import 'package:snout_db/snout_db.dart';
 
 const double matchCardHeight = 69;
 
-const TextStyle whiteText = TextStyle(color: Colors.white70);
+const TextStyle whiteText = TextStyle(color: Colors.white70, fontSize: 12);
 const TextStyle whiteTextBold =
-    TextStyle(color: Colors.white, fontWeight: FontWeight.bold);
+    TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12);
 
 class MatchCard extends StatelessWidget {
   final FRCMatch match;
@@ -24,7 +24,7 @@ class MatchCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       height: matchCardHeight,
-      child: Consumer<SnoutScoutData>(builder: (context, snoutData, child) {
+      child: Consumer<EventDB>(builder: (context, snoutData, child) {
         return InkWell(
           onTap: () {
             Navigator.push(
@@ -55,12 +55,13 @@ class MatchCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Container(
+                    height: 33,
                     color: Colors.red,
                     child: Row(children: [
                       for (var team in match.red)
                         TextButton(
                             style: TextButton.styleFrom(
-                              minimumSize: const Size(0, 40),
+                              minimumSize: const Size(0, 30),
                               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                             ),
                             onPressed: () {
@@ -84,19 +85,19 @@ class MatchCard extends StatelessWidget {
                               : "?",
                           style: match.results?.winner == Alliance.red ||
                                   match.results?.winner == Alliance.tie
-                              ? whiteTextBold
-                              : whiteText,
+                              ? whiteTextBold : null,
                         ),
                       ),
                     ]),
                   ),
                   Container(
+                    height: 33,
                     color: Colors.blue,
                     child: Row(children: [
                       for (var team in match.blue)
                         TextButton(
                             style: TextButton.styleFrom(
-                              minimumSize: const Size(0, 40),
+                              minimumSize: const Size(0, 30),
                               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                             ),
                             onPressed: () {
@@ -121,7 +122,7 @@ class MatchCard extends StatelessWidget {
                             style: match.results?.winner == Alliance.blue ||
                                     match.results?.winner == Alliance.tie
                                 ? whiteTextBold
-                                : whiteText),
+                                : null),
                       ),
                     ]),
                   ),

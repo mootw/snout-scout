@@ -21,6 +21,9 @@ Future setServer(String newServer) async {
   var prefs = await SharedPreferences.getInstance();
   prefs.setString("server", newServer);
   serverURL = newServer;
+  
+  //Literally re-initialize the app when changing the server.
+  main();
 }
 
 void main() async {
@@ -37,7 +40,6 @@ void main() async {
     var data = await apiClient.get(Uri.parse("$serverURL"));
     event = FRCEvent.fromJson(jsonDecode(data.body));
     prefs.setString("$serverURL", data.body);
-
   } catch (e) {
     try {
       //Load from cache
@@ -51,7 +53,7 @@ void main() async {
     }
   }
 
-  SnoutScoutData data = SnoutScoutData(event);
+  EventDB data = EventDB(event);
 
   runApp(ChangeNotifierProvider(
     create: (context) => data,
@@ -94,7 +96,6 @@ class SetupAppScreen extends StatelessWidget {
             trailing: IconButton(
               icon: const Icon(Icons.edit),
               onPressed: () async {
-                print("pressed");
                 var result =
                     await showStringInputDialog(context, "Server", serverURL);
                 if (result != null) {
@@ -109,22 +110,14 @@ class SetupAppScreen extends StatelessWidget {
   }
 }
 
-class SnoutScoutData extends ChangeNotifier {
-
-  //Edit mode shows options to edit things like adding/removing
-  //events, matches, teams, match scheduled times...
-  bool editMode = false;
-
+class EventDB extends ChangeNotifier {
   FRCEvent db;
 
-  SnoutScoutData(this.db) {
-
-    late WebSocketChannel channel;
+  EventDB(this.db) {
     Uri serverUri = Uri.parse(serverURL);
-    channel = WebSocketChannel.connect(Uri.parse(
+    WebSocketChannel channel = WebSocketChannel.connect(Uri.parse(
         '${serverURL.startsWith("https") ? "wss" : "ws"}://${serverUri.host}:${serverUri.port}/listen/${serverUri.pathSegments[1]}'));
     channel.stream.listen((event) async {
-
       print("got notification");
 
       db = Patch.fromJson(jsonDecode(event)).patch(db);
@@ -135,12 +128,10 @@ class SnoutScoutData extends ChangeNotifier {
     });
   }
 
-  void setEditMode() {}
-
   //Writes a patch to local disk and submits it to the server.
   Future addPatch(Patch patch) async {
-    var res = await apiClient.put(Uri.parse("$serverURL"),
-        body: jsonEncode(patch));
+    var res =
+        await apiClient.put(Uri.parse("$serverURL"), body: jsonEncode(patch));
 
     if (res.statusCode == 200) {
       //This was sucessful
@@ -185,7 +176,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<SnoutScoutData>(builder: (context, snoutData, child) {
+    return Consumer<EventDB>(builder: (context, snoutData, child) {
       return Scaffold(
         appBar: AppBar(
           title: Text(snoutData.db.name),
@@ -221,16 +212,19 @@ class _MyHomePageState extends State<MyHomePage> {
                     final result = await Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => JSONEditor(validate: EventConfig.fromJson, source: const JsonEncoder.withIndent("    ").convert(Provider.of<SnoutScoutData>(context, listen: false).db.config),),
+                          builder: (context) => JSONEditor(
+                            validate: EventConfig.fromJson,
+                            source: const JsonEncoder.withIndent("    ")
+                                .convert(
+                                    Provider.of<EventDB>(context, listen: false)
+                                        .db
+                                        .config),
+                          ),
                         ));
 
-                    if(result != null) {
+                    if (result != null) {
                       Patch patch = Patch(
-                      time: DateTime.now(),
-                      path: [
-                        'config'
-                      ],
-                      data: result);
+                          time: DateTime.now(), path: ['config'], data: result);
                       //Save the scouting results to the server!!
                       await snoutData.addPatch(patch);
                     }

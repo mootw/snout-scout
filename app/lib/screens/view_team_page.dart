@@ -27,7 +27,7 @@ class TeamViewPage extends StatefulWidget {
 class _TeamViewPageState extends State<TeamViewPage> {
   @override
   Widget build(BuildContext context) {
-    return Consumer<SnoutScoutData>(builder: (context, snoutData, child) {
+    return Consumer<EventDB>(builder: (context, snoutData, child) {
       return Scaffold(
           appBar: AppBar(
             actions: [
@@ -218,7 +218,7 @@ class _TeamViewPageState extends State<TeamViewPage> {
 
 class ScoutingResultsViewer extends StatelessWidget {
   final int teamNumber;
-  final SnoutScoutData snoutData;
+  final EventDB snoutData;
 
   const ScoutingResultsViewer(
       {Key? key, required this.teamNumber, required this.snoutData})

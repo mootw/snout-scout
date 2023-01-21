@@ -43,7 +43,7 @@ Future loadEvents() async {
 }
 
 void main(List<String> args) async {
-  if (env['FRCAPI'] == null) {
+  if (env.isDefined('FRCAPI') == false) {
     print(
         "NO FRC API key detected. Create a .env or set env to FRCAPI=username:key");
   }
@@ -117,9 +117,15 @@ void main(List<String> args) async {
       return handleEditLockRequest(request);
     }
 
+    if (request.uri.toString() == "/events") {
+      request.response.write(loadedEvents.keys.toList());
+      request.response.close();
+      return;
+    }
+
     // event/some_name
     if (request.uri.pathSegments.length > 1 &&
-        request.uri.pathSegments[0] == 'event') {
+        request.uri.pathSegments[0] == 'events') {
       final eventID = request.uri.pathSegments[1];
       File? f = loadedEvents[eventID]?.file;
       if (f == null || await f.exists() == false) {
@@ -134,7 +140,7 @@ void main(List<String> args) async {
         if (request.uri.pathSegments.length > 2 &&
             request.uri.pathSegments[2] != "") {
           //query was for a specific sub-item. Path segments with a trailing zero need to be filtered
-          //event/2022mnmi2 is not the same as event/2022mnmi2/
+          //events/2022mnmi2 is not the same as event/2022mnmi2/
           try {
             var dbJson = jsonDecode(jsonEncode(event));
             final pointer = JsonPointer(
@@ -260,7 +266,8 @@ Future loadScheduleFromFRCAPI(
     DateTime startTime = DateTime.parse(match['startTime']);
     int matchNumber = match['matchNumber'];
     List<dynamic> teams = match['teams'];
-    TournamentLevel tournamentLevel = TournamentLevel.values.byName(match['tournamentLevel']);
+    TournamentLevel tournamentLevel =
+        TournamentLevel.values.byName(match['tournamentLevel']);
 
     //Assume they just list teams in order of 1-2-3 red 1-2-3 blue
     List<int> red = [];
@@ -286,18 +293,19 @@ Future loadScheduleFromFRCAPI(
           results: null,
           robot: {});
 
-          Patch patch = Patch(
-            time: DateTime.now(),
-            path: [
-              'matches',
-              newMatch.description,
-            ],
-            data: jsonEncode(newMatch));
+      Patch patch = Patch(
+          time: DateTime.now(),
+          path: [
+            'matches',
+            newMatch.description,
+          ],
+          data: jsonEncode(newMatch));
 
-          print(jsonEncode(patch));
+      print(jsonEncode(patch));
 
-          var res = await http.put(Uri.parse("http://localhost:$serverPort/event/$eventID"),
-              body: jsonEncode(patch));
+      var res = await http.put(
+          Uri.parse("http://localhost:$serverPort/events/$eventID"),
+          body: jsonEncode(patch));
     }
   }
 }

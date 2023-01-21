@@ -42,7 +42,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
   FieldPosition? get robotPosition => lastMoveEvent?.position;
 
   List<MatchEventConfig> get scoutingEvents => _time <= 17
-      ? Provider.of<SnoutScoutData>(context, listen: false)
+      ? Provider.of<EventDB>(context, listen: false)
           .db
           .config
           .matchscouting
@@ -51,7 +51,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
               element.mode == MatchSegment.auto ||
               element.mode == MatchSegment.both)
           .toList()
-      : Provider.of<SnoutScoutData>(context, listen: false)
+      : Provider.of<EventDB>(context, listen: false)
           .db
           .config
           .matchscouting
@@ -65,7 +65,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
   }
 
   Widget getEventButton(MatchEventConfig tool) {
-    final fieldStyle = Provider.of<SnoutScoutData>(context, listen: false).db.config.fieldStyle;
+    final fieldStyle = Provider.of<EventDB>(context, listen: false).db.config.fieldStyle;
     return Card(
       child: MaterialButton(
         onPressed: lastMoveEvent == null || _time - lastMoveEvent!.time > 3
@@ -128,7 +128,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
     //Allow slightly wide to be considered vertical for foldable devices or near-square devices
     final isHorizontal = MediaQuery.of(context).size.aspectRatio > 1.2;
     //used to normalize the field position
-    final fieldStyle = Provider.of<SnoutScoutData>(context, listen: false).db.config.fieldStyle;
+    final fieldStyle = Provider.of<EventDB>(context, listen: false).db.config.fieldStyle;
 
     if (_mode == MatchMode.finished) {
       return ConfirmExitDialog(
@@ -150,7 +150,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
             shrinkWrap: true,
             children: [
               for (var item
-                  in Provider.of<SnoutScoutData>(context, listen: false)
+                  in Provider.of<EventDB>(context, listen: false)
                       .db
                       .config
                       .matchscouting
@@ -266,7 +266,6 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                   alliance: widget.teamAlliance,
                   robotPosition: robotPosition,
                   onTap: (robotPosition) {
-                    print(robotPosition.toString());
                     HapticFeedback.lightImpact();
                     setState(() {
                       for (final event in events.toList()) {

@@ -19,7 +19,7 @@ class _AllTeamsPageState extends State<AllTeamsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<SnoutScoutData>(
+    return Consumer<EventDB>(
       builder: (context, snoutData, child) {
         return SingleChildScrollView(
           scrollDirection: Axis.vertical,
@@ -39,7 +39,7 @@ class _AllTeamsPageState extends State<AllTeamsPage> {
                           final result = await Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => JSONEditor(validate: (item) {}, source: const JsonEncoder.withIndent("    ").convert(Provider.of<SnoutScoutData>(context, listen: false).db.teams),),
+                          builder: (context) => JSONEditor(validate: (item) {}, source: const JsonEncoder.withIndent("    ").convert(Provider.of<EventDB>(context, listen: false).db.teams),),
                         ));
 
                     if(result != null) {
@@ -65,7 +65,7 @@ class _AllTeamsPageState extends State<AllTeamsPage> {
 
 class TeamListTile extends StatelessWidget {
   final int teamNumber;
-  final SnoutScoutData snoutData;
+  final EventDB snoutData;
 
   const TeamListTile({Key? key, required this.teamNumber, required this.snoutData}) : super(key: key);
 

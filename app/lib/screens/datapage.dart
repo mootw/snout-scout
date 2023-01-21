@@ -28,7 +28,7 @@ class _DataTablePageState extends State<DataTablePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<SnoutScoutData>(builder: (context, snoutData, child) {
+    return Consumer<EventDB>(builder: (context, snoutData, child) {
       //TODO fix ugly sorting code
       List<int> teamsSorted = snoutData.db.teams.toList();
 
@@ -61,7 +61,7 @@ class _DataTablePageState extends State<DataTablePage> {
                         .where(
                             (element) => element.robot[team.toString()] != null)
                         .length),
-            ][column](teamsSorted[row]);
+            ][column](teamsSorted[row])?.toDouble();
             if (value.isNaN) {
               //Less than zero value to stort all the way at the bottom
               return -1;
@@ -80,8 +80,6 @@ class _DataTablePageState extends State<DataTablePage> {
 
       return ListView(
         children: [
-          const Text(
-              "Display a spreadsheet like table with every metric (including performance metrics for ranking like win-loss) and allow sorting and filtering of the data"),
           ScrollConfiguration(
             behavior: MouseInteractableScrollBehavior(),
             child: SingleChildScrollView(

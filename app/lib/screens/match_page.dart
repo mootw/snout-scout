@@ -28,7 +28,7 @@ class MatchPage extends StatefulWidget {
 class _MatchPageState extends State<MatchPage> {
   @override
   Widget build(BuildContext context) {
-    return Consumer<SnoutScoutData>(builder: (context, snoutData, child) {
+    return Consumer<EventDB>(builder: (context, snoutData, child) {
       FRCMatch match = snoutData.db.matches[widget.matchid]!;
 
       return DefaultTabController(

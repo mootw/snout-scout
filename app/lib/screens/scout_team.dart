@@ -44,7 +44,7 @@ class _PitScoutTeamPageState extends State<PitScoutTeamPage> {
             IconButton(
                 onPressed: () async {
                   var snoutData =
-                      Provider.of<SnoutScoutData>(context, listen: false);
+                      Provider.of<EventDB>(context, listen: false);
 
                   Patch patch = Patch(
                       time: DateTime.now(),

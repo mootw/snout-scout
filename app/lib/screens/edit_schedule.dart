@@ -31,7 +31,7 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<SnoutScoutData>(builder: (context, snoutData, child) {
+    return Consumer<EventDB>(builder: (context, snoutData, child) {
       return Scaffold(
         appBar: AppBar(title: const Text("Edit Schedule"), actions: [
           TextButton(child: Text("LOAD MATCHES FROM FRCAPI"), onPressed: () async {
@@ -104,7 +104,7 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
     });
   }
 
-  Future editMatch(FRCMatch match, SnoutScoutData snoutData, String? matchID) async {
+  Future editMatch(FRCMatch match, EventDB snoutData, String? matchID) async {
     
 
     String? result = await Navigator.of(context).push(MaterialPageRoute(
