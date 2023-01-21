@@ -57,7 +57,7 @@
     ],
     "config": {
         "season": 2022,
-        "fieldStyle": "inverted",
+        "fieldStyle": "rotated",
         "team": 6749,
         "pitscouting": [
             {
