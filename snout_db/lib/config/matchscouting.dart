@@ -8,13 +8,11 @@ part 'matchscouting.g.dart';
 class MatchScouting {
   
   List<MatchEventConfig> events;
-  Map<String, dynamic> eventValues;
   List<SurveyItem> postgame;
   List<String> scoring;
 
   MatchScouting(
       {required this.events,
-      required this.eventValues,
       required this.postgame,
       required this.scoring});
 

@@ -1,9 +1,12 @@
 {
-    "name": "Example",
+    "name": "2023 Example",
     "teams": [
-        1,
-        2,
-        3
+        1000,
+        2000,
+        3000,
+        4000,
+        5000,
+        6000
     ],
     "config": {
         "season": 2023,
@@ -14,61 +17,87 @@
                 "id": "robot_name",
                 "label": "Robot Name",
                 "type": "text",
-                "options": null,
-                "options_values": null
+                "options": null
             },
             {
                 "id": "robot_picture",
                 "label": "Robot Photo",
                 "type": "picture",
-                "options": null,
-                "options_values": null
+                "options": null
             },
             {
-                "id": "shooter_type",
-                "label": "Shooter type",
+                "id": "score_type",
+                "label": "Scoring",
                 "type": "selector",
                 "options": [
-                    "No Shooter",
-                    "Low Goal",
-                    "High Goal",
-                    "Any goal"
-                ],
-                "options_values": null
+                    "No scoring",
+                    "Cubes",
+                    "Cones",
+                    "Both"
+                ]
             },
             {
-                "id": "climb",
-                "label": "Climb",
+                "id": "socring_levels",
+                "label": "Scoring Levels",
                 "type": "selector",
                 "options": [
-                    "No Climb",
-                    "Low",
-                    "Medium",
-                    "High",
-                    "Traversal"
-                ],
-                "options_values": null
+                    "No scoring",
+                    "Bottom",
+                    "Middle",
+                    "Top"
+                ]
             },
             {
-                "id": "climb_time",
-                "label": "Climb time",
+                "id": "intake",
+                "label": "Intake Options",
+                "type": "selector",
+                "options": [
+                    "No Intake (push only)",
+                    "Substation",
+                    "Floor",
+                    "Floor (upright cones only)",
+                    "Both",
+                    "Both (upright cones only)"
+                ]
+            },
+            {
+                "id": "intake_comments",
+                "label": "Intake Comments",
+                "type": "text",
+                "options": null
+            },
+            {
+                "id": "robot_width",
+                "label": "How wide is robot on docking station (including bumpers; inches)?",
                 "type": "number",
-                "options": null,
-                "options_values": null
+                "options": null
+            },
+            {
+                "id": "can_use_station",
+                "label": "Can the robot get onto the docking station?",
+                "type": "toggle",
+                "options": null
+            },
+            {
+                "id": "can_autolevel",
+                "label": "Can the robot automatically level itself?",
+                "type": "toggle",
+                "options": null
             },
             {
                 "id": "auto",
                 "label": "Describe autos",
                 "type": "text",
-                "options": null,
-                "options_values": null
+                "options": null
             },
             {
-                "id": "can_defense",
-                "label": "Can play defense?",
-                "type": "toggle",
-                "options": null,
-                "options_values": null
+                "id": "confidence",
+                "label": "Apparent Confidence",
+                "type": "selector",
+                "options": [
+                    "Not Confident",
+                    "Confident"
+                ]
             },
             {
                 "id": "pick",
@@ -78,42 +107,50 @@
                     "Definitely not",
                     "Potentially",
                     "Top Pick"
-                ],
-                "options_values": null
+                ]
             },
             {
                 "id": "comments",
                 "label": "Extra comments",
                 "type": "text",
-                "options": null,
-                "options_values": null
+                "options": null
             }
         ],
         "matchscouting": {
             "events": [
                 {
-                    "id": "cargo_intake",
-                    "label": "Intake Cargo",
+                    "id": "cone",
+                    "label": "Scored Cone",
                     "mode": "both"
                 },
                 {
-                    "id": "cargo_upper",
-                    "label": "Cargo Upper",
+                    "id": "cube",
+                    "label": "Scored Cube",
                     "mode": "both"
                 },
                 {
-                    "id": "cargo_lower",
-                    "label": "Cargo Lower",
+                    "id": "bottom",
+                    "label": "Scored Bottom",
                     "mode": "both"
                 },
                 {
-                    "id": "cargo_miss",
-                    "label": "Cargo Miss",
+                    "id": "middle",
+                    "label": "Scored Middle",
                     "mode": "both"
                 },
                 {
-                    "id": "cargo_drop",
-                    "label": "Cargo Drop",
+                    "id": "top",
+                    "label": "Scored Top",
+                    "mode": "both"
+                },
+                {
+                    "id": "intake",
+                    "label": "Intake",
+                    "mode": "both"
+                },
+                {
+                    "id": "fumble",
+                    "label": "Fumble",
                     "mode": "both"
                 }
             ],
@@ -130,14 +167,6 @@
                         "Medium",
                         "High",
                         "Traversal"
-                    ],
-                    "options_values": [
-                        0,
-                        0,
-                        4,
-                        6,
-                        10,
-                        15
                     ]
                 },
                 {
@@ -148,8 +177,7 @@
                         "Low",
                         "Medium",
                         "High"
-                    ],
-                    "options_values": null
+                    ]
                 },
                 {
                     "id": "driving_awareness",
@@ -159,15 +187,13 @@
                         "Low",
                         "Medium",
                         "High"
-                    ],
-                    "options_values": null
+                    ]
                 },
                 {
                     "id": "intake_issue",
                     "label": "Intake issues?",
                     "type": "toggle",
-                    "options": null,
-                    "options_values": null
+                    "options": null
                 },
                 {
                     "id": "defense_skill",
@@ -178,15 +204,13 @@
                         "Low",
                         "Medium",
                         "High"
-                    ],
-                    "options_values": null
+                    ]
                 },
                 {
                     "id": "comments",
                     "label": "Extra comments",
                     "type": "text",
-                    "options": null,
-                    "options_values": null
+                    "options": null
                 }
             ],
             "scoring": [
