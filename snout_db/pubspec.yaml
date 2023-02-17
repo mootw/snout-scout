@@ -6,8 +6,8 @@ environment:
   sdk: ">=2.16.2 <3.0.0"
 
 dependencies:
-  collection: ^1.16.0
-  json_annotation: ^4.7.0
+  collection: ^1.17.1
+  json_annotation: ^4.8.0
 
   rfc_6901: ^0.1.1
 
