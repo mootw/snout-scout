@@ -14,6 +14,7 @@ import 'package:snout_db/event/frcevent.dart';
 import 'package:snout_db/patch.dart';
 import 'package:snout_db/snout_db.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 late String serverURL;
 
@@ -117,8 +118,16 @@ class EventDB extends ChangeNotifier {
     Uri serverUri = Uri.parse(serverURL);
     WebSocketChannel channel = WebSocketChannel.connect(Uri.parse(
         '${serverURL.startsWith("https") ? "wss" : "ws"}://${serverUri.host}:${serverUri.port}/listen/${serverUri.pathSegments[1]}'));
+
     channel.stream.listen((event) async {
       print("got notification");
+
+
+      //REALLY JANK PING PONG SYSTEM THIS SHOULD BE FIXED!!!!
+      if(event == "PING") {
+        channel.sink.add("PONG");
+        return;
+      }
 
       db = Patch.fromJson(jsonDecode(event)).patch(db);
       final prefs = await SharedPreferences.getInstance();
@@ -179,7 +188,18 @@ class _MyHomePageState extends State<MyHomePage> {
     return Consumer<EventDB>(builder: (context, snoutData, child) {
       return Scaffold(
         appBar: AppBar(
+          titleSpacing: 0,
           title: Text(snoutData.db.name),
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: FilledButton.tonal(onPressed: () {
+                      String url = Uri.parse(serverURL).pathSegments[1];
+            
+                      launchUrlString("https://www.thebluealliance.com/event/${url.substring(0, url.length-5)}#rankings");
+                    }, child: const Text("Rankings")),
+            ),
+          ],
         ),
         body: [
           const AllMatchesPage(),

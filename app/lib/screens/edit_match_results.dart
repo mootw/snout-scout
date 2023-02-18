@@ -71,7 +71,7 @@ class _EditMatchResultsState extends State<EditMatchResults> {
                 icon: const Icon(Icons.save)),
           ],
           title:
-              Text("Edit Results"),
+              const Text("Edit Results"),
         ),
         body: Form(
           key: _form,

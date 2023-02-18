@@ -45,7 +45,7 @@ class FieldPositionSelector extends StatelessWidget {
           },
           child: Stack(
             children: [
-              FieldMapWidget(),
+              const FieldMapWidget(),
               if (robotPosition != null)
                 Container(
                   alignment: Alignment(
@@ -115,7 +115,7 @@ class _FieldTimelineViewerState extends State<FieldTimelineViewer> {
             child: LayoutBuilder(builder: (context, constraints) {
               return Stack(
                 children: [
-                  FieldMapWidget(),
+                  const FieldMapWidget(),
                   for (final robot in widget.match.robot.keys)
                     RobotMapEventView(
                         time: _animationTime,
@@ -244,7 +244,7 @@ class FieldHeatMap extends StatelessWidget {
         child: LayoutBuilder(builder: (context, constraints) {
           return Stack(
             children: [
-              FieldMapWidget(),
+              const FieldMapWidget(),
               //Darken the map slightly to create more contrast against the heatmap
               Container(
                   width: double.infinity,

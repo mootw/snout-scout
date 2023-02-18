@@ -48,6 +48,21 @@ void main(List<String> args) async {
         "NO FRC API key detected. Create a .env or set env to FRCAPI=username:key");
   }
 
+
+  //REALLY JANK PING PONG SYSTEM
+  //I SHOULD BE USING listener.pingInterval BUT THE CLIENT ISNT RESPONING
+  //TO THE PING MESSAGES FOR SOME REASON (RESULTING IN THE CONNECTION CLOSING AFTER 1.5 DURATIONS)
+  //BY THE SERVER. IF I LEAVE PING DURATION NULL THE CONNECTION CLOSES 1006 AFTER 60 seconds
+  //I think this is a client side or proxy side thing.
+  Timer.periodic(Duration(seconds: 30), (timer) {
+    for(final event in loadedEvents.values) {
+      for (final listener in event.listeners) {
+        listener.add("PING");
+      }
+    }
+  });
+  
+
   await loadEvents();
 
   HttpServer server =
@@ -73,6 +88,8 @@ void main(List<String> args) async {
         request.uri.pathSegments[0] == 'listen') {
       WebSocketTransformer.upgrade(request).then((WebSocket websocket) {
         final event = request.uri.pathSegments[1];
+        //Set the ping interval to keep the connection alive for many browser's and proxy's default behavior.
+        websocket.pingInterval = Duration(seconds: 30);
         loadedEvents[event]?.listeners.add(websocket);
       });
       return;

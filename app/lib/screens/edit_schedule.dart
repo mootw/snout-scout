@@ -34,13 +34,13 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
     return Consumer<EventDB>(builder: (context, snoutData, child) {
       return Scaffold(
         appBar: AppBar(title: const Text("Edit Schedule"), actions: [
-          TextButton(child: Text("LOAD MATCHES FROM FRCAPI"), onPressed: () async {
+          TextButton(child: const Text("LOAD MATCHES FROM FRCAPI"), onPressed: () async {
             await apiClient.get(Uri.parse("${serverURL.replaceFirst("event", "load_schedule")}"));
             
           },)
         ],),
         body: ListView(children: [
-          Text(
+          const Text(
               "Warning: Editing the schedule is potentially destructive! Data could be lost if the edit removes matches or a match was edited in-between some sub-edit"),
           for (final match in snoutData.db.matches.entries)
             ListTile(
@@ -140,7 +140,7 @@ class EditMatchDetailsState extends State<EditMatchDetails> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text("Match"),
+      title: const Text("Match"),
       actions: [
         TextButton(
             onPressed: () {

@@ -88,8 +88,8 @@ class _DataTablePageState extends State<DataTablePage> {
                 sortAscending: _sortAscending,
                 sortColumnIndex: _currentSortColumn,
                 columns: [
-                  DataColumn(label: Text("Team"), onSort: updateSort),
-                  DataColumn(label: Text("Played"), onSort: updateSort),
+                  DataColumn(label: const Text("Team"), onSort: updateSort),
+                  DataColumn(label: const Text("Played"), onSort: updateSort),
                   for (final eventType
                       in snoutData.db.config.matchscouting.events)
                     DataColumn(
