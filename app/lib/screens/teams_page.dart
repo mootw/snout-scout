@@ -2,11 +2,9 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:app/main.dart';
-import 'package:app/screens/edit_json.dart';
 import 'package:app/screens/view_team_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:snout_db/patch.dart';
 
 class AllTeamsPage extends StatefulWidget {
   const AllTeamsPage({Key? key}) : super(key: key);
@@ -23,40 +21,17 @@ class _AllTeamsPageState extends State<AllTeamsPage> {
       builder: (context, snoutData, child) {
         return SingleChildScrollView(
           scrollDirection: Axis.vertical,
-          child: Wrap(
-            spacing: 12,
-            runSpacing: 12,
-            runAlignment: WrapAlignment.start,
-            alignment: WrapAlignment.spaceEvenly,
-                children: [
-                  for (var team in snoutData.db.teams)
-                    TeamListTile(teamNumber: team, snoutData: snoutData),
-        
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Center(
-                      child: FilledButton.tonal(onPressed: () async {
-                          final result = await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => JSONEditor(validate: (item) {}, source: const JsonEncoder.withIndent("    ").convert(Provider.of<EventDB>(context, listen: false).db.teams),),
-                        ));
-
-                    if(result != null) {
-                      Patch patch = Patch(
-                      time: DateTime.now(),
-                      path: [
-                        'teams'
-                      ],
-                      data: result);
-                      //Save the scouting results to the server!!
-                      await snoutData.addPatch(patch);
-                    }
-                      }, child: const Text("Edit Teams")),
-                    ),
-                  )
-                ],
-              ),
+          child: Center(
+            child: Wrap(
+              spacing: 12,
+              runSpacing: 12,
+              alignment: WrapAlignment.spaceEvenly,
+                  children: [
+                    for (var team in snoutData.db.teams)
+                      TeamListTile(teamNumber: team, snoutData: snoutData),
+                  ],
+                ),
+          ),
         );
       }
     );

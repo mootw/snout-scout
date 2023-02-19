@@ -74,7 +74,8 @@ class _MatchPageState extends State<MatchPage> {
                 behavior: MouseInteractableScrollBehavior(),
                 child: SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
-                  child: DataTable(columns: [
+                  child: DataTable(
+                    columns: [
                     const DataColumn(label: Text("Team")),
                     const DataColumn(label: Text("Timeline")),
                     for (final item in snoutData.db.config.matchscouting.events)

@@ -70,9 +70,9 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
 
     return Card(
       child: MaterialButton(
-        onPressed: disabledForAuto || disabledForTeleop ||
+        onPressed: _mode == MatchMode.setup || disabledForAuto || disabledForTeleop ||
                 lastMoveEvent == null ||
-                _time - lastMoveEvent!.time > 3
+                _time - lastMoveEvent!.time > 4
             ? null
             : () {
                 HapticFeedback.mediumImpact();
@@ -343,6 +343,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
           const SizedBox(width: 12),
           FilledButton.icon(
             icon: const Icon(Icons.arrow_forward),
+            style: _mode == MatchMode.playing ? FilledButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white) : null,
             onPressed: lastMoveEvent == null ? null : handleNextSection,
             label: Text(_mode == MatchMode.setup
                 ? "Start"

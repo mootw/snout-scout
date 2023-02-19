@@ -88,7 +88,7 @@ void main(List<String> args) async {
       WebSocketTransformer.upgrade(request).then((WebSocket websocket) {
         final event = request.uri.pathSegments[1];
         //Set the ping interval to keep the connection alive for many browser's and proxy's default behavior.
-        websocket.pingInterval = Duration(seconds: 30);
+        websocket.pingInterval = Duration(hours: 12);
         loadedEvents[event]?.listeners.add(websocket);
       });
       return;
@@ -97,7 +97,9 @@ void main(List<String> args) async {
     //Load schedule stuff.
     if (request.uri.pathSegments.length > 1 &&
         request.uri.pathSegments[0] == 'load_schedule') {
+
       final eventID = request.uri.pathSegments[1];
+
       File? f = loadedEvents[eventID]?.file;
       if (f == null || await f.exists() == false) {
         request.response.statusCode = 404;
@@ -163,7 +165,7 @@ void main(List<String> args) async {
                 '/${request.uri.pathSegments.sublist(2).join("/")}');
             dbJson = pointer.read(dbJson);
             request.response.headers.contentType =
-                new ContentType('application', 'json');
+            new ContentType('application', 'json', charset: 'utf-8');
             request.response.write(jsonEncode(dbJson));
             request.response.close();
             return;
@@ -177,7 +179,7 @@ void main(List<String> args) async {
         }
 
         request.response.headers.contentType =
-            new ContentType('application', 'json');
+            new ContentType('application', 'json', charset: 'utf-8');
         request.response.write(jsonEncode(event));
         request.response.close();
         return;

@@ -52,22 +52,6 @@ class _AllMatchesPageState extends State<AllMatchesPage> {
                   Container(
                     color: match == snoutData.db.nextMatch ? Theme.of(context).colorScheme.onPrimary : null,
                     child: MatchCard(match: match, focusTeam: snoutData.db.config.team)),
-
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Center(
-                    child: FilledButton.tonal(
-                        onPressed: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => EditSchedulePage(
-                                    matches: snoutData.db.matches),
-                              ));
-                        },
-                        child: const Text("Edit Schedule")),
-                  ),
-                )
               ],
             ),
           ),

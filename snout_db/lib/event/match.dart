@@ -16,11 +16,11 @@ class FRCMatch {
   ///time the match was scheduled for, and is how matches should be sorted.
   DateTime scheduledTime;
 
-  ///list of blue teams
-  List<int> blue;
-
   /// list of red teams
   List<int> red;
+
+  ///list of blue teams
+  List<int> blue;
 
   ///results of the match (null if the match has not been played)
   MatchResults? results;

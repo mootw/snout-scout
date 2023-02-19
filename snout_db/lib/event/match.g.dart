@@ -25,8 +25,8 @@ Map<String, dynamic> _$FRCMatchToJson(FRCMatch instance) => <String, dynamic>{
       'number': instance.number,
       'description': instance.description,
       'scheduledTime': instance.scheduledTime.toIso8601String(),
-      'blue': instance.blue,
       'red': instance.red,
+      'blue': instance.blue,
       'results': instance.results,
       'robot': instance.robot,
     };

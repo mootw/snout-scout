@@ -4,6 +4,7 @@ import 'package:app/api.dart';
 import 'package:app/screens/analysis.dart';
 import 'package:app/screens/datapage.dart';
 import 'package:app/screens/edit_json.dart';
+import 'package:app/screens/edit_schedule.dart';
 import 'package:app/screens/matches_page.dart';
 import 'package:app/screens/teams_page.dart';
 import 'package:flutter/material.dart';
@@ -22,7 +23,7 @@ Future setServer(String newServer) async {
   var prefs = await SharedPreferences.getInstance();
   prefs.setString("server", newServer);
   serverURL = newServer;
-  
+
   //Literally re-initialize the app when changing the server.
   main();
 }
@@ -122,9 +123,8 @@ class EventDB extends ChangeNotifier {
     channel.stream.listen((event) async {
       print("got notification");
 
-
       //REALLY JANK PING PONG SYSTEM THIS SHOULD BE FIXED!!!!
-      if(event == "PING") {
+      if (event == "PING") {
         channel.sink.add("PONG");
         return;
       }
@@ -185,20 +185,24 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    String? tbaKey = context.watch<EventDB>().db.config.tbaEventId;
+
     return Consumer<EventDB>(builder: (context, snoutData, child) {
       return Scaffold(
         appBar: AppBar(
           titleSpacing: 0,
           title: Text(snoutData.db.config.name),
           actions: [
-            Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: FilledButton.tonal(onPressed: () {
-                      String url = Uri.parse(serverURL).pathSegments[1];
-            
-                      launchUrlString("https://www.thebluealliance.com/event/${url.substring(0, url.length-5)}#rankings");
-                    }, child: const Text("Rankings")),
-            ),
+            if (tbaKey != null)
+              Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: FilledButton.tonal(
+                    onPressed: () {
+                      launchUrlString(
+                          "https://www.thebluealliance.com/event/$tbaKey#rankings");
+                    },
+                    child: const Text("Rankings")),
+              ),
           ],
         ),
         body: [
@@ -251,6 +255,45 @@ class _MyHomePageState extends State<MyHomePage> {
                   },
                   icon: const Icon(Icons.edit)),
             ),
+            Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Center(
+                    child: FilledButton.tonal(
+                        onPressed: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => EditSchedulePage(
+                                    matches: snoutData.db.matches),
+                              ));
+                        },
+                        child: const Text("Edit Schedule")),
+                  ),
+                ),
+          Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Center(
+                      child: FilledButton.tonal(onPressed: () async {
+                          final result = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => JSONEditor(validate: (item) {}, source: const JsonEncoder.withIndent("    ").convert(Provider.of<EventDB>(context, listen: false).db.teams),),
+                        ));
+
+                    if(result != null) {
+                      Patch patch = Patch(
+                      time: DateTime.now(),
+                      path: [
+                        'teams'
+                      ],
+                      data: result);
+                      //Save the scouting results to the server!!
+                      await snoutData.addPatch(patch);
+                    }
+                      }, child: const Text("Edit Teams")),
+                    ),
+                  )
+
           ]),
         ),
         bottomNavigationBar: NavigationBar(
