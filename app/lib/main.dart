@@ -7,6 +7,7 @@ import 'package:app/screens/edit_json.dart';
 import 'package:app/screens/edit_schedule.dart';
 import 'package:app/screens/matches_page.dart';
 import 'package:app/screens/teams_page.dart';
+import 'package:app/search.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -203,6 +204,12 @@ class _MyHomePageState extends State<MyHomePage> {
                     },
                     child: const Text("Rankings")),
               ),
+
+            IconButton(onPressed: () {
+
+              showSearch(context: context, delegate: SnoutScoutSearch());
+              
+            }, icon: Icon(Icons.search))
           ],
         ),
         body: [

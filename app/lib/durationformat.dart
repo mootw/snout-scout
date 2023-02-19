@@ -28,5 +28,6 @@ String formatDuration (Duration duration) {
 }
 
 String offsetDurationInMins(Duration duration) {
-  return "${duration.isNegative == true ? "-" : "+"}${duration.inMinutes} min${duration.inMinutes == 1 ? "" : "s"}";
+  //Do not add a negative sign since it is already included in the minutes.
+  return "${duration.isNegative == true ? "" : "+"}${duration.inMinutes} min${duration.inMinutes == 1 ? "" : "s"}";
 }
