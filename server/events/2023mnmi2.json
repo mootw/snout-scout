@@ -1,8 +1,8 @@
 {
-    "name": "2023 Example",
     "teams": [],
     "config": {
         "season": 2023,
+        "name": "2023 Example",
         "fieldStyle": "mirrored",
         "team": 1,
         "pitscouting": [

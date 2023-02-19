@@ -1,5 +1,4 @@
 {
-    "name": "2022 Regionals",
     "teams": [
         1816,
         2129,
@@ -56,6 +55,7 @@
         8234
     ],
     "config": {
+        "name": "2022 Regionals",
         "season": 2022,
         "fieldStyle": "rotated",
         "team": 6749,

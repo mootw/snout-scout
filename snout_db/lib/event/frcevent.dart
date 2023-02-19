@@ -10,8 +10,6 @@ part 'frcevent.g.dart';
 
 @JsonSerializable()
 class FRCEvent {
-  ///Human readable name for this event (the one displayed on the status bar)
-  String name;
 
   ///List of teams in the event, ideally ordered smallest number to largest
   List<int> teams;
@@ -28,7 +26,6 @@ class FRCEvent {
   //Enforce that all matches are sorted
   FRCEvent(
       {required this.config,
-      required this.name,
       required this.teams,
       required Map<String, FRCMatch> matches,
       required this.pitscouting})

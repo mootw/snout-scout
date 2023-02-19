@@ -14,5 +14,3 @@ Duration matchLength = const Duration(minutes: 2, seconds: 31);
 
 // Team includes all of the field teams ("red" and "blue"), but also all possible match winning teams like "tie"
 enum Alliance {red, blue, tie}
-
-enum TournamentLevel { None, Practice, Qualification, Playoff }

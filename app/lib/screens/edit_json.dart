@@ -45,9 +45,6 @@ class _JSONEditorState extends State<JSONEditor> {
                 onChanged: (value) {
                   try {
                     widget.validate(jsonDecode(value));
-
-                    
-
                     setState(() {
                       error = "";
                     });

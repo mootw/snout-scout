@@ -9,7 +9,6 @@ import 'dart:io';
 
 import 'package:http/http.dart' as http;
 import 'package:snout_db/event/match.dart';
-import 'package:snout_db/game.dart';
 
 import 'package:snout_db/patch.dart';
 
@@ -283,8 +282,8 @@ Future loadScheduleFromFRCAPI(
     DateTime startTime = DateTime.parse(match['startTime']);
     int matchNumber = match['matchNumber'];
     List<dynamic> teams = match['teams'];
-    TournamentLevel tournamentLevel =
-        TournamentLevel.values.byName(match['tournamentLevel']);
+    // TournamentLevel tournamentLevel =
+    //     TournamentLevel.values.byName(match['tournamentLevel']);
 
     //Assume they just list teams in order of 1-2-3 red 1-2-3 blue
     List<int> red = [];
@@ -301,7 +300,7 @@ Future loadScheduleFromFRCAPI(
     if (eventData.matches.keys.toList().contains(description) == false) {
       print("match ${description} does not exist; adding...");
       FRCMatch newMatch = FRCMatch(
-          level: tournamentLevel,
+          // level: tournamentLevel,
           description: description,
           number: matchNumber,
           scheduledTime: startTime,

@@ -86,7 +86,6 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
             child: FilledButton(
                 onPressed: () async {
                   FRCMatch match = FRCMatch(
-                      level: TournamentLevel.Qualification,
                       description: "Some name",
                       number: 0,
                       scheduledTime: DateTime.now(),

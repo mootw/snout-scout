@@ -189,7 +189,7 @@ class _MyHomePageState extends State<MyHomePage> {
       return Scaffold(
         appBar: AppBar(
           titleSpacing: 0,
-          title: Text(snoutData.db.name),
+          title: Text(snoutData.db.config.name),
           actions: [
             Padding(
               padding: const EdgeInsets.only(right: 8),
@@ -226,7 +226,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             ListTile(
               title: const Text("Event Config"),
-              subtitle: Text(snoutData.db.name),
+              subtitle: Text(snoutData.db.config.name),
               trailing: IconButton(
                   onPressed: () async {
                     final result = await Navigator.push(

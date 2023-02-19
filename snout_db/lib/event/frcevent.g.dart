@@ -8,7 +8,6 @@ part of 'frcevent.dart';
 
 FRCEvent _$FRCEventFromJson(Map<String, dynamic> json) => FRCEvent(
       config: EventConfig.fromJson(json['config'] as Map<String, dynamic>),
-      name: json['name'] as String,
       teams: (json['teams'] as List<dynamic>).map((e) => e as int).toList(),
       matches: (json['matches'] as Map<String, dynamic>).map(
         (k, e) => MapEntry(k, FRCMatch.fromJson(e as Map<String, dynamic>)),
@@ -19,7 +18,6 @@ FRCEvent _$FRCEventFromJson(Map<String, dynamic> json) => FRCEvent(
     );
 
 Map<String, dynamic> _$FRCEventToJson(FRCEvent instance) => <String, dynamic>{
-      'name': instance.name,
       'teams': instance.teams,
       'config': instance.config,
       'matches': instance.matches,
