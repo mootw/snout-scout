@@ -186,155 +186,151 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final data = context.watch<EventDB>();
     String? tbaKey = context.watch<EventDB>().db.config.tbaEventId;
 
-    return Consumer<EventDB>(builder: (context, snoutData, child) {
-      return Scaffold(
-        appBar: AppBar(
-          titleSpacing: 0,
-          title: Text(snoutData.db.config.name),
-          actions: [
-            if (tbaKey != null)
-              Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: FilledButton.tonal(
-                    onPressed: () {
-                      launchUrlString(
-                          "https://www.thebluealliance.com/event/$tbaKey#rankings");
-                    },
-                    child: const Text("Rankings")),
-              ),
-
-            IconButton(onPressed: () {
-
-              showSearch(context: context, delegate: SnoutScoutSearch());
-              
-            }, icon: Icon(Icons.search))
-          ],
-        ),
-        body: [
-          const AllMatchesPage(),
-          const AllTeamsPage(),
-          const DataTablePage(),
-          const AnalysisPage(),
-        ][_currentPageIndex],
-        drawer: Drawer(
-          child: ListView(children: [
-            ListTile(
-              title: const Text("Server"),
-              subtitle: Text(serverURL),
-              trailing: IconButton(
-                icon: const Icon(Icons.edit),
+    return Scaffold(
+      appBar: AppBar(
+        titleSpacing: 0,
+        title: Text(data.db.config.name),
+        actions: [
+          if (tbaKey != null)
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: FilledButton.tonal(
+                  onPressed: () {
+                    launchUrlString(
+                        "https://www.thebluealliance.com/event/$tbaKey#rankings");
+                  },
+                  child: const Text("Rankings")),
+            ),
+          IconButton(
+              onPressed: () {
+                showSearch(context: context, delegate: SnoutScoutSearch());
+              },
+              icon: Icon(Icons.search))
+        ],
+      ),
+      body: [
+        const AllMatchesPage(),
+        const AllTeamsPage(),
+        const DataTablePage(),
+        const AnalysisPage(),
+      ][_currentPageIndex],
+      drawer: Drawer(
+        child: ListView(children: [
+          ListTile(
+            title: const Text("Server"),
+            subtitle: Text(serverURL),
+            trailing: IconButton(
+              icon: const Icon(Icons.edit),
+              onPressed: () async {
+                var result =
+                    await showStringInputDialog(context, "Server", serverURL);
+                if (result != null) {
+                  await setServer(result);
+                  setState(() {});
+                }
+              },
+            ),
+          ),
+          ListTile(
+            title: const Text("Event Config"),
+            subtitle: Text(data.db.config.name),
+            trailing: IconButton(
                 onPressed: () async {
-                  var result =
-                      await showStringInputDialog(context, "Server", serverURL);
+                  final result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => JSONEditor(
+                          validate: EventConfig.fromJson,
+                          source: const JsonEncoder.withIndent("    ")
+                              .convert(context.read<EventDB>().db.config),
+                        ),
+                      ));
+
                   if (result != null) {
-                    await setServer(result);
-                    setState(() {});
+                    Patch patch = Patch(
+                        time: DateTime.now(), path: ['config'], data: result);
+                    //Save the scouting results to the server!!
+                    await data.addPatch(patch);
                   }
                 },
-              ),
+                icon: const Icon(Icons.edit)),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Center(
+              child: FilledButton.tonal(
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              EditSchedulePage(matches: data.db.matches),
+                        ));
+                  },
+                  child: const Text("Edit Schedule")),
             ),
-            ListTile(
-              title: const Text("Event Config"),
-              subtitle: Text(snoutData.db.config.name),
-              trailing: IconButton(
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Center(
+              child: FilledButton.tonal(
                   onPressed: () async {
                     final result = await Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => JSONEditor(
-                            validate: EventConfig.fromJson,
+                            validate: (item) {},
                             source: const JsonEncoder.withIndent("    ")
-                                .convert(
-                                    Provider.of<EventDB>(context, listen: false)
-                                        .db
-                                        .config),
+                                .convert(context.watch<EventDB>().db.teams),
                           ),
                         ));
 
                     if (result != null) {
                       Patch patch = Patch(
-                          time: DateTime.now(), path: ['config'], data: result);
+                          time: DateTime.now(), path: ['teams'], data: result);
                       //Save the scouting results to the server!!
-                      await snoutData.addPatch(patch);
+                      await data.addPatch(patch);
                     }
                   },
-                  icon: const Icon(Icons.edit)),
+                  child: const Text("Edit Teams")),
             ),
-            Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Center(
-                    child: FilledButton.tonal(
-                        onPressed: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => EditSchedulePage(
-                                    matches: snoutData.db.matches),
-                              ));
-                        },
-                        child: const Text("Edit Schedule")),
-                  ),
-                ),
-          Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Center(
-                      child: FilledButton.tonal(onPressed: () async {
-                          final result = await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => JSONEditor(validate: (item) {}, source: const JsonEncoder.withIndent("    ").convert(Provider.of<EventDB>(context, listen: false).db.teams),),
-                        ));
-
-                    if(result != null) {
-                      Patch patch = Patch(
-                      time: DateTime.now(),
-                      path: [
-                        'teams'
-                      ],
-                      data: result);
-                      //Save the scouting results to the server!!
-                      await snoutData.addPatch(patch);
-                    }
-                      }, child: const Text("Edit Teams")),
-                    ),
-                  )
-
-          ]),
-        ),
-        bottomNavigationBar: NavigationBar(
-          onDestinationSelected: (int index) {
-            setState(() {
-              _currentPageIndex = index;
-            });
-          },
-          selectedIndex: _currentPageIndex,
-          destinations: const [
-            NavigationDestination(
-              selectedIcon: Icon(Icons.table_rows),
-              icon: Icon(Icons.table_rows_outlined),
-              label: 'Schedule',
-            ),
-            NavigationDestination(
-              selectedIcon: Icon(Icons.people),
-              icon: Icon(Icons.people_alt_outlined),
-              label: 'Teams',
-            ),
-            NavigationDestination(
-              selectedIcon: Icon(Icons.table_chart),
-              icon: Icon(Icons.table_chart_outlined),
-              label: 'Data',
-            ),
-            NavigationDestination(
-              selectedIcon: Icon(Icons.analytics),
-              icon: Icon(Icons.analytics_outlined),
-              label: 'Analysis',
-            ),
-          ],
-        ),
-      );
-    });
+          )
+        ]),
+      ),
+      bottomNavigationBar: NavigationBar(
+        onDestinationSelected: (int index) {
+          setState(() {
+            _currentPageIndex = index;
+          });
+        },
+        selectedIndex: _currentPageIndex,
+        destinations: const [
+          NavigationDestination(
+            selectedIcon: Icon(Icons.table_rows),
+            icon: Icon(Icons.table_rows_outlined),
+            label: 'Schedule',
+          ),
+          NavigationDestination(
+            selectedIcon: Icon(Icons.people),
+            icon: Icon(Icons.people_alt_outlined),
+            label: 'Teams',
+          ),
+          NavigationDestination(
+            selectedIcon: Icon(Icons.table_chart),
+            icon: Icon(Icons.table_chart_outlined),
+            label: 'Data',
+          ),
+          NavigationDestination(
+            selectedIcon: Icon(Icons.analytics),
+            icon: Icon(Icons.analytics_outlined),
+            label: 'Analysis',
+          ),
+        ],
+      ),
+    );
   }
 }
 

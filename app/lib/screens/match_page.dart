@@ -1,9 +1,9 @@
 import 'dart:convert';
 
+import 'package:app/datasheet.dart';
 import 'package:app/edit_lock.dart';
 import 'package:app/fieldwidget.dart';
 import 'package:app/main.dart';
-import 'package:app/screens/datapage.dart';
 import 'package:app/screens/edit_match_results.dart';
 import 'package:app/screens/match_recorder.dart';
 import 'package:app/screens/view_team_page.dart';
@@ -26,8 +26,7 @@ class MatchPage extends StatefulWidget {
 }
 
 class _MatchPageState extends State<MatchPage> {
-  TextEditingController _textController = TextEditingController();
-
+  final TextEditingController _textController = TextEditingController();
   Alliance alliance = Alliance.blue;
 
   @override
@@ -70,24 +69,23 @@ class _MatchPageState extends State<MatchPage> {
         ),
         body: ListView(
           children: [
-            ScrollConfiguration(
-                behavior: MouseInteractableScrollBehavior(),
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: DataTable(
-                    columns: [
-                    const DataColumn(label: Text("Team")),
-                    const DataColumn(label: Text("Timeline")),
+            
+            DataSheet(
+                //Data is a list of rows and columns
+                columns: [
+                  DataItem.fromText("Team"),
+                  DataItem.fromText("Timeline"),
                     for (final item in snoutData.db.config.matchscouting.events)
-                      DataColumn(label: Text(item.label)),
+                      DataItem.fromText(item.label),
                     for (final item
                         in snoutData.db.config.matchscouting.postgame)
-                      DataColumn(label: Text(item.label)),
-                    // for(final item in snoutData.db.config.matchscouting.events)
-                  ], rows: [
-                    for (final team in [...match.red, ...match.blue])
-                      DataRow(cells: [
-                        DataCell(TextButton(
+                      DataItem.fromText(item.label),
+                ],
+                rows: [
+                  for (final team in [...match.red, ...match.blue])
+                    [
+                      DataItem(
+                          displayValue: TextButton(
                           child: Text(team.toString(),
                               style: TextStyle(
                                   color:
@@ -103,8 +101,11 @@ class _MatchPageState extends State<MatchPage> {
                                       TeamViewPage(teamNumber: team)),
                             );
                           },
-                        )),
-                        DataCell(FilledButton.tonal(
+                        ),
+                          exportValue: team.toString(),
+                          sortingValue: team),
+                        DataItem(
+                          displayValue: FilledButton.tonal(
                           child: match.robot[team.toString()] == null
                               ? const Text("Record")
                               : const Text("Re-record"),
@@ -137,27 +138,33 @@ class _MatchPageState extends State<MatchPage> {
                               await snoutData.addPatch(patch);
                             }
                           },
-                        )),
-                        for (final item
+                        ),
+                          exportValue: match.robot[team.toString()] == null
+                              ? "Record"
+                              : "Re-record",
+                          sortingValue: match.robot[team.toString()] == null
+                              ? "Record"
+                              : "Re-record"),
+                      for (final item
                             in snoutData.db.config.matchscouting.events)
-                          DataCell(Text(numDisplay(match
+                        DataItem.fromNumber(match
                               .robot[team.toString()]?.timeline
                               .where((event) => event.id == item.id)
                               .length
-                              .toDouble()))),
-                        for (final item in snoutData
+                            .toDouble()),
+                      for (final item in snoutData
                             .db.config.matchscouting.postgame
                             .where((element) =>
                                 element.type != SurveyItemType.picture))
-                          DataCell(Text(match
+                        DataItem.fromText(match
                                   .robot[team.toString()]?.survey[item.id]
                                   ?.toString() ??
-                              "No Data")),
-                      ]),
-                  ]),
-                )),
+                              "No Data"),
+                    ],
+                ],
+              ),
             TextField(
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 border: OutlineInputBorder(),
                 hintText: 'Wrong team?',
               ),
@@ -214,7 +221,7 @@ class _MatchPageState extends State<MatchPage> {
                     await snoutData.addPatch(patch);
                   }
                 },
-                child: Text("Record Substitution")),
+                child: const Text("Record Substitution")),
             const SizedBox(height: 16),
             FieldTimelineViewer(match: match),
             ListTile(

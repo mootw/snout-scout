@@ -29,12 +29,18 @@ class _JSONEditorState extends State<JSONEditor> {
   Widget build(BuildContext context) {
     return ConfirmExitDialog(
       child: Scaffold(
-        appBar: AppBar(title: const Text("Edit"), actions: [
-          IconButton(onPressed: error != "" ? null :
-          () {
-            Navigator.of(context).pop(_controller.text);
-          }, icon: const Icon(Icons.save))
-        ],),
+        appBar: AppBar(
+          title: const Text("Edit"),
+          actions: [
+            IconButton(
+                onPressed: error != ""
+                    ? null
+                    : () {
+                        Navigator.of(context).pop(_controller.text);
+                      },
+                icon: const Icon(Icons.save))
+          ],
+        ),
         body: Column(
           children: [
             Expanded(
@@ -56,7 +62,8 @@ class _JSONEditorState extends State<JSONEditor> {
                 },
               ),
             ),
-            Text(error, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+            Text(error,
+                style: TextStyle(color: Theme.of(context).colorScheme.error)),
           ],
         ),
       ),

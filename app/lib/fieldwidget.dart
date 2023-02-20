@@ -326,6 +326,6 @@ class FieldMapWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Image.asset("assets/field_map/${Provider.of<EventDB>(context, listen: false).db.config.season}.png");
+    return Image.asset("assets/field_map/${context.watch<EventDB>().db.config.season}.png");
   }
 }

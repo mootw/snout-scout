@@ -60,7 +60,7 @@ class SnoutScoutSearch extends SearchDelegate {
         results.add(
           ListTile(
             title: Text(team.toString()),
-            subtitle: Text("Team"),
+            subtitle: const Text("Team"),
             onTap: () {
               Navigator.push(
                 context,
@@ -81,7 +81,7 @@ class SnoutScoutSearch extends SearchDelegate {
         results.add(
           ListTile(
             title: Text(match.description.toString()),
-            subtitle: Text("Match"),
+            subtitle: const Text("Match"),
             onTap: () {
               Navigator.push(
               context,

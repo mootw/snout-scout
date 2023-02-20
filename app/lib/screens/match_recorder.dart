@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:app/confirm_exit_dialog.dart';
 import 'package:app/fieldwidget.dart';
@@ -42,11 +43,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
   FieldPosition? get robotPosition => lastMoveEvent?.position;
 
   List<MatchEventConfig> get scoutingEvents =>
-      Provider.of<EventDB>(context, listen: false)
-          .db
-          .config
-          .matchscouting
-          .events;
+      context.read<EventDB>().db.config.matchscouting.events;
 
   @override
   void dispose() {
@@ -55,22 +52,21 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
   }
 
   Widget getEventButton(MatchEventConfig tool) {
-    final fieldStyle =
-        Provider.of<EventDB>(context, listen: false).db.config.fieldStyle;
+    final fieldStyle = context.read<EventDB>().db.config.fieldStyle;
 
     //Disable the button if it is for teleop ONLY during the auto phase.
-    final bool disabledForAuto = _time <= 17 && tool.mode == MatchSegment.teleop
-        ? true
-        : false;
-    
+    final bool disabledForAuto =
+        _time <= 17 && tool.mode == MatchSegment.teleop ? true : false;
+
     //Disable the button if it is for teleop ONLY during the auto phase.
-    final bool disabledForTeleop = _time > 17 && tool.mode == MatchSegment.auto
-        ? true
-        : false;
+    final bool disabledForTeleop =
+        _time > 17 && tool.mode == MatchSegment.auto ? true : false;
 
     return Card(
       child: MaterialButton(
-        onPressed: _mode == MatchMode.setup || disabledForAuto || disabledForTeleop ||
+        onPressed: _mode == MatchMode.setup ||
+                disabledForAuto ||
+                disabledForTeleop ||
                 lastMoveEvent == null ||
                 _time - lastMoveEvent!.time > 4
             ? null
@@ -100,10 +96,8 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
     return [
       const Center(
           child: Text(
-              "Press 'start' when you hear the field buzzer and see the field lights. It is more important to know the location of each event rather than the position of the robot at all times. Event buttons will disable if no position has been recently input.")),
+              "Check to see the map is rotated correctly! Press 'start' when you hear the field buzzer and see the field lights. It is more important to know the location of each event rather than the position of the robot at all times. Event buttons will disable if no position has been recently input.")),
       const SizedBox(height: 32),
-      const Center(
-          child: SizedBox(height: 32, child: Text("Start of Timeline"))),
       for (final item in events.toList()) ...[
         const Divider(height: 0),
         Padding(
@@ -134,8 +128,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
     //Allow slightly wide to be considered vertical for foldable devices or near-square devices
     final isHorizontal = MediaQuery.of(context).size.aspectRatio > 1.2;
     //used to normalize the field position
-    final fieldStyle =
-        Provider.of<EventDB>(context, listen: false).db.config.fieldStyle;
+    final fieldStyle = context.watch<EventDB>().db.config.fieldStyle;
 
     if (_mode == MatchMode.finished) {
       return ConfirmExitDialog(
@@ -156,7 +149,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
           body: ListView(
             shrinkWrap: true,
             children: [
-              for (var item in Provider.of<EventDB>(context, listen: false)
+              for (var item in context.watch<EventDB>()
                   .db
                   .config
                   .matchscouting
@@ -183,7 +176,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
           body: Row(
             children: [
               SizedBox(
-                width: 130 * 3,
+                width: 120 * 3,
                 child: Column(
                   children: [
                     Expanded(
@@ -198,7 +191,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                         for (int i = 0; i < scoutingEvents.length; i++)
                           SizedBox(
                             height: 60,
-                            width: 130, // -1 for some layout padding.
+                            width: 120, // -1 for some layout padding.
                             child: getEventButton(scoutingEvents[i]),
                           ),
                       ],
@@ -317,6 +310,19 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
   }
 
   Widget statusAndToolBar() {
+    Widget? robotPicture;
+    final pictureData = context
+        .watch<EventDB>()
+        .db
+        .pitscouting[widget.team.toString()]?['robot_picture'];
+    if (pictureData != null) {
+      robotPicture = SizedBox(
+        height: scoutImageSize,
+        child: Image.memory(
+            Uint8List.fromList(base64Decode(pictureData).cast<int>())),
+      );
+    }
+
     return Padding(
       padding: const EdgeInsets.all(8),
       child: Row(
@@ -341,9 +347,33 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                       : "auto"
                   : ""),
           const SizedBox(width: 12),
+          if (robotPicture == null) const Text("No Picture Available"),
+          if (robotPicture != null)
+            Center(
+              child: FilledButton.tonal(
+                  onPressed: () {
+                    showDialog(
+                        context: context,
+                        builder: (bc) {
+                          return AlertDialog(
+                            content: robotPicture!,
+                            actions: [
+                              TextButton(
+                                  onPressed: () => Navigator.pop(bc),
+                                  child: const Text("Okay")),
+                            ],
+                          );
+                        });
+                  },
+                  child: const Text("Robot Picture")),
+            ),
+          const SizedBox(width: 12),
           FilledButton.icon(
             icon: const Icon(Icons.arrow_forward),
-            style: _mode == MatchMode.playing ? FilledButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white) : null,
+            style: _mode == MatchMode.playing
+                ? FilledButton.styleFrom(
+                    backgroundColor: Colors.red, foregroundColor: Colors.white)
+                : null,
             onPressed: lastMoveEvent == null ? null : handleNextSection,
             label: Text(_mode == MatchMode.setup
                 ? "Start"

@@ -1,11 +1,11 @@
 {
-    "name": "app",
-    "short_name": "app",
+    "name": "Snout Scout",
+    "short_name": "Scout",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#363636",
-    "theme_color": "#31db2b",
-    "description": "A new Flutter project.",
+    "theme_color": "#006400",
+    "description": "Snout Scout Client",
     "orientation": "any",
     "prefer_related_applications": false,
     "icons": [

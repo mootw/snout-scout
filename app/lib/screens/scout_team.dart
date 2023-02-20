@@ -43,15 +43,11 @@ class _PitScoutTeamPageState extends State<PitScoutTeamPage> {
           actions: [
             IconButton(
                 onPressed: () async {
-                  var snoutData =
-                      Provider.of<EventDB>(context, listen: false);
+                  var snoutData = context.read<EventDB>();
 
                   Patch patch = Patch(
                       time: DateTime.now(),
-                      path: [
-                        'pitscouting',
-                        widget.team.toString()
-                      ],
+                      path: ['pitscouting', widget.team.toString()],
                       data: jsonEncode(results));
 
                   //Save the scouting results to the server!!

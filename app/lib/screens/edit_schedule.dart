@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:snout_db/event/match.dart';
 import 'package:snout_db/patch.dart';
-import 'package:snout_db/snout_db.dart';
 
 class EditSchedulePage extends StatefulWidget {
   const EditSchedulePage({super.key, required this.matches});

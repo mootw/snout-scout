@@ -1,5 +1,3 @@
-
-
 import 'package:app/confirm_exit_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -10,7 +8,8 @@ class EditMatchResults extends StatefulWidget {
   final EventConfig config;
   final MatchResults? results;
 
-  const EditMatchResults({required this.config, required this.results, Key? key})
+  const EditMatchResults(
+      {required this.config, required this.results, Key? key})
       : super(key: key);
 
   @override
@@ -30,7 +29,7 @@ class _EditMatchResultsState extends State<EditMatchResults> {
     super.initState();
 
     DateTime? date = widget.results?.time;
-    if(date != null) {
+    if (date != null) {
       matchEndTime = date.add(matchLength);
     } else {
       matchEndTime = DateTime.now();
@@ -38,8 +37,10 @@ class _EditMatchResultsState extends State<EditMatchResults> {
 
     //Pre-fill result scores
     for (var resultValue in widget.config.matchscouting.scoring) {
-      _red[resultValue] = TextEditingController(text: widget.results?.red[resultValue]?.toString());
-      _blue[resultValue] = TextEditingController(text: widget.results?.blue[resultValue]?.toString());
+      _red[resultValue] = TextEditingController(
+          text: widget.results?.red[resultValue]?.toString());
+      _blue[resultValue] = TextEditingController(
+          text: widget.results?.blue[resultValue]?.toString());
     }
   }
 
@@ -61,17 +62,16 @@ class _EditMatchResultsState extends State<EditMatchResults> {
                     //Input is valid
                     //Construct match results object
                     MatchResults results = MatchResults(
-                        time: matchEndTime.subtract(matchLength),
-                        red: _mapTo(_red),
-                        blue: _mapTo(_blue),
-                      );
-                      Navigator.pop(context, results);
+                      time: matchEndTime.subtract(matchLength),
+                      red: _mapTo(_red),
+                      blue: _mapTo(_blue),
+                    );
+                    Navigator.pop(context, results);
                   }
                 },
                 icon: const Icon(Icons.save)),
           ],
-          title:
-              const Text("Edit Results"),
+          title: const Text("Edit Results"),
         ),
         body: Form(
           key: _form,
@@ -92,7 +92,7 @@ class _EditMatchResultsState extends State<EditMatchResults> {
                       matchEndTime = DateTime(d.year, d.month, d.day,
                           matchEndTime.hour, matchEndTime.minute);
                     }
-    
+
                     TimeOfDay? time = await showTimePicker(
                         context: context,
                         initialTime: TimeOfDay(
@@ -116,8 +116,8 @@ class _EditMatchResultsState extends State<EditMatchResults> {
                   DataColumn(label: Text("Red")),
                   DataColumn(label: Text("Blue")),
                 ],
-                  rows: [
-                    for (final item in widget.config.matchscouting.scoring)
+                rows: [
+                  for (final item in widget.config.matchscouting.scoring)
                     DataRow(
                       cells: [
                         DataCell(Text(item)),
@@ -131,7 +131,6 @@ class _EditMatchResultsState extends State<EditMatchResults> {
                         )),
                       ],
                     )
-                  
                 ],
               ),
             ],
