@@ -154,7 +154,7 @@ class _MatchPageState extends State<MatchPage> {
                 ],
             ],
           ),
-          Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
+          Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
             Flexible(
               child: TextField(
                 decoration: const InputDecoration(
@@ -185,7 +185,7 @@ class _MatchPageState extends State<MatchPage> {
               ),
             ),
             Flexible(
-              child: FilledButton.tonal(
+              child: TextButton(
                   onPressed: () async {
                     //TODO this isnt very safe :(
                     int team = int.parse(_textController.text);
