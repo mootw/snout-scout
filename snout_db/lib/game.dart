@@ -1,7 +1,5 @@
 /// Stores game type data and things
 
-
-
 //0 seconds is reserved for events before the match starts like starting pos
 //1 to 16 seconds are for auto (15 seconds)
 //17; the delay between teleop and auto is ignored and treated as auto
@@ -13,4 +11,4 @@
 Duration matchLength = const Duration(minutes: 2, seconds: 31);
 
 // Team includes all of the field teams ("red" and "blue"), but also all possible match winning teams like "tie"
-enum Alliance {red, blue, tie}
+enum Alliance { red, blue, tie }

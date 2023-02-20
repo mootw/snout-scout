@@ -2,6 +2,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:app/helpers.dart';
 import 'package:app/main.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
@@ -62,7 +63,7 @@ class FieldPositionSelector extends StatelessWidget {
                       width: robotPorportionalSize * constraints.maxWidth,
                       height: robotPorportionalSize * constraints.maxWidth,
                       color:
-                          alliance == Alliance.red ? Colors.red : Colors.blue,
+                          getAllianceColor(alliance),
                       child: Text(teamNumber.toString(),
                           style: TextStyle(
                               fontSize: 13 * (constraints.maxWidth / fieldWidthSizeInches)))),
@@ -211,9 +212,7 @@ class RobotMapEventView extends StatelessWidget {
                 alignment: Alignment.center,
                 width: robotPorportionalSize * constraints.maxWidth,
                 height: robotPorportionalSize * constraints.maxWidth,
-                color: match.getAllianceOf(int.parse(team)) == Alliance.red
-                    ? Colors.red
-                    : Colors.blue,
+                color: getAllianceColor(match.getAllianceOf(int.parse(team))),
                 child: Text(team,
                     style:
                         TextStyle(fontSize: 13 * (constraints.maxWidth / fieldWidthSizeInches))),

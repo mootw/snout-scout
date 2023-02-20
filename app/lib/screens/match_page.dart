@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:app/datasheet.dart';
 import 'package:app/edit_lock.dart';
 import 'package:app/fieldwidget.dart';
+import 'package:app/helpers.dart';
 import 'package:app/main.dart';
 import 'package:app/screens/edit_match_results.dart';
 import 'package:app/screens/match_recorder.dart';
@@ -85,9 +86,8 @@ class _MatchPageState extends State<MatchPage> {
                       displayValue: TextButton(
                         child: Text(team.toString(),
                             style: TextStyle(
-                                color: match.getAllianceOf(team) == Alliance.red
-                                    ? Colors.red
-                                    : Colors.blue)),
+                                color: getAllianceColor(
+                                    match.getAllianceOf(team)))),
                         onPressed: () {
                           //Open this teams scouting page
                           Navigator.push(
@@ -154,65 +154,69 @@ class _MatchPageState extends State<MatchPage> {
                 ],
             ],
           ),
-          TextField(
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              hintText: 'Wrong team?',
+          Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
+            Flexible(
+              child: TextField(
+                decoration: const InputDecoration(
+                  // border: OutlineInputBorder(),
+                  hintText: 'Wrong team?',
+                ),
+                autocorrect: false,
+                keyboardType: TextInputType.number,
+                controller: _textController,
+              ),
             ),
-            autocorrect: false,
-            keyboardType: TextInputType.number,
-            controller: _textController,
-          ),
-          DropdownButton<Alliance>(
-            value: alliance,
-            icon: const Icon(Icons.arrow_downward),
-            elevation: 16,
-            style: const TextStyle(color: Colors.deepPurple),
-            underline: Container(
-              height: 2,
-              color: Colors.deepPurpleAccent,
+            Flexible(
+              child: DropdownButton<Alliance>(
+                value: alliance,
+                onChanged: (Alliance? value) {
+                  setState(() {
+                    alliance = value!;
+                  });
+                },
+                items: [Alliance.blue, Alliance.red]
+                    .map<DropdownMenuItem<Alliance>>((Alliance value) {
+                  return DropdownMenuItem<Alliance>(
+                    value: value,
+                    child: Text(value.toString(),
+                        style: TextStyle(color: getAllianceColor(value))),
+                  );
+                }).toList(),
+              ),
             ),
-            onChanged: (Alliance? value) {
-              // This is called when the user selects an item.
-              setState(() {
-                alliance = value!;
-              });
-            },
-            items: [Alliance.blue, Alliance.red]
-                .map<DropdownMenuItem<Alliance>>((Alliance value) {
-              return DropdownMenuItem<Alliance>(
-                value: value,
-                child: Text(value.toString()),
-              );
-            }).toList(),
-          ),
-          FilledButton.tonal(
-              onPressed: () async {
-                //TODO this isnt very safe :(
-                int team = int.parse(_textController.text);
-                RobotMatchResults? result = await navigateWithEditLock(
-                    context,
-                    "match:${match.description}:$team:timeline",
-                    () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => MatchRecorderPage(
-                                  team: team, teamAlliance: alliance)),
-                        ));
-                if (result != null) {
-                  Patch patch = Patch(
-                      time: DateTime.now(),
-                      path: [
-                        'matches',
-                        widget.matchid,
-                        'robot',
-                        team.toString()
-                      ],
-                      data: jsonEncode(result));
-                  await snoutData.addPatch(patch);
-                }
-              },
-              child: const Text("Record Substitution")),
+            Flexible(
+              child: FilledButton.tonal(
+                  onPressed: () async {
+                    //TODO this isnt very safe :(
+                    int team = int.parse(_textController.text);
+                    RobotMatchResults? result = await navigateWithEditLock(
+                        context,
+                        "match:${match.description}:$team:timeline",
+                        () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => MatchRecorderPage(
+                                      team: team, teamAlliance: alliance)),
+                            ));
+                    if (result != null) {
+                      Patch patch = Patch(
+                          time: DateTime.now(),
+                          path: [
+                            'matches',
+                            widget.matchid,
+                            'robot',
+                            team.toString()
+                          ],
+                          data: jsonEncode(result));
+                      await snoutData.addPatch(patch);
+                    }
+                  },
+                  child: const Text(
+                    "Record\nSubstitution",
+                    textAlign: TextAlign.center,
+                  )),
+            ),
+          ]),
           const SizedBox(height: 16),
           FieldTimelineViewer(match: match),
           ListTile(

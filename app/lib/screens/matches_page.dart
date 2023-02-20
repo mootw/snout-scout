@@ -1,4 +1,5 @@
 import 'package:app/durationformat.dart';
+import 'package:app/helpers.dart';
 import 'package:app/main.dart';
 import 'package:app/match_card.dart';
 import 'package:app/screens/match_page.dart';
@@ -80,11 +81,8 @@ class _AllMatchesPageState extends State<AllMatchesPage> {
                       child: Text(
                         teamNextMatch.description,
                         style: TextStyle(
-                            color: teamNextMatch.getAllianceOf(
-                                        snoutData.db.config.team) ==
-                                    Alliance.red
-                                ? Colors.red
-                                : Colors.blue),
+                            color: getAllianceColor(teamNextMatch
+                                .getAllianceOf(snoutData.db.config.team))),
                       ),
                     ),
                     TimeDuration(

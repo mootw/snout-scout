@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:app/datasheet.dart';
 import 'package:app/edit_lock.dart';
 import 'package:app/fieldwidget.dart';
+import 'package:app/helpers.dart';
 import 'package:app/main.dart';
 import 'package:app/match_card.dart';
 import 'package:app/screens/match_page.dart';
@@ -123,11 +124,8 @@ class _TeamViewPageState extends State<TeamViewPage> {
                             child: Text(
                               match.description,
                               style: TextStyle(
-                                  color:
-                                      match.getAllianceOf(widget.teamNumber) ==
-                                              Alliance.blue
-                                          ? Colors.blue
-                                          : Colors.red),
+                                  color: getAllianceColor(
+                                      match.getAllianceOf(widget.teamNumber))),
                             )),
                         exportValue: match.description,
                         sortingValue: match.scheduledTime),
