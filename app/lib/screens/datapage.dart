@@ -65,8 +65,7 @@ class _DataTablePageState extends State<DataTablePage> {
                 .where((element) => element.type != SurveyItemType.picture))
               DataItem.fromText(data
                       .db.pitscouting[team.toString()]?[pitSurvey.id]
-                      ?.toString() ??
-                  "No Data")
+                      ?.toString())
           ]
       ]),
     );

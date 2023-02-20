@@ -5,16 +5,20 @@ import 'package:flutter/material.dart';
 class DataItem {
   //Helpers to create data items from different types
   DataItem.fromNumber(double? number)
-      : displayValue = Text(number == null || number.isNaN ? "No Data" : numDisplay(number)),
-        exportValue = number == null || number.isNaN ? "No Data" : numDisplay(number),
+      : displayValue = Text(
+            number == null || number.isNaN ? "No Data" : numDisplay(number)),
+        exportValue =
+            number == null || number.isNaN ? "No Data" : numDisplay(number),
+        //"0" will sort to the bottom by default
         sortingValue = number == null || number.isNaN ? 0 : number;
 
-  DataItem.fromText(String text)
+  DataItem.fromText(String? text)
       : displayValue = ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 300),
-            child: Text(text)),
-        exportValue = text,
-        sortingValue = text.toLowerCase();
+            child: Text(text ?? "No Data")),
+        exportValue = text ?? "No Data",
+        //Empty string will sort to the bottom by default
+        sortingValue = text?.toLowerCase() ?? "";
 
   DataItem(
       {required this.displayValue,
@@ -61,8 +65,8 @@ class _DataSheetState extends State<DataSheet> {
 
   @override
   Widget build(BuildContext context) {
-    if(_currentSortColumn != null) {
-        widget.rows.sort((a, b) {
+    if (_currentSortColumn != null) {
+      widget.rows.sort((a, b) {
         final aValue = a[_currentSortColumn!].sortingValue;
         final bValue = b[_currentSortColumn!].sortingValue;
         return _sortAscending

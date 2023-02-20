@@ -158,8 +158,7 @@ class _MatchPageState extends State<MatchPage> {
                                 element.type != SurveyItemType.picture))
                         DataItem.fromText(match
                                   .robot[team.toString()]?.survey[item.id]
-                                  ?.toString() ??
-                              "No Data"),
+                                  ?.toString()),
                     ],
                 ],
               ),

@@ -147,8 +147,7 @@ class _TeamViewPageState extends State<TeamViewPage> {
                         DataItem.fromText(match
                                 .robot[widget.teamNumber.toString()]
                                 ?.survey[pitSurvey.id]
-                                ?.toString() ??
-                            "No Data"),
+                                ?.toString()),
                     ],
                 ],
               ),
