@@ -31,234 +31,224 @@ class _MatchPageState extends State<MatchPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<EventDB>(builder: (context, snoutData, child) {
-      FRCMatch match = snoutData.db.matches[widget.matchid]!;
+    final snoutData = context.watch<EventDB>();
+    FRCMatch match = snoutData.db.matches[widget.matchid]!;
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(match.description),
+        actions: [
+          // Text(DefaultTabController.of(context).index.toString()),
+          TextButton(
+            child: match.results == null
+                ? const Text("Add Results")
+                : const Text("Edit Results"),
+            onPressed: () async {
+              var result = await navigateWithEditLock(
+                  context,
+                  "match:${match.description}:results",
+                  () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => EditMatchResults(
+                            results: match.results,
+                            config: snoutData.db.config),
+                      )));
 
-      return Scaffold(
-        appBar: AppBar(
-          title: Text(match.description),
-          actions: [
-            // Text(DefaultTabController.of(context).index.toString()),
-            TextButton(
-              child: match.results == null
-                  ? const Text("Add Results")
-                  : const Text("Edit Results"),
+              if (result != null) {
+                Patch patch = Patch(
+                    time: DateTime.now(),
+                    path: ['matches', widget.matchid, 'results'],
+                    data: jsonEncode(result));
+
+                await snoutData.addPatch(patch);
+              }
+            },
+          )
+        ],
+      ),
+      body: ListView(
+        children: [
+          DataSheet(
+            //Data is a list of rows and columns
+            columns: [
+              DataItem.fromText("Team"),
+              DataItem.fromText("Timeline"),
+              for (final item in snoutData.db.config.matchscouting.events)
+                DataItem.fromText(item.label),
+              for (final item in snoutData.db.config.matchscouting.postgame)
+                DataItem.fromText(item.label),
+            ],
+            rows: [
+              for (final team in [...match.red, ...match.blue])
+                [
+                  DataItem(
+                      displayValue: TextButton(
+                        child: Text(team.toString(),
+                            style: TextStyle(
+                                color: match.getAllianceOf(team) == Alliance.red
+                                    ? Colors.red
+                                    : Colors.blue)),
+                        onPressed: () {
+                          //Open this teams scouting page
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    TeamViewPage(teamNumber: team)),
+                          );
+                        },
+                      ),
+                      exportValue: team.toString(),
+                      sortingValue: team),
+                  DataItem(
+                      displayValue: FilledButton.tonal(
+                        child: match.robot[team.toString()] == null
+                            ? const Text("Record")
+                            : const Text("Re-record"),
+                        onPressed: () async {
+                          RobotMatchResults? result =
+                              await navigateWithEditLock(
+                                  context,
+                                  "match:${match.description}:$team:timeline",
+                                  () => Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                MatchRecorderPage(
+                                                    team: team,
+                                                    teamAlliance: match
+                                                        .getAllianceOf(team))),
+                                      ));
+
+                          if (result != null) {
+                            Patch patch = Patch(
+                                time: DateTime.now(),
+                                path: [
+                                  'matches',
+                                  widget.matchid,
+                                  'robot',
+                                  team.toString()
+                                ],
+                                data: jsonEncode(result));
+                            await snoutData.addPatch(patch);
+                          }
+                        },
+                      ),
+                      exportValue: match.robot[team.toString()] == null
+                          ? "Record"
+                          : "Re-record",
+                      sortingValue: match.robot[team.toString()] == null
+                          ? "Record"
+                          : "Re-record"),
+                  for (final item in snoutData.db.config.matchscouting.events)
+                    DataItem.fromNumber(match.robot[team.toString()]?.timeline
+                        .where((event) => event.id == item.id)
+                        .length
+                        .toDouble()),
+                  for (final item in snoutData.db.config.matchscouting.postgame
+                      .where(
+                          (element) => element.type != SurveyItemType.picture))
+                    DataItem.fromText(match
+                        .robot[team.toString()]?.survey[item.id]
+                        ?.toString()),
+                ],
+            ],
+          ),
+          TextField(
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              hintText: 'Wrong team?',
+            ),
+            autocorrect: false,
+            keyboardType: TextInputType.number,
+            controller: _textController,
+          ),
+          DropdownButton<Alliance>(
+            value: alliance,
+            icon: const Icon(Icons.arrow_downward),
+            elevation: 16,
+            style: const TextStyle(color: Colors.deepPurple),
+            underline: Container(
+              height: 2,
+              color: Colors.deepPurpleAccent,
+            ),
+            onChanged: (Alliance? value) {
+              // This is called when the user selects an item.
+              setState(() {
+                alliance = value!;
+              });
+            },
+            items: [Alliance.blue, Alliance.red]
+                .map<DropdownMenuItem<Alliance>>((Alliance value) {
+              return DropdownMenuItem<Alliance>(
+                value: value,
+                child: Text(value.toString()),
+              );
+            }).toList(),
+          ),
+          FilledButton.tonal(
               onPressed: () async {
-                var result = await navigateWithEditLock(
+                //TODO this isnt very safe :(
+                int team = int.parse(_textController.text);
+                RobotMatchResults? result = await navigateWithEditLock(
                     context,
-                    "match:${match.description}:results",
+                    "match:${match.description}:$team:timeline",
                     () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => EditMatchResults(
-                              results: match.results,
-                              config: snoutData.db.config),
-                        )));
-
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => MatchRecorderPage(
+                                  team: team, teamAlliance: alliance)),
+                        ));
                 if (result != null) {
                   Patch patch = Patch(
                       time: DateTime.now(),
-                      path: ['matches', widget.matchid, 'results'],
+                      path: [
+                        'matches',
+                        widget.matchid,
+                        'robot',
+                        team.toString()
+                      ],
                       data: jsonEncode(result));
-
                   await snoutData.addPatch(patch);
                 }
               },
-            )
-          ],
-        ),
-        body: ListView(
-          children: [
-            
-            DataSheet(
-                //Data is a list of rows and columns
-                columns: [
-                  DataItem.fromText("Team"),
-                  DataItem.fromText("Timeline"),
-                    for (final item in snoutData.db.config.matchscouting.events)
-                      DataItem.fromText(item.label),
-                    for (final item
-                        in snoutData.db.config.matchscouting.postgame)
-                      DataItem.fromText(item.label),
-                ],
-                rows: [
-                  for (final team in [...match.red, ...match.blue])
-                    [
-                      DataItem(
-                          displayValue: TextButton(
-                          child: Text(team.toString(),
-                              style: TextStyle(
-                                  color:
-                                      match.getAllianceOf(team) == Alliance.red
-                                          ? Colors.red
-                                          : Colors.blue)),
-                          onPressed: () {
-                            //Open this teams scouting page
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      TeamViewPage(teamNumber: team)),
-                            );
-                          },
-                        ),
-                          exportValue: team.toString(),
-                          sortingValue: team),
-                        DataItem(
-                          displayValue: FilledButton.tonal(
-                          child: match.robot[team.toString()] == null
-                              ? const Text("Record")
-                              : const Text("Re-record"),
-                          onPressed: () async {
-                            RobotMatchResults? result =
-                                await navigateWithEditLock(
-                                    context,
-                                    "match:${match.description}:$team:timeline",
-                                    () => Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  MatchRecorderPage(
-                                                      team: team,
-                                                      teamAlliance:
-                                                          match.getAllianceOf(
-                                                              team))),
-                                        ));
-
-                            if (result != null) {
-                              Patch patch = Patch(
-                                  time: DateTime.now(),
-                                  path: [
-                                    'matches',
-                                    widget.matchid,
-                                    'robot',
-                                    team.toString()
-                                  ],
-                                  data: jsonEncode(result));
-                              await snoutData.addPatch(patch);
-                            }
-                          },
-                        ),
-                          exportValue: match.robot[team.toString()] == null
-                              ? "Record"
-                              : "Re-record",
-                          sortingValue: match.robot[team.toString()] == null
-                              ? "Record"
-                              : "Re-record"),
-                      for (final item
-                            in snoutData.db.config.matchscouting.events)
-                        DataItem.fromNumber(match
-                              .robot[team.toString()]?.timeline
-                              .where((event) => event.id == item.id)
-                              .length
-                            .toDouble()),
-                      for (final item in snoutData
-                            .db.config.matchscouting.postgame
-                            .where((element) =>
-                                element.type != SurveyItemType.picture))
-                        DataItem.fromText(match
-                                  .robot[team.toString()]?.survey[item.id]
-                                  ?.toString()),
-                    ],
-                ],
-              ),
-            TextField(
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                hintText: 'Wrong team?',
-              ),
-              autocorrect: false,
-              keyboardType: TextInputType.number,
-              controller: _textController,
-            ),
-            DropdownButton<Alliance>(
-              value: alliance,
-              icon: const Icon(Icons.arrow_downward),
-              elevation: 16,
-              style: const TextStyle(color: Colors.deepPurple),
-              underline: Container(
-                height: 2,
-                color: Colors.deepPurpleAccent,
-              ),
-              onChanged: (Alliance? value) {
-                // This is called when the user selects an item.
-                setState(() {
-                  alliance = value!;
-                });
-              },
-              items: [Alliance.blue, Alliance.red]
-                  .map<DropdownMenuItem<Alliance>>((Alliance value) {
-                return DropdownMenuItem<Alliance>(
-                  value: value,
-                  child: Text(value.toString()),
-                );
-              }).toList(),
-            ),
-            FilledButton.tonal(
-                onPressed: () async {
-                  //TODO this isnt very safe :(
-                  int team = int.parse(_textController.text);
-                  RobotMatchResults? result = await navigateWithEditLock(
-                      context,
-                      "match:${match.description}:$team:timeline",
-                      () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => MatchRecorderPage(
-                                    team: team, teamAlliance: alliance)),
-                          ));
-                  if (result != null) {
-                    Patch patch = Patch(
-                        time: DateTime.now(),
-                        path: [
-                          'matches',
-                          widget.matchid,
-                          'robot',
-                          team.toString()
-                        ],
-                        data: jsonEncode(result));
-                    await snoutData.addPatch(patch);
-                  }
-                },
-                child: const Text("Record Substitution")),
-            const SizedBox(height: 16),
-            FieldTimelineViewer(match: match),
+              child: const Text("Record Substitution")),
+          const SizedBox(height: 16),
+          FieldTimelineViewer(match: match),
+          ListTile(
+            title: const Text("Scheduled Time"),
+            subtitle: Text(DateFormat.jm()
+                .add_yMd()
+                .format(match.scheduledTime.toLocal())),
+          ),
+          if (match.results != null)
             ListTile(
-              title: const Text("Scheduled Time"),
+              title: const Text("Actual Time"),
               subtitle: Text(DateFormat.jm()
                   .add_yMd()
-                  .format(match.scheduledTime.toLocal())),
+                  .format(match.results!.time.toLocal())),
             ),
-            if (match.results != null)
-              ListTile(
-                title: const Text("Actual Time"),
-                subtitle: Text(DateFormat.jm()
-                    .add_yMd()
-                    .format(match.results!.time.toLocal())),
+          if (match.results != null)
+            Align(
+              alignment: Alignment.center,
+              child: DataTable(
+                columns: const [
+                  DataColumn(label: Text("Results")),
+                  DataColumn(label: Text("Red")),
+                  DataColumn(label: Text("Blue")),
+                ],
+                rows: [
+                  for (final type in snoutData.db.config.matchscouting.scoring)
+                    DataRow(cells: [
+                      DataCell(Text(type)),
+                      DataCell(Text(match.results!.red[type].toString())),
+                      DataCell(Text(match.results!.blue[type].toString())),
+                    ]),
+                ],
               ),
-            if (match.results != null)
-              Align(
-                alignment: Alignment.center,
-                child: DataTable(
-                  columns: const [
-                    DataColumn(label: Text("Results")),
-                    DataColumn(label: Text("Red")),
-                    DataColumn(label: Text("Blue")),
-                  ],
-                  rows: [
-                    for (final type
-                        in snoutData.db.config.matchscouting.scoring)
-                      DataRow(cells: [
-                        DataCell(Text(type)),
-                        DataCell(Text(match.results!.red[type].toString())),
-                        DataCell(Text(match.results!.blue[type].toString())),
-                      ]),
-                  ],
-                ),
-              ),
-          ],
-        ),
-      );
-    });
+            ),
+        ],
+      ),
+    );
   }
 }

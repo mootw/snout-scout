@@ -30,81 +30,83 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<EventDB>(builder: (context, snoutData, child) {
-      return Scaffold(
-        appBar: AppBar(title: const Text("Edit Schedule"), actions: [
-          TextButton(child: const Text("LOAD MATCHES FROM FRCAPI"), onPressed: () async {
-            await apiClient.get(Uri.parse(serverURL.replaceFirst("event", "load_schedule")));
-            
-          },)
-        ],),
-        body: ListView(children: [
-          const Text(
-              "Warning: Editing the schedule is potentially destructive! Data could be lost if the edit removes matches or a match was edited in-between some sub-edit"),
-          for (final match in snoutData.db.matches.entries)
-            ListTile(
-              title: Text(match.value.description),
-              subtitle: Text(match.key),
-              onTap: () => editMatch(match.value, snoutData, match.key),
-              trailing: IconButton(
-                icon: const Icon(Icons.delete),
-                onPressed: () async {
-                  final result = await showDialog(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                            title: const Text(
-                                "Are you sure you want to remove this match?"),
-                            actions: [
-                              TextButton(
-                                  child: const Text("No"),
-                                  onPressed: () =>
-                                      Navigator.of(context).pop(false)),
-                              TextButton(
-                                child: const Text("Yes"),
+    final snoutData = context.watch<EventDB>();
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Edit Schedule"),
+        actions: [
+          TextButton(
+            child: const Text("LOAD MATCHES FROM FRCAPI"),
+            onPressed: () async {
+              await apiClient.get(
+                  Uri.parse(serverURL.replaceFirst("event", "load_schedule")));
+            },
+          )
+        ],
+      ),
+      body: ListView(children: [
+        const Text(
+            "Warning: Editing the schedule is potentially destructive! Data could be lost if the edit removes matches or a match was edited in-between some sub-edit"),
+        for (final match in snoutData.db.matches.entries)
+          ListTile(
+            title: Text(match.value.description),
+            subtitle: Text(match.key),
+            onTap: () => editMatch(match.value, snoutData, match.key),
+            trailing: IconButton(
+              icon: const Icon(Icons.delete),
+              onPressed: () async {
+                final result = await showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                          title: const Text(
+                              "Are you sure you want to remove this match?"),
+                          actions: [
+                            TextButton(
+                                child: const Text("No"),
                                 onPressed: () =>
-                                    Navigator.of(context).pop(true),
-                              )
-                            ],
-                          ));
-                  if (result == true) {
-                    final matchesWithRemoved = Map.from(snoutData.db.matches);
-                    matchesWithRemoved.remove(match.key);
+                                    Navigator.of(context).pop(false)),
+                            TextButton(
+                              child: const Text("Yes"),
+                              onPressed: () => Navigator.of(context).pop(true),
+                            )
+                          ],
+                        ));
+                if (result == true) {
+                  final matchesWithRemoved = Map.from(snoutData.db.matches);
+                  matchesWithRemoved.remove(match.key);
 
-                    Patch patch = Patch(
-                        time: DateTime.now(),
-                        path: [
-                          'matches',
-                        ],
-                        data: jsonEncode(matchesWithRemoved));
-                    await snoutData.addPatch(patch);
-                  }
-                },
-              ),
+                  Patch patch = Patch(
+                      time: DateTime.now(),
+                      path: [
+                        'matches',
+                      ],
+                      data: jsonEncode(matchesWithRemoved));
+                  await snoutData.addPatch(patch);
+                }
+              },
             ),
-          Center(
-            child: FilledButton(
-                onPressed: () async {
-                  FRCMatch match = FRCMatch(
-                      description: "Some name",
-                      number: 0,
-                      scheduledTime: DateTime.now(),
-                      blue: [],
-                      red: [],
-                      results: null,
-                      robot: {});
-
-                  await editMatch(match, snoutData, null);
-                },
-                child: const Text("Add Match")),
           ),
-        ]),
-      );
-    });
+        Center(
+          child: FilledButton(
+              onPressed: () async {
+                FRCMatch match = FRCMatch(
+                    description: "Some name",
+                    number: 0,
+                    scheduledTime: DateTime.now(),
+                    blue: [],
+                    red: [],
+                    results: null,
+                    robot: {});
+
+                await editMatch(match, snoutData, null);
+              },
+              child: const Text("Add Match")),
+        ),
+      ]),
+    );
   }
 
   Future editMatch(FRCMatch match, EventDB snoutData, String? matchID) async {
-    
-
     String? result = await Navigator.of(context).push(MaterialPageRoute(
         builder: (context) => JSONEditor(
             source: const JsonEncoder.withIndent("    ").convert(match),

@@ -22,10 +22,10 @@ class MatchCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final snoutData = context.watch<EventDB>();
     return SizedBox(
       height: matchCardHeight,
-      child: Consumer<EventDB>(builder: (context, snoutData, child) {
-        return InkWell(
+      child: InkWell(
           onTap: () {
             Navigator.push(
               context,
@@ -130,8 +130,7 @@ class MatchCard extends StatelessWidget {
               ),
             ],
           ),
-        );
-      }),
+        ),
     );
   }
 }

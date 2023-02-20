@@ -14,46 +14,42 @@ class AllTeamsPage extends StatefulWidget {
 }
 
 class _AllTeamsPageState extends State<AllTeamsPage> {
-
   @override
   Widget build(BuildContext context) {
-    return Consumer<EventDB>(
-      builder: (context, snoutData, child) {
-        return SingleChildScrollView(
-          scrollDirection: Axis.vertical,
-          child: Center(
-            child: Wrap(
-              spacing: 12,
-              runSpacing: 12,
-              alignment: WrapAlignment.spaceEvenly,
-                  children: [
-                    for (var team in snoutData.db.teams)
-                      TeamListTile(teamNumber: team, snoutData: snoutData),
-                  ],
-                ),
-          ),
-        );
-      }
+    return SingleChildScrollView(
+      scrollDirection: Axis.vertical,
+      child: Center(
+        child: Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          alignment: WrapAlignment.spaceEvenly,
+          children: [
+            for (var team in context.watch<EventDB>().db.teams)
+              TeamListTile(teamNumber: team),
+          ],
+        ),
+      ),
     );
   }
 }
 
 class TeamListTile extends StatelessWidget {
   final int teamNumber;
-  final EventDB snoutData;
 
-  const TeamListTile({Key? key, required this.teamNumber, required this.snoutData}) : super(key: key);
+  const TeamListTile({Key? key, required this.teamNumber}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    
+    final snoutData = context.watch<EventDB>();
     Widget? image;
-    var data = snoutData.db.pitscouting[teamNumber.toString()]?['robot_picture'];
-    if (data!= null) {
+    var data =
+        snoutData.db.pitscouting[teamNumber.toString()]?['robot_picture'];
+    if (data != null) {
       image = AspectRatio(
-            aspectRatio: 1,
-            child: Image.memory(Uint8List.fromList(
-                base64Decode(data).cast<int>()), fit: BoxFit.cover));
+          aspectRatio: 1,
+          child: Image.memory(
+              Uint8List.fromList(base64Decode(data).cast<int>()),
+              fit: BoxFit.cover));
     }
 
     return InkWell(
@@ -73,7 +69,8 @@ class TeamListTile extends StatelessWidget {
             child: image ?? const Center(child: Text("No Image")),
           ),
           const SizedBox(height: 4),
-          Text(teamNumber.toString(), style: Theme.of(context).textTheme.titleMedium)
+          Text(teamNumber.toString(),
+              style: Theme.of(context).textTheme.titleMedium)
         ],
       ),
     );

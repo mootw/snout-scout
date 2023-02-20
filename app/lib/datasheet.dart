@@ -3,7 +3,6 @@ import 'dart:ui';
 
 import 'package:csv/csv.dart';
 import 'package:flutter/material.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:download/download.dart';
 
 class DataItem {
@@ -86,7 +85,7 @@ class _DataSheetState extends State<DataSheet> {
           child: FilledButton.tonal(onPressed: () async {
                 final stream = Stream.fromIterable(utf8.encode(dataTableToCSV(widget.columns, widget.rows)));
                 download(stream, 'table.csv');
-              }, child: Text("Export CSV")),
+              }, child: const Text("Export CSV")),
         ),
         ScrollConfiguration(
           behavior: MouseInteractableScrollBehavior(),
@@ -117,7 +116,7 @@ class _DataSheetState extends State<DataSheet> {
 String dataTableToCSV (List<DataItem> columns, List<List<DataItem>> rows) {
   //Append the colums to the top of the rows
   List<List<DataItem>> combined = [columns, ...rows];
-  return ListToCsvConverter().convert(combined);
+  return const ListToCsvConverter().convert(combined);
 }
 
 
