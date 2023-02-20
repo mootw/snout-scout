@@ -40,13 +40,13 @@ void main() async {
 
   try {
     //Load season config from server
-    var data = await apiClient.get(Uri.parse("$serverURL"));
+    var data = await apiClient.get(Uri.parse(serverURL));
     event = FRCEvent.fromJson(jsonDecode(data.body));
-    prefs.setString("$serverURL", data.body);
+    prefs.setString(serverURL, data.body);
   } catch (e) {
     try {
       //Load from cache
-      String? dbCache = prefs.getString("$serverURL");
+      String? dbCache = prefs.getString(serverURL);
       event = FRCEvent.fromJson(jsonDecode(dbCache!));
       print("got data from cache");
     } catch (e) {
@@ -141,7 +141,7 @@ class EventDB extends ChangeNotifier {
   //Writes a patch to local disk and submits it to the server.
   Future addPatch(Patch patch) async {
     var res =
-        await apiClient.put(Uri.parse("$serverURL"), body: jsonEncode(patch));
+        await apiClient.put(Uri.parse(serverURL), body: jsonEncode(patch));
 
     if (res.statusCode == 200) {
       //This was sucessful
@@ -208,7 +208,7 @@ class _MyHomePageState extends State<MyHomePage> {
               onPressed: () {
                 showSearch(context: context, delegate: SnoutScoutSearch());
               },
-              icon: Icon(Icons.search))
+              icon: const Icon(Icons.search))
         ],
       ),
       body: [
