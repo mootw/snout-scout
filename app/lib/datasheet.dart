@@ -13,12 +13,17 @@ class DataItem {
         exportValue =
             number == null || number.isNaN ? "No Data" : number.toString(),
         //negative infinity will sort no data to the bottom by default
-        sortingValue = number == null || number.isNaN ? double.negativeInfinity : number;
+        sortingValue =
+            number == null || number.isNaN ? double.negativeInfinity : number;
 
   DataItem.fromText(String? text)
       : displayValue = ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 240),
-            child: Text(text ?? "No Data")),
+            constraints: const BoxConstraints(maxWidth: 200),
+            //Make the text smaller so that long text fits
+            //This is more of a hack than best practice
+            child: Text(text ?? "No Data",
+                style:
+                    TextStyle(fontSize: (text?.length ?? 0) > 50 ? 10 : null))),
         exportValue = text ?? "No Data",
         //Empty string will sort to the bottom by default
         sortingValue = text?.toLowerCase() ?? "";
@@ -85,10 +90,13 @@ class _DataSheetState extends State<DataSheet> {
           child: Row(
             children: [
               // Text("TABLE NAME"),
-              TextButton(onPressed: () async {
-                    final stream = Stream.fromIterable(utf8.encode(dataTableToCSV(widget.columns, widget.rows)));
+              TextButton(
+                  onPressed: () async {
+                    final stream = Stream.fromIterable(utf8
+                        .encode(dataTableToCSV(widget.columns, widget.rows)));
                     download(stream, 'table.csv');
-                  }, child: const Text("Export CSV")),
+                  },
+                  child: const Text("Export CSV")),
             ],
           ),
         ),
@@ -101,16 +109,15 @@ class _DataSheetState extends State<DataSheet> {
               columnSpacing: 12,
               sortAscending: _sortAscending,
               sortColumnIndex: _currentSortColumn,
-              //+12 for a third line. kMinInteractiveDimension is the default height
-              dataRowHeight: kMinInteractiveDimension + 12,
               columns: [
                 for (final column in widget.columns)
                   DataColumn(label: column.displayValue, onSort: updateSort),
               ],
               rows: [
                 for (final row in widget.rows)
-                  DataRow(
-                      cells: [for (final cell in row) DataCell(cell.displayValue)]),
+                  DataRow(cells: [
+                    for (final cell in row) DataCell(cell.displayValue)
+                  ]),
               ],
             ),
           ),
@@ -120,12 +127,11 @@ class _DataSheetState extends State<DataSheet> {
   }
 }
 
-String dataTableToCSV (List<DataItem> columns, List<List<DataItem>> rows) {
+String dataTableToCSV(List<DataItem> columns, List<List<DataItem>> rows) {
   //Append the colums to the top of the rows
   List<List<DataItem>> combined = [columns, ...rows];
   return const ListToCsvConverter().convert(combined);
 }
-
 
 class MouseInteractableScrollBehavior extends MaterialScrollBehavior {
   // Override behavior methods and getters like dragDevices
