@@ -24,7 +24,7 @@ class _DataTablePageState extends State<DataTablePage> {
           DataItem.fromText("Avg:\n${eventType.label}"),
         for (final pitSurvey in data.db.config.pitscouting
             .where((element) => element.type != SurveyItemType.picture))
-          DataItem.fromText("Pit Scouting:\n${pitSurvey.label}"),
+          DataItem.fromText(pitSurvey.label),
       ], rows: [
         for (final team in data.db.teams)
           [

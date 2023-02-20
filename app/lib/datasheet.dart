@@ -17,7 +17,7 @@ class DataItem {
 
   DataItem.fromText(String? text)
       : displayValue = ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 300),
+            constraints: const BoxConstraints(maxWidth: 240),
             child: Text(text ?? "No Data")),
         exportValue = text ?? "No Data",
         //Empty string will sort to the bottom by default
@@ -81,11 +81,16 @@ class _DataSheetState extends State<DataSheet> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.all(8),
-          child: FilledButton.tonal(onPressed: () async {
-                final stream = Stream.fromIterable(utf8.encode(dataTableToCSV(widget.columns, widget.rows)));
-                download(stream, 'table.csv');
-              }, child: const Text("Export CSV")),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          child: Row(
+            children: [
+              // Text("TABLE NAME"),
+              TextButton(onPressed: () async {
+                    final stream = Stream.fromIterable(utf8.encode(dataTableToCSV(widget.columns, widget.rows)));
+                    download(stream, 'table.csv');
+                  }, child: const Text("Export CSV")),
+            ],
+          ),
         ),
         ScrollConfiguration(
           behavior: MouseInteractableScrollBehavior(),
@@ -93,9 +98,11 @@ class _DataSheetState extends State<DataSheet> {
             scrollDirection: Axis.horizontal,
             child: DataTable(
               //This is to make the data more compact
-              columnSpacing: 24,
+              columnSpacing: 12,
               sortAscending: _sortAscending,
               sortColumnIndex: _currentSortColumn,
+              //+12 for a third line. kMinInteractiveDimension is the default height
+              dataRowHeight: kMinInteractiveDimension + 12,
               columns: [
                 for (final column in widget.columns)
                   DataColumn(label: column.displayValue, onSort: updateSort),
