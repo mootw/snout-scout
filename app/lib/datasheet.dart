@@ -1,6 +1,10 @@
+import 'dart:convert';
 import 'dart:ui';
 
+import 'package:csv/csv.dart';
 import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:download/download.dart';
 
 class DataItem {
   //Helpers to create data items from different types
@@ -8,9 +12,9 @@ class DataItem {
       : displayValue = Text(
             number == null || number.isNaN ? "No Data" : numDisplay(number)),
         exportValue =
-            number == null || number.isNaN ? "No Data" : numDisplay(number),
-        //"0" will sort to the bottom by default
-        sortingValue = number == null || number.isNaN ? 0 : number;
+            number == null || number.isNaN ? "No Data" : number.toString(),
+        //negative infinity will sort no data to the bottom by default
+        sortingValue = number == null || number.isNaN ? double.negativeInfinity : number;
 
   DataItem.fromText(String? text)
       : displayValue = ConstrainedBox(
@@ -74,29 +78,48 @@ class _DataSheetState extends State<DataSheet> {
             : Comparable.compare(bValue, aValue);
       });
     }
-    return ScrollConfiguration(
-      behavior: MouseInteractableScrollBehavior(),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: DataTable(
-          //This is to make the data more compact
-          columnSpacing: 24,
-          sortAscending: _sortAscending,
-          sortColumnIndex: _currentSortColumn,
-          columns: [
-            for (final column in widget.columns)
-              DataColumn(label: column.displayValue, onSort: updateSort),
-          ],
-          rows: [
-            for (final row in widget.rows)
-              DataRow(
-                  cells: [for (final cell in row) DataCell(cell.displayValue)]),
-          ],
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(8),
+          child: FilledButton.tonal(onPressed: () async {
+                final stream = Stream.fromIterable(utf8.encode(dataTableToCSV(widget.columns, widget.rows)));
+                download(stream, 'table.csv');
+              }, child: Text("Export CSV")),
         ),
-      ),
+        ScrollConfiguration(
+          behavior: MouseInteractableScrollBehavior(),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: DataTable(
+              //This is to make the data more compact
+              columnSpacing: 24,
+              sortAscending: _sortAscending,
+              sortColumnIndex: _currentSortColumn,
+              columns: [
+                for (final column in widget.columns)
+                  DataColumn(label: column.displayValue, onSort: updateSort),
+              ],
+              rows: [
+                for (final row in widget.rows)
+                  DataRow(
+                      cells: [for (final cell in row) DataCell(cell.displayValue)]),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
+
+String dataTableToCSV (List<DataItem> columns, List<List<DataItem>> rows) {
+  //Append the colums to the top of the rows
+  List<List<DataItem>> combined = [columns, ...rows];
+  return ListToCsvConverter().convert(combined);
+}
+
 
 class MouseInteractableScrollBehavior extends MaterialScrollBehavior {
   // Override behavior methods and getters like dragDevices
