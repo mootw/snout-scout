@@ -212,7 +212,7 @@ class EventDB extends ChangeNotifier {
         successfulPatches.add(jsonEncode(patch));
         prefs.setStringList("successful_patches", successfulPatches);
         //Remove it from the failed patches if it exists there
-        if (failedPatches.contains(jsonEncode(patch))) {
+        if(failedPatches.contains(jsonEncode(patch))) {
           failedPatches.remove(jsonEncode(patch));
           prefs.setStringList("failed_patches", failedPatches);
         }
@@ -237,6 +237,15 @@ class EventDB extends ChangeNotifier {
     }
     notifyListeners();
   }
+
+  //Clears all of the failed patches.
+  Future clearFailedPatches () async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    failedPatches.clear();
+    prefs.setStringList("failed_patches", failedPatches);
+    notifyListeners();
+  }
+
 }
 
 class MyApp extends StatelessWidget {
@@ -263,6 +272,43 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _currentPageIndex = 0;
 
+  PreferredSize? getErrorBar() {
+    final data = context.read<EventDB>();
+
+    if (data.failedPatches.isNotEmpty) {
+      return PreferredSize(
+        preferredSize: const Size.fromHeight(36),
+        child: InkWell(
+          onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const LocalPatchStorage(),
+              )),
+          child: Container(
+              alignment: Alignment.center,
+              width: double.infinity,
+              height: 36,
+              color: Colors.orange,
+              child: Text(
+                  "You have ${data.failedPatches.length} failed patches! Tap to see")),
+        ),
+      );
+    }
+
+    if (data.connected == false) {
+      return PreferredSize(
+        preferredSize: const Size.fromHeight(36),
+        child: Container(
+            alignment: Alignment.center,
+            width: double.infinity,
+            height: 36,
+            color: Theme.of(context).colorScheme.errorContainer,
+            child: const Text("No Live Connection to server!!!")),
+      );
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     final data = context.watch<EventDB>();
@@ -270,17 +316,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     return Scaffold(
       appBar: AppBar(
-        bottom: data.connected
-            ? null
-            : PreferredSize(
-                preferredSize: const Size.fromHeight(36),
-                child: Container(
-                    alignment: Alignment.center,
-                    width: double.infinity,
-                    height: 36,
-                    color: Theme.of(context).colorScheme.errorContainer,
-                    child: const Text("No Live Connection to server!!!")),
-              ),
+        bottom: getErrorBar(),
         titleSpacing: 0,
         title: Text(data.db.config.name),
         actions: [
