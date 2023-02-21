@@ -13,6 +13,7 @@ import 'package:app/screens/teams_page.dart';
 import 'package:app/search.dart';
 import 'package:download/download.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:snout_db/config/eventconfig.dart';
@@ -28,6 +29,9 @@ Future setServer(String newServer) async {
   var prefs = await SharedPreferences.getInstance();
   prefs.setString("server", newServer);
   serverURL = newServer;
+
+  //Reset the last origin sync value
+  prefs.remove("lastoriginsync");
 
   //Literally re-initialize the app when changing the server.
   main();
@@ -47,6 +51,7 @@ void main() async {
     var data = await apiClient.get(Uri.parse(serverURL));
     event = FRCEvent.fromJson(jsonDecode(data.body));
     prefs.setString(serverURL, data.body);
+    prefs.setString("lastoriginsync", DateTime.now().toIso8601String());
   } catch (e) {
     try {
       //Load from cache
@@ -120,6 +125,8 @@ class SetupAppScreen extends StatelessWidget {
 class EventDB extends ChangeNotifier {
   FRCEvent db;
 
+
+  DateTime? lastOriginSync;
   bool connected = true;
 
   //This timer is set and will trigger a re-connect if a ping is not recieved
@@ -205,9 +212,11 @@ class EventDB extends ChangeNotifier {
       var data = await apiClient.get(Uri.parse(serverURL));
       db = FRCEvent.fromJson(jsonDecode(data.body));
       prefs.setString(serverURL, data.body);
+      prefs.setString("lastoriginsync", DateTime.now().toIso8601String());
+      lastOriginSync = DateTime.now(); //FOR easy UI update. This is slowly becoming spaghetti
       notifyListeners();
     } catch (e) {
-
+      print(e);
     }
   }
 
@@ -219,6 +228,7 @@ class EventDB extends ChangeNotifier {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       successfulPatches = prefs.getStringList("successful_patches") ?? [];
       failedPatches = prefs.getStringList("failed_patches") ?? [];
+      lastOriginSync = DateTime.tryParse(prefs.getString("lastoriginsync") ?? "");
     }();
   }
 
@@ -389,6 +399,35 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           ),
           ListTile(
+            title: const Text("Last Origin Sync"),
+            subtitle: data.lastOriginSync == null ? const Text("Never") : Text(DateFormat.yMMMMEEEEd().add_Hms().format(data.lastOriginSync!)),
+          ),
+          ListTile(
+            title: const Text("Local Patch Storage"),
+            trailing: const Icon(Icons.data_object),
+            onTap: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const LocalPatchStorage(),
+                  ));
+            },
+          ),
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: FilledButton(
+                  onPressed: () {
+                    final data = context.read<EventDB>().db;
+                    final stream =
+                        Stream.fromIterable(utf8.encode(jsonEncode(data)));
+                    download(stream, '${data.config.name}.json');
+                  },
+                  child: const Text("Download Event Data to File")),
+            ),
+          ),
+          const Divider(height: 64),
+          ListTile(
             title: const Text("Event Config"),
             subtitle: Text(data.db.config.name),
             trailing: IconButton(
@@ -411,27 +450,6 @@ class _MyHomePageState extends State<MyHomePage> {
                   }
                 },
                 icon: const Icon(Icons.edit)),
-          ),
-          ListTile(
-            title: const Text("Local Patch Storage"),
-            onTap: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const LocalPatchStorage(),
-                  ));
-            },
-          ),
-          const SizedBox(height: 32),
-          Center(
-            child: FilledButton(
-                onPressed: () {
-                  final data = context.read<EventDB>().db;
-                  final stream =
-                      Stream.fromIterable(utf8.encode(jsonEncode(data)));
-                  download(stream, '${data.config.name}.json');
-                },
-                child: const Text("Download Event Data to File")),
           ),
           Padding(
             padding: const EdgeInsets.all(8.0),

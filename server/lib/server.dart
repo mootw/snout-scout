@@ -87,7 +87,12 @@ void main(List<String> args) async {
       WebSocketTransformer.upgrade(request).then((WebSocket websocket) {
         final event = request.uri.pathSegments[1];
         //Set the ping interval to keep the connection alive for many browser's and proxy's default behavior.
+        //For some reason this doesnt work client side so the server will just close the connection after 16 hours
+        //the client will reconnect though so it "works". If pingInterval is fixed on the client side this can be reduced
+        //and used as the primary connection indicator. Maybe 30 seconds
         websocket.pingInterval = Duration(hours: 12);
+        //Remove the websocket from the listeners when it is closed for any reason.
+        websocket.done.then((value) => loadedEvents[event]?.listeners.remove(websocket));
         loadedEvents[event]?.listeners.add(websocket);
       });
       return;
