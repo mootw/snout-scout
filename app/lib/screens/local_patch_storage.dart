@@ -46,6 +46,30 @@ class _LocalPatchStorageState extends State<LocalPatchStorage> {
                         ],
                       )),
               icon: const Icon(Icons.delete)),
+          IconButton(
+              color: Colors.green,
+              onPressed: () => showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                        title: const Text(
+                            "Are you sure you want to delete ALL successful patches?"),
+                        actions: [
+                          TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: const Text("Cancel")),
+                          FilledButton.tonal(
+                              style: FilledButton.styleFrom(
+                                  backgroundColor: Theme.of(context)
+                                      .colorScheme
+                                      .errorContainer),
+                              onPressed: () async {
+                                await snoutData.clearSuccessfulPatches();
+                                Navigator.pop(context);
+                              },
+                              child: const Text("Delete")),
+                        ],
+                      )),
+              icon: const Icon(Icons.delete)),
         ],
       ),
       body: ListView(

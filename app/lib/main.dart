@@ -241,8 +241,16 @@ class EventDB extends ChangeNotifier {
   //Clears all of the failed patches.
   Future clearFailedPatches () async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    failedPatches.clear();
-    prefs.setStringList("failed_patches", failedPatches);
+    failedPatches.clear(); //For UI update
+    prefs.setStringList("failed_patches", []);
+    notifyListeners();
+  }
+
+  //Clears all of the successful patches.
+  Future clearSuccessfulPatches () async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    successfulPatches.clear(); //For UI update
+    prefs.setStringList("successful_patches", []);
     notifyListeners();
   }
 
