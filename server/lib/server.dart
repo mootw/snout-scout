@@ -268,7 +268,7 @@ Future loadScheduleFromTBA(FRCEvent eventData, String eventID) async {
 
   for (var match in matches) {
     String key = match['key'];
-    DateTime startTime = DateTime.fromMillisecondsSinceEpoch(match['time'] * 1000);
+    DateTime startTime = DateTime.fromMillisecondsSinceEpoch(match['time'] * 1000, isUtc: true);
 
     //"red": {
     //   "dq_team_keys": [],
