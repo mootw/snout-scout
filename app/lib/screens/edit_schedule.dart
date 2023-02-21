@@ -36,24 +36,28 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
         title: const Text("Edit Schedule"),
         actions: [
           TextButton(
-            child: const Text("LOAD MATCHES FROM FRCAPI"),
+            child: const Text("LOAD MATCHES FROM TBA"),
             onPressed: () async {
               final result = await apiClient.get(
                   Uri.parse(serverURL.replaceFirst("events", "load_schedule")));
-              
-              showDialog(context: context, builder: (context) {
-                return AlertDialog(
-                  title: Text(result.statusCode.toString()),
-                  content: Text(result.body),
-                );
-              });
+
+              showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      title: Text(result.statusCode.toString()),
+                      content: Text(result.body),
+                    );
+                  });
             },
           )
         ],
       ),
       body: ListView(children: [
-        const Text(
-            "Warning: Editing the schedule is potentially destructive! Data could be lost if the edit removes matches or a match was edited in-between some sub-edit"),
+        Text(
+          "Warning: Editing the schedule is potentially destructive! Data could be lost if the edit removes matches or a match was edited in-between some sub-edit",
+          style: TextStyle(color: Theme.of(context).colorScheme.error),
+        ),
         for (final match in snoutData.db.matches.entries)
           ListTile(
             title: Text(match.value.description),

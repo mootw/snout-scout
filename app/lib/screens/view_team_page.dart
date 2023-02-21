@@ -14,7 +14,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:snout_db/event/pitscoutresult.dart';
 import 'package:snout_db/config/surveyitem.dart';
-import 'package:snout_db/snout_db.dart';
 
 class TeamViewPage extends StatefulWidget {
   final int teamNumber;

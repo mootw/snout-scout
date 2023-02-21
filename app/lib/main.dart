@@ -10,6 +10,7 @@ import 'package:app/screens/edit_schedule.dart';
 import 'package:app/screens/matches_page.dart';
 import 'package:app/screens/teams_page.dart';
 import 'package:app/search.dart';
+import 'package:download/download.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -236,13 +237,14 @@ class _MyHomePageState extends State<MyHomePage> {
         bottom: data.connected
             ? null
             : PreferredSize(
+                preferredSize: const Size.fromHeight(36),
                 child: Container(
                     alignment: Alignment.center,
                     width: double.infinity,
                     height: 36,
-                    child: Text("No Live Connection to server!!!"),
-                    color: Theme.of(context).colorScheme.errorContainer),
-                preferredSize: Size.fromHeight(36)),
+                    color: Theme.of(context).colorScheme.errorContainer,
+                    child: const Text("No Live Connection to server!!!")),
+              ),
         titleSpacing: 0,
         title: Text(data.db.config.name),
         actions: [
@@ -308,6 +310,14 @@ class _MyHomePageState extends State<MyHomePage> {
                 },
                 icon: const Icon(Icons.edit)),
           ),
+          Center(
+            child: FilledButton(onPressed: 
+            () {
+              final data = context.read<EventDB>().db;
+              final stream = Stream.fromIterable(utf8.encode(jsonEncode(data)));
+              download(stream, '${data.config.name}.json');
+            }, child: const Text("Download Event Data to File")),
+          ),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Center(
@@ -347,7 +357,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   },
                   child: const Text("Edit Teams")),
             ),
-          )
+          ),
         ]),
       ),
       bottomNavigationBar: NavigationBar(

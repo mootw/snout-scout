@@ -7,7 +7,6 @@ import 'package:app/timeduration.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:snout_db/event/match.dart';
-import 'package:snout_db/snout_db.dart';
 
 class AllMatchesPage extends StatefulWidget {
   const AllMatchesPage({Key? key}) : super(key: key);
