@@ -7,6 +7,7 @@ import 'package:app/screens/analysis.dart';
 import 'package:app/screens/datapage.dart';
 import 'package:app/screens/edit_json.dart';
 import 'package:app/screens/edit_schedule.dart';
+import 'package:app/screens/local_patch_storage.dart';
 import 'package:app/screens/matches_page.dart';
 import 'package:app/screens/teams_page.dart';
 import 'package:app/search.dart';
@@ -128,6 +129,10 @@ class EventDB extends ChangeNotifier {
 
   WebSocketChannel? channel;
 
+  //Used in the UI to see failed and successful patches
+  List<String> successfulPatches = <String>[];
+  List<String> failedPatches = <String>[];
+
   void resetConnectionTimer() {
     connectionTimer?.cancel();
     connectionTimer = Timer(const Duration(seconds: 61), () {
@@ -186,19 +191,50 @@ class EventDB extends ChangeNotifier {
 
   EventDB(this.db) {
     reconnect();
+
+    //Initialize the patches array to be used in the UI.
+    () async {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      successfulPatches = prefs.getStringList("successful_patches") ?? [];
+      failedPatches = prefs.getStringList("failed_patches") ?? [];
+    }();
   }
 
   //Writes a patch to local disk and submits it to the server.
   Future addPatch(Patch patch) async {
-    var res =
-        await apiClient.put(Uri.parse(serverURL), body: jsonEncode(patch));
-
-    if (res.statusCode == 200) {
-      //This was sucessful
-      return true;
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    try {
+      var res =
+          await apiClient.put(Uri.parse(serverURL), body: jsonEncode(patch));
+      if (res.statusCode == 200) {
+        //This was successful
+        successfulPatches = prefs.getStringList("successful_patches") ?? [];
+        successfulPatches.add(jsonEncode(patch));
+        prefs.setStringList("successful_patches", successfulPatches);
+        //Remove it from the failed patches if it exists there
+        if (failedPatches.contains(jsonEncode(patch))) {
+          failedPatches.remove(jsonEncode(patch));
+          prefs.setStringList("failed_patches", failedPatches);
+        }
+        //Apply the patch to the local only if it was successful!
+        db = patch.patch(db);
+        return true;
+      } else {
+        failedPatches = prefs.getStringList("failed_patches") ?? [];
+        if (failedPatches.contains(jsonEncode(patch)) == false) {
+          //Do not add the same patch multiple times into the failed patches!
+          failedPatches.add(jsonEncode(patch));
+        }
+        prefs.setStringList("failed_patches", failedPatches);
+      }
+    } catch (e) {
+      failedPatches = prefs.getStringList("failed_patches") ?? [];
+      if (failedPatches.contains(jsonEncode(patch)) == false) {
+        //Do not add the same patch multiple times into the failed patches!
+        failedPatches.add(jsonEncode(patch));
+      }
+      prefs.setStringList("failed_patches", failedPatches);
     }
-    db = patch.patch(db);
-
     notifyListeners();
   }
 }
@@ -310,13 +346,26 @@ class _MyHomePageState extends State<MyHomePage> {
                 },
                 icon: const Icon(Icons.edit)),
           ),
+          ListTile(
+            title: const Text("Local Patch Storage"),
+            onTap: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const LocalPatchStorage(),
+                  ));
+            },
+          ),
+          const SizedBox(height: 32),
           Center(
-            child: FilledButton(onPressed: 
-            () {
-              final data = context.read<EventDB>().db;
-              final stream = Stream.fromIterable(utf8.encode(jsonEncode(data)));
-              download(stream, '${data.config.name}.json');
-            }, child: const Text("Download Event Data to File")),
+            child: FilledButton(
+                onPressed: () {
+                  final data = context.read<EventDB>().db;
+                  final stream =
+                      Stream.fromIterable(utf8.encode(jsonEncode(data)));
+                  download(stream, '${data.config.name}.json');
+                },
+                child: const Text("Download Event Data to File")),
           ),
           Padding(
             padding: const EdgeInsets.all(8.0),
