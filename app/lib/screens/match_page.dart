@@ -16,6 +16,7 @@ import 'package:snout_db/event/match.dart';
 import 'package:snout_db/event/robotmatchresults.dart';
 import 'package:snout_db/patch.dart';
 import 'package:snout_db/snout_db.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class MatchPage extends StatefulWidget {
   const MatchPage({required this.matchid, Key? key}) : super(key: key);
@@ -38,7 +39,16 @@ class _MatchPageState extends State<MatchPage> {
       appBar: AppBar(
         title: Text(match.description),
         actions: [
-          // Text(DefaultTabController.of(context).index.toString()),
+          //If there is a TBA event ID we will add a button to view the match id
+          //since we will assume that all of the matches (or at least most)
+          //have been imported to match the tba id format
+          if (snoutData.db.config.tbaEventId != null)
+            FilledButton.tonal(
+              child: const Text("TBA"),
+              onPressed: () =>
+                    launchUrlString(
+                        "https://www.thebluealliance.com/match/${widget.matchid}"),
+            ),
           TextButton(
             child: match.results == null
                 ? const Text("Add Results")
@@ -64,7 +74,7 @@ class _MatchPageState extends State<MatchPage> {
                 await snoutData.addPatch(patch);
               }
             },
-          )
+          ),
         ],
       ),
       body: ListView(
@@ -101,7 +111,7 @@ class _MatchPageState extends State<MatchPage> {
                       exportValue: team.toString(),
                       sortingValue: team),
                   DataItem(
-                      displayValue: FilledButton.tonal(
+                      displayValue: TextButton(
                         child: match.robot[team.toString()] == null
                             ? const Text("Record")
                             : const Text("Re-record"),

@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:app/api.dart';
+import 'package:app/helpers.dart';
 import 'package:app/screens/analysis.dart';
 import 'package:app/screens/datapage.dart';
 import 'package:app/screens/edit_json.dart';
@@ -116,17 +118,45 @@ class SetupAppScreen extends StatelessWidget {
 class EventDB extends ChangeNotifier {
   FRCEvent db;
 
-  EventDB(this.db) {
+  bool connected = true;
+
+  //This timer is set and will trigger a re-connect if a ping is not recieved
+  //It will also
+  //within a certain amount of time.
+  Timer? connectionTimer;
+
+  WebSocketChannel? channel;
+
+  void resetConnectionTimer() {
+    connectionTimer?.cancel();
+    connectionTimer = Timer(const Duration(seconds: 61), () {
+      print("connection timer triggered");
+      //No message has been recieved in 60 seconds, close down the connection.
+      channel?.sink.close();
+      connected = false;
+    });
+  }
+
+  void reconnect() async {
+    print("attempting a reconnection!");
+    //Do not close the stream if it already exists idk how that behaves
+    //it might reuslt in the onDone being called unexpetedly.
     Uri serverUri = Uri.parse(serverURL);
-    WebSocketChannel channel = WebSocketChannel.connect(Uri.parse(
+    channel = WebSocketChannel.connect(Uri.parse(
         '${serverURL.startsWith("https") ? "wss" : "ws"}://${serverUri.host}:${serverUri.port}/listen/${serverUri.pathSegments[1]}'));
 
-    channel.stream.listen((event) async {
-      print("got notification");
+    channel!.ready.then((_) {
+      connected = true;
+      notifyListeners();
+      resetConnectionTimer();
+      print("On ready");
+    });
 
+    channel!.stream.listen((event) async {
+      resetConnectionTimer();
       //REALLY JANK PING PONG SYSTEM THIS SHOULD BE FIXED!!!!
       if (event == "PING") {
-        channel.sink.add("PONG");
+        channel!.sink.add("PONG");
         return;
       }
 
@@ -135,7 +165,26 @@ class EventDB extends ChangeNotifier {
       //Save the database to disk
       prefs.setString("db", jsonEncode(db));
       notifyListeners();
+    }, onDone: () {
+      connected = false;
+      notifyListeners();
+      //Re-attempt a connection after a minute
+      Timer(const Duration(seconds: 30), () {
+        print("attempting to reconnect");
+        if (connected == false) {
+          reconnect();
+        }
+      });
+    }, onError: (e) {
+      print("On error");
+      //Dont try and reconnect on an error
+      print(e);
+      notifyListeners();
     });
+  }
+
+  EventDB(this.db) {
+    reconnect();
   }
 
   //Writes a patch to local disk and submits it to the server.
@@ -152,13 +201,6 @@ class EventDB extends ChangeNotifier {
     notifyListeners();
   }
 }
-
-//Set up theme
-const primaryColor = Color.fromARGB(255, 49, 219, 43);
-final darkScheme =
-    ColorScheme.fromSeed(seedColor: primaryColor, brightness: Brightness.dark);
-ThemeData defaultTheme =
-    ThemeData.from(colorScheme: darkScheme, useMaterial3: true);
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -191,6 +233,16 @@ class _MyHomePageState extends State<MyHomePage> {
 
     return Scaffold(
       appBar: AppBar(
+        bottom: data.connected
+            ? null
+            : PreferredSize(
+                child: Container(
+                    alignment: Alignment.center,
+                    width: double.infinity,
+                    height: 36,
+                    child: Text("No Live Connection to server!!!"),
+                    color: Theme.of(context).colorScheme.errorContainer),
+                preferredSize: Size.fromHeight(36)),
         titleSpacing: 0,
         title: Text(data.db.config.name),
         actions: [
@@ -198,10 +250,8 @@ class _MyHomePageState extends State<MyHomePage> {
             Padding(
               padding: const EdgeInsets.only(right: 8),
               child: FilledButton.tonal(
-                  onPressed: () {
-                    launchUrlString(
-                        "https://www.thebluealliance.com/event/$tbaKey#rankings");
-                  },
+                  onPressed: () => launchUrlString(
+                      "https://www.thebluealliance.com/event/$tbaKey#rankings"),
                   child: const Text("Rankings")),
             ),
           IconButton(

@@ -38,7 +38,7 @@ class MatchCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               SizedBox(
-                width: 120,
+                width: 130,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [

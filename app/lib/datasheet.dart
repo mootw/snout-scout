@@ -82,6 +82,7 @@ class _DataSheetState extends State<DataSheet> {
             : Comparable.compare(bValue, aValue);
       });
     }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

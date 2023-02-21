@@ -38,8 +38,15 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
           TextButton(
             child: const Text("LOAD MATCHES FROM FRCAPI"),
             onPressed: () async {
-              await apiClient.get(
-                  Uri.parse(serverURL.replaceFirst("event", "load_schedule")));
+              final result = await apiClient.get(
+                  Uri.parse(serverURL.replaceFirst("events", "load_schedule")));
+              
+              showDialog(context: context, builder: (context) {
+                return AlertDialog(
+                  title: Text(result.statusCode.toString()),
+                  content: Text(result.body),
+                );
+              });
             },
           )
         ],

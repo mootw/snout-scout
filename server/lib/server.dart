@@ -42,11 +42,10 @@ Future loadEvents() async {
 }
 
 void main(List<String> args) async {
-  if (env.isDefined('FRCAPI') == false) {
+  if (env.isDefined('X-TBA-Auth-Key') == false) {
     print(
-        "NO FRC API key detected. Create a .env or set env to FRCAPI=username:key");
+        "NO X-TBA-Auth-Key detected. Create a .env or set env to X-TBA-Auth-Key=key");
   }
-
 
   //REALLY JANK PING PONG SYSTEM
   //I SHOULD BE USING listener.pingInterval BUT THE CLIENT ISNT RESPONING
@@ -102,6 +101,7 @@ void main(List<String> args) async {
 
       File? f = loadedEvents[eventID]?.file;
       if (f == null || await f.exists() == false) {
+        print("event not found");
         request.response.statusCode = 404;
         request.response.write('Event not found');
         request.response.close();
@@ -111,17 +111,11 @@ void main(List<String> args) async {
       try {
         var eventData = FRCEvent.fromJson(jsonDecode(await f.readAsString()));
 
-        String season = eventID.substring(0, 4); //Get the 4 digit date
-        String event = eventID
-            .substring(4)
-            .toUpperCase(); //FRC uses upper case event stuff
-        //Remove json from file if it exists.
-        event = event.replaceAll(".JSON", "");
-
-        print(season);
-        print(event);
-
-        await loadScheduleFromFRCAPI(eventID, season, event, eventData);
+        await loadScheduleFromTBA(eventData, eventID);
+        
+        request.response.write("Done adding matches");
+        request.response.close();
+        return;
       } catch (e, s) {
         print(e);
         print(s);
@@ -250,59 +244,73 @@ void handleEditLockRequest(HttpRequest request) {
   }
 }
 
-//Attempt to load the schedule from the official FRC API.
-//This code is JANK and designed to be repaired and not cause damage.
-//Nowhere near as robust as the main app or API because of it.
-//It will make API calls to this server's api to apply the changes
-Future loadScheduleFromFRCAPI(
-    String eventID, String season, String event, FRCEvent eventData) async {
-  final headers = {
-    "Authorization": "Basic ${base64Encode(utf8.encode(env["FRCAPI"] ?? ""))}"
-  };
+//https://www.thebluealliance.com/apidocs/v3
+Future loadScheduleFromTBA(FRCEvent eventData, String eventID) async {
+
+  if(eventData.config.tbaEventId == null) {
+    throw Exception("TBA event ID cannot be null in the config!");
+  }
+  
   //Get playoff level matches
-  final responseQual = await http.get(
+  final apiData = await http.get(
       Uri.parse(
-          "https://frc-api.firstinspires.org/v3.0/$season/schedule/$event?tournamentLevel=qual"),
-      headers: headers);
-  //Get playoff level matches
-  final responsePlayoff = await http.get(
-      Uri.parse(
-          "https://frc-api.firstinspires.org/v3.0/$season/schedule/$event?tournamentLevel=playoff"),
-      headers: headers);
+          "https://www.thebluealliance.com/api/v3/event/${eventData.config.tbaEventId}/matches"),
+      headers: {
+        'X-TBA-Auth-Key': env['X-TBA-Auth-Key']!,
+      });
+  
 
   //Alright I THINK the timezone for the iso string is the one local to the event, but this would be chaotic
   //(and not to the ISO8601 standard since it should show timezone offset meaning the actual time is WRONG)
   //Basically just place your server in the same timezone as the event and hope for the best lmao
 
-  final matches = [
-    ...jsonDecode(responseQual.body)['Schedule'],
-    ...jsonDecode(responsePlayoff.body)['Schedule']
-  ];
+  final matches = jsonDecode(apiData.body);
 
   for (var match in matches) {
-    String description = match['description'];
-    DateTime startTime = DateTime.parse(match['startTime']);
-    int matchNumber = match['matchNumber'];
-    List<dynamic> teams = match['teams'];
-    // TournamentLevel tournamentLevel =
-    //     TournamentLevel.values.byName(match['tournamentLevel']);
+    String key = match['key'];
+    DateTime startTime = DateTime.fromMillisecondsSinceEpoch(match['time'] * 1000);
 
-    //Assume they just list teams in order of 1-2-3 red 1-2-3 blue
-    List<int> red = [];
-    List<int> blue = [];
-    for (int i = 0; i < teams.length; i++) {
-      if (i < 3) {
-        red.add(teams[i]['teamNumber']);
-      } else {
-        blue.add(teams[i]['teamNumber']);
-      }
+    //"red": {
+    //   "dq_team_keys": [],
+    //   "score": 86,
+    //   "surrogate_team_keys": [],
+    //   "team_keys": [
+    //     "frc2883",
+    //     "frc2239",
+    //     "frc2129"
+    //   ]
+    // }
+    List<int> red = [
+      for(String team in match['alliances']['red']['team_keys'])
+        int.parse(team.substring(3)),
+    ];
+    List<int> blue = [
+      for(String team in match['alliances']['blue']['team_keys'])
+        int.parse(team.substring(3)),
+    ];
+
+    int matchNumber = match['match_number'];
+    int setNumber = match['set_number'];
+    String compLevel = match['comp_level'];
+    //Generate a human readable description for each match
+    String description;
+    //qm, ef, qf, sf, f
+    if(compLevel == "qm") {
+      description = "Quals $matchNumber";
+    } else if (compLevel == "qf") {
+      description = "Quarters $matchNumber Match $setNumber";
+    } else if (compLevel == "sf") {
+      description = "Semis $matchNumber Match $setNumber";
+    } else if (compLevel == "f") {
+      description = "Finals $matchNumber";
+    } else {
+      description = "Unknown $matchNumber";
     }
 
     //ONLY modify matches that do not exist yet to prevent damage
-    if (eventData.matches.keys.toList().contains(description) == false) {
-      print("match ${description} does not exist; adding...");
+    if (eventData.matches.keys.toList().contains(key) == false) {
+      print("match ${key} does not exist; adding...");
       FRCMatch newMatch = FRCMatch(
-          // level: tournamentLevel,
           description: description,
           number: matchNumber,
           scheduledTime: startTime,
@@ -315,7 +323,7 @@ Future loadScheduleFromFRCAPI(
           time: DateTime.now(),
           path: [
             'matches',
-            newMatch.description,
+            key,
           ],
           data: jsonEncode(newMatch));
 

@@ -23,7 +23,8 @@ class Patch {
   factory Patch.fromJson(Map<String, dynamic> json) => _$PatchFromJson(json);
   Map<String, dynamic> toJson() => _$PatchToJson(this);
 
-  //Patches a given database, throws an error if there is an issue.
+  /// Patches a given database, throws an error if there is an issue.
+  /// Returns a NEW instance of FRCEvent, it does not mutate the original
   FRCEvent patch (FRCEvent database) {
     var dbJson = jsonDecode(jsonEncode(database));
     final pointer = JsonPointer.build(path);
