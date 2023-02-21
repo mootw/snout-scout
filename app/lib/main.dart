@@ -152,6 +152,13 @@ class EventDB extends ChangeNotifier {
         '${serverURL.startsWith("https") ? "wss" : "ws"}://${serverUri.host}:${serverUri.port}/listen/${serverUri.pathSegments[1]}'));
 
     channel!.ready.then((_) {
+      if(connected == false) {
+        //Only do an origin sync if we were previouosly not connected
+        //Since the db is syncronized before creating this object
+        //we can assume that connection exists for the first reconnect
+        //thus connected = true by default
+        tryOriginSync();
+      }
       connected = true;
       notifyListeners();
       resetConnectionTimer();
@@ -187,6 +194,21 @@ class EventDB extends ChangeNotifier {
       print(e);
       notifyListeners();
     });
+  }
+  
+  //Attempts to sync with the server
+  Future tryOriginSync () async {
+    print("Attempted origin sync");
+    final prefs = await SharedPreferences.getInstance();
+    try {
+      //Load season config from server
+      var data = await apiClient.get(Uri.parse(serverURL));
+      db = FRCEvent.fromJson(jsonDecode(data.body));
+      prefs.setString(serverURL, data.body);
+      notifyListeners();
+    } catch (e) {
+
+    }
   }
 
   EventDB(this.db) {

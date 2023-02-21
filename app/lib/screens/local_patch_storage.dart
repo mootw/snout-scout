@@ -75,7 +75,7 @@ class _LocalPatchStorageState extends State<LocalPatchStorage> {
       body: ListView(
         children: [
           const Center(child: Text("Failed Patches")),
-          for (final patch in snoutData.failedPatches)
+          for (final patch in snoutData.failedPatches.reversed)
             ListTile(
               onTap: () => showDialog(
                   context: context,
@@ -101,7 +101,7 @@ class _LocalPatchStorageState extends State<LocalPatchStorage> {
               ),
             ),
           const Center(child: Text("Successful Patches")),
-          for (final patch in snoutData.successfulPatches)
+          for (final patch in snoutData.successfulPatches.reversed)
             ListTile(
               onTap: () => showDialog(
                   context: context,

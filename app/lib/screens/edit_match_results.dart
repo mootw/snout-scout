@@ -122,11 +122,11 @@ class _EditMatchResultsState extends State<EditMatchResults> {
                       cells: [
                         DataCell(Text(item)),
                         DataCell(TextFormField(
-                          controller: _blue[item],
+                          controller: _red[item],
                           validator: _checkIsNumber,
                         )),
                         DataCell(TextFormField(
-                          controller: _red[item],
+                          controller: _blue[item],
                           validator: _checkIsNumber,
                         )),
                       ],
