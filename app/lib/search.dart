@@ -50,7 +50,7 @@ class SnoutScoutSearch extends SearchDelegate {
 
     EventDB db = context.watch<EventDB>();
 
-    for (var team in db.db.teams) {
+    for (final team in db.db.teams) {
       if (query.isEmpty) {
         continue;
       }
@@ -82,7 +82,7 @@ class SnoutScoutSearch extends SearchDelegate {
       }
     }
 
-    for (var match in db.db.matches.values) {
+    for (final match in db.db.matches.values) {
       if (query.isEmpty) {
         continue;
       }
@@ -103,7 +103,7 @@ class SnoutScoutSearch extends SearchDelegate {
     }
 
     //Search in pit scouting
-    for (var team in db.db.teams) {
+    for (final team in db.db.teams) {
       if (query.isEmpty) {
         continue;
       }
@@ -112,7 +112,7 @@ class SnoutScoutSearch extends SearchDelegate {
         continue;
       }
 
-      for (var item in pitScouting.entries) {
+      for (final item in pitScouting.entries) {
         final surveyItem = db.db.config.pitscouting
             .firstWhere((element) => element.id == item.key);
         if (surveyItem.type == SurveyItemType.picture) {
@@ -136,7 +136,7 @@ class SnoutScoutSearch extends SearchDelegate {
             leading: robotPicture,
             title: Text('${item.value}'),
             subtitle:
-                Text("${team.toString()} Pit Scouting - ${surveyItem.label}"),
+                Text("${team.toString()} scouting - ${surveyItem.label}"),
             onTap: () {
               Navigator.push(
                 context,
@@ -145,6 +145,31 @@ class SnoutScoutSearch extends SearchDelegate {
               );
             },
           ));
+        }
+      }
+    }
+
+    //Search in post match survey
+    for (final match in db.db.matches.values) {
+      if (query.isEmpty) {
+        continue;
+      }
+      for (final robot in match.robot.entries) {
+        for (final value in robot.value.survey.entries) {
+          if (value.value.toString().toLowerCase().contains(query.toLowerCase())) {
+            results.add(ListTile(
+              title: Text(value.value.toString()),
+              subtitle: Text("${match.description} - ${robot.key} - ${value.key}"),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          MatchPage(matchid: db.db.matchIDFromMatch(match))),
+                );
+              },
+            ));
+          }
         }
       }
     }

@@ -8,6 +8,7 @@ import 'package:app/main.dart';
 import 'package:app/screens/edit_match_results.dart';
 import 'package:app/screens/match_recorder.dart';
 import 'package:app/screens/view_team_page.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -45,9 +46,8 @@ class _MatchPageState extends State<MatchPage> {
           if (snoutData.db.config.tbaEventId != null)
             FilledButton.tonal(
               child: const Text("TBA"),
-              onPressed: () =>
-                    launchUrlString(
-                        "https://www.thebluealliance.com/match/${widget.matchid}"),
+              onPressed: () => launchUrlString(
+                  "https://www.thebluealliance.com/match/${widget.matchid}"),
             ),
           TextButton(
             child: match.results == null
@@ -90,7 +90,12 @@ class _MatchPageState extends State<MatchPage> {
                 DataItem.fromText(item.label),
             ],
             rows: [
-              for (final team in [...match.red, ...match.blue])
+              for (final team in <int>{
+                ...match.red,
+                ...match.blue,
+                //Also include all of the surrogate robots
+                ...match.robot.keys.map((e) => int.tryParse(e)).whereNotNull()
+              })
                 [
                   DataItem(
                       displayValue: TextButton(
