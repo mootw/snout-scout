@@ -7,11 +7,11 @@ import 'package:flutter/material.dart';
 import 'package:snout_db/event/match.dart';
 import 'package:snout_db/snout_db.dart';
 
-const double matchCardHeight = 69;
+const double matchCardHeight = 60;
 
-const TextStyle whiteText = TextStyle(color: Colors.white70, fontSize: 12);
+const TextStyle whiteText = TextStyle(color: Colors.white70, fontSize: 13);
 const TextStyle whiteTextBold =
-    TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12);
+    TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13);
 
 class MatchCard extends StatelessWidget {
   final FRCMatch match;
@@ -55,12 +55,14 @@ class MatchCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Container(
-                    height: 33,
-                    color: Colors.red,
+                    height: 28,
+                    width: 190,
+                    color: Colors.redAccent,
                     child: Row(children: [
                       for (var team in match.red)
                         TextButton(
                             style: TextButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                               minimumSize: const Size(0, 30),
                               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                             ),
@@ -78,7 +80,7 @@ class MatchCard extends StatelessWidget {
                                     : whiteText)),
                       Container(
                         alignment: Alignment.center,
-                        width: 52,
+                        width: 42,
                         child: Text(
                           match.results?.red['points'] != null
                               ? match.results!.red['points'].toString()
@@ -91,12 +93,15 @@ class MatchCard extends StatelessWidget {
                     ]),
                   ),
                   Container(
-                    height: 33,
-                    color: Colors.blue,
-                    child: Row(children: [
+                    height: 28,
+                    width: 190,
+                    color: Colors.blueAccent,
+                    child: Row(
+                      children: [
                       for (var team in match.blue)
                         TextButton(
                             style: TextButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                               minimumSize: const Size(0, 30),
                               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                             ),
@@ -114,7 +119,7 @@ class MatchCard extends StatelessWidget {
                                     : whiteText)),
                       Container(
                         alignment: Alignment.center,
-                        width: 52,
+                        width: 42,
                         child: Text(
                             match.results?.blue['points'] != null
                                 ? match.results!.blue['points'].toString()

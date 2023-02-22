@@ -305,13 +305,13 @@ class HeatMap extends CustomPainter {
 
       Paint p = Paint();
       p.maskFilter =
-          MaskFilter.blur(BlurStyle.normal, math.sqrt(group.length) + 2);
+          MaskFilter.blur(BlurStyle.normal, math.sqrt(group.length * 0.75) + 2);
       p.color = HSVColor.fromAHSV(
               1, (1 - (group.length / maxGroupLength)) * 225, 1, 1)
           .toColor();
       //Draw more and more green circles with increasing opacity
       canvas.drawCircle(Offset(ls[group[0]][0], ls[group[0]][1]),
-          6 + math.sqrt(group.length * 3), p);
+          6 + math.sqrt(group.length * 2), p);
     }
   }
 

@@ -302,7 +302,9 @@ Future loadScheduleFromTBA(FRCEvent eventData, String eventID) async {
     //qm, ef, qf, sf, f
     if(compLevel == "qm") {
       description = "Quals $matchNumber";
-    } else if (compLevel == "qf") {
+    } else if (compLevel == "ef") {
+      description = "Eighths $matchNumber Match $setNumber";
+    }else if (compLevel == "qf") {
       description = "Quarters $matchNumber Match $setNumber";
     } else if (compLevel == "sf") {
       description = "Semis $matchNumber Match $setNumber";

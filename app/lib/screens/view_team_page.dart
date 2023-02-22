@@ -66,27 +66,36 @@ class _TeamViewPageState extends State<TeamViewPage> {
             Center(
                 child: Text("Average Metrics",
                     style: Theme.of(context).textTheme.titleLarge)),
-            for (final eventType in snoutData.db.config.matchscouting.events)
-              ListTile(
-                title: Text(eventType.label),
-                subtitle: Text(numDisplay((snoutData.db
-                        .matchesWithTeam(widget.teamNumber)
-                        .fold<int>(
-                            0,
-                            (previousValue, match) =>
-                                previousValue +
-                                (match.robot[widget.teamNumber.toString()]
-                                        ?.timeline
-                                        .where(
-                                            (event) => event.id == eventType.id)
-                                        .length ??
-                                    0)) /
-                    snoutData.db
-                        .matchesWithTeam(widget.teamNumber)
-                        .where((element) =>
-                            element.robot[widget.teamNumber.toString()] != null)
-                        .length))),
+            Wrap(
+
+              children: [
+                  for (final eventType in snoutData.db.config.matchscouting.events)
+              SizedBox(
+                width: 160,
+                child: ListTile(
+                  title: Text(eventType.label),
+                  subtitle: Text(numDisplay((snoutData.db
+                          .matchesWithTeam(widget.teamNumber)
+                          .fold<int>(
+                              0,
+                              (previousValue, match) =>
+                                  previousValue +
+                                  (match.robot[widget.teamNumber.toString()]
+                                          ?.timeline
+                                          .where(
+                                              (event) => event.id == eventType.id)
+                                          .length ??
+                                      0)) /
+                      snoutData.db
+                          .matchesWithTeam(widget.teamNumber)
+                          .where((element) =>
+                              element.robot[widget.teamNumber.toString()] != null)
+                          .length))),
+                ),
               ),
+              ],
+            ),
+            
 
             const Divider(height: 32),
 
@@ -168,7 +177,7 @@ class _TeamViewPageState extends State<TeamViewPage> {
                                           event.time == 0)
                                 ])),
                 const SizedBox(height: 16),
-                Text("Auto Positions",
+                Text("Autos",
                     style: Theme.of(context).textTheme.titleLarge),
                 FieldHeatMap(
                     useRedNormalized: true,
@@ -204,6 +213,22 @@ class _TeamViewPageState extends State<TeamViewPage> {
                                             (event) => event.id == eventType.id)
                                   ])),
                 ],
+                const SizedBox(height: 16),
+                Text("Driving Tendencies",
+                    style: Theme.of(context).textTheme.titleLarge),
+                FieldHeatMap(
+                    useRedNormalized: true,
+                    events:
+                        snoutData.db.matchesWithTeam(widget.teamNumber).fold(
+                            [],
+                            (previousValue, element) => [
+                                  ...previousValue,
+                                  ...?element
+                                      .robot[widget.teamNumber.toString()]
+                                      ?.timelineInterpolated()
+                                      .where((event) =>
+                                          event.id == "robot_position")
+                                ])),
                 const Divider(height: 32),
                 Center(
                     child: Text("Schedule",
@@ -247,8 +272,7 @@ class ScoutingResult extends StatelessWidget {
   final SurveyItem item;
   final PitScoutResult survey;
 
-  const ScoutingResult({Key? key, required this.item, required this.survey})
-      : super(key: key);
+  const ScoutingResult({super.key, required this.item, required this.survey});
 
   dynamic get value => survey[item.id];
 
@@ -257,8 +281,6 @@ class ScoutingResult extends StatelessWidget {
     if (value == null) {
       return Container();
     }
-
-    // print(item.type);
 
     if (item.type == SurveyItemType.picture) {
       return ListTile(
@@ -272,8 +294,8 @@ class ScoutingResult extends StatelessWidget {
     }
 
     return ListTile(
-      title: Text(value.toString()),
-      subtitle: Text(item.label),
+      title: Text(item.label),
+      subtitle: Text(value.toString()),
     );
   }
 }

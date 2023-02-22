@@ -1,9 +1,8 @@
-
-
-
-
+import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:app/main.dart';
+import 'package:app/scouting_tools/scouting_tool.dart';
 import 'package:app/screens/match_page.dart';
 import 'package:app/screens/view_team_page.dart';
 import 'package:flutter/material.dart';
@@ -11,7 +10,6 @@ import 'package:provider/provider.dart';
 import 'package:snout_db/config/surveyitem.dart';
 
 class SnoutScoutSearch extends SearchDelegate {
-
   @override
   String get searchFieldLabel => 'Search Data';
 
@@ -47,76 +45,98 @@ class SnoutScoutSearch extends SearchDelegate {
     return search(context);
   }
 
-  Widget search (BuildContext context) {
+  Widget search(BuildContext context) {
     List<Widget> results = [];
 
     EventDB db = context.watch<EventDB>();
 
-    for(var team in db.db.teams) {
-      if(query.isEmpty) {
+    for (var team in db.db.teams) {
+      if (query.isEmpty) {
         continue;
       }
-      if(team.toString().contains(query)) {
-        results.add(
-          ListTile(
-            title: Text(team.toString()),
-            subtitle: const Text("Team"),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => TeamViewPage(teamNumber: team)),
-              );
-            },
-          )
-        );
+      if (team.toString().contains(query)) {
+        //Load the robot picture to show in the search if it is available
+        Widget? robotPicture;
+        final pictureData =
+            db.db.pitscouting[team.toString()]?['robot_picture'];
+        if (pictureData != null) {
+          robotPicture = AspectRatio(
+              aspectRatio: 1,
+              child: Image.memory(
+                  Uint8List.fromList(base64Decode(pictureData).cast<int>()),
+                  fit: BoxFit.cover));
+        }
+
+        results.add(ListTile(
+          leading: robotPicture,
+          title: Text(team.toString()),
+          subtitle: const Text("Team"),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => TeamViewPage(teamNumber: team)),
+            );
+          },
+        ));
       }
     }
 
-    for(var match in db.db.matches.values) {
-      if(query.isEmpty) {
+    for (var match in db.db.matches.values) {
+      if (query.isEmpty) {
         continue;
       }
-      if(match.description.toLowerCase().contains(query.toLowerCase())) {
-        results.add(
-          ListTile(
-            title: Text(match.description.toString()),
-            subtitle: const Text("Match"),
-            onTap: () {
-              Navigator.push(
+      if (match.description.toLowerCase().contains(query.toLowerCase())) {
+        results.add(ListTile(
+          title: Text(match.description.toString()),
+          subtitle: const Text("Match"),
+          onTap: () {
+            Navigator.push(
               context,
               MaterialPageRoute(
                   builder: (context) =>
                       MatchPage(matchid: db.db.matchIDFromMatch(match))),
             );
-            },
-          )
-        );
+          },
+        ));
       }
     }
 
     //Search in pit scouting
-    for(var team in db.db.teams) {
-      if(query.isEmpty) {
+    for (var team in db.db.teams) {
+      if (query.isEmpty) {
         continue;
       }
       final pitScouting = db.db.pitscouting[team.toString()];
-      if(pitScouting == null) {
+      if (pitScouting == null) {
         continue;
       }
 
-      for(var item in pitScouting.entries) {
-        final surveyItem = db.db.config.pitscouting.firstWhere((element) => element.id == item.key);
-        if(surveyItem.type == SurveyItemType.picture) {
+      for (var item in pitScouting.entries) {
+        final surveyItem = db.db.config.pitscouting
+            .firstWhere((element) => element.id == item.key);
+        if (surveyItem.type == SurveyItemType.picture) {
           //Do not include image data.
           continue;
         }
+        if (item.value.toString().toLowerCase().contains(query.toLowerCase())) {
+          //Load the robot picture to show in the search if it is available
+          Widget? robotPicture;
+          final pictureData =
+              db.db.pitscouting[team.toString()]?['robot_picture'];
+          if (pictureData != null) {
+            robotPicture = AspectRatio(
+                aspectRatio: 1,
+                child: Image.memory(
+                    Uint8List.fromList(base64Decode(pictureData).cast<int>()),
+                    fit: BoxFit.cover));
+          }
 
-        if(item.value.toString().toLowerCase().contains(query.toLowerCase())) {
-          results.add(
-          ListTile(
+          results.add(ListTile(
+            leading: robotPicture,
             title: Text('${item.value}'),
-            subtitle: Text("${team.toString()} Pit Scouting - ${surveyItem.label}"),
+            subtitle:
+                Text("${team.toString()} Pit Scouting - ${surveyItem.label}"),
             onTap: () {
               Navigator.push(
                 context,
@@ -124,15 +144,11 @@ class SnoutScoutSearch extends SearchDelegate {
                     builder: (context) => TeamViewPage(teamNumber: team)),
               );
             },
-          )
-        );
+          ));
         }
       }
     }
 
     return ListView(children: results);
   }
-
-
-
 }
