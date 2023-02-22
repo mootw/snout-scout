@@ -80,6 +80,7 @@ class _MatchPageState extends State<MatchPage> {
       body: ListView(
         children: [
           DataSheet(
+            title: 'Per Team Performance',
             //Data is a list of rows and columns
             columns: [
               DataItem.fromText("Team"),

@@ -4,6 +4,7 @@ import 'dart:math' as math;
 
 import 'package:app/helpers.dart';
 import 'package:app/main.dart';
+import 'package:app/screens/analysis.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -59,14 +60,15 @@ class FieldPositionSelector extends StatelessWidget {
                               ((robotPorportionalSize * constraints.maxWidth) /
                                   constraints.maxHeight))),
                   child: Container(
-                    alignment: Alignment.center,
+                      alignment: Alignment.center,
                       width: robotPorportionalSize * constraints.maxWidth,
                       height: robotPorportionalSize * constraints.maxWidth,
-                      color:
-                          getAllianceColor(alliance),
+                      color: getAllianceColor(alliance),
                       child: Text(teamNumber.toString(),
                           style: TextStyle(
-                              fontSize: 13 * (constraints.maxWidth / fieldWidthSizeInches)))),
+                              fontSize: 13 *
+                                  (constraints.maxWidth /
+                                      fieldWidthSizeInches)))),
                 ),
             ],
           ),
@@ -177,7 +179,7 @@ class RobotMapEventView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final posEvent = match.robot[team]!.timelineInterpolated().lastWhereOrNull(
+    final posEvent = match.robot[team]!.timelineInterpolated.lastWhereOrNull(
         (event) => event.time <= time && event.id == "robot_position");
     if (posEvent == null) {
       //A position event is required to show the robot on the timeline
@@ -185,7 +187,7 @@ class RobotMapEventView extends StatelessWidget {
     }
     FieldPosition robotPosition = posEvent.position;
 
-    final allRecentEvents = match.robot[team]!.timelineInterpolated().where(
+    final allRecentEvents = match.robot[team]!.timelineInterpolated.where(
         (event) =>
             event.time >= time &&
             event.time < time + 2 &&
@@ -214,8 +216,9 @@ class RobotMapEventView extends StatelessWidget {
                 height: robotPorportionalSize * constraints.maxWidth,
                 color: getAllianceColor(match.getAllianceOf(int.parse(team))),
                 child: Text(team,
-                    style:
-                        TextStyle(fontSize: 13 * (constraints.maxWidth / fieldWidthSizeInches))),
+                    style: TextStyle(
+                        fontSize: 13 *
+                            (constraints.maxWidth / fieldWidthSizeInches))),
               ),
             ),
             for (final event in allRecentEvents)
@@ -260,6 +263,39 @@ class FieldHeatMap extends StatelessWidget {
   }
 }
 
+class FieldPaths extends StatelessWidget {
+
+  final List<List<MatchEvent>> paths;
+
+  const FieldPaths({super.key, required this.paths});
+
+  @override
+  Widget build(BuildContext context) {
+    return AspectRatio(
+        aspectRatio: 1 / mapRatio,
+        child: LayoutBuilder(builder: (context, constraints) {
+          return Stack(
+            children: [
+              const FieldMapWidget(),
+              //Darken the map slightly to create more contrast against the heatmap
+              Container(
+                  width: double.infinity,
+                  height: double.infinity,
+                  color: Colors.black26),
+              for (final match in paths)
+                CustomPaint(
+                  size: Size.infinite,
+                  painter: MapLine(
+                    color: getColorFromIndex(paths.indexOf(match)),
+                      events: match,
+                      useRedNormalized: true),
+                )
+            ],
+          );
+        }));
+  }
+}
+
 class HeatMap extends CustomPainter {
   List<MatchEvent> events;
   bool useRedNormalized;
@@ -269,7 +305,7 @@ class HeatMap extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     DBSCAN dbscan = DBSCAN(
-      epsilon: robotPorportionalSize / 3 * size.width,
+      epsilon: robotPorportionalSize / 3.5 * size.width,
       //Allow for clusters of single points
       minPoints: 1,
     );
@@ -311,7 +347,7 @@ class HeatMap extends CustomPainter {
           .toColor();
       //Draw more and more green circles with increasing opacity
       canvas.drawCircle(Offset(ls[group[0]][0], ls[group[0]][1]),
-          6 + math.sqrt(group.length * 2), p);
+          5 + math.sqrt(group.length * 3), p);
     }
   }
 
@@ -319,12 +355,65 @@ class HeatMap extends CustomPainter {
   bool shouldRepaint(HeatMap oldDelegate) => false;
 }
 
+/// Renders a line with a color over the surface
+class MapLine extends CustomPainter {
+
+  Color color;
+  List<MatchEvent> events;
+  bool useRedNormalized;
+
+  MapLine({required this.events, required this.useRedNormalized, this.color = Colors.green});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if(events.isEmpty) {
+      return;
+    }
+    Paint p = Paint();
+    p.color = color;
+    p.strokeWidth = 5;
+    p.strokeCap = StrokeCap.round;
+    p.style = PaintingStyle.stroke;
+
+    Path path = Path();
+
+    final startingPosition = getFieldPosition(events.first, size);
+    path.moveTo(startingPosition[0], startingPosition[1]);
+    for (int i = 0; i < events.length; i++) {
+      final pos1 = getFieldPosition(events[i], size);
+      path.lineTo(pos1[0], pos1[1]);
+
+    }
+    canvas.drawPath(path, p);
+  }
+
+  // Returns [x, y]
+  getFieldPosition(MatchEvent event, Size renderSize) {
+    return [
+      (((useRedNormalized ? event.positionTeamNormalized.x : event.position.x) +
+                  1) /
+              2) *
+          renderSize.width,
+      (1 -
+              (((useRedNormalized
+                          ? event.positionTeamNormalized.y
+                          : event.position.y) +
+                      1) /
+                  2)) *
+          renderSize.height
+    ];
+  }
+
+  @override
+  bool shouldRepaint(HeatMap oldDelegate) => false;
+}
 
 class FieldMapWidget extends StatelessWidget {
   const FieldMapWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Image.asset("assets/field_map/${context.watch<EventDB>().db.config.season}.png");
+    return Image.asset(
+        "assets/field_map/${context.watch<EventDB>().db.config.season}.png");
   }
 }

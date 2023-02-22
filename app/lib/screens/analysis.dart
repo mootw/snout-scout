@@ -1,5 +1,7 @@
 import 'dart:math';
 
+import 'package:app/fieldwidget.dart';
+import 'package:app/helpers.dart';
 import 'package:app/main.dart';
 import 'package:app/screens/teams_page.dart';
 import 'package:app/screens/view_team_page.dart';
@@ -33,6 +35,41 @@ class _AnalysisPageState extends State<AnalysisPage> {
             SurveyItemRatioChart(surveyItem: surveyItem),
         ],
       ),
+
+
+      Text("Autos", style: Theme.of(context).textTheme.titleLarge),
+      FieldPaths(
+        paths: [
+          for (final match
+              in data.db.matches.values)
+              for(final robot in match.robot.entries)
+                match.robot[robot.key]!
+                    .timelineInterpolated
+                    .where((element) => element.isInAuto)
+                    .toList()
+        ],
+      ),
+
+
+      for (final eventType
+                    in data.db.config.matchscouting.events) ...[
+                  const SizedBox(height: 16),
+                  Text(eventType.label,
+                      style: Theme.of(context).textTheme.titleLarge),
+                  FieldHeatMap(
+                      useRedNormalized: true,
+                      events:
+                          data.db.matches.values.fold(
+                              [],
+                              (previousValue, element) => [
+                                    ...previousValue,
+                                    ...element
+                                        .robot.values.fold([], (previousValue, element) => [...previousValue, ...element.timeline
+                                        .where(
+                                            (event) => event.id == eventType.id)])
+                    ])),
+                ],
+
     ]);
   }
 }
@@ -126,7 +163,3 @@ class _SurveyItemRatioChartState extends State<SurveyItemRatioChart> {
     );
   }
 }
-
-Color getColorFromIndex(int index) =>
-    HSVColor.fromAHSV(1, (100 + (index * pi * 10000)) % 360, 0.8, 0.6)
-        .toColor();

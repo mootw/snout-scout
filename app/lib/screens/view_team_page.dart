@@ -10,8 +10,10 @@ import 'package:app/match_card.dart';
 import 'package:app/screens/match_page.dart';
 import 'package:app/screens/scout_team.dart';
 import 'package:app/scouting_tools/scouting_tool.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:snout_db/event/match.dart';
 import 'package:snout_db/event/pitscoutresult.dart';
 import 'package:snout_db/config/surveyitem.dart';
 
@@ -28,6 +30,7 @@ class _TeamViewPageState extends State<TeamViewPage> {
   @override
   Widget build(BuildContext context) {
     final snoutData = context.watch<EventDB>();
+
     return Scaffold(
         appBar: AppBar(
           actions: [
@@ -67,43 +70,23 @@ class _TeamViewPageState extends State<TeamViewPage> {
                 child: Text("Average Metrics",
                     style: Theme.of(context).textTheme.titleLarge)),
             Wrap(
-
               children: [
-                  for (final eventType in snoutData.db.config.matchscouting.events)
-              SizedBox(
-                width: 160,
-                child: ListTile(
-                  title: Text(eventType.label),
-                  subtitle: Text(numDisplay((snoutData.db
-                          .matchesWithTeam(widget.teamNumber)
-                          .fold<int>(
-                              0,
-                              (previousValue, match) =>
-                                  previousValue +
-                                  (match.robot[widget.teamNumber.toString()]
-                                          ?.timeline
-                                          .where(
-                                              (event) => event.id == eventType.id)
-                                          .length ??
-                                      0)) /
-                      snoutData.db
-                          .matchesWithTeam(widget.teamNumber)
-                          .where((element) =>
-                              element.robot[widget.teamNumber.toString()] != null)
-                          .length))),
-                ),
-              ),
+                for (final eventType
+                    in snoutData.db.config.matchscouting.events)
+                  SizedBox(
+                    width: 160,
+                    child: ListTile(
+                      title: Text(eventType.label),
+                      subtitle: Text(numDisplay(snoutData.db
+                          .teamAverageMetric(widget.teamNumber, eventType.id))),
+                    ),
+                  ),
               ],
             ),
-            
 
             const Divider(height: 32),
-
-            Center(
-                child: Text("Per Match Metrics",
-                    style: Theme.of(context).textTheme.titleLarge)),
-
             DataSheet(
+              title: 'Matches',
               //Data is a list of rows and columns
               columns: [
                 DataItem.fromText("Match"),
@@ -115,8 +98,13 @@ class _TeamViewPageState extends State<TeamViewPage> {
                   DataItem.fromText(pitSurvey.label),
               ],
               rows: [
-                for (final match
-                    in snoutData.db.matchesWithTeam(widget.teamNumber))
+                //Show ALL matches the team is scheduled for ALONG with all matches they played regardless of it it is scheduled sorted
+                for (final match in <FRCMatch>{
+                  ...snoutData.db.matchesWithTeam(widget.teamNumber),
+                  ...snoutData.db
+                      .teamRecordedMatches(widget.teamNumber)
+                      .map((e) => e.value)
+                }.sorted((a, b) => Comparable.compare(a, b)))
                   [
                     DataItem(
                         displayValue: TextButton(
@@ -164,12 +152,14 @@ class _TeamViewPageState extends State<TeamViewPage> {
                     style: Theme.of(context).textTheme.titleLarge),
                 FieldHeatMap(
                     useRedNormalized: true,
-                    events:
-                        snoutData.db.matchesWithTeam(widget.teamNumber).fold(
+                    events: snoutData.db
+                        .teamRecordedMatches(widget.teamNumber)
+                        .fold(
                             [],
                             (previousValue, element) => [
                                   ...previousValue,
                                   ...?element
+                                      .value
                                       .robot[widget.teamNumber.toString()]
                                       ?.timeline
                                       .where((event) =>
@@ -177,18 +167,29 @@ class _TeamViewPageState extends State<TeamViewPage> {
                                           event.time == 0)
                                 ])),
                 const SizedBox(height: 16),
-                Text("Autos",
-                    style: Theme.of(context).textTheme.titleLarge),
+                Text("Autos", style: Theme.of(context).textTheme.titleLarge),
+                FieldPaths(
+                  paths: [
+                    for (final match
+                        in snoutData.db.teamRecordedMatches(widget.teamNumber))
+                      match.value.robot[widget.teamNumber.toString()]!
+                          .timelineInterpolated
+                          .where((element) => element.isInAuto)
+                          .toList()
+                  ],
+                ),
                 FieldHeatMap(
                     useRedNormalized: true,
-                    events:
-                        snoutData.db.matchesWithTeam(widget.teamNumber).fold(
+                    events: snoutData.db
+                        .teamRecordedMatches(widget.teamNumber)
+                        .fold(
                             [],
                             (previousValue, element) => [
                                   ...previousValue,
                                   ...?element
+                                      .value
                                       .robot[widget.teamNumber.toString()]
-                                      ?.timelineInterpolated()
+                                      ?.timelineInterpolated
                                       .where((event) =>
                                           event.id == "robot_position" &&
                                           event.isInAuto)
@@ -201,12 +202,14 @@ class _TeamViewPageState extends State<TeamViewPage> {
                       style: Theme.of(context).textTheme.titleLarge),
                   FieldHeatMap(
                       useRedNormalized: true,
-                      events:
-                          snoutData.db.matchesWithTeam(widget.teamNumber).fold(
+                      events: snoutData.db
+                          .teamRecordedMatches(widget.teamNumber)
+                          .fold(
                               [],
                               (previousValue, element) => [
                                     ...previousValue,
                                     ...?element
+                                        .value
                                         .robot[widget.teamNumber.toString()]
                                         ?.timeline
                                         .where(
@@ -218,14 +221,16 @@ class _TeamViewPageState extends State<TeamViewPage> {
                     style: Theme.of(context).textTheme.titleLarge),
                 FieldHeatMap(
                     useRedNormalized: true,
-                    events:
-                        snoutData.db.matchesWithTeam(widget.teamNumber).fold(
+                    events: snoutData.db
+                        .teamRecordedMatches(widget.teamNumber)
+                        .fold(
                             [],
                             (previousValue, element) => [
                                   ...previousValue,
                                   ...?element
+                                      .value
                                       .robot[widget.teamNumber.toString()]
-                                      ?.timelineInterpolated()
+                                      ?.timelineInterpolated
                                       .where((event) =>
                                           event.id == "robot_position")
                                 ])),

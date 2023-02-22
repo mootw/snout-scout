@@ -44,9 +44,10 @@ class DataItem {
 }
 
 class DataSheet extends StatefulWidget {
-  const DataSheet({super.key, required this.columns, required this.rows});
+  const DataSheet({super.key, this.title, required this.columns, required this.rows});
 
   ///Rows<Columns<DataItem<Comparable>>
+  final String? title;
   final List<List<DataItem>> rows;
   final List<DataItem> columns;
 
@@ -90,14 +91,15 @@ class _DataSheetState extends State<DataSheet> {
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-          child: Row(
+          child: Wrap(
             children: [
-              // Text("TABLE NAME"),
+              if(widget.title != null)
+                Text('${widget.title}', style: Theme.of(context).textTheme.titleLarge),
               TextButton(
                   onPressed: () async {
                     final stream = Stream.fromIterable(utf8
                         .encode(dataTableToCSV(widget.columns, widget.rows)));
-                    download(stream, 'table.csv');
+                    download(stream, widget.title != null ? '${widget.title}.csv' : 'table.csv');
                   },
                   child: const Text("Export CSV")),
             ],

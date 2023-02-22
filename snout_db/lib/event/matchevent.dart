@@ -62,4 +62,7 @@ class MatchEvent {
   FieldPosition get positionTeamNormalized => FieldPosition(nx, ny);
   
   bool get isInAuto => time <= 17;
+
+  @override
+  String toString () => 't:${time} id:${id} pos:${position}';
 }

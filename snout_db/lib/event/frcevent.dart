@@ -10,7 +10,6 @@ part 'frcevent.g.dart';
 
 @JsonSerializable()
 class FRCEvent {
-
   ///List of teams in the event, ideally ordered smallest number to largest
   List<int> teams;
 
@@ -29,24 +28,22 @@ class FRCEvent {
       required this.teams,
       required Map<String, FRCMatch> matches,
       required this.pitscouting})
-      //Enforce that the matches are sorted in ascending time.
-      : matches = SplayTreeMap.from(
-            matches,
-            (key1, key2) => matches[key1]!
-                .scheduledTime
-                .difference(matches[key2]!.scheduledTime)
-                .inMilliseconds);
+      //Enforce that the matches are sorted correctly
+      : matches = SplayTreeMap.from(matches,
+            (key1, key2) => Comparable.compare(matches[key1]!, matches[key2]!));
 
   factory FRCEvent.fromJson(Map<String, dynamic> json) =>
       _$FRCEventFromJson(json);
   Map<String, dynamic> toJson() => _$FRCEventToJson(this);
 
   //Returns the id for a given match
-  String matchIDFromMatch (FRCMatch match) => matches.keys.toList()[matches.values.toList().indexOf(match)];
+  String matchIDFromMatch(FRCMatch match) =>
+      matches.keys.toList()[matches.values.toList().indexOf(match)];
 
   /// returns matches with a specific team in them
   List<FRCMatch> matchesWithTeam(int team) =>
       matches.values.where((match) => match.hasTeam(team)).toList();
+
   //returns the match after the last match with results
   FRCMatch? get nextMatch => matches.values
       .toList()
@@ -61,4 +58,24 @@ class FRCEvent {
   Duration? get scheduleDelay => matches.values
       .lastWhereOrNull((match) => match.results != null)
       ?.scheduleDelay;
+
+  /// Returns all matches that include a recording for a specific team
+  Iterable<MapEntry<String, FRCMatch>> teamRecordedMatches(int team) => matches
+      .entries
+      .where((element) => element.value.robot.keys.contains(team.toString()));
+
+  //Returns the average value of a given metric per match over all recorded matches.
+  double teamAverageMetric(int team, String eventId) {
+    final recordedMatches = teamRecordedMatches(team);
+
+    return recordedMatches.fold<int>(
+            0,
+            (previousValue, match) =>
+                previousValue +
+                (match.value.robot[team.toString()]?.timeline
+                        .where((event) => event.id == eventId)
+                        .length ??
+                    0)) /
+        recordedMatches.length;
+  }
 }

@@ -6,7 +6,7 @@ import 'package:snout_db/game.dart';
 part 'match.g.dart';
 
 @JsonSerializable()
-class FRCMatch {
+class FRCMatch extends Comparable<FRCMatch> {
   ///The number of this match in the series
   int number;
 
@@ -41,6 +41,10 @@ class FRCMatch {
   factory FRCMatch.fromJson(Map<String, dynamic> json) =>
       _$FRCMatchFromJson(json);
   Map<String, dynamic> toJson() => _$FRCMatchToJson(this);
+
+  //Default sorting should be based on match time
+  @override
+  int compareTo(other) => scheduledTime.difference(other.scheduledTime).inMilliseconds;
 
   //Helpers
   bool hasTeam(int team) => red.contains(team) || blue.contains(team);
