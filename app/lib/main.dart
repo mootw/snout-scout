@@ -377,7 +377,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: [
         const AllMatchesPage(),
-        const AllTeamsPage(),
+        const TeamGridList(),
         const DataTablePage(),
         const AnalysisPage(),
       ][_currentPageIndex],

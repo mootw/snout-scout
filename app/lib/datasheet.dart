@@ -5,13 +5,15 @@ import 'package:csv/csv.dart';
 import 'package:flutter/material.dart';
 import 'package:download/download.dart';
 
+String noDataText = "";
+
 class DataItem {
   //Helpers to create data items from different types
   DataItem.fromNumber(double? number)
       : displayValue = Text(
-            number == null || number.isNaN ? "No Data" : numDisplay(number)),
+            number == null || number.isNaN ? noDataText : numDisplay(number)),
         exportValue =
-            number == null || number.isNaN ? "No Data" : number.toString(),
+            number == null || number.isNaN ? noDataText : number.toString(),
         //negative infinity will sort no data to the bottom by default
         sortingValue =
             number == null || number.isNaN ? double.negativeInfinity : number;
@@ -21,10 +23,10 @@ class DataItem {
             constraints: const BoxConstraints(maxWidth: 200),
             //Make the text smaller so that long text fits
             //This is more of a hack than best practice
-            child: Text(text ?? "No Data",
+            child: Text(text ?? noDataText,
                 style:
                     TextStyle(fontSize: (text?.length ?? 0) > 50 ? 10 : null))),
-        exportValue = text ?? "No Data",
+        exportValue = text ?? noDataText,
         //Empty string will sort to the bottom by default
         sortingValue = text?.toLowerCase() ?? "";
 
@@ -106,6 +108,9 @@ class _DataSheetState extends State<DataSheet> {
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: DataTable(
+              // border: TableBorder(
+              //   verticalInside: BorderSide(width: 0, color: Theme.of(context).highlightColor.withOpacity(0.1)),
+              // ),
               //This is to make the data more compact
               columnSpacing: 12,
               sortAscending: _sortAscending,
@@ -147,7 +152,7 @@ class MouseInteractableScrollBehavior extends MaterialScrollBehavior {
 //Displays a rounded number or No Data if null or NaN
 String numDisplay(double? input) {
   if (input == null || input.isNaN) {
-    return "No Data";
+    return noDataText;
   }
   return ((input * 10).round() / 10).toString();
 }

@@ -6,14 +6,18 @@ import 'package:app/screens/view_team_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class AllTeamsPage extends StatefulWidget {
-  const AllTeamsPage({Key? key}) : super(key: key);
+
+/// Displays a wrapped grid of teams
+class TeamGridList extends StatefulWidget {
+  const TeamGridList({super.key, this.teamFiler});
+
+  final List<int>? teamFiler;
 
   @override
-  State<AllTeamsPage> createState() => _AllTeamsPageState();
+  State<TeamGridList> createState() => _TeamGridListState();
 }
 
-class _AllTeamsPageState extends State<AllTeamsPage> {
+class _TeamGridListState extends State<TeamGridList> {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -25,7 +29,8 @@ class _AllTeamsPageState extends State<AllTeamsPage> {
           alignment: WrapAlignment.spaceEvenly,
           children: [
             for (var team in context.watch<EventDB>().db.teams)
-              TeamListTile(teamNumber: team),
+              if(widget.teamFiler == null || widget.teamFiler!.contains(team))
+                TeamListTile(teamNumber: team),
           ],
         ),
       ),

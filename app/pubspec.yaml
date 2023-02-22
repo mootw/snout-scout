@@ -31,19 +31,21 @@ dependencies:
     sdk: flutter
 
   provider: ^6.0.5
-  collection: 1.17.1
-  intl: 0.18.0
-  shared_preferences: 2.0.16
-  http: 0.13.5
+  collection: ^1.17.1
+  intl: ^0.18.0
+  shared_preferences: ^2.0.16
+  http: ^0.13.5
   image_picker: ^0.8.6
   web_socket_channel: ^2.3.0
   simple_cluster: ^0.3.0
   url_launcher: ^6.1.7
+  download: ^1.0.0
+  csv: ^5.0.1
+  fl_chart: ^0.61.0
+
   #TOOD unused right now, but sharing might make sense in the future
   #for things like giving people the app easily, and sharing data
   share_plus: ^6.3.1 
-  download: ^1.0.0
-  csv: ^5.0.1
 
   #boolean_selector: ^2.1.1
 
