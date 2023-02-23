@@ -4,7 +4,6 @@ import 'dart:math' as math;
 
 import 'package:app/helpers.dart';
 import 'package:app/main.dart';
-import 'package:app/screens/analysis.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -23,15 +22,21 @@ class FieldPositionSelector extends StatelessWidget {
       required this.onTap,
       required this.robotPosition,
       required this.alliance,
-      required this.teamNumber});
+      required this.teamNumber,
+      this.coverAlignment});
 
   final Function(FieldPosition) onTap;
   final FieldPosition? robotPosition;
   final Alliance alliance;
   final int teamNumber;
 
+  final double? coverAlignment;
+
   @override
   Widget build(BuildContext context) {
+    //We still use the map ratio since The layout builder can be in an unconstrained width
+    //when the device is tilted sideways in the match recorder and it can result in
+    //weird visuals since none of this is really the best way to do it.
     return AspectRatio(
       aspectRatio: 1 / mapRatio,
       child: LayoutBuilder(builder: (context, constraints) {
@@ -45,9 +50,15 @@ class FieldPositionSelector extends StatelessWidget {
                         2) -
                     1));
           },
-          child: Stack(
+          child: FieldMap(
             children: [
-              const FieldMapWidget(),
+              if (coverAlignment != null)
+                Align(
+                    alignment: Alignment(coverAlignment!, 0),
+                    child: Container(
+                        width: constraints.maxWidth / 2,
+                        height: double.infinity,
+                        color: Colors.black54)),
               if (robotPosition != null)
                 Container(
                   alignment: Alignment(
@@ -57,8 +68,12 @@ class FieldPositionSelector extends StatelessWidget {
                                   constraints.maxWidth)),
                       -robotPosition!.y *
                           (1 +
-                              ((robotPorportionalSize * constraints.maxWidth) /
-                                  constraints.maxHeight))),
+                              //Use 1/mapratio for the height since we are ONLY using the width constraint
+                              //IDK it seems to work here, not sure why it isn't a problem elseware.
+                              (((1 / mapRatio) *
+                                      robotPorportionalSize *
+                                      constraints.maxWidth) /
+                                  constraints.maxWidth))),
                   child: Container(
                       alignment: Alignment.center,
                       width: robotPorportionalSize * constraints.maxWidth,
@@ -113,21 +128,14 @@ class _FieldTimelineViewerState extends State<FieldTimelineViewer> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        AspectRatio(
-            aspectRatio: 1 / mapRatio,
-            child: LayoutBuilder(builder: (context, constraints) {
-              return Stack(
-                children: [
-                  const FieldMapWidget(),
-                  for (final robot in widget.match.robot.keys)
-                    RobotMapEventView(
-                        time: _animationTime,
-                        match: widget.match,
-                        team: robot,
-                        isAnimating: _isPlaying),
-                ],
-              );
-            })),
+        FieldMap(children: [
+          for (final robot in widget.match.robot.keys)
+            RobotMapEventView(
+                time: _animationTime,
+                match: widget.match,
+                team: robot,
+                isAnimating: _isPlaying),
+        ]),
         Row(
           children: [
             IconButton(
@@ -241,58 +249,36 @@ class FieldHeatMap extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AspectRatio(
-        aspectRatio: 1 / mapRatio,
-        child: LayoutBuilder(builder: (context, constraints) {
-          return Stack(
-            children: [
-              const FieldMapWidget(),
-              //Darken the map slightly to create more contrast against the heatmap
-              Container(
-                  width: double.infinity,
-                  height: double.infinity,
-                  color: Colors.black26),
-              CustomPaint(
-                size: Size.infinite,
-                painter:
-                    HeatMap(events: events, useRedNormalized: useRedNormalized),
-              )
-            ],
-          );
-        }));
+    return FieldMap(
+      children: [
+        Container(color: Colors.black26),
+        CustomPaint(
+          size: Size.infinite,
+          painter: HeatMap(events: events, useRedNormalized: useRedNormalized),
+        )
+      ],
+    );
   }
 }
 
 class FieldPaths extends StatelessWidget {
-
   final List<List<MatchEvent>> paths;
 
   const FieldPaths({super.key, required this.paths});
 
   @override
   Widget build(BuildContext context) {
-    return AspectRatio(
-        aspectRatio: 1 / mapRatio,
-        child: LayoutBuilder(builder: (context, constraints) {
-          return Stack(
-            children: [
-              const FieldMapWidget(),
-              //Darken the map slightly to create more contrast against the heatmap
-              Container(
-                  width: double.infinity,
-                  height: double.infinity,
-                  color: Colors.black26),
-              for (final match in paths)
-                CustomPaint(
-                  size: Size.infinite,
-                  painter: MapLine(
-                    color: getColorFromIndex(paths.indexOf(match)),
-                      events: match,
-                      useRedNormalized: true),
-                )
-            ],
-          );
-        }));
+    return FieldMap(children: [
+      Container(color: Colors.black26),
+      for (final match in paths)
+        CustomPaint(
+          size: Size.infinite,
+          painter: MapLine(
+              color: getColorFromIndex(paths.indexOf(match)),
+              events: match,
+              useRedNormalized: true),
+        )
+    ]);
   }
 }
 
@@ -357,21 +343,23 @@ class HeatMap extends CustomPainter {
 
 /// Renders a line with a color over the surface
 class MapLine extends CustomPainter {
-
   Color color;
   List<MatchEvent> events;
   bool useRedNormalized;
 
-  MapLine({required this.events, required this.useRedNormalized, this.color = Colors.green});
+  MapLine(
+      {required this.events,
+      required this.useRedNormalized,
+      this.color = Colors.green});
 
   @override
   void paint(Canvas canvas, Size size) {
-    if(events.isEmpty) {
+    if (events.isEmpty) {
       return;
     }
     Paint p = Paint();
     p.color = color;
-    p.strokeWidth = 5;
+    p.strokeWidth = 8;
     p.strokeCap = StrokeCap.round;
     p.style = PaintingStyle.stroke;
 
@@ -382,7 +370,6 @@ class MapLine extends CustomPainter {
     for (int i = 0; i < events.length; i++) {
       final pos1 = getFieldPosition(events[i], size);
       path.lineTo(pos1[0], pos1[1]);
-
     }
     canvas.drawPath(path, p);
   }
@@ -415,5 +402,26 @@ class FieldMapWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Image.asset(
         "assets/field_map/${context.watch<EventDB>().db.config.season}.png");
+  }
+}
+
+class FieldMap extends StatelessWidget {
+  final List<Widget> children;
+
+  //Displays a field map with overlays.
+  const FieldMap({super.key, required this.children});
+
+  @override
+  Widget build(BuildContext context) {
+    return AspectRatio(
+      aspectRatio: 1 / mapRatio,
+      child: Stack(
+        children: [
+          Image.asset(
+              "assets/field_map/${context.watch<EventDB>().db.config.season}.png"),
+          ...children,
+        ],
+      ),
+    );
   }
 }

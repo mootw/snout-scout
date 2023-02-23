@@ -95,7 +95,7 @@ class _DataTablePageState extends State<DataTablePage> {
                         },
                       ),
                       exportValue: match.value.description,
-                      sortingValue: match.value.scheduledTime),
+                      sortingValue: match.value),
                   DataItem(
                       displayValue: TextButton(
                         child: Text(robot.key,

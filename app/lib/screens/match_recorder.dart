@@ -206,6 +206,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                   child: Transform.rotate(
                     angle: mapRotation,
                     child: FieldPositionSelector(
+                      coverAlignment: _mode != MatchMode.setup ? null : widget.teamAlliance == Alliance.red ? 1 : -1,
                       teamNumber: widget.team,
                       alliance: widget.teamAlliance,
                       robotPosition: robotPosition,
@@ -264,6 +265,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                 angle: mapRotation,
                 child: FieldPositionSelector(
                   teamNumber: widget.team,
+                  coverAlignment: _mode != MatchMode.setup ? null : widget.teamAlliance == Alliance.red ? 1 : -1,
                   alliance: widget.teamAlliance,
                   robotPosition: robotPosition,
                   onTap: (robotPosition) {

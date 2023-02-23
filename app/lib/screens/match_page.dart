@@ -100,9 +100,9 @@ class _MatchPageState extends State<MatchPage> {
                 [
                   DataItem(
                       displayValue: TextButton(
-                        child: Text(team.toString(),
+                        child: Text(team.toString() + (match.hasTeam(team) == false ? " [surrogate]" : ""),
                             style: TextStyle(
-                                color: getAllianceColor(
+                                color: match.hasTeam(team) == false ? null : getAllianceColor(
                                     match.getAllianceOf(team)))),
                         onPressed: () {
                           //Open this teams scouting page
@@ -118,9 +118,7 @@ class _MatchPageState extends State<MatchPage> {
                       sortingValue: team),
                   DataItem(
                       displayValue: TextButton(
-                        child: match.robot[team.toString()] == null
-                            ? const Text("Record")
-                            : const Text("Re-record"),
+                        child: const Text("Record"),
                         onPressed: () async {
                           RobotMatchResults? result =
                               await navigateWithEditLock(
@@ -150,12 +148,8 @@ class _MatchPageState extends State<MatchPage> {
                           }
                         },
                       ),
-                      exportValue: match.robot[team.toString()] == null
-                          ? "Record"
-                          : "Re-record",
-                      sortingValue: match.robot[team.toString()] == null
-                          ? "Record"
-                          : "Re-record"),
+                      exportValue: "Record",
+                      sortingValue: "Record"),
                   for (final item in snoutData.db.config.matchscouting.events)
                     DataItem.fromNumber(match.robot[team.toString()]?.timeline
                         .where((event) => event.id == item.id)
@@ -233,7 +227,7 @@ class _MatchPageState extends State<MatchPage> {
                   )),
             ),
           ]),
-          const SizedBox(height: 16),
+          const SizedBox(height: 32),
           FieldTimelineViewer(match: match),
           ListTile(
             title: const Text("Scheduled Time"),

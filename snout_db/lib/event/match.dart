@@ -48,7 +48,9 @@ class FRCMatch extends Comparable<FRCMatch> {
 
   //Helpers
   bool hasTeam(int team) => red.contains(team) || blue.contains(team);
-  Alliance getAllianceOf(int team) =>
-      red.contains(team) ? Alliance.red : Alliance.blue;
+
+  // Returns the alliance the team is on, otherwise null if the team is not part of the schedule.
+  Alliance getAllianceOf(int team) => red.contains(team) ? Alliance.red : Alliance.blue;
+  
   Duration? get scheduleDelay => results?.time.difference(scheduledTime);
 }

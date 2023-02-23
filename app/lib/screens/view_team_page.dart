@@ -124,7 +124,7 @@ class _TeamViewPageState extends State<TeamViewPage> {
                                       match.getAllianceOf(widget.teamNumber))),
                             )),
                         exportValue: match.description,
-                        sortingValue: match.scheduledTime),
+                        sortingValue: match),
                     for (final eventId
                         in snoutData.db.config.matchscouting.events)
                       DataItem.fromNumber(match
@@ -178,22 +178,6 @@ class _TeamViewPageState extends State<TeamViewPage> {
                           .toList()
                   ],
                 ),
-                FieldHeatMap(
-                    useRedNormalized: true,
-                    events: snoutData.db
-                        .teamRecordedMatches(widget.teamNumber)
-                        .fold(
-                            [],
-                            (previousValue, element) => [
-                                  ...previousValue,
-                                  ...?element
-                                      .value
-                                      .robot[widget.teamNumber.toString()]
-                                      ?.timelineInterpolated
-                                      .where((event) =>
-                                          event.id == "robot_position" &&
-                                          event.isInAuto)
-                                ])),
                 const SizedBox(height: 16),
                 for (final eventType
                     in snoutData.db.config.matchscouting.events) ...[
