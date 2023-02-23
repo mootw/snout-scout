@@ -144,80 +144,108 @@ class _TeamViewPageState extends State<TeamViewPage> {
               ],
             ),
 
-            const Divider(height: 32),
+            const Divider(height: 16),
 
-            Column(
+            Wrap(
+              spacing: 12,
+              alignment: WrapAlignment.center,
               children: [
-                Text("Starting Positions",
-                    style: Theme.of(context).textTheme.titleLarge),
-                FieldHeatMap(
-                    useRedNormalized: true,
-                    events: snoutData.db
-                        .teamRecordedMatches(widget.teamNumber)
-                        .fold(
-                            [],
-                            (previousValue, element) => [
-                                  ...previousValue,
-                                  ...?element
-                                      .value
-                                      .robot[widget.teamNumber.toString()]
-                                      ?.timeline
-                                      .where((event) =>
-                                          event.id == "robot_position" &&
-                                          event.time == 0)
-                                ])),
-                const SizedBox(height: 16),
-                Text("Autos", style: Theme.of(context).textTheme.titleLarge),
-                FieldPaths(
-                  paths: [
-                    for (final match
-                        in snoutData.db.teamRecordedMatches(widget.teamNumber))
-                      match.value.robot[widget.teamNumber.toString()]!
-                          .timelineInterpolated
-                          .where((element) => element.isInAuto)
-                          .toList()
-                  ],
+                // SizedBox(
+                //   width: 360,
+                //   child: Column(
+                //     children: [
+                //       const SizedBox(height: 16),
+                //       Text("Starting Positions",
+                //           style: Theme.of(context).textTheme.titleLarge),
+                //       FieldHeatMap(
+                //           useRedNormalized: true,
+                //           events: snoutData.db
+                //               .teamRecordedMatches(widget.teamNumber)
+                //               .fold(
+                //                   [],
+                //                   (previousValue, element) => [
+                //                         ...previousValue,
+                //                         ...?element
+                //                             .value
+                //                             .robot[widget.teamNumber.toString()]
+                //                             ?.timeline
+                //                             .where((event) =>
+                //                                 event.id == "robot_position" &&
+                //                                 event.time == 0)
+                //                       ])),
+                //     ],
+                //   ),
+                // ),
+                SizedBox(
+                  width: 360,
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 16),
+                      Text("Autos",
+                          style: Theme.of(context).textTheme.titleLarge),
+                      FieldPaths(
+                        paths: [
+                          for (final match in snoutData.db
+                              .teamRecordedMatches(widget.teamNumber))
+                            match.value.robot[widget.teamNumber.toString()]!
+                                .timelineInterpolated
+                                .where((element) => element.isInAuto)
+                                .toList()
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 16),
                 for (final eventType
-                    in snoutData.db.config.matchscouting.events) ...[
-                  const SizedBox(height: 16),
-                  Text(eventType.label,
-                      style: Theme.of(context).textTheme.titleLarge),
-                  FieldHeatMap(
-                      useRedNormalized: true,
-                      events: snoutData.db
-                          .teamRecordedMatches(widget.teamNumber)
-                          .fold(
-                              [],
-                              (previousValue, element) => [
-                                    ...previousValue,
-                                    ...?element
-                                        .value
-                                        .robot[widget.teamNumber.toString()]
-                                        ?.timeline
-                                        .where(
-                                            (event) => event.id == eventType.id)
-                                  ])),
-                ],
-                const SizedBox(height: 16),
-                Text("Driving Tendencies",
-                    style: Theme.of(context).textTheme.titleLarge),
-                FieldHeatMap(
-                    useRedNormalized: true,
-                    events: snoutData.db
-                        .teamRecordedMatches(widget.teamNumber)
-                        .fold(
-                            [],
-                            (previousValue, element) => [
-                                  ...previousValue,
-                                  ...?element
-                                      .value
-                                      .robot[widget.teamNumber.toString()]
-                                      ?.timelineInterpolated
-                                      .where((event) =>
-                                          event.id == "robot_position")
-                                ])),
+                    in snoutData.db.config.matchscouting.events)
+                  SizedBox(
+                    width: 360,
+                    child: Column(children: [
+                      const SizedBox(height: 16),
+                      Text(eventType.label,
+                          style: Theme.of(context).textTheme.titleLarge),
+                      FieldHeatMap(
+                          useRedNormalized: true,
+                          events: snoutData.db
+                              .teamRecordedMatches(widget.teamNumber)
+                              .fold(
+                                  [],
+                                  (previousValue, element) => [
+                                        ...previousValue,
+                                        ...?element
+                                            .value
+                                            .robot[widget.teamNumber.toString()]
+                                            ?.timeline
+                                            .where((event) =>
+                                                event.id == eventType.id)
+                                      ])),
+                    ]),
+                  ),
+                SizedBox(
+                    width: 360,
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 16),
+                        Text("Driving Tendencies",
+                            style: Theme.of(context).textTheme.titleLarge),
+                        FieldHeatMap(
+                            useRedNormalized: true,
+                            events: snoutData.db
+                                .teamRecordedMatches(widget.teamNumber)
+                                .fold(
+                                    [],
+                                    (previousValue, element) => [
+                                          ...previousValue,
+                                          ...?element
+                                              .value
+                                              .robot[
+                                                  widget.teamNumber.toString()]
+                                              ?.timelineInterpolated
+                                              .where((event) =>
+                                                  event.id == "robot_position")
+                                        ])),
+                      ],
+                    )),
                 const Divider(height: 32),
                 Center(
                     child: Text("Schedule",

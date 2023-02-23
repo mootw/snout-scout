@@ -263,8 +263,9 @@ class FieldHeatMap extends StatelessWidget {
 
 class FieldPaths extends StatelessWidget {
   final List<List<MatchEvent>> paths;
+  final bool emphasizeStartPoint;
 
-  const FieldPaths({super.key, required this.paths});
+  const FieldPaths({super.key, required this.paths, this.emphasizeStartPoint = true});
 
   @override
   Widget build(BuildContext context) {
@@ -274,6 +275,7 @@ class FieldPaths extends StatelessWidget {
         CustomPaint(
           size: Size.infinite,
           painter: MapLine(
+            emphasizeStartPoint: emphasizeStartPoint,
               color: getColorFromIndex(paths.indexOf(match)),
               events: match,
               useRedNormalized: true),
@@ -346,10 +348,12 @@ class MapLine extends CustomPainter {
   Color color;
   List<MatchEvent> events;
   bool useRedNormalized;
+  bool emphasizeStartPoint;
 
   MapLine(
       {required this.events,
       required this.useRedNormalized,
+      required this.emphasizeStartPoint,
       this.color = Colors.green});
 
   @override
@@ -359,7 +363,7 @@ class MapLine extends CustomPainter {
     }
     Paint p = Paint();
     p.color = color;
-    p.strokeWidth = 8;
+    p.strokeWidth = 4;
     p.strokeCap = StrokeCap.round;
     p.style = PaintingStyle.stroke;
 
@@ -372,6 +376,10 @@ class MapLine extends CustomPainter {
       path.lineTo(pos1[0], pos1[1]);
     }
     canvas.drawPath(path, p);
+
+    if(emphasizeStartPoint) {
+      canvas.drawCircle(Offset(startingPosition[0], startingPosition[1]), 4, p);
+    }
   }
 
   // Returns [x, y]
