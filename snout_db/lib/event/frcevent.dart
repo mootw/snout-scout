@@ -65,10 +65,17 @@ class FRCEvent {
       .where((element) => element.value.robot.keys.contains(team.toString()));
 
   //Returns the average value of a given metric per match over all recorded matches.
-  double teamAverageMetric(int team, String eventId) {
+  //returns null if there is no data. Otherwise we get weird NaN stuff and
+  //if you add NaN to anything it completely destroys the whole calculation
+  double? teamAverageMetric(int team, String eventId) {
     final recordedMatches = teamRecordedMatches(team);
 
-    return recordedMatches.fold<int>(
+    if (recordedMatches.isEmpty) {
+      //TODO handle this nicer by testing for NaN as well on the fold operation
+      return null;
+    }
+
+    return recordedMatches.fold<double>(
             0,
             (previousValue, match) =>
                 previousValue +

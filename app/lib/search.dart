@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:app/main.dart';
-import 'package:app/scouting_tools/scouting_tool.dart';
 import 'package:app/screens/match_page.dart';
 import 'package:app/screens/view_team_page.dart';
 import 'package:flutter/material.dart';
