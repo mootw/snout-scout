@@ -22,13 +22,13 @@ class _DataTablePageState extends State<DataTablePage> {
       shrinkWrap: true,
       children: [
         SingleChildScrollView(
-          child: DataSheet(
-            title: 'Teams',
-            columns: [
+          child: DataSheet(title: 'Team Averages', columns: [
             DataItem.fromText("Team"),
             DataItem.fromText("Played"),
             for (final eventType in data.db.config.matchscouting.events)
-              DataItem.fromText("avg\n${eventType.label}"),
+              DataItem.fromText(eventType.label),
+            for (final eventType in data.db.config.matchscouting.events)
+              DataItem.fromText("Auto\n${eventType.label}"),
             for (final pitSurvey in data.db.config.pitscouting
                 .where((element) => element.type != SurveyItemType.picture))
               DataItem.fromText(pitSurvey.label),
@@ -43,7 +43,8 @@ class _DataTablePageState extends State<DataTablePage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => TeamViewPage(teamNumber: team)),
+                              builder: (context) =>
+                                  TeamViewPage(teamNumber: team)),
                         );
                       },
                     ),
@@ -55,31 +56,35 @@ class _DataTablePageState extends State<DataTablePage> {
                     .length
                     .toDouble()),
                 for (final eventType in data.db.config.matchscouting.events)
-                  DataItem.fromNumber(data.db.teamAverageMetric(team, eventType.id)),
+                  DataItem.fromNumber(
+                      data.db.teamAverageMetric(team, eventType.id)),
+                for (final eventType in data.db.config.matchscouting.events)
+                  DataItem.fromNumber(
+                      data.db.teamAverageMetric(team, eventType.id, (event) => event.isInAuto)),
                 for (final pitSurvey in data.db.config.pitscouting
                     .where((element) => element.type != SurveyItemType.picture))
                   DataItem.fromText(data
-                          .db.pitscouting[team.toString()]?[pitSurvey.id]
-                          ?.toString())
+                      .db.pitscouting[team.toString()]?[pitSurvey.id]
+                      ?.toString())
               ]
           ]),
         ),
-
-
         DataSheet(
-            title: 'Match Recordings',
-            //Data is a list of rows and columns
-            columns: [
-              DataItem.fromText("Match"),
-              DataItem.fromText("Team"),
-              for (final item in data.db.config.matchscouting.events)
-                DataItem.fromText(item.label),
-              for (final item in data.db.config.matchscouting.postgame)
-                DataItem.fromText(item.label),
-            ],
-            rows: [
-              for (final match in data.db.matches.entries)
-                for(final robot in match.value.robot.entries)
+          title: 'Match Recordings',
+          //Data is a list of rows and columns
+          columns: [
+            DataItem.fromText("Match"),
+            DataItem.fromText("Team"),
+            for (final item in data.db.config.matchscouting.events)
+              DataItem.fromText(item.label),
+            for (final item in data.db.config.matchscouting.events)
+              DataItem.fromText("Auto\n${item.label}"),
+            for (final item in data.db.config.matchscouting.postgame)
+              DataItem.fromText(item.label),
+          ],
+          rows: [
+            for (final match in data.db.matches.entries)
+              for (final robot in match.value.robot.entries)
                 [
                   DataItem(
                       displayValue: TextButton(
@@ -100,15 +105,15 @@ class _DataTablePageState extends State<DataTablePage> {
                       displayValue: TextButton(
                         child: Text(robot.key,
                             style: TextStyle(
-                                color: getAllianceColor(
-                                    match.value.getAllianceOf(int.parse(robot.key))))),
+                                color: getAllianceColor(match.value
+                                    .getAllianceOf(int.parse(robot.key))))),
                         onPressed: () {
                           //Open this teams scouting page
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) =>
-                                    TeamViewPage(teamNumber: int.parse(robot.key))),
+                                builder: (context) => TeamViewPage(
+                                    teamNumber: int.parse(robot.key))),
                           );
                         },
                       ),
@@ -119,16 +124,20 @@ class _DataTablePageState extends State<DataTablePage> {
                         .where((event) => event.id == item.id)
                         .length
                         .toDouble()),
+                  for (final item in data.db.config.matchscouting.events)
+                    DataItem.fromNumber(match.value.robot[robot.key]?.timeline
+                        .where((event) => event.isInAuto && event.id == item.id)
+                        .length
+                        .toDouble()),
                   for (final item in data.db.config.matchscouting.postgame
                       .where(
                           (element) => element.type != SurveyItemType.picture))
-                    DataItem.fromText(match.value
-                        .robot[robot.key]?.survey[item.id]
+                    DataItem.fromText(match
+                        .value.robot[robot.key]?.survey[item.id]
                         ?.toString()),
                 ],
-            ],
-          ),
-
+          ],
+        ),
       ],
     );
   }

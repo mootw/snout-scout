@@ -265,7 +265,8 @@ class FieldPaths extends StatelessWidget {
   final List<List<MatchEvent>> paths;
   final bool emphasizeStartPoint;
 
-  const FieldPaths({super.key, required this.paths, this.emphasizeStartPoint = true});
+  const FieldPaths(
+      {super.key, required this.paths, this.emphasizeStartPoint = true});
 
   @override
   Widget build(BuildContext context) {
@@ -275,7 +276,7 @@ class FieldPaths extends StatelessWidget {
         CustomPaint(
           size: Size.infinite,
           painter: MapLine(
-            emphasizeStartPoint: emphasizeStartPoint,
+              emphasizeStartPoint: emphasizeStartPoint,
               color: getColorFromIndex(paths.indexOf(match)),
               events: match,
               useRedNormalized: true),
@@ -340,7 +341,8 @@ class HeatMap extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(HeatMap oldDelegate) => false;
+  bool shouldRepaint(HeatMap oldDelegate) =>
+      Object.hashAll(oldDelegate.events) != Object.hashAll(events);
 }
 
 /// Renders a line with a color over the surface
@@ -377,7 +379,7 @@ class MapLine extends CustomPainter {
     }
     canvas.drawPath(path, p);
 
-    if(emphasizeStartPoint) {
+    if (emphasizeStartPoint) {
       canvas.drawCircle(Offset(startingPosition[0], startingPosition[1]), 4, p);
     }
   }
@@ -399,8 +401,9 @@ class MapLine extends CustomPainter {
     ];
   }
 
-  @override
-  bool shouldRepaint(HeatMap oldDelegate) => false;
+   @override
+  bool shouldRepaint(HeatMap oldDelegate) =>
+      Object.hashAll(oldDelegate.events) != Object.hashAll(events);
 }
 
 class FieldMapWidget extends StatelessWidget {

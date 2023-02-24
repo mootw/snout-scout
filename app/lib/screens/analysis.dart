@@ -28,7 +28,7 @@ class _AnalysisPageState extends State<AnalysisPage> {
           Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (builder) => const AnalysisMatchPreview()));
+                  builder: (builder) => const AnalysisMatchPreview(red: [], blue: [])));
         },
       ),
       
@@ -59,6 +59,9 @@ class _AnalysisPageState extends State<AnalysisPage> {
                   builder: (builder) => const AnalysisPostMatchSurvey()));
         },
       ),
+
+      const Text(
+              "Analysis PER data point (like box and whisper plots and Scatter plot)"),
     ]);
   }
 }

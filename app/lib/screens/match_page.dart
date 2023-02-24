@@ -5,6 +5,7 @@ import 'package:app/edit_lock.dart';
 import 'package:app/fieldwidget.dart';
 import 'package:app/helpers.dart';
 import 'package:app/main.dart';
+import 'package:app/screens/analysis/match_preview.dart';
 import 'package:app/screens/edit_match_results.dart';
 import 'package:app/screens/match_recorder.dart';
 import 'package:app/screens/view_team_page.dart';
@@ -79,6 +80,20 @@ class _MatchPageState extends State<MatchPage> {
       ),
       body: ListView(
         children: [
+          Wrap(
+            children: [
+              const SizedBox(width: 16),
+              FilledButton.tonal(
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (builder) => AnalysisMatchPreview(
+                                red: match.red, blue: match.blue)));
+                  },
+                  child: const Text("Match Preview"))
+            ],
+          ),
           DataSheet(
             title: 'Per Team Performance',
             //Data is a list of rows and columns
@@ -100,10 +115,16 @@ class _MatchPageState extends State<MatchPage> {
                 [
                   DataItem(
                       displayValue: TextButton(
-                        child: Text(team.toString() + (match.hasTeam(team) == false ? " [surrogate]" : ""),
+                        child: Text(
+                            team.toString() +
+                                (match.hasTeam(team) == false
+                                    ? " [surrogate]"
+                                    : ""),
                             style: TextStyle(
-                                color: match.hasTeam(team) == false ? null : getAllianceColor(
-                                    match.getAllianceOf(team)))),
+                                color: match.hasTeam(team) == false
+                                    ? null
+                                    : getAllianceColor(
+                                        match.getAllianceOf(team)))),
                         onPressed: () {
                           //Open this teams scouting page
                           Navigator.push(

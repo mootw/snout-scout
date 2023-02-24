@@ -1,6 +1,7 @@
 import 'dart:collection';
 
 import 'package:json_annotation/json_annotation.dart';
+import 'package:snout_db/event/matchevent.dart';
 import 'package:snout_db/event/pitscoutresult.dart';
 import 'match.dart';
 import 'package:collection/collection.dart';
@@ -67,7 +68,8 @@ class FRCEvent {
   /// Returns the average value of a given metric per match over all recorded matches.
   /// returns null if there is no data. Otherwise we get weird NaN stuff and
   /// if you add NaN to anything it completely destroys the whole calculation
-  double? teamAverageMetric(int team, String eventId) {
+  /// There is an optional where clause to filter the events out for a specific type
+  double? teamAverageMetric(int team, String eventId, [Function(MatchEvent)? where]) {
     final recordedMatches = teamRecordedMatches(team);
 
     if (recordedMatches.isEmpty) {
@@ -80,7 +82,7 @@ class FRCEvent {
             (previousValue, match) =>
                 previousValue +
                 (match.value.robot[team.toString()]?.timeline
-                        .where((event) => event.id == eventId)
+                        .where((event) => event.id == eventId && (where?.call(event) ?? true))
                         .length ??
                     0)) /
         recordedMatches.length;

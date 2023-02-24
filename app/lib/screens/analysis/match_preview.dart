@@ -1,4 +1,5 @@
 import 'package:app/datasheet.dart';
+import 'package:app/fieldwidget.dart';
 import 'package:app/helpers.dart';
 import 'package:app/main.dart';
 import 'package:app/screens/view_team_page.dart';
@@ -9,7 +10,11 @@ import 'package:snout_db/event/match.dart';
 import 'package:snout_db/snout_db.dart';
 
 class AnalysisMatchPreview extends StatefulWidget {
-  const AnalysisMatchPreview({super.key});
+  const AnalysisMatchPreview(
+      {super.key, required this.red, required this.blue});
+
+  final List<int> red;
+  final List<int> blue;
 
   @override
   State<AnalysisMatchPreview> createState() => _AnalysisMatchPreviewState();
@@ -20,6 +25,15 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
   List<int> blue = [];
 
   FRCMatch? selectedMatch;
+
+  int? selectedTeam;
+
+  @override
+  void initState() {
+    super.initState();
+    red = widget.red;
+    blue = widget.blue;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,6 +49,8 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
               setState(() {
                 selectedMatch = value!;
               });
+
+              selectedTeam = null;
 
               red = selectedMatch!.red;
               blue = selectedMatch!.blue;
@@ -54,6 +70,8 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
             DataItem.fromText("Alliance"),
             for (final item in data.db.config.matchscouting.events)
               DataItem.fromText(item.label),
+            for (final item in data.db.config.matchscouting.events)
+              DataItem.fromText("Auto:\n${item.label}"),
           ], rows: [
             [
               DataItem(
@@ -67,6 +85,14 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                     (previousValue, team) =>
                         previousValue +
                         (data.db.teamAverageMetric(team, event.id) ?? 0))),
+              for (final event in data.db.config.matchscouting.events)
+                DataItem.fromNumber(red.fold<double>(
+                    0,
+                    (previousValue, team) =>
+                        previousValue +
+                        (data.db.teamAverageMetric(
+                                team, event.id, (event) => event.isInAuto) ??
+                            0))),
             ],
             [
               DataItem(
@@ -80,6 +106,14 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                     (previousValue, team) =>
                         previousValue +
                         (data.db.teamAverageMetric(team, event.id) ?? 0))),
+              for (final event in data.db.config.matchscouting.events)
+                DataItem.fromNumber(blue.fold<double>(
+                    0,
+                    (previousValue, team) =>
+                        previousValue +
+                        (data.db.teamAverageMetric(
+                                team, event.id, (event) => event.isInAuto) ??
+                            0))),
             ]
           ]),
           const Divider(height: 42),
@@ -87,6 +121,8 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
             DataItem.fromText("Team"),
             for (final item in data.db.config.matchscouting.events)
               DataItem.fromText(item.label),
+            for (final item in data.db.config.matchscouting.events)
+              DataItem.fromText("AUTO\n${item.label}"),
             for (final item in data.db.config.matchscouting.postgame)
               DataItem.fromText(item.label),
           ], rows: [
@@ -114,18 +150,10 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                 for (final eventType in data.db.config.matchscouting.events)
                   DataItem.fromNumber(
                       data.db.teamAverageMetric(team, eventType.id)),
+                for (final eventType in data.db.config.matchscouting.events)
+                  DataItem.fromNumber(data.db.teamAverageMetric(
+                      team, eventType.id, (event) => event.isInAuto)),
                 for (final item in data.db.config.matchscouting.postgame)
-                  //Get the frequency of events and then pick the highest frequency one.
-                  // DataItem.fromText(data.db
-                  //     .teamPostGameSurveyByFrequency(team, item.id)
-                  //     .entries
-                  //     .fold<MapEntry<String, double>>(
-                  //         MapEntry(noDataText, 0),
-                  //         (previousValue, element) =>
-                  //             element.value > previousValue.value
-                  //                 ? element
-                  //                 : previousValue)
-                  //     .toString()),
                   DataItem.fromText(data.db
                       .teamPostGameSurveyByFrequency(team, item.id)
                       .entries
@@ -140,6 +168,77 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
               "Also display data about the team's post game survey since it can include important details like climbing"),
           const Text(
               "Show heatmaps for each alliance/team to see their autos and scoring"),
+          Center(
+            child: DropdownButton<int>(
+              value: selectedTeam,
+              onChanged: (int? value) {
+                // This is called when the user selects an item.
+                setState(() {
+                  selectedTeam = value!;
+                });
+              },
+              items: {...red, ...blue}
+                  .toList()
+                  .map<DropdownMenuItem<int>>((value) {
+                return DropdownMenuItem<int>(
+                  value: value,
+                  child: Text(value.toString()),
+                );
+              }).toList(),
+            ),
+          ),
+          if (selectedTeam != null)
+            Wrap(
+              alignment: WrapAlignment.center,
+              children: [
+                SizedBox(
+                  width: 360,
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 16),
+                      Text("Autos",
+                          style: Theme.of(context).textTheme.titleLarge),
+                      FieldPaths(
+                        key: UniqueKey(),
+                        paths: [
+                          for (final match
+                              in data.db.teamRecordedMatches(selectedTeam!))
+                            match.value.robot[selectedTeam.toString()]!
+                                .timelineInterpolated
+                                .where((element) => element.isInAuto)
+                                .toList()
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                if (selectedTeam != null)
+                  for (final eventType in data.db.config.matchscouting.events)
+                    SizedBox(
+                      width: 360,
+                      child: Column(children: [
+                        const SizedBox(height: 16),
+                        Text(eventType.label,
+                            style: Theme.of(context).textTheme.titleLarge),
+                        FieldHeatMap(
+                            key: UniqueKey(),
+                            useRedNormalized: true,
+                            events:
+                                data.db.teamRecordedMatches(selectedTeam!).fold(
+                                    [],
+                                    (previousValue, element) => [
+                                          ...previousValue,
+                                          ...?element
+                                              .value
+                                              .robot[selectedTeam.toString()]
+                                              ?.timeline
+                                              .where((event) =>
+                                                  event.id == eventType.id)
+                                        ])),
+                      ]),
+                    ),
+              ],
+            ),
         ],
       ),
     );

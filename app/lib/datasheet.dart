@@ -110,9 +110,6 @@ class _DataSheetState extends State<DataSheet> {
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: DataTable(
-              // border: TableBorder(
-              //   verticalInside: BorderSide(width: 0, color: Theme.of(context).highlightColor.withOpacity(0.1)),
-              // ),
               //This is to make the data more compact
               columnSpacing: 12,
               sortAscending: _sortAscending,
