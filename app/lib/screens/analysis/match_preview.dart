@@ -2,6 +2,7 @@ import 'package:app/datasheet.dart';
 import 'package:app/helpers.dart';
 import 'package:app/main.dart';
 import 'package:app/screens/view_team_page.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:snout_db/event/match.dart';
@@ -46,50 +47,47 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
               );
             }).toList(),
           ),
-
           const Text(
               "Show a table of each robot in the match and their average performance for each metric, along with some pit scouting data to see where they intake from and stuff???"),
-
           const SizedBox(height: 32),
-
           DataSheet(title: "Sum Alliance Average", columns: [
             DataItem.fromText("Alliance"),
             for (final item in data.db.config.matchscouting.events)
               DataItem.fromText(item.label),
           ], rows: [
-              [
-                DataItem(
-                    displayValue: const Text("RED", style: TextStyle(color: Colors.red)),
-                    exportValue: "RED",
-                    sortingValue: "RED"),
-                for (final event in data.db.config.matchscouting.events)
-                  DataItem.fromNumber(
-                      red.fold<double>(
-                          0,
-                          (previousValue, team) =>
-                              previousValue +
-                              (data.db.teamAverageMetric(team, event.id) ?? 0))),
-              ],
-              [
-                DataItem(
-                    displayValue: const Text("BLUE", style: TextStyle(color: Colors.blue)),
-                    exportValue: "BLUE",
-                    sortingValue: "BLUE"),
-                for (final event in data.db.config.matchscouting.events)
-                  DataItem.fromNumber(
-                      blue.fold<double>(
-                          0,
-                          (previousValue, team) =>
-                              previousValue +
-                              (data.db.teamAverageMetric(team, event.id) ?? 0))),
-              ]
+            [
+              DataItem(
+                  displayValue:
+                      const Text("RED", style: TextStyle(color: Colors.red)),
+                  exportValue: "RED",
+                  sortingValue: "RED"),
+              for (final event in data.db.config.matchscouting.events)
+                DataItem.fromNumber(red.fold<double>(
+                    0,
+                    (previousValue, team) =>
+                        previousValue +
+                        (data.db.teamAverageMetric(team, event.id) ?? 0))),
+            ],
+            [
+              DataItem(
+                  displayValue:
+                      const Text("BLUE", style: TextStyle(color: Colors.blue)),
+                  exportValue: "BLUE",
+                  sortingValue: "BLUE"),
+              for (final event in data.db.config.matchscouting.events)
+                DataItem.fromNumber(blue.fold<double>(
+                    0,
+                    (previousValue, team) =>
+                        previousValue +
+                        (data.db.teamAverageMetric(team, event.id) ?? 0))),
+            ]
           ]),
-
           const Divider(height: 42),
-
           DataSheet(title: "Team Averages", columns: [
             DataItem.fromText("Team"),
             for (final item in data.db.config.matchscouting.events)
+              DataItem.fromText(item.label),
+            for (final item in data.db.config.matchscouting.postgame)
               DataItem.fromText(item.label),
           ], rows: [
             for (final team in [...red, ...blue])
@@ -116,11 +114,30 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                 for (final eventType in data.db.config.matchscouting.events)
                   DataItem.fromNumber(
                       data.db.teamAverageMetric(team, eventType.id)),
+                for (final item in data.db.config.matchscouting.postgame)
+                  //Get the frequency of events and then pick the highest frequency one.
+                  // DataItem.fromText(data.db
+                  //     .teamPostGameSurveyByFrequency(team, item.id)
+                  //     .entries
+                  //     .fold<MapEntry<String, double>>(
+                  //         MapEntry(noDataText, 0),
+                  //         (previousValue, element) =>
+                  //             element.value > previousValue.value
+                  //                 ? element
+                  //                 : previousValue)
+                  //     .toString()),
+                  DataItem.fromText(data.db
+                      .teamPostGameSurveyByFrequency(team, item.id)
+                      .entries
+                      .sorted((a, b) => Comparable.compare(a.value, b.value))
+                      .fold<String>(
+                          "",
+                          (previousValue, element) =>
+                              "${previousValue == "" ? "" : "$previousValue\n"} ${(element.value * 100).round()}% ${element.key}")),
               ]
           ]),
-
-          //
-
+          const Text(
+              "Also display data about the team's post game survey since it can include important details like climbing"),
           const Text(
               "Show heatmaps for each alliance/team to see their autos and scoring"),
         ],

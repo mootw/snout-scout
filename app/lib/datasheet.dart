@@ -124,7 +124,13 @@ class _DataSheetState extends State<DataSheet> {
               rows: [
                 for (final row in widget.rows)
                   DataRow(cells: [
-                    for (final cell in row) DataCell(cell.displayValue)
+                    for (final cell in row) DataCell(cell.displayValue, onTap: cell.exportValue.length < 50 ? null : () {
+                      //If the cell's export value length (basically the text of whatever the display value is)
+                      //we will have an on-tap that will display a dialog with the complete data
+                      showDialog(context: context, builder: (context) => AlertDialog(
+                        content: cell.displayValue,
+                      ));
+                    })
                   ]),
               ],
             ),

@@ -64,9 +64,9 @@ class FRCEvent {
       .entries
       .where((element) => element.value.robot.keys.contains(team.toString()));
 
-  //Returns the average value of a given metric per match over all recorded matches.
-  //returns null if there is no data. Otherwise we get weird NaN stuff and
-  //if you add NaN to anything it completely destroys the whole calculation
+  /// Returns the average value of a given metric per match over all recorded matches.
+  /// returns null if there is no data. Otherwise we get weird NaN stuff and
+  /// if you add NaN to anything it completely destroys the whole calculation
   double? teamAverageMetric(int team, String eventId) {
     final recordedMatches = teamRecordedMatches(team);
 
@@ -85,4 +85,30 @@ class FRCEvent {
                     0)) /
         recordedMatches.length;
   }
+
+  /// For each recorded match of this team, it will return a map of each
+  /// Value with the key being the value, and the value being the percent frequency
+  /// The map will be empty if there are no recordings 
+  Map<String, double> teamPostGameSurveyByFrequency (int team, String eventId) {
+    final recordedMatches = teamRecordedMatches(team);
+    Map<String, double> toReturn = {};
+
+    for(final match in recordedMatches) {
+      final surveyValue = match.value.robot[team.toString()]!.survey[eventId]?.toString();
+      if(surveyValue == null) {
+        continue;
+      }
+      if(toReturn[surveyValue] == null) {
+        toReturn[surveyValue] = 1;
+      } else {
+        toReturn[surveyValue] = toReturn[surveyValue]! + 1;
+      }
+    }
+    //We have to calculate the total values since not all matches have a survey value
+    final totalValues = toReturn.values.fold<double>(0, (previousValue, element) => previousValue + element);
+    //Convert the map to be a percentage rather than total sum
+    toReturn = toReturn.map((key, value) => MapEntry(key, value/totalValues));
+    return toReturn;
+  }
+
 }
