@@ -330,13 +330,16 @@ class HeatMap extends CustomPainter {
 
       Paint p = Paint();
       p.maskFilter =
-          MaskFilter.blur(BlurStyle.normal, math.sqrt(group.length * 0.75) + 2);
+          MaskFilter.blur(BlurStyle.normal, math.sqrt(group.length * 0.1) + 1);
+      // p.color = HSVColor.fromAHSV(
+      //         1, (1 - (group.length / maxGroupLength)) * 225, 1, 1)
+      //     .toColor();
       p.color = HSVColor.fromAHSV(
-              1, (1 - (group.length / maxGroupLength)) * 225, 1, 1)
+              1, 100, 1, 1)
           .toColor();
       //Draw more and more green circles with increasing opacity
       canvas.drawCircle(Offset(ls[group[0]][0], ls[group[0]][1]),
-          5 + math.sqrt(group.length * 3), p);
+          4 + math.sqrt(group.length * 0.5), p);
     }
   }
 
@@ -365,7 +368,7 @@ class MapLine extends CustomPainter {
     }
     Paint p = Paint();
     p.color = color;
-    p.strokeWidth = 4;
+    p.strokeWidth = 3;
     p.strokeCap = StrokeCap.round;
     p.style = PaintingStyle.stroke;
 
@@ -380,7 +383,7 @@ class MapLine extends CustomPainter {
     canvas.drawPath(path, p);
 
     if (emphasizeStartPoint) {
-      canvas.drawCircle(Offset(startingPosition[0], startingPosition[1]), 4, p);
+      canvas.drawCircle(Offset(startingPosition[0], startingPosition[1]), 3, p);
     }
   }
 
