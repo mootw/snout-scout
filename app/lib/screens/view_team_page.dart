@@ -170,7 +170,7 @@ class _TeamViewPageState extends State<TeamViewPage> {
                     children: [
                       const SizedBox(height: 16),
                       Text("Autos",
-                          style: Theme.of(context).textTheme.titleLarge),
+                          style: Theme.of(context).textTheme.titleMedium),
                       FieldPaths(
                         paths: [
                           for (final match
@@ -190,7 +190,7 @@ class _TeamViewPageState extends State<TeamViewPage> {
                     child: Column(children: [
                       const SizedBox(height: 16),
                       Text(eventType.label,
-                          style: Theme.of(context).textTheme.titleLarge),
+                          style: Theme.of(context).textTheme.titleMedium),
                       FieldHeatMap(
                           useRedNormalized: true,
                           events: data.db
@@ -214,7 +214,7 @@ class _TeamViewPageState extends State<TeamViewPage> {
                       children: [
                         const SizedBox(height: 16),
                         Text("Driving Tendencies",
-                            style: Theme.of(context).textTheme.titleLarge),
+                            style: Theme.of(context).textTheme.titleMedium),
                         FieldHeatMap(
                             useRedNormalized: true,
                             events: data.db

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:app/datasheet.dart';
 import 'package:app/fieldwidget.dart';
 import 'package:app/helpers.dart';
@@ -23,8 +25,6 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
   List<int> red = [];
   List<int> blue = [];
 
-  int? selectedTeam;
-
   @override
   void initState() {
     super.initState();
@@ -36,7 +36,38 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
   Widget build(BuildContext context) {
     final data = context.watch<EventDB>();
     return Scaffold(
-      appBar: AppBar(title: const Text("Match Preview")),
+      appBar: AppBar(title: const Text("Match Preview"), actions: [
+        TextButton(onPressed: () {
+
+          showDialog(context: context, builder: (context) => AlertDialog(
+            title: const Text("PRESS ENTER TO 'SUBMIT' THE CHANGE"),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+              const Text("Red"),
+              TextField(
+                controller: TextEditingController(text: jsonEncode(red)),
+                onSubmitted: (value) {
+                  setState(() {
+                    red = List<int>.from(jsonDecode(value));
+                  });
+                },
+              ),
+              const SizedBox(height: 16),
+              const Text("Blue"),
+              TextField(
+                controller: TextEditingController(text: jsonEncode(blue)),
+                onSubmitted: (value) {
+                  setState(() {
+                    blue = List<int>.from(jsonDecode(value));
+                  });
+                },
+              )
+            ]),
+          ));
+
+        }, child: const Text("Edit Teams"))
+      ]),
       body: ListView(
         children: [
           
@@ -139,77 +170,103 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                               "${previousValue == "" ? "" : "$previousValue\n"} ${(element.value * 100).round()}% ${element.key}")),
               ]
           ]),
-          Center(
-            child: DropdownButton<int>(
-              value: selectedTeam,
-              onChanged: (int? value) {
-                // This is called when the user selects an item.
-                setState(() {
-                  selectedTeam = value!;
-                });
-              },
-              items: {...red, ...blue}
-                  .toList()
-                  .map<DropdownMenuItem<int>>((value) {
-                return DropdownMenuItem<int>(
-                  value: value,
-                  child: Text(value.toString()),
-                );
-              }).toList(),
-            ),
-          ),
-          if (selectedTeam != null)
-            Wrap(
-              alignment: WrapAlignment.center,
-              children: [
-                SizedBox(
-                  width: 360,
-                  child: Column(
-                    children: [
-                      const SizedBox(height: 16),
-                      Text("Autos",
-                          style: Theme.of(context).textTheme.titleLarge),
-                      FieldPaths(
-                        key: UniqueKey(),
-                        paths: [
-                          for (final match
-                              in data.db.teamRecordedMatches(selectedTeam!))
-                            match.value.robot[selectedTeam.toString()]!
-                                .timelineInterpolated
-                                .where((element) => element.isInAuto)
-                                .toList()
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                if (selectedTeam != null)
-                  for (final eventType in data.db.config.matchscouting.events)
+
+          const SizedBox(height: 32),
+
+          ScrollConfiguration(
+            behavior: MouseInteractableScrollBehavior(),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+
+                children: [
+              for (final team in [...red, ...blue])
+              ...[
+                const SizedBox(width: 8),
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(team.toString(), style: Theme.of(context).textTheme.titleLarge?.copyWith(color: getAllianceColor(red.contains(team)
+                                  ? Alliance.red
+                                  : Alliance.blue))),
                     SizedBox(
                       width: 360,
-                      child: Column(children: [
-                        const SizedBox(height: 16),
-                        Text(eventType.label,
-                            style: Theme.of(context).textTheme.titleLarge),
-                        FieldHeatMap(
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 16),
+                          Text("Autos",
+                              style: Theme.of(context).textTheme.titleMedium),
+                          FieldPaths(
                             key: UniqueKey(),
+                            paths: [
+                              for (final match
+                                  in data.db.teamRecordedMatches(team!))
+                                match.value.robot[team.toString()]!
+                                    .timelineInterpolated
+                                    .where((element) => element.isInAuto)
+                                    .toList()
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                      for (final eventType in data.db.config.matchscouting.events)
+                        SizedBox(
+                          width: 360,
+                          child: Column(children: [
+                            const SizedBox(height: 16),
+                            Text(eventType.label,
+                                style: Theme.of(context).textTheme.titleMedium),
+                            FieldHeatMap(
+                                key: UniqueKey(),
+                                useRedNormalized: true,
+                                events:
+                                    data.db.teamRecordedMatches(team).fold(
+                                        [],
+                                        (previousValue, element) => [
+                                              ...previousValue,
+                                              ...?element
+                                                  .value
+                                                  .robot[team.toString()]
+                                                  ?.timeline
+                                                  .where((event) =>
+                                                      event.id == eventType.id)
+                                            ])),
+                          ]),
+                        ),
+                    SizedBox(
+                    width: 360,
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 16),
+                        Text("Driving Tendencies",
+                            style: Theme.of(context).textTheme.titleMedium),
+                        FieldHeatMap(
                             useRedNormalized: true,
-                            events:
-                                data.db.teamRecordedMatches(selectedTeam!).fold(
+                            events: data.db
+                                .teamRecordedMatches(team)
+                                .fold(
                                     [],
                                     (previousValue, element) => [
                                           ...previousValue,
                                           ...?element
                                               .value
-                                              .robot[selectedTeam.toString()]
-                                              ?.timeline
+                                              .robot[
+                                                  team.toString()]
+                                              ?.timelineInterpolated
                                               .where((event) =>
-                                                  event.id == eventType.id)
+                                                  event.id == "robot_position")
                                         ])),
-                      ]),
-                    ),
+                      ],
+                    )),
+                  ],
+                ),
+                const SizedBox(width: 8),
+              ]
+                
               ],
-            ),
+            )),
+          ),
         ],
       ),
     );

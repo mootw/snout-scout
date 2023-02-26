@@ -19,7 +19,7 @@ class AnalysisEventsHeatmap extends StatelessWidget {
       ),
       body: ListView(
         children: [
-          Text("Autos", style: Theme.of(context).textTheme.titleLarge),
+          Text("Autos", style: Theme.of(context).textTheme.titleMedium),
         FieldPaths(
           paths: [
             for (final match in data.db.matches.values)
@@ -31,7 +31,7 @@ class AnalysisEventsHeatmap extends StatelessWidget {
         ),
         for (final eventType in data.db.config.matchscouting.events) ...[
           const SizedBox(height: 16),
-          Text(eventType.label, style: Theme.of(context).textTheme.titleLarge),
+          Text(eventType.label, style: Theme.of(context).textTheme.titleMedium),
           FieldHeatMap(
               useRedNormalized: true,
               events: data.db.matches.values.fold(
@@ -47,6 +47,21 @@ class AnalysisEventsHeatmap extends StatelessWidget {
                                 ])
                       ])),
         ],
+        const SizedBox(height: 16),
+        Text("Driving Tendencies",
+                            style: Theme.of(context).textTheme.titleMedium),
+                        FieldHeatMap(
+                            useRedNormalized: true,
+                            events: data.db
+                                .matches.values
+                                .fold(
+                                    [],
+                                    (previousValue, element) => [
+                                          ...previousValue,
+                                          ...?element
+                                              .robot.entries.fold([], (previousValue, element) => [...previousValue!, ...element.value.timelineInterpolated.where((event) =>
+                                                  event.id == "robot_position")]) 
+                                        ])),
         ],
       ),
     );

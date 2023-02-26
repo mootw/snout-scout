@@ -26,9 +26,6 @@ class _AnalysisPageState extends State<AnalysisPage> {
       ListTile(
         title: const Text("Match Preview"),
         onTap: () {
-
-          
-
           Navigator.push(
               context,
               MaterialPageRoute(
