@@ -6,7 +6,6 @@ import 'package:app/screens/view_team_page.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:snout_db/event/match.dart';
 import 'package:snout_db/snout_db.dart';
 
 class AnalysisMatchPreview extends StatefulWidget {
@@ -24,8 +23,6 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
   List<int> red = [];
   List<int> blue = [];
 
-  FRCMatch? selectedMatch;
-
   int? selectedTeam;
 
   @override
@@ -42,29 +39,7 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
       appBar: AppBar(title: const Text("Match Preview")),
       body: ListView(
         children: [
-          DropdownButton<FRCMatch>(
-            value: selectedMatch,
-            onChanged: (FRCMatch? value) {
-              // This is called when the user selects an item.
-              setState(() {
-                selectedMatch = value!;
-              });
-
-              selectedTeam = null;
-
-              red = selectedMatch!.red;
-              blue = selectedMatch!.blue;
-            },
-            items: data.db.matches.values
-                .map<DropdownMenuItem<FRCMatch>>((FRCMatch value) {
-              return DropdownMenuItem<FRCMatch>(
-                value: value,
-                child: Text(value.description),
-              );
-            }).toList(),
-          ),
-          const Text(
-              "Show a table of each robot in the match and their average performance for each metric, along with some pit scouting data to see where they intake from and stuff???"),
+          
           const SizedBox(height: 32),
           DataSheet(title: "Sum Alliance Average", columns: [
             DataItem.fromText("Alliance"),
@@ -164,10 +139,6 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                               "${previousValue == "" ? "" : "$previousValue\n"} ${(element.value * 100).round()}% ${element.key}")),
               ]
           ]),
-          const Text(
-              "Also display data about the team's post game survey since it can include important details like climbing"),
-          const Text(
-              "Show heatmaps for each alliance/team to see their autos and scoring"),
           Center(
             child: DropdownButton<int>(
               value: selectedTeam,

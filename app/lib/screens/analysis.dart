@@ -14,6 +14,7 @@ class AnalysisPage extends StatefulWidget {
 }
 
 class _AnalysisPageState extends State<AnalysisPage> {
+
   @override
   Widget build(BuildContext context) {
     final data = context.watch<EventDB>();
@@ -25,6 +26,9 @@ class _AnalysisPageState extends State<AnalysisPage> {
       ListTile(
         title: const Text("Match Preview"),
         onTap: () {
+
+          
+
           Navigator.push(
               context,
               MaterialPageRoute(

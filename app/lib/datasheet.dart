@@ -20,12 +20,10 @@ class DataItem {
 
   DataItem.fromText(String? text)
       : displayValue = ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 200),
+            constraints: const BoxConstraints(maxWidth: 180),
             //Make the text smaller so that long text fits
             //This is more of a hack than best practice
-            child: Text(text ?? noDataText,
-                style:
-                    TextStyle(fontSize: (text?.length ?? 0) > 50 ? 10 : null))),
+            child: Text(text ?? noDataText)),
         exportValue = text ?? noDataText,
         //Empty string will sort to the bottom by default
         sortingValue = text?.toLowerCase() ?? "";
@@ -114,9 +112,15 @@ class _DataSheetState extends State<DataSheet> {
               columnSpacing: 12,
               sortAscending: _sortAscending,
               sortColumnIndex: _currentSortColumn,
+              border: const TableBorder(
+                verticalInside: BorderSide(
+                  width: 1,
+                  color: Colors.white10,
+                )
+              ),
               columns: [
                 for (final column in widget.columns)
-                  DataColumn(label: column.displayValue, onSort: updateSort),
+                  DataColumn(label: DefaultTextStyle(maxLines: 2, style: Theme.of(context).textTheme.bodySmall!, child: column.displayValue), onSort: updateSort),
               ],
               rows: [
                 for (final row in widget.rows)
@@ -126,6 +130,9 @@ class _DataSheetState extends State<DataSheet> {
                       //we will have an on-tap that will display a dialog with the complete data
                       showDialog(context: context, builder: (context) => AlertDialog(
                         content: cell.displayValue,
+                        actions: [
+                          TextButton(onPressed: () => Navigator.pop(context), child: const Text("Ok")),
+                        ],
                       ));
                     })
                   ]),

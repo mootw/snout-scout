@@ -80,10 +80,11 @@ class _MatchPageState extends State<MatchPage> {
       ),
       body: ListView(
         children: [
+          const SizedBox(height: 8),
           Wrap(
             children: [
               const SizedBox(width: 16),
-              FilledButton.tonal(
+              FilledButton(
                   onPressed: () {
                     Navigator.push(
                         context,
@@ -94,6 +95,7 @@ class _MatchPageState extends State<MatchPage> {
                   child: const Text("Match Preview"))
             ],
           ),
+          const SizedBox(height: 8),
           DataSheet(
             title: 'Per Team Performance',
             //Data is a list of rows and columns
