@@ -143,7 +143,8 @@ class _TeamViewPageState extends State<TeamViewPage> {
                     for (final eventId in data.db.config.matchscouting.events)
                       DataItem.fromNumber(match
                           .robot[widget.teamNumber.toString()]?.timeline
-                          .where((event) => event.isInAuto && event.id == eventId.id)
+                          .where((event) =>
+                              event.isInAuto && event.id == eventId.id)
                           .length
                           .toDouble()),
                     for (final pitSurvey in data
@@ -229,7 +230,7 @@ class _TeamViewPageState extends State<TeamViewPage> {
                                                   widget.teamNumber.toString()]
                                               ?.timelineInterpolated
                                               .where((event) =>
-                                                  event.id == "robot_position")
+                                                  event.isPositionEvent)
                                         ])),
                       ],
                     )),

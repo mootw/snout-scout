@@ -37,41 +37,42 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
     final data = context.watch<EventDB>();
     return Scaffold(
       appBar: AppBar(title: const Text("Match Preview"), actions: [
-        TextButton(onPressed: () {
-
-          showDialog(context: context, builder: (context) => AlertDialog(
-            title: const Text("PRESS ENTER TO 'SUBMIT' THE CHANGE"),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-              const Text("Red"),
-              TextField(
-                controller: TextEditingController(text: jsonEncode(red)),
-                onSubmitted: (value) {
-                  setState(() {
-                    red = List<int>.from(jsonDecode(value));
-                  });
-                },
-              ),
-              const SizedBox(height: 16),
-              const Text("Blue"),
-              TextField(
-                controller: TextEditingController(text: jsonEncode(blue)),
-                onSubmitted: (value) {
-                  setState(() {
-                    blue = List<int>.from(jsonDecode(value));
-                  });
-                },
-              )
-            ]),
-          ));
-
-        }, child: const Text("Edit Teams"))
+        TextButton(
+            onPressed: () {
+              showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                        title: const Text("PRESS ENTER TO 'SUBMIT' THE CHANGE"),
+                        content:
+                            Column(mainAxisSize: MainAxisSize.min, children: [
+                          const Text("Red"),
+                          TextField(
+                            controller:
+                                TextEditingController(text: jsonEncode(red)),
+                            onSubmitted: (value) {
+                              setState(() {
+                                red = List<int>.from(jsonDecode(value));
+                              });
+                            },
+                          ),
+                          const SizedBox(height: 16),
+                          const Text("Blue"),
+                          TextField(
+                            controller:
+                                TextEditingController(text: jsonEncode(blue)),
+                            onSubmitted: (value) {
+                              setState(() {
+                                blue = List<int>.from(jsonDecode(value));
+                              });
+                            },
+                          )
+                        ]),
+                      ));
+            },
+            child: const Text("Edit Teams"))
       ]),
       body: ListView(
         children: [
-          
-          const SizedBox(height: 32),
           DataSheet(title: "Sum Alliance Average", columns: [
             DataItem.fromText("Alliance"),
             for (final item in data.db.config.matchscouting.events)
@@ -170,102 +171,109 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                               "${previousValue == "" ? "" : "$previousValue\n"} ${(element.value * 100).round()}% ${element.key}")),
               ]
           ]),
-
-          const SizedBox(height: 32),
-
+          const Divider(height: 32),
           ScrollConfiguration(
             behavior: MouseInteractableScrollBehavior(),
             child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-
-                children: [
-              for (final team in [...red, ...blue])
-              ...[
-                const SizedBox(width: 8),
-                Column(
-                  mainAxisSize: MainAxisSize.min,
+                scrollDirection: Axis.horizontal,
+                child: Row(
                   children: [
-                    Text(team.toString(), style: Theme.of(context).textTheme.titleLarge?.copyWith(color: getAllianceColor(red.contains(team)
-                                  ? Alliance.red
-                                  : Alliance.blue))),
-                    SizedBox(
-                      width: 360,
-                      child: Column(
+                    for (final team in [...red, ...blue]) ...[
+                      const SizedBox(width: 8),
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          const SizedBox(height: 16),
-                          Text("Autos",
-                              style: Theme.of(context).textTheme.titleMedium),
-                          FieldPaths(
-                            key: UniqueKey(),
-                            paths: [
-                              for (final match
-                                  in data.db.teamRecordedMatches(team!))
-                                match.value.robot[team.toString()]!
-                                    .timelineInterpolated
-                                    .where((element) => element.isInAuto)
-                                    .toList()
-                            ],
+                          Text(team.toString(),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleLarge
+                                  ?.copyWith(
+                                      color: getAllianceColor(red.contains(team)
+                                          ? Alliance.red
+                                          : Alliance.blue))),
+                          SizedBox(
+                            width: 300,
+                            child: Column(
+                              children: [
+                                const SizedBox(height: 16),
+                                Text("Autos",
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium),
+                                FieldPaths(
+                                  key: UniqueKey(),
+                                  paths: [
+                                    for (final match
+                                        in data.db.teamRecordedMatches(team!))
+                                      match.value.robot[team.toString()]!
+                                          .timelineInterpolated
+                                          .where((element) => element.isInAuto)
+                                          .toList()
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
+                          for (final eventType
+                              in data.db.config.matchscouting.events)
+                            SizedBox(
+                              width: 300,
+                              child: Column(children: [
+                                const SizedBox(height: 16),
+                                Text(eventType.label,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium),
+                                FieldHeatMap(
+                                    key: UniqueKey(),
+                                    useRedNormalized: true,
+                                    events:
+                                        data.db.teamRecordedMatches(team).fold(
+                                            [],
+                                            (previousValue, element) => [
+                                                  ...previousValue,
+                                                  ...?element
+                                                      .value
+                                                      .robot[team.toString()]
+                                                      ?.timeline
+                                                      .where((event) =>
+                                                          event.id ==
+                                                          eventType.id)
+                                                ])),
+                              ]),
+                            ),
+                          SizedBox(
+                              width: 300,
+                              child: Column(
+                                children: [
+                                  const SizedBox(height: 16),
+                                  Text("Driving Tendencies",
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium),
+                                  FieldHeatMap(
+                                      useRedNormalized: true,
+                                      events: data.db
+                                          .teamRecordedMatches(team)
+                                          .fold(
+                                              [],
+                                              (previousValue, element) => [
+                                                    ...previousValue,
+                                                    ...?element
+                                                        .value
+                                                        .robot[team.toString()]
+                                                        ?.timelineInterpolated
+                                                        .where((event) => event
+                                                            .isPositionEvent)
+                                                  ])),
+                                ],
+                              )),
                         ],
                       ),
-                    ),
-                      for (final eventType in data.db.config.matchscouting.events)
-                        SizedBox(
-                          width: 360,
-                          child: Column(children: [
-                            const SizedBox(height: 16),
-                            Text(eventType.label,
-                                style: Theme.of(context).textTheme.titleMedium),
-                            FieldHeatMap(
-                                key: UniqueKey(),
-                                useRedNormalized: true,
-                                events:
-                                    data.db.teamRecordedMatches(team).fold(
-                                        [],
-                                        (previousValue, element) => [
-                                              ...previousValue,
-                                              ...?element
-                                                  .value
-                                                  .robot[team.toString()]
-                                                  ?.timeline
-                                                  .where((event) =>
-                                                      event.id == eventType.id)
-                                            ])),
-                          ]),
-                        ),
-                    SizedBox(
-                    width: 360,
-                    child: Column(
-                      children: [
-                        const SizedBox(height: 16),
-                        Text("Driving Tendencies",
-                            style: Theme.of(context).textTheme.titleMedium),
-                        FieldHeatMap(
-                            useRedNormalized: true,
-                            events: data.db
-                                .teamRecordedMatches(team)
-                                .fold(
-                                    [],
-                                    (previousValue, element) => [
-                                          ...previousValue,
-                                          ...?element
-                                              .value
-                                              .robot[
-                                                  team.toString()]
-                                              ?.timelineInterpolated
-                                              .where((event) =>
-                                                  event.id == "robot_position")
-                                        ])),
-                      ],
-                    )),
+                      const SizedBox(width: 8),
+                    ]
                   ],
-                ),
-                const SizedBox(width: 8),
-              ]
-                
-              ],
-            )),
+                )),
           ),
         ],
       ),

@@ -26,7 +26,7 @@ class RobotMatchResults {
     var interpolated = timeline.toList();
 
     final positions =
-        timeline.where((element) => element.id == "robot_position").toList();
+        timeline.where((element) => element.isPositionEvent).toList();
     for (int i = 0; i < positions.length - 1; i++) {
       //Interpolate between them
       final pos1 = positions[i];

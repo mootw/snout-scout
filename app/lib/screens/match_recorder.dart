@@ -39,7 +39,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
   Timer? t;
 
   MatchEvent? get lastMoveEvent =>
-      events.toList().lastWhereOrNull((event) => event.id == "robot_position");
+      events.toList().lastWhereOrNull((event) => event.isPositionEvent);
   FieldPosition? get robotPosition => lastMoveEvent?.position;
 
   List<MatchEventConfig> get scoutingEvents =>
@@ -149,11 +149,8 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
           body: ListView(
             shrinkWrap: true,
             children: [
-              for (var item in context.watch<EventDB>()
-                  .db
-                  .config
-                  .matchscouting
-                  .postgame)
+              for (var item
+                  in context.watch<EventDB>().db.config.matchscouting.postgame)
                 Container(
                     padding: const EdgeInsets.all(12),
                     child: ScoutingToolWidget(
@@ -206,7 +203,11 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                   child: Transform.rotate(
                     angle: mapRotation,
                     child: FieldPositionSelector(
-                      coverAlignment: _mode != MatchMode.setup ? null : widget.teamAlliance == Alliance.red ? 1 : -1,
+                      coverAlignment: _mode != MatchMode.setup
+                          ? null
+                          : widget.teamAlliance == Alliance.red
+                              ? 1
+                              : -1,
                       teamNumber: widget.team,
                       alliance: widget.teamAlliance,
                       robotPosition: robotPosition,
@@ -214,7 +215,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                         HapticFeedback.lightImpact();
                         setState(() {
                           for (final event in events.toList()) {
-                            if (event.id == "robot_position") {
+                            if (event.isPositionEvent) {
                               //Is position event
                               if (event.time == _time) {
                                 //Event is the same time, overrwite
@@ -265,14 +266,18 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                 angle: mapRotation,
                 child: FieldPositionSelector(
                   teamNumber: widget.team,
-                  coverAlignment: _mode != MatchMode.setup ? null : widget.teamAlliance == Alliance.red ? 1 : -1,
+                  coverAlignment: _mode != MatchMode.setup
+                      ? null
+                      : widget.teamAlliance == Alliance.red
+                          ? 1
+                          : -1,
                   alliance: widget.teamAlliance,
                   robotPosition: robotPosition,
                   onTap: (robotPosition) {
                     HapticFeedback.lightImpact();
                     setState(() {
                       for (final event in events.toList()) {
-                        if (event.id == "robot_position") {
+                        if (event.isPositionEvent) {
                           //Is position event
                           if (event.time == _time) {
                             //Event is the same time, overrwite

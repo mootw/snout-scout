@@ -188,7 +188,7 @@ class RobotMapEventView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final posEvent = match.robot[team]!.timelineInterpolated.lastWhereOrNull(
-        (event) => event.time <= time && event.id == "robot_position");
+        (event) => event.time <= time && event.isPositionEvent);
     if (posEvent == null) {
       //A position event is required to show the robot on the timeline
       return const SizedBox();
@@ -199,7 +199,7 @@ class RobotMapEventView extends StatelessWidget {
         (event) =>
             event.time >= time &&
             event.time < time + 2 &&
-            event.id != "robot_position");
+            event.isPositionEvent == false);
 
     return LayoutBuilder(
         key: Key(team),
@@ -264,23 +264,48 @@ class FieldHeatMap extends StatelessWidget {
 class FieldPaths extends StatelessWidget {
   final List<List<MatchEvent>> paths;
   final bool emphasizeStartPoint;
+  final bool eventLabels;
 
   const FieldPaths(
-      {super.key, required this.paths, this.emphasizeStartPoint = true});
+      {super.key,
+      required this.paths,
+      this.emphasizeStartPoint = true,
+      this.eventLabels = true});
 
   @override
   Widget build(BuildContext context) {
     return FieldMap(children: [
       Container(color: Colors.black26),
-      for (final match in paths)
+      for (final match in paths) ...[
         CustomPaint(
           size: Size.infinite,
           painter: MapLine(
               emphasizeStartPoint: emphasizeStartPoint,
               color: getColorFromIndex(paths.indexOf(match)),
               events: match,
+              eventLabels: eventLabels,
               useRedNormalized: true),
-        )
+        ),
+      ],
+        Expanded(
+          child: Align(
+            alignment: Alignment.bottomRight,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                if (eventLabels)
+                  for (final match in paths)
+                  for (final event
+                      in match.where((event) => !event.isPositionEvent))
+                    Text(event.label,
+                        style: TextStyle(
+                            color: getColorFromIndex(paths.indexOf(match)),
+                            fontSize: 10,
+                            backgroundColor: Colors.black38)),
+              ],
+            ),
+          ),
+        ),
     ]);
   }
 }
@@ -334,9 +359,7 @@ class HeatMap extends CustomPainter {
       // p.color = HSVColor.fromAHSV(
       //         1, (1 - (group.length / maxGroupLength)) * 225, 1, 1)
       //     .toColor();
-      p.color = HSVColor.fromAHSV(
-              1, 100, 1, 1)
-          .toColor();
+      p.color = HSVColor.fromAHSV(1, 100, 1, 1).toColor();
       //Draw more and more green circles with increasing opacity
       canvas.drawCircle(Offset(ls[group[0]][0], ls[group[0]][1]),
           4 + math.sqrt(group.length * 0.5), p);
@@ -354,11 +377,13 @@ class MapLine extends CustomPainter {
   List<MatchEvent> events;
   bool useRedNormalized;
   bool emphasizeStartPoint;
+  bool eventLabels;
 
   MapLine(
       {required this.events,
       required this.useRedNormalized,
       required this.emphasizeStartPoint,
+      required this.eventLabels,
       this.color = Colors.green});
 
   @override
@@ -368,7 +393,7 @@ class MapLine extends CustomPainter {
     }
     Paint p = Paint();
     p.color = color;
-    p.strokeWidth = 3;
+    p.strokeWidth = 2;
     p.strokeCap = StrokeCap.round;
     p.style = PaintingStyle.stroke;
 
@@ -376,14 +401,20 @@ class MapLine extends CustomPainter {
 
     final startingPosition = getFieldPosition(events.first, size);
     path.moveTo(startingPosition[0], startingPosition[1]);
-    for (int i = 0; i < events.length; i++) {
-      final pos1 = getFieldPosition(events[i], size);
-      path.lineTo(pos1[0], pos1[1]);
+    for (final event in events) {
+      final pos1 = getFieldPosition(event, size);
+      if (event.isPositionEvent) {
+        path.lineTo(pos1[0], pos1[1]);
+      } else {
+        canvas.drawCircle(Offset(pos1[0], pos1[1]), 2, p);
+      }
     }
     canvas.drawPath(path, p);
 
+    p.style = PaintingStyle.fill;
+
     if (emphasizeStartPoint) {
-      canvas.drawCircle(Offset(startingPosition[0], startingPosition[1]), 3, p);
+      canvas.drawCircle(Offset(startingPosition[0], startingPosition[1]), 5, p);
     }
   }
 
@@ -404,7 +435,7 @@ class MapLine extends CustomPainter {
     ];
   }
 
-   @override
+  @override
   bool shouldRepaint(HeatMap oldDelegate) =>
       Object.hashAll(oldDelegate.events) != Object.hashAll(events);
 }
