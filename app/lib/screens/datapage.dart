@@ -21,54 +21,52 @@ class _DataTablePageState extends State<DataTablePage> {
     return ListView(
       shrinkWrap: true,
       children: [
-        SingleChildScrollView(
-          child: DataSheet(title: 'Team Averages', columns: [
-            DataItem.fromText("Team"),
-            DataItem.fromText("Played"),
-            for (final eventType in data.db.config.matchscouting.events)
-              DataItem.fromText(eventType.label),
-            for (final eventType in data.db.config.matchscouting.events)
-              DataItem.fromText("Auto\n${eventType.label}"),
-            for (final pitSurvey in data.db.config.pitscouting
-                .where((element) => element.type != SurveyItemType.picture))
-              DataItem.fromText(pitSurvey.label),
-          ], rows: [
-            for (final team in data.db.teams)
-              [
-                DataItem(
-                    displayValue: TextButton(
-                      child: Text(team.toString()),
-                      onPressed: () {
-                        //Open this teams scouting page
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) =>
-                                  TeamViewPage(teamNumber: team)),
-                        );
-                      },
-                    ),
-                    exportValue: team.toString(),
-                    sortingValue: team),
-                DataItem.fromNumber(data.db
-                    .matchesWithTeam(team)
-                    .where((element) => element.results != null)
-                    .length
-                    .toDouble()),
-                for (final eventType in data.db.config.matchscouting.events)
-                  DataItem.fromNumber(
-                      data.db.teamAverageMetric(team, eventType.id)),
-                for (final eventType in data.db.config.matchscouting.events)
-                  DataItem.fromNumber(
-                      data.db.teamAverageMetric(team, eventType.id, (event) => event.isInAuto)),
-                for (final pitSurvey in data.db.config.pitscouting
-                    .where((element) => element.type != SurveyItemType.picture))
-                  DataItem.fromText(data
-                      .db.pitscouting[team.toString()]?[pitSurvey.id]
-                      ?.toString())
-              ]
-          ]),
-        ),
+        DataSheet(title: 'Team Averages', columns: [
+          DataItem.fromText("Team"),
+          DataItem.fromText("Played"),
+          for (final eventType in data.db.config.matchscouting.events)
+            DataItem.fromText(eventType.label),
+          for (final eventType in data.db.config.matchscouting.events)
+            DataItem.fromText("auto\n${eventType.label}"),
+          for (final pitSurvey in data.db.config.pitscouting
+              .where((element) => element.type != SurveyItemType.picture))
+            DataItem.fromText(pitSurvey.label),
+        ], rows: [
+          for (final team in data.db.teams)
+            [
+              DataItem(
+                  displayValue: TextButton(
+                    child: Text(team.toString()),
+                    onPressed: () {
+                      //Open this teams scouting page
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                TeamViewPage(teamNumber: team)),
+                      );
+                    },
+                  ),
+                  exportValue: team.toString(),
+                  sortingValue: team),
+              DataItem.fromNumber(data.db
+                  .matchesWithTeam(team)
+                  .where((element) => element.results != null)
+                  .length
+                  .toDouble()),
+              for (final eventType in data.db.config.matchscouting.events)
+                DataItem.fromNumber(
+                    data.db.teamAverageMetric(team, eventType.id)),
+              for (final eventType in data.db.config.matchscouting.events)
+                DataItem.fromNumber(
+                    data.db.teamAverageMetric(team, eventType.id, (event) => event.isInAuto)),
+              for (final pitSurvey in data.db.config.pitscouting
+                  .where((element) => element.type != SurveyItemType.picture))
+                DataItem.fromText(data
+                    .db.pitscouting[team.toString()]?[pitSurvey.id]
+                    ?.toString())
+            ]
+        ]),
         DataSheet(
           title: 'Match Recordings',
           //Data is a list of rows and columns
@@ -78,7 +76,7 @@ class _DataTablePageState extends State<DataTablePage> {
             for (final item in data.db.config.matchscouting.events)
               DataItem.fromText(item.label),
             for (final item in data.db.config.matchscouting.events)
-              DataItem.fromText("Auto\n${item.label}"),
+              DataItem.fromText("auto\n${item.label}"),
             for (final item in data.db.config.matchscouting.postgame)
               DataItem.fromText(item.label),
           ],

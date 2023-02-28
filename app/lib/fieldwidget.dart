@@ -286,9 +286,8 @@ class FieldPaths extends StatelessWidget {
               eventLabels: eventLabels,
               useRedNormalized: true),
         ),
-      ],
-        Expanded(
-          child: Align(
+      ],       
+          Align(
             alignment: Alignment.bottomRight,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -305,7 +304,6 @@ class FieldPaths extends StatelessWidget {
               ],
             ),
           ),
-        ),
     ]);
   }
 }
@@ -406,7 +404,7 @@ class MapLine extends CustomPainter {
       if (event.isPositionEvent) {
         path.lineTo(pos1[0], pos1[1]);
       } else {
-        canvas.drawCircle(Offset(pos1[0], pos1[1]), 2, p);
+        canvas.drawCircle(Offset(pos1[0], pos1[1]), 1.5, p);
       }
     }
     canvas.drawPath(path, p);
