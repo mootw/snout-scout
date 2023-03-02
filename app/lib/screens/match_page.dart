@@ -55,7 +55,7 @@ class _MatchPageState extends State<MatchPage> {
                 ? const Text("Add Results")
                 : const Text("Edit Results"),
             onPressed: () async {
-              var result = await navigateWithEditLock(
+              final result = await navigateWithEditLock(
                   context,
                   "match:${match.description}:results",
                   () => Navigator.push(

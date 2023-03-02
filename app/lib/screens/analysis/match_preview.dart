@@ -81,9 +81,9 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
               DataItem.fromText("Auto:\n${item.label}"),
           ], rows: [
             [
-              DataItem(
+              const DataItem(
                   displayValue:
-                      const Text("RED", style: TextStyle(color: Colors.red)),
+                      Text("RED", style: TextStyle(color: Colors.red)),
                   exportValue: "RED",
                   sortingValue: "RED"),
               for (final event in data.db.config.matchscouting.events)
@@ -102,9 +102,9 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                             0))),
             ],
             [
-              DataItem(
+              const DataItem(
                   displayValue:
-                      const Text("BLUE", style: TextStyle(color: Colors.blue)),
+                      Text("BLUE", style: TextStyle(color: Colors.blue)),
                   exportValue: "BLUE",
                   sortingValue: "BLUE"),
               for (final event in data.db.config.matchscouting.events)
@@ -204,7 +204,7 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                                   key: UniqueKey(),
                                   paths: [
                                     for (final match
-                                        in data.db.teamRecordedMatches(team!))
+                                        in data.db.teamRecordedMatches(team))
                                       match.value.robot[team.toString()]!
                                           .timelineInterpolated
                                           .where((element) => element.isInAuto)

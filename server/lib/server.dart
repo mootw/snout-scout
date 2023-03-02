@@ -12,7 +12,7 @@ import 'package:snout_db/event/match.dart';
 
 import 'package:snout_db/patch.dart';
 
-var env = DotEnv(includePlatformEnvironment: true)..load();
+final env = DotEnv(includePlatformEnvironment: true)..load();
 
 int serverPort = 6749;
 
@@ -114,7 +114,7 @@ void main(List<String> args) async {
       }
       //Attempt to laod the schedule from the API
       try {
-        var eventData = FRCEvent.fromJson(jsonDecode(await f.readAsString()));
+        final eventData = FRCEvent.fromJson(jsonDecode(await f.readAsString()));
 
         await loadScheduleFromTBA(eventData, eventID);
         
@@ -271,7 +271,7 @@ Future loadScheduleFromTBA(FRCEvent eventData, String eventID) async {
 
   final matches = jsonDecode(apiData.body);
 
-  for (var match in matches) {
+  for (final match in matches) {
     String key = match['key'];
     DateTime startTime = DateTime.fromMillisecondsSinceEpoch(match['time'] * 1000, isUtc: true);
 
@@ -336,7 +336,7 @@ Future loadScheduleFromTBA(FRCEvent eventData, String eventID) async {
 
       print(jsonEncode(patch));
 
-      var res = await http.put(
+      final res = await http.put(
           Uri.parse("http://localhost:$serverPort/events/$eventID"),
           body: jsonEncode(patch));
     }

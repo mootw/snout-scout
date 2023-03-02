@@ -8,56 +8,59 @@ import 'package:flutter/material.dart';
 //This function will not throw an exception and always fail safe by navigating to the other page.
 Future<dynamic> navigateWithEditLock(
     BuildContext context, String key, Function navigteFunction) async {
-
-  Uri editLockUri = Uri.parse("${Uri.parse(serverURL).scheme}://${Uri.parse(serverURL).host}:${Uri.parse(serverURL).port}/edit_lock");
+  Uri editLockUri = Uri.parse(
+      "${Uri.parse(serverURL).scheme}://${Uri.parse(serverURL).host}:${Uri.parse(serverURL).port}/edit_lock");
   //Check if this key is being edited
   try {
-    var isLocked = await apiClient
-        .get(editLockUri, headers: {"key": key}).timeout(const Duration(seconds: 1));
+    final isLocked = await apiClient.get(editLockUri,
+        headers: {"key": key}).timeout(const Duration(seconds: 1));
 
     if (isLocked.body == "true") {
       //Warn that this key is locked
-      var result = await showDialog(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              title: const Text("This item is already being edited"),
-              actions: <Widget>[
-                TextButton(
-                  child: const Text('Edit Anyways'),
-                  onPressed: () {
-                    Navigator.pop(context, true);
-                  },
-                ),
-                TextButton(
-                  child: const Text('Cancel'),
-                  onPressed: () {
-                    Navigator.pop(context, false);
-                  },
-                ),
-              ],
-            );
-          });
-      if (result == true) {
-        //User wants to edit item anways, don't write a new edit lock in this case.
-        return await navigteFunction();
+      if (context.mounted) {
+        //Check if we are still mounted before showing the dialog
+        final result = await showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                title: const Text("This item is already being edited"),
+                actions: <Widget>[
+                  TextButton(
+                    child: const Text('Edit Anyways'),
+                    onPressed: () {
+                      Navigator.pop(context, true);
+                    },
+                  ),
+                  TextButton(
+                    child: const Text('Cancel'),
+                    onPressed: () {
+                      Navigator.pop(context, false);
+                    },
+                  ),
+                ],
+              );
+            });
+        if (result == true) {
+          //User wants to edit item anways, don't write a new edit lock in this case.
+          return await navigteFunction();
+        }
       }
     } else {
       //Apply lock
       try {
-        await apiClient
-            .post(editLockUri, headers: {"key": key}).timeout(const Duration(seconds: 1));
+        await apiClient.post(editLockUri,
+            headers: {"key": key}).timeout(const Duration(seconds: 1));
       } catch (e) {
         print(e);
       }
 
       //Navigate
-      var result = await navigteFunction();
+      final result = await navigteFunction();
       //Clear lock
 
       try {
-        await apiClient
-            .delete(editLockUri, headers: {"key": key}).timeout(const Duration(seconds: 1));
+        await apiClient.delete(editLockUri,
+            headers: {"key": key}).timeout(const Duration(seconds: 1));
       } catch (e) {
         print(e);
       }

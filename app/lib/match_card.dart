@@ -59,7 +59,7 @@ class MatchCard extends StatelessWidget {
                     width: 190,
                     color: Colors.redAccent,
                     child: Row(children: [
-                      for (var team in match.red)
+                      for (final team in match.red)
                         TextButton(
                             style: TextButton.styleFrom(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -98,7 +98,7 @@ class MatchCard extends StatelessWidget {
                     color: Colors.blueAccent,
                     child: Row(
                       children: [
-                      for (var team in match.blue)
+                      for (final team in match.blue)
                         TextButton(
                             style: TextButton.styleFrom(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),

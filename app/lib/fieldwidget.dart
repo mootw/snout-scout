@@ -300,7 +300,7 @@ class FieldPaths extends StatelessWidget {
                         style: TextStyle(
                             color: getColorFromIndex(paths.indexOf(match)),
                             fontSize: 10,
-                            backgroundColor: Colors.black38)),
+                            backgroundColor: Colors.black45)),
               ],
             ),
           ),
@@ -357,7 +357,7 @@ class HeatMap extends CustomPainter {
       // p.color = HSVColor.fromAHSV(
       //         1, (1 - (group.length / maxGroupLength)) * 225, 1, 1)
       //     .toColor();
-      p.color = HSVColor.fromAHSV(1, 100, 1, 1).toColor();
+      p.color = const HSVColor.fromAHSV(1, 100, 1, 1).toColor();
       //Draw more and more green circles with increasing opacity
       canvas.drawCircle(Offset(ls[group[0]][0], ls[group[0]][1]),
           4 + math.sqrt(group.length * 0.5), p);

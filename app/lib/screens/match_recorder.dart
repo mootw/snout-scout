@@ -149,7 +149,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
           body: ListView(
             shrinkWrap: true,
             children: [
-              for (var item
+              for (final item
                   in context.watch<EventDB>().db.config.matchscouting.postgame)
                 Container(
                     padding: const EdgeInsets.all(12),
@@ -400,7 +400,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
       t?.cancel();
       _mode = MatchMode.finished;
       //Scale auto times
-      for (var event in events) {
+      for (final event in events) {
         //Scale times to 15 seconds
         event.time = ((event.time / _time) * matchLength.inSeconds).round();
       }

@@ -23,7 +23,7 @@ class RobotMatchResults {
   /// Generally we just linearly interpolate however, if the points are more than 15 seconds apart
   /// we will just teleport the robot to the new position
   List<MatchEvent> get timelineInterpolated {
-    var interpolated = timeline.toList();
+    final interpolated = timeline.toList();
 
     final positions =
         timeline.where((element) => element.isPositionEvent).toList();
@@ -73,6 +73,7 @@ class RobotMatchResults {
     return interpolated;
   }
 }
+
 
 double lerp(double xa, double ya, double xb, double yb, double t) {
   return ya + ((yb - ya) * ((t - xa) / (xb - xa)));

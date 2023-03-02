@@ -28,14 +28,14 @@ class DataItem {
         //Empty string will sort to the bottom by default
         sortingValue = text?.toLowerCase() ?? "";
 
-  DataItem(
+  const DataItem(
       {required this.displayValue,
       required this.exportValue,
       required this.sortingValue});
 
-  Widget displayValue; //Widget to be displayed in the app
-  String exportValue; //Used to export to CSV
-  Comparable sortingValue; //Value used to sort the data
+  final Widget displayValue; //Widget to be displayed in the app
+  final String exportValue; //Used to export to CSV
+  final Comparable sortingValue; //Value used to sort the data
 
   @override
   String toString() => exportValue;
@@ -83,7 +83,6 @@ class _DataSheetState extends State<DataSheet> {
             : Comparable.compare(bValue, aValue);
       });
     }
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

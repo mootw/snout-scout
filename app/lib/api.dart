@@ -1,6 +1,6 @@
 import 'package:http/http.dart' as http;
 
-var apiClient = APIClient(http.Client());
+final apiClient = APIClient(http.Client());
 
 class APIClient extends http.BaseClient {
   final http.Client _inner;

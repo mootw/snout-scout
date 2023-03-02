@@ -43,7 +43,7 @@ class _PitScoutTeamPageState extends State<PitScoutTeamPage> {
           actions: [
             IconButton(
                 onPressed: () async {
-                  var snoutData = context.read<EventDB>();
+                  final snoutData = context.read<EventDB>();
 
                   Patch patch = Patch(
                       time: DateTime.now(),
@@ -68,7 +68,7 @@ class _PitScoutTeamPageState extends State<PitScoutTeamPage> {
           shrinkWrap: true,
           children: [
             const Text("Pit scouting data should be subjective or complementary (photo, team name, intake/scoring ability, pick information)"),
-            for (var item in widget.config.pitscouting)
+            for (final item in widget.config.pitscouting)
               Container(
                   padding: const EdgeInsets.all(12),
                   child: ScoutingToolWidget(

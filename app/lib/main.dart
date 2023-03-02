@@ -26,7 +26,7 @@ import 'package:url_launcher/url_launcher_string.dart';
 late String serverURL;
 
 Future setServer(String newServer) async {
-  var prefs = await SharedPreferences.getInstance();
+  final prefs = await SharedPreferences.getInstance();
   prefs.setString("server", newServer);
   serverURL = newServer;
 
@@ -41,14 +41,14 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   //Load data and initialize the app
-  var prefs = await SharedPreferences.getInstance();
+  final prefs = await SharedPreferences.getInstance();
   serverURL = prefs.getString("server") ?? "http://localhost:6749";
 
   FRCEvent event;
 
   try {
     //Load season config from server
-    var data = await apiClient.get(Uri.parse(serverURL));
+    final data = await apiClient.get(Uri.parse(serverURL));
     event = FRCEvent.fromJson(jsonDecode(data.body));
     prefs.setString(serverURL, data.body);
     prefs.setString("lastoriginsync", DateTime.now().toIso8601String());
@@ -108,7 +108,7 @@ class SetupAppScreen extends StatelessWidget {
             trailing: IconButton(
               icon: const Icon(Icons.edit),
               onPressed: () async {
-                var result =
+                final result =
                     await showStringInputDialog(context, "Server", serverURL);
                 if (result != null) {
                   await setServer(result);
@@ -209,7 +209,7 @@ class EventDB extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     try {
       //Load season config from server
-      var data = await apiClient.get(Uri.parse(serverURL));
+      final data = await apiClient.get(Uri.parse(serverURL));
       db = FRCEvent.fromJson(jsonDecode(data.body));
       prefs.setString(serverURL, data.body);
       prefs.setString("lastoriginsync", DateTime.now().toIso8601String());
@@ -236,7 +236,7 @@ class EventDB extends ChangeNotifier {
   Future addPatch(Patch patch) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     try {
-      var res =
+      final res =
           await apiClient.put(Uri.parse(serverURL), body: jsonEncode(patch));
       if (res.statusCode == 200) {
         //This was successful
@@ -389,7 +389,7 @@ class _MyHomePageState extends State<MyHomePage> {
             trailing: IconButton(
               icon: const Icon(Icons.edit),
               onPressed: () async {
-                var result =
+                final result =
                     await showStringInputDialog(context, "Server", serverURL);
                 if (result != null) {
                   await setServer(result);

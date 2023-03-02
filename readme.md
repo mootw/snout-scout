@@ -8,15 +8,14 @@
 - data server read/write API
 - easy import and export of each event into multiple formats like csv and json
 - Connect to the TBA API to populate event schedules (and results?)
-- heavily normalized database
 - client saves patches (changes) locally until it can sync with origin.
-- Single compact readable data file to allow for durable data.
+- Single compact (mostly) readable data JSON file to allow for durable data.
 
 ## Snout-scout is NOT designed to:
 - track standings or scores directly (official scores are linked if TBA event key is provided)
 - analyse multiple events at once (multiple events can be queried at the server level)
 - retain compatibility with older versions
-- sync data between multiple clients peer-to-peer
+- sync data between multiple clients peer-to-peer. The assumption is that internet access (or a local network at the event) will be available and mostly available.
 
 # Known Issues
 - Emojis render in black and white due to canvaskit https://github.com/flutter/flutter/issues/119536 https://stackoverflow.com/questions/75439788/flutter-web-shows-emojis-in-blackwhite

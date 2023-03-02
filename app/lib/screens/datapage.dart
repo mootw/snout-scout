@@ -23,7 +23,6 @@ class _DataTablePageState extends State<DataTablePage> {
       children: [
         DataSheet(title: 'Team Averages', columns: [
           DataItem.fromText("Team"),
-          DataItem.fromText("Played"),
           for (final eventType in data.db.config.matchscouting.events)
             DataItem.fromText(eventType.label),
           for (final eventType in data.db.config.matchscouting.events)
@@ -49,11 +48,6 @@ class _DataTablePageState extends State<DataTablePage> {
                   ),
                   exportValue: team.toString(),
                   sortingValue: team),
-              DataItem.fromNumber(data.db
-                  .matchesWithTeam(team)
-                  .where((element) => element.results != null)
-                  .length
-                  .toDouble()),
               for (final eventType in data.db.config.matchscouting.events)
                 DataItem.fromNumber(
                     data.db.teamAverageMetric(team, eventType.id)),

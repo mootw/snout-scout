@@ -47,7 +47,7 @@ class _AllMatchesPageState extends State<AllMatchesPage> {
             children: [
               //Iterate through all of the matches and add them to the list
               //if a match is equal to the next match; highlight it!
-              for (var match in snoutData.db.matches.values)
+              for (final match in snoutData.db.matches.values)
                 Container(
                     color: match == snoutData.db.nextMatch
                         ? Theme.of(context).colorScheme.onPrimary

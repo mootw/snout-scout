@@ -36,7 +36,7 @@ class _EditMatchResultsState extends State<EditMatchResults> {
     }
 
     //Pre-fill result scores
-    for (var resultValue in widget.config.matchscouting.scoring) {
+    for (final resultValue in widget.config.matchscouting.scoring) {
       _red[resultValue] = TextEditingController(
           text: widget.results?.red[resultValue]?.toString());
       _blue[resultValue] = TextEditingController(

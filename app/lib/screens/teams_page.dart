@@ -28,7 +28,7 @@ class _TeamGridListState extends State<TeamGridList> {
           runSpacing: 12,
           alignment: WrapAlignment.spaceEvenly,
           children: [
-            for (var team in context.watch<EventDB>().db.teams)
+            for (final team in context.watch<EventDB>().db.teams)
               if(widget.teamFiler == null || widget.teamFiler!.contains(team))
                 TeamListTile(teamNumber: team),
           ],
@@ -47,7 +47,7 @@ class TeamListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final snoutData = context.watch<EventDB>();
     Widget? image;
-    var data =
+    final data =
         snoutData.db.pitscouting[teamNumber.toString()]?['robot_picture'];
     if (data != null) {
       image = AspectRatio(

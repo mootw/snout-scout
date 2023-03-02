@@ -37,7 +37,7 @@ class _TeamViewPageState extends State<TeamViewPage> {
             TextButton(
                 onPressed: () async {
                   //Get existing scouting data.
-                  var result = await navigateWithEditLock(
+                  final result = await navigateWithEditLock(
                       context,
                       "scoutteam:${widget.teamNumber}",
                       () => Navigator.push(
@@ -238,7 +238,7 @@ class _TeamViewPageState extends State<TeamViewPage> {
                 Center(
                     child: Text("Schedule",
                         style: Theme.of(context).textTheme.titleLarge)),
-                for (var match in data.db.matchesWithTeam(widget.teamNumber))
+                for (final match in data.db.matchesWithTeam(widget.teamNumber))
                   MatchCard(match: match, focusTeam: widget.teamNumber),
               ],
             ),
@@ -257,7 +257,7 @@ class ScoutingResultsViewer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var data = snoutData.db.pitscouting[teamNumber.toString()];
+    final data = snoutData.db.pitscouting[teamNumber.toString()];
 
     if (data == null) {
       return const ListTile(title: Text("Team has no pit scouting data"));
@@ -265,7 +265,7 @@ class ScoutingResultsViewer extends StatelessWidget {
 
     return Column(
       children: [
-        for (var item in snoutData.db.config.pitscouting)
+        for (final item in snoutData.db.config.pitscouting)
           ScoutingResult(item: item, survey: data)
       ],
     );
