@@ -73,6 +73,7 @@ class _EditMatchResultsState extends State<EditMatchResults> {
         ),
         body: Form(
           key: _form,
+          autovalidateMode: AutovalidateMode.onUserInteraction,
           child: ListView(
             children: [
               ListTile(

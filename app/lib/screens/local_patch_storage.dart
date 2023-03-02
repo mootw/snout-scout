@@ -39,7 +39,9 @@ class _LocalPatchStorageState extends State<LocalPatchStorage> {
                                       .errorContainer),
                               onPressed: () async {
                                 await snoutData.clearFailedPatches();
-                                Navigator.pop(context);
+                                if (mounted) {
+                                  Navigator.pop(context);
+                                }
                               },
                               child: const Text("Delete")),
                         ],
@@ -63,7 +65,9 @@ class _LocalPatchStorageState extends State<LocalPatchStorage> {
                                       .errorContainer),
                               onPressed: () async {
                                 await snoutData.clearSuccessfulPatches();
-                                Navigator.pop(context);
+                                if (mounted) {
+                                  Navigator.pop(context);
+                                }
                               },
                               child: const Text("Delete")),
                         ],

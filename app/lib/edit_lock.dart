@@ -14,7 +14,6 @@ Future<dynamic> navigateWithEditLock(
   try {
     final isLocked = await apiClient.get(editLockUri,
         headers: {"key": key}).timeout(const Duration(seconds: 1));
-
     if (isLocked.body == "true") {
       //Warn that this key is locked
       if (context.mounted) {
@@ -53,18 +52,15 @@ Future<dynamic> navigateWithEditLock(
       } catch (e) {
         print(e);
       }
-
       //Navigate
       final result = await navigteFunction();
       //Clear lock
-
       try {
         await apiClient.delete(editLockUri,
             headers: {"key": key}).timeout(const Duration(seconds: 1));
       } catch (e) {
         print(e);
       }
-
       //Return data
       return result;
     }

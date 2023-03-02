@@ -57,7 +57,6 @@ void main() async {
       //Load from cache
       String? dbCache = prefs.getString(serverURL);
       event = FRCEvent.fromJson(jsonDecode(dbCache!));
-      print("got data from cache");
     } catch (e) {
       //Really bad we have no cache or server connection
       runApp(const SetupApp());
@@ -142,7 +141,6 @@ class EventDB extends ChangeNotifier {
   void resetConnectionTimer() {
     connectionTimer?.cancel();
     connectionTimer = Timer(const Duration(seconds: 61), () {
-      print("connection timer triggered");
       //No message has been recieved in 60 seconds, close down the connection.
       channel?.sink.close();
       connected = false;
@@ -150,7 +148,6 @@ class EventDB extends ChangeNotifier {
   }
 
   void reconnect() async {
-    print("attempting a reconnection!");
     //Do not close the stream if it already exists idk how that behaves
     //it might reuslt in the onDone being called unexpetedly.
     Uri serverUri = Uri.parse(serverURL);
@@ -168,7 +165,6 @@ class EventDB extends ChangeNotifier {
       connected = true;
       notifyListeners();
       resetConnectionTimer();
-      print("On ready");
     });
 
     channel!.stream.listen((event) async {
@@ -189,13 +185,11 @@ class EventDB extends ChangeNotifier {
       notifyListeners();
       //Re-attempt a connection after some time
       Timer(const Duration(seconds: 10), () {
-        print("attempting to reconnect");
         if (connected == false) {
           reconnect();
         }
       });
     }, onError: (e) {
-      print("On error");
       //Dont try and reconnect on an error
       print(e);
       notifyListeners();
@@ -204,7 +198,6 @@ class EventDB extends ChangeNotifier {
 
   //Attempts to sync with the server
   Future tryOriginSync() async {
-    print("Attempted origin sync");
     final prefs = await SharedPreferences.getInstance();
     try {
       //Load season config from server

@@ -1,6 +1,4 @@
 import 'dart:collection';
-import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:json_annotation/json_annotation.dart';
 import 'package:snout_db/event/matchevent.dart';
