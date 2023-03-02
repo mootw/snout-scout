@@ -18,16 +18,6 @@ class EditSchedulePage extends StatefulWidget {
 }
 
 class _EditSchedulePageState extends State<EditSchedulePage> {
-  late Map<String, FRCMatch> matchesEdited;
-
-  int i = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    matchesEdited = widget.matches;
-  }
-
   @override
   Widget build(BuildContext context) {
     final snoutData = context.watch<EventDB>();
@@ -41,14 +31,16 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
               final result = await apiClient.get(
                   Uri.parse(serverURL.replaceFirst("events", "load_schedule")));
 
-              showDialog(
-                  context: context,
-                  builder: (context) {
-                    return AlertDialog(
-                      title: Text(result.statusCode.toString()),
-                      content: Text(result.body),
-                    );
-                  });
+              if (mounted) {
+                showDialog(
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        title: Text(result.statusCode.toString()),
+                        content: Text(result.body),
+                      );
+                    });
+              }
             },
           )
         ],

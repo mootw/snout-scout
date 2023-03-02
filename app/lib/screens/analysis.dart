@@ -5,7 +5,7 @@ import 'package:app/screens/analysis/postmatch_survey_analysis.dart';
 import 'package:flutter/material.dart';
 
 class AnalysisPage extends StatefulWidget {
-  const AnalysisPage({Key? key}) : super(key: key);
+  const AnalysisPage({super.key});
 
   @override
   State<AnalysisPage> createState() => _AnalysisPageState();

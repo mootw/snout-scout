@@ -41,7 +41,7 @@ class _TeamGridListState extends State<TeamGridList> {
 class TeamListTile extends StatelessWidget {
   final int teamNumber;
 
-  const TeamListTile({Key? key, required this.teamNumber}) : super(key: key);
+  const TeamListTile({super.key, required this.teamNumber});
 
   @override
   Widget build(BuildContext context) {

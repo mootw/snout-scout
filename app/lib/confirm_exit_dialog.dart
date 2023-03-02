@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-
 ///Wrapping a widget with this will prompt for a confirm if
 ///the scope is popped. This should be used for edit menus
 class ConfirmExitDialog extends StatelessWidget {

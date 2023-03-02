@@ -9,7 +9,7 @@ import 'package:provider/provider.dart';
 import 'package:snout_db/event/match.dart';
 
 class AllMatchesPage extends StatefulWidget {
-  const AllMatchesPage({Key? key}) : super(key: key);
+  const AllMatchesPage({super.key});
 
   @override
   State<AllMatchesPage> createState() => _AllMatchesPageState();
@@ -27,7 +27,7 @@ class _AllMatchesPageState extends State<AllMatchesPage> {
     final nextMatch = data.db.nextMatch;
     if (nextMatch != null) {
       WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-          _controller.positions.first.moveTo(
+        _controller.positions.first.moveTo(
             data.db.matches.values.toList().indexOf(nextMatch) *
                 matchCardHeight,
             clamp: true);

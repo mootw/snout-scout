@@ -22,14 +22,14 @@ class AnalysisMatchPreview extends StatefulWidget {
 }
 
 class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
-  List<int> red = [];
-  List<int> blue = [];
+  List<int> _red = [];
+  List<int> _blue = [];
 
   @override
   void initState() {
     super.initState();
-    red = widget.red;
-    blue = widget.blue;
+    _red = widget.red;
+    _blue = widget.blue;
   }
 
   @override
@@ -48,10 +48,10 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                           const Text("Red"),
                           TextField(
                             controller:
-                                TextEditingController(text: jsonEncode(red)),
+                                TextEditingController(text: jsonEncode(_red)),
                             onSubmitted: (value) {
                               setState(() {
-                                red = List<int>.from(jsonDecode(value));
+                                _red = List<int>.from(jsonDecode(value));
                               });
                             },
                           ),
@@ -59,10 +59,10 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                           const Text("Blue"),
                           TextField(
                             controller:
-                                TextEditingController(text: jsonEncode(blue)),
+                                TextEditingController(text: jsonEncode(_blue)),
                             onSubmitted: (value) {
                               setState(() {
-                                blue = List<int>.from(jsonDecode(value));
+                                _blue = List<int>.from(jsonDecode(value));
                               });
                             },
                           )
@@ -87,13 +87,13 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                   exportValue: "RED",
                   sortingValue: "RED"),
               for (final event in data.db.config.matchscouting.events)
-                DataItem.fromNumber(red.fold<double>(
+                DataItem.fromNumber(_red.fold<double>(
                     0,
                     (previousValue, team) =>
                         previousValue +
                         (data.db.teamAverageMetric(team, event.id) ?? 0))),
               for (final event in data.db.config.matchscouting.events)
-                DataItem.fromNumber(red.fold<double>(
+                DataItem.fromNumber(_red.fold<double>(
                     0,
                     (previousValue, team) =>
                         previousValue +
@@ -108,13 +108,13 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                   exportValue: "BLUE",
                   sortingValue: "BLUE"),
               for (final event in data.db.config.matchscouting.events)
-                DataItem.fromNumber(blue.fold<double>(
+                DataItem.fromNumber(_blue.fold<double>(
                     0,
                     (previousValue, team) =>
                         previousValue +
                         (data.db.teamAverageMetric(team, event.id) ?? 0))),
               for (final event in data.db.config.matchscouting.events)
-                DataItem.fromNumber(blue.fold<double>(
+                DataItem.fromNumber(_blue.fold<double>(
                     0,
                     (previousValue, team) =>
                         previousValue +
@@ -133,13 +133,13 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
             for (final item in data.db.config.matchscouting.postgame)
               DataItem.fromText(item.label),
           ], rows: [
-            for (final team in [...red, ...blue])
+            for (final team in [..._red, ..._blue])
               [
                 DataItem(
                     displayValue: TextButton(
                       child: Text(team.toString(),
                           style: TextStyle(
-                              color: getAllianceColor(red.contains(team)
+                              color: getAllianceColor(_red.contains(team)
                                   ? Alliance.red
                                   : Alliance.blue))),
                       onPressed: () {
@@ -178,7 +178,7 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   children: [
-                    for (final team in [...red, ...blue]) ...[
+                    for (final team in [..._red, ..._blue]) ...[
                       const SizedBox(width: 8),
                       Column(
                         mainAxisSize: MainAxisSize.min,
@@ -188,7 +188,7 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                                   .textTheme
                                   .titleLarge
                                   ?.copyWith(
-                                      color: getAllianceColor(red.contains(team)
+                                      color: getAllianceColor(_red.contains(team)
                                           ? Alliance.red
                                           : Alliance.blue))),
                           SizedBox(

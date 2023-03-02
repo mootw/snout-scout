@@ -15,15 +15,15 @@ class PitScoutTeamPage extends StatefulWidget {
   final PitScoutResult? oldData;
 
   const PitScoutTeamPage(
-      {Key? key, required this.team, required this.config, this.oldData})
-      : super(key: key);
+      {super.key, required this.team, required this.config, this.oldData});
 
   @override
   State<PitScoutTeamPage> createState() => _PitScoutTeamPageState();
 }
 
 class _PitScoutTeamPageState extends State<PitScoutTeamPage> {
-  PitScoutResult results = {};
+  final PitScoutResult _results = {};
+  final _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
@@ -31,7 +31,7 @@ class _PitScoutTeamPageState extends State<PitScoutTeamPage> {
 
     //populate existing data to pre-fill.
     if (widget.oldData != null) {
-      results.addAll(widget.oldData!);
+      _results.addAll(widget.oldData!);
     }
   }
 
@@ -43,20 +43,25 @@ class _PitScoutTeamPageState extends State<PitScoutTeamPage> {
           actions: [
             IconButton(
                 onPressed: () async {
+                  if (_formKey.currentState!.validate() == false) {
+                    //There are form errors, do nothing here.
+                    return;
+                  }
+
                   final snoutData = context.read<EventDB>();
 
                   Patch patch = Patch(
                       time: DateTime.now(),
                       path: ['pitscouting', widget.team.toString()],
-                      data: jsonEncode(results));
+                      data: jsonEncode(_results));
 
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                    content: Text('Saving Scouting Data'),
+                    duration: Duration(seconds: 4),
+                  ));
                   //Save the scouting results to the server!!
                   await snoutData.addPatch(patch);
                   if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                      content: Text('Saved Scouting Data'),
-                      duration: Duration(seconds: 4),
-                    ));
                     Navigator.of(context).pop(true);
                   }
                 },
@@ -64,18 +69,23 @@ class _PitScoutTeamPageState extends State<PitScoutTeamPage> {
           ],
           title: Text("Scouting ${widget.team}"),
         ),
-        body: ListView(
-          shrinkWrap: true,
-          children: [
-            const Text("Pit scouting data should be subjective or complementary (photo, team name, intake/scoring ability, pick information)"),
-            for (final item in widget.config.pitscouting)
-              Container(
-                  padding: const EdgeInsets.all(12),
-                  child: ScoutingToolWidget(
-                    tool: item,
-                    survey: results,
-                  )),
-          ],
+        body: Form(
+          autovalidateMode: AutovalidateMode.onUserInteraction,
+          key: _formKey,
+          child: ListView(
+            shrinkWrap: true,
+            children: [
+              const Text(
+                  "Pit scouting data should be subjective or complementary (photo, team name, intake/scoring ability, pick information)"),
+              for (final item in widget.config.pitscouting)
+                Container(
+                    padding: const EdgeInsets.all(12),
+                    child: ScoutingToolWidget(
+                      tool: item,
+                      survey: _results,
+                    )),
+            ],
+          ),
         ),
       ),
     );

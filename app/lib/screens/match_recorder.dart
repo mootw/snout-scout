@@ -31,15 +31,16 @@ class MatchRecorderPage extends StatefulWidget {
 enum MatchMode { setup, playing, finished }
 
 class _MatchRecorderPageState extends State<MatchRecorderPage> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   MatchMode _mode = MatchMode.setup;
-  List<MatchEvent> events = [];
-  PitScoutResult postGameSurvey = {};
+  List<MatchEvent> _events = [];
+  final PitScoutResult _postGameSurvey = {};
   int _time = 0;
-  double mapRotation = 0;
-  Timer? t;
+  double _mapRotation = 0;
+  Timer? _t;
 
   MatchEvent? get lastMoveEvent =>
-      events.toList().lastWhereOrNull((event) => event.isPositionEvent);
+      _events.toList().lastWhereOrNull((event) => event.isPositionEvent);
   FieldPosition? get robotPosition => lastMoveEvent?.position;
 
   List<MatchEventConfig> get scoutingEvents =>
@@ -47,11 +48,11 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
 
   @override
   void dispose() {
-    t?.cancel();
+    _t?.cancel();
     super.dispose();
   }
 
-  Widget getEventButton(MatchEventConfig tool) {
+  Widget _getEventButton(MatchEventConfig tool) {
     final fieldStyle = context.read<EventDB>().db.config.fieldStyle;
 
     //Disable the button if it is for teleop ONLY during the auto phase.
@@ -74,7 +75,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                 HapticFeedback.mediumImpact();
                 setState(() {
                   if (_mode != MatchMode.setup && robotPosition != null) {
-                    events.add(MatchEvent.fromEventConfig(
+                    _events.add(MatchEvent.fromEventConfig(
                         time: _time,
                         event: tool,
                         position: robotPosition!,
@@ -92,13 +93,13 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
     );
   }
 
-  List<Widget> getTimeline() {
+  List<Widget> _getTimeline() {
     return [
       const Center(
           child: Text(
               "Check to see the map is rotated correctly! Press 'start' when you hear the field buzzer and see the field lights. It is more important to know the location of each event rather than the position of the robot at all times. Event buttons will disable if no position has been recently input.")),
       const SizedBox(height: 32),
-      for (final item in events.toList()) ...[
+      for (final item in _events.toList()) ...[
         const Divider(height: 0),
         Padding(
           padding: const EdgeInsets.only(left: 12, right: 12),
@@ -112,7 +113,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                 icon: const Icon(Icons.remove),
                 onPressed: () {
                   setState(() {
-                    events.remove(item);
+                    _events.remove(item);
                   });
                 },
               ),
@@ -138,26 +139,38 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
             actions: [
               IconButton(
                   onPressed: () {
+                    if (_formKey.currentState!.validate() == false) {
+                      //Do not save with pending form errors.
+                      return;
+                    }
                     Navigator.pop(
                         context,
                         RobotMatchResults(
-                            timeline: events, survey: postGameSurvey));
+                            timeline: _events, survey: _postGameSurvey));
                   },
                   icon: const Icon(Icons.save)),
             ],
           ),
-          body: ListView(
-            shrinkWrap: true,
-            children: [
-              for (final item
-                  in context.watch<EventDB>().db.config.matchscouting.postgame)
-                Container(
-                    padding: const EdgeInsets.all(12),
-                    child: ScoutingToolWidget(
-                      tool: item,
-                      survey: postGameSurvey,
-                    )),
-            ],
+          body: Form(
+            key: _formKey,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            child: ListView(
+              shrinkWrap: true,
+              children: [
+                for (final item in context
+                    .watch<EventDB>()
+                    .db
+                    .config
+                    .matchscouting
+                    .postgame)
+                  Container(
+                      padding: const EdgeInsets.all(12),
+                      child: ScoutingToolWidget(
+                        tool: item,
+                        survey: _postGameSurvey,
+                      )),
+              ],
+            ),
           ),
         ),
       );
@@ -168,7 +181,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
         child: Scaffold(
           appBar: AppBar(
             title: Text("Team ${widget.team}"),
-            actions: [statusAndToolBar()],
+            actions: [_statusAndToolBar()],
           ),
           body: Row(
             children: [
@@ -180,7 +193,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                       child: ListView(
                         reverse: true,
                         shrinkWrap: true,
-                        children: getTimeline().reversed.toList(),
+                        children: _getTimeline().reversed.toList(),
                       ),
                     ),
                     Wrap(
@@ -189,7 +202,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                           SizedBox(
                             height: 60,
                             width: 120, // -1 for some layout padding.
-                            child: getEventButton(scoutingEvents[i]),
+                            child: _getEventButton(scoutingEvents[i]),
                           ),
                       ],
                     ),
@@ -201,7 +214,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                   constraints: const BoxConstraints(maxWidth: 600),
                   alignment: Alignment.bottomRight,
                   child: Transform.rotate(
-                    angle: mapRotation,
+                    angle: _mapRotation,
                     child: FieldPositionSelector(
                       coverAlignment: _mode != MatchMode.setup
                           ? null
@@ -214,16 +227,16 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                       onTap: (robotPosition) {
                         HapticFeedback.lightImpact();
                         setState(() {
-                          for (final event in events.toList()) {
+                          for (final event in _events.toList()) {
                             if (event.isPositionEvent) {
                               //Is position event
                               if (event.time == _time) {
                                 //Event is the same time, overrwite
-                                events.remove(event);
+                                _events.remove(event);
                               }
                             }
                           }
-                          events.add(MatchEvent.robotPositionEvent(
+                          _events.add(MatchEvent.robotPositionEvent(
                               time: _time,
                               position: robotPosition,
                               redNormalizedPosition:
@@ -255,15 +268,15 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
             Expanded(
               child: ListView(
                 reverse: true,
-                children: getTimeline().reversed.toList(),
+                children: _getTimeline().reversed.toList(),
               ),
             ),
-            statusAndToolBar(),
+            _statusAndToolBar(),
             Container(
               width: 600,
               alignment: Alignment.bottomRight,
               child: Transform.rotate(
-                angle: mapRotation,
+                angle: _mapRotation,
                 child: FieldPositionSelector(
                   teamNumber: widget.team,
                   coverAlignment: _mode != MatchMode.setup
@@ -276,16 +289,16 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                   onTap: (robotPosition) {
                     HapticFeedback.lightImpact();
                     setState(() {
-                      for (final event in events.toList()) {
+                      for (final event in _events.toList()) {
                         if (event.isPositionEvent) {
                           //Is position event
                           if (event.time == _time) {
                             //Event is the same time, overrwite
-                            events.remove(event);
+                            _events.remove(event);
                           }
                         }
                       }
-                      events.add(MatchEvent.robotPositionEvent(
+                      _events.add(MatchEvent.robotPositionEvent(
                           time: _time,
                           position: robotPosition,
                           redNormalizedPosition:
@@ -306,7 +319,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                     height: 69,
                     width: (MediaQuery.of(context).size.width / 3) -
                         1, // -1 for some layout padding.
-                    child: getEventButton(scoutingEvents[i]),
+                    child: _getEventButton(scoutingEvents[i]),
                   ),
               ],
             ),
@@ -316,7 +329,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
     );
   }
 
-  Widget statusAndToolBar() {
+  Widget _statusAndToolBar() {
     Widget? robotPicture;
     final pictureData = context
         .watch<EventDB>()
@@ -339,7 +352,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
               tooltip: "Rotate Map",
               onPressed: () {
                 setState(() {
-                  mapRotation += math.pi;
+                  _mapRotation += math.pi;
                 });
               },
               icon: const Icon(Icons.rotate_right)),
@@ -381,7 +394,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                 ? FilledButton.styleFrom(
                     backgroundColor: Colors.red, foregroundColor: Colors.white)
                 : null,
-            onPressed: lastMoveEvent == null ? null : handleNextSection,
+            onPressed: lastMoveEvent == null ? null : _handleNextSection,
             label: Text(_mode == MatchMode.setup
                 ? "Start"
                 : _mode == MatchMode.playing
@@ -393,15 +406,15 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
     );
   }
 
-  void handleNextSection() {
+  void _handleNextSection() {
     HapticFeedback.heavyImpact();
     if (_mode == MatchMode.playing) {
       //Stop timer
-      t?.cancel();
+      _t?.cancel();
       _mode = MatchMode.finished;
       //Scale event times to be within the match length
-      events = List.generate(events.length, (index) {
-        final event = events[index];
+      _events = List.generate(_events.length, (index) {
+        final event = _events[index];
         return MatchEvent(
             time: ((event.time / _time) * matchLength.inSeconds).round(),
             x: event.x,
@@ -417,7 +430,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
       _mode = MatchMode.playing;
       _time = 1; //Second 0 is reserved for pre-game events
       //Start timer
-      t = Timer.periodic(const Duration(seconds: 1), (timer) {
+      _t = Timer.periodic(const Duration(seconds: 1), (timer) {
         if (_mode != MatchMode.finished) {
           setState(() {
             _time++;

@@ -16,12 +16,12 @@ class TimeDuration extends StatefulWidget {
 }
 
 class _TimeDurationState extends State<TimeDuration> {
-  late Timer t;
+  late Timer _t;
 
   @override
   void initState() {
     super.initState();
-    t = Timer.periodic(const Duration(seconds: 5), (timer) {
+    _t = Timer.periodic(const Duration(seconds: 5), (timer) {
       if (widget.displayDurationDefault) {
         setState(() {});
       }
@@ -30,7 +30,7 @@ class _TimeDurationState extends State<TimeDuration> {
 
   @override
   void dispose() {
-    t.cancel();
+    _t.cancel();
     super.dispose();
   }
 

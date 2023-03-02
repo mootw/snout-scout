@@ -20,7 +20,7 @@ import 'package:snout_db/config/surveyitem.dart';
 class TeamViewPage extends StatefulWidget {
   final int teamNumber;
 
-  const TeamViewPage({Key? key, required this.teamNumber}) : super(key: key);
+  const TeamViewPage({super.key, required this.teamNumber});
 
   @override
   State<TeamViewPage> createState() => _TeamViewPageState();
@@ -30,7 +30,6 @@ class _TeamViewPageState extends State<TeamViewPage> {
   @override
   Widget build(BuildContext context) {
     final data = context.watch<EventDB>();
-
     return Scaffold(
         appBar: AppBar(
           actions: [
@@ -252,17 +251,14 @@ class ScoutingResultsViewer extends StatelessWidget {
   final EventDB snoutData;
 
   const ScoutingResultsViewer(
-      {Key? key, required this.teamNumber, required this.snoutData})
-      : super(key: key);
+      {super.key, required this.teamNumber, required this.snoutData});
 
   @override
   Widget build(BuildContext context) {
     final data = snoutData.db.pitscouting[teamNumber.toString()];
-
     if (data == null) {
       return const ListTile(title: Text("Team has no pit scouting data"));
     }
-
     return Column(
       children: [
         for (final item in snoutData.db.config.pitscouting)

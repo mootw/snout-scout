@@ -60,11 +60,6 @@ class _DataSheetState extends State<DataSheet> {
   int? _currentSortColumn;
   bool _sortAscending = true;
 
-  @override
-  void initState() {
-    super.initState();
-  }
-
   void updateSort(int columnIndex, bool ascending) {
     setState(() {
       _currentSortColumn = columnIndex;

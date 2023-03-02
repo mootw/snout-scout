@@ -125,7 +125,6 @@ class SetupAppScreen extends StatelessWidget {
 class EventDB extends ChangeNotifier {
   FRCEvent db;
 
-
   DateTime? lastOriginSync;
   bool connected = true;
 
@@ -159,7 +158,7 @@ class EventDB extends ChangeNotifier {
         '${serverURL.startsWith("https") ? "wss" : "ws"}://${serverUri.host}:${serverUri.port}/listen/${serverUri.pathSegments[1]}'));
 
     channel!.ready.then((_) {
-      if(connected == false) {
+      if (connected == false) {
         //Only do an origin sync if we were previouosly not connected
         //Since the db is syncronized before creating this object
         //we can assume that connection exists for the first reconnect
@@ -188,8 +187,8 @@ class EventDB extends ChangeNotifier {
     }, onDone: () {
       connected = false;
       notifyListeners();
-      //Re-attempt a connection after a minute
-      Timer(const Duration(seconds: 30), () {
+      //Re-attempt a connection after some time
+      Timer(const Duration(seconds: 10), () {
         print("attempting to reconnect");
         if (connected == false) {
           reconnect();
@@ -202,9 +201,9 @@ class EventDB extends ChangeNotifier {
       notifyListeners();
     });
   }
-  
+
   //Attempts to sync with the server
-  Future tryOriginSync () async {
+  Future tryOriginSync() async {
     print("Attempted origin sync");
     final prefs = await SharedPreferences.getInstance();
     try {
@@ -213,7 +212,8 @@ class EventDB extends ChangeNotifier {
       db = FRCEvent.fromJson(jsonDecode(data.body));
       prefs.setString(serverURL, data.body);
       prefs.setString("lastoriginsync", DateTime.now().toIso8601String());
-      lastOriginSync = DateTime.now(); //FOR easy UI update. This is slowly becoming spaghetti
+      lastOriginSync = DateTime
+          .now(); //FOR easy UI update. This is slowly becoming spaghetti
       notifyListeners();
     } catch (e) {
       print(e);
@@ -228,7 +228,8 @@ class EventDB extends ChangeNotifier {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       successfulPatches = prefs.getStringList("successful_patches") ?? [];
       failedPatches = prefs.getStringList("failed_patches") ?? [];
-      lastOriginSync = DateTime.tryParse(prefs.getString("lastoriginsync") ?? "");
+      lastOriginSync =
+          DateTime.tryParse(prefs.getString("lastoriginsync") ?? "");
     }();
   }
 
@@ -244,7 +245,7 @@ class EventDB extends ChangeNotifier {
         successfulPatches.add(jsonEncode(patch));
         prefs.setStringList("successful_patches", successfulPatches);
         //Remove it from the failed patches if it exists there
-        if(failedPatches.contains(jsonEncode(patch))) {
+        if (failedPatches.contains(jsonEncode(patch))) {
           failedPatches.remove(jsonEncode(patch));
           prefs.setStringList("failed_patches", failedPatches);
         }
@@ -271,7 +272,7 @@ class EventDB extends ChangeNotifier {
   }
 
   //Clears all of the failed patches.
-  Future clearFailedPatches () async {
+  Future clearFailedPatches() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     failedPatches.clear(); //For UI update
     prefs.setStringList("failed_patches", []);
@@ -279,13 +280,12 @@ class EventDB extends ChangeNotifier {
   }
 
   //Clears all of the successful patches.
-  Future clearSuccessfulPatches () async {
+  Future clearSuccessfulPatches() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     successfulPatches.clear(); //For UI update
     prefs.setStringList("successful_patches", []);
     notifyListeners();
   }
-
 }
 
 class MyApp extends StatelessWidget {
@@ -400,7 +400,11 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           ListTile(
             title: const Text("Last Origin Sync"),
-            subtitle: data.lastOriginSync == null ? const Text("Never") : Text(DateFormat.yMMMMEEEEd().add_Hms().format(data.lastOriginSync!)),
+            subtitle: data.lastOriginSync == null
+                ? const Text("Never")
+                : Text(DateFormat.yMMMMEEEEd()
+                    .add_Hms()
+                    .format(data.lastOriginSync!)),
           ),
           ListTile(
             title: const Text("Local Patch Storage"),

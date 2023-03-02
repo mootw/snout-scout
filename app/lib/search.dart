@@ -28,9 +28,7 @@ class SnoutScoutSearch extends SearchDelegate {
   Widget? buildLeading(BuildContext context) {
     return IconButton(
       icon: const BackButtonIcon(),
-      onPressed: () {
-        close(context, null);
-      },
+      onPressed: () => close(context, null),
     );
   }
 

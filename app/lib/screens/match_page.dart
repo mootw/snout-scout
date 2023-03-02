@@ -21,7 +21,7 @@ import 'package:snout_db/snout_db.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class MatchPage extends StatefulWidget {
-  const MatchPage({required this.matchid, Key? key}) : super(key: key);
+  const MatchPage({super.key, required this.matchid});
 
   final String matchid;
 
@@ -31,7 +31,7 @@ class MatchPage extends StatefulWidget {
 
 class _MatchPageState extends State<MatchPage> {
   final TextEditingController _textController = TextEditingController();
-  Alliance alliance = Alliance.blue;
+  Alliance _alliance = Alliance.blue;
 
   @override
   Widget build(BuildContext context) {
@@ -169,6 +169,13 @@ class _MatchPageState extends State<MatchPage> {
                                   team.toString()
                                 ],
                                 data: jsonEncode(result));
+
+                            if (mounted) {
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(const SnackBar(
+                                content: Text('Saving Data'),
+                              ));
+                            }
                             await snoutData.addPatch(patch);
                           }
                         },
@@ -180,12 +187,11 @@ class _MatchPageState extends State<MatchPage> {
                         .where((event) => event.id == item.id)
                         .length
                         .toDouble()),
-                    for (final item in snoutData.db.config.matchscouting.events)
+                  for (final item in snoutData.db.config.matchscouting.events)
                     DataItem.fromNumber(match.robot[team.toString()]?.timeline
                         .where((event) => event.isInAuto && event.id == item.id)
                         .length
                         .toDouble()),
-                    
                   for (final item in snoutData.db.config.matchscouting.postgame
                       .where(
                           (element) => element.type != SurveyItemType.picture))
@@ -209,10 +215,10 @@ class _MatchPageState extends State<MatchPage> {
             ),
             Flexible(
               child: DropdownButton<Alliance>(
-                value: alliance,
+                value: _alliance,
                 onChanged: (Alliance? value) {
                   setState(() {
-                    alliance = value!;
+                    _alliance = value!;
                   });
                 },
                 items: [Alliance.blue, Alliance.red]
@@ -237,7 +243,7 @@ class _MatchPageState extends State<MatchPage> {
                               context,
                               MaterialPageRoute(
                                   builder: (context) => MatchRecorderPage(
-                                      team: team, teamAlliance: alliance)),
+                                      team: team, teamAlliance: _alliance)),
                             ));
                     if (result != null) {
                       Patch patch = Patch(

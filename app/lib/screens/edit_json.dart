@@ -16,8 +16,7 @@ class JSONEditor extends StatefulWidget {
 
 class _JSONEditorState extends State<JSONEditor> {
   final _controller = TextEditingController();
-
-  String error = "";
+  String _error = "";
 
   @override
   void initState() {
@@ -33,7 +32,7 @@ class _JSONEditorState extends State<JSONEditor> {
           title: const Text("Edit"),
           actions: [
             IconButton(
-                onPressed: error != ""
+                onPressed: _error != ""
                     ? null
                     : () {
                         Navigator.of(context).pop(_controller.text);
@@ -52,17 +51,17 @@ class _JSONEditorState extends State<JSONEditor> {
                   try {
                     widget.validate(jsonDecode(value));
                     setState(() {
-                      error = "";
+                      _error = "";
                     });
                   } catch (e) {
                     setState(() {
-                      error = e.toString();
+                      _error = e.toString();
                     });
                   }
                 },
               ),
             ),
-            Text(error,
+            Text(_error,
                 style: TextStyle(color: Theme.of(context).colorScheme.error)),
           ],
         ),

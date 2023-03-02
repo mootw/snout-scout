@@ -14,40 +14,39 @@ class ScoutingToolWidget extends StatefulWidget {
   final SurveyItem tool;
   final PitScoutResult survey;
 
-  const ScoutingToolWidget({Key? key, required this.tool, required this.survey})
-      : super(key: key);
+  const ScoutingToolWidget({super.key, required this.tool, required this.survey});
 
   @override
   State<ScoutingToolWidget> createState() => _ScoutingToolWidgetState();
 }
 
 class _ScoutingToolWidgetState extends State<ScoutingToolWidget> {
-  final myController = TextEditingController();
+  final _myController = TextEditingController();
 
-  get value => widget.survey[widget.tool.id];
-  set value (dynamic newValue) => widget.survey[widget.tool.id] = newValue;
+  get _value => widget.survey[widget.tool.id];
+  set _value (dynamic newValue) => widget.survey[widget.tool.id] = newValue;
 
   @override
   void initState() {
     super.initState();
-    if (value == null && widget.tool.type == SurveyItemType.toggle) {
-      value = false;
+    if (_value == null && widget.tool.type == SurveyItemType.toggle) {
+      _value = false;
     }
     if (widget.tool.type == SurveyItemType.text || widget.tool.type == SurveyItemType.number) {
-      myController.text = value?.toString() ?? "";
+      _myController.text = _value?.toString() ?? "";
     }
   }
 
   @override
   Widget build(BuildContext context) {
     if (widget.tool.type == SurveyItemType.text) {
-      return TextField(
-        controller: myController,
+      return TextFormField(
+        controller: _myController,
         onChanged: (text) {
-          value = text;
+          _value = text;
           //TO prevent previously filled but now unfilled data from showing as empty.
           if (text == "") {
-            value = null;
+            _value = null;
           }
         },
         minLines: 1,
@@ -60,10 +59,23 @@ class _ScoutingToolWidgetState extends State<ScoutingToolWidget> {
     }
 
     if (widget.tool.type == SurveyItemType.number) {
-      return TextField(
-        controller: myController,
+      return TextFormField(
+        //Numbers or no value only
+        validator: (value) {
+          if(value == null || value == "") {
+            //No value is fine
+            return null;
+          }
+          //Check if number
+          return num.tryParse(value) != null ? null : "Value must be a number";
+        },
+        controller: _myController,
         onChanged: (text) {
-          value = num.tryParse(text);
+          if(text == "") {
+            //Empty input should be null
+            _value = null;
+          }
+          _value = num.tryParse(text);
         },
         keyboardType: TextInputType.number,
         decoration: InputDecoration(
@@ -77,18 +89,19 @@ class _ScoutingToolWidgetState extends State<ScoutingToolWidget> {
       return ListTile(
         title: Text(widget.tool.label),
         trailing: DropdownButton<String>(
-          value: value,
+          value: _value,
           icon: const Icon(Icons.arrow_downward),
           onChanged: (String? newValue) {
             setState(() {
-              value = newValue!;
+              _value = newValue;
             });
           },
-          items: widget.tool.options!
-              .map<DropdownMenuItem<String>>((String value) {
+          //Insert empty value here as an option
+          items: [null, ...widget.tool.options!]
+              .map<DropdownMenuItem<String>>((String? value) {
             return DropdownMenuItem<String>(
               value: value,
-              child: Text(value),
+              child: Text(value ?? ""),
             );
           }).toList(),
         ),
@@ -99,10 +112,10 @@ class _ScoutingToolWidgetState extends State<ScoutingToolWidget> {
       return ListTile(
         title: Text(widget.tool.label),
         trailing: Switch(
-            value: value,
+            value: _value,
             onChanged: (newValue) {
               setState(() {
-                value = newValue;
+                _value = newValue;
               });
             }),
       );
@@ -119,12 +132,12 @@ class _ScoutingToolWidgetState extends State<ScoutingToolWidget> {
               if(photo != null) {
                 Uint8List bytes = await photo.readAsBytes();
                 setState(() {
-                  value = base64Encode(bytes);
+                  _value = base64Encode(bytes);
                 });
               }
             }),
         title: Text(widget.tool.label),
-        subtitle: value == null ? const Text("No Image") : SizedBox(height: scoutImageSize, child: Image.memory(Uint8List.fromList(base64Decode(value).cast<int>()))),
+        subtitle: _value == null ? const Text("No Image") : SizedBox(height: scoutImageSize, child: Image.memory(Uint8List.fromList(base64Decode(_value).cast<int>()))),
       );
     }
 
