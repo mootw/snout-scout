@@ -8,9 +8,9 @@ part 'robotmatchresults.g.dart';
 @JsonSerializable()
 class RobotMatchResults {
   /// List of events this robot did during the match
-  List<MatchEvent> timeline;
+  final List<MatchEvent> timeline;
   //Post game survey like pit scouting; but used for scoring too
-  PitScoutResult survey;
+  final PitScoutResult survey;
 
   RobotMatchResults({required this.timeline, required this.survey});
 

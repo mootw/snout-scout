@@ -1,4 +1,6 @@
 import 'dart:collection';
+import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:json_annotation/json_annotation.dart';
 import 'package:snout_db/event/matchevent.dart';
@@ -12,16 +14,16 @@ part 'frcevent.g.dart';
 @JsonSerializable()
 class FRCEvent {
   ///List of teams in the event, ideally ordered smallest number to largest
-  List<int> teams;
+  final List<int> teams;
 
   /// how should this event be tracked?
-  EventConfig config;
+  final EventConfig config;
 
   ///List of matches
-  SplayTreeMap<String, FRCMatch> matches;
+  final SplayTreeMap<String, FRCMatch> matches;
 
   //Pit scouting results
-  Map<String, PitScoutResult> pitscouting;
+  final Map<String, PitScoutResult> pitscouting;
 
   //Enforce that all matches are sorted
   FRCEvent(
@@ -69,7 +71,8 @@ class FRCEvent {
   /// returns null if there is no data. Otherwise we get weird NaN stuff and
   /// if you add NaN to anything it completely destroys the whole calculation
   /// There is an optional where clause to filter the events out for a specific type
-  double? teamAverageMetric(int team, String eventId, [Function(MatchEvent)? where]) {
+  double? teamAverageMetric(int team, String eventId,
+      [Function(MatchEvent)? where]) {
     final recordedMatches = teamRecordedMatches(team);
 
     if (recordedMatches.isEmpty) {
@@ -82,7 +85,8 @@ class FRCEvent {
             (previousValue, match) =>
                 previousValue +
                 (match.value.robot[team.toString()]?.timeline
-                        .where((event) => event.id == eventId && (where?.call(event) ?? true))
+                        .where((event) =>
+                            event.id == eventId && (where?.call(event) ?? true))
                         .length ??
                     0)) /
         recordedMatches.length;
@@ -90,27 +94,28 @@ class FRCEvent {
 
   /// For each recorded match of this team, it will return a map of each
   /// Value with the key being the value, and the value being the percent frequency
-  /// The map will be empty if there are no recordings 
-  Map<String, double> teamPostGameSurveyByFrequency (int team, String eventId) {
+  /// The map will be empty if there are no recordings
+  Map<String, double> teamPostGameSurveyByFrequency(int team, String eventId) {
     final recordedMatches = teamRecordedMatches(team);
     Map<String, double> toReturn = {};
 
-    for(final match in recordedMatches) {
-      final surveyValue = match.value.robot[team.toString()]!.survey[eventId]?.toString();
-      if(surveyValue == null) {
+    for (final match in recordedMatches) {
+      final surveyValue =
+          match.value.robot[team.toString()]!.survey[eventId]?.toString();
+      if (surveyValue == null) {
         continue;
       }
-      if(toReturn[surveyValue] == null) {
+      if (toReturn[surveyValue] == null) {
         toReturn[surveyValue] = 1;
       } else {
         toReturn[surveyValue] = toReturn[surveyValue]! + 1;
       }
     }
     //We have to calculate the total values since not all matches have a survey value
-    final totalValues = toReturn.values.fold<double>(0, (previousValue, element) => previousValue + element);
+    final totalValues = toReturn.values
+        .fold<double>(0, (previousValue, element) => previousValue + element);
     //Convert the map to be a percentage rather than total sum
-    toReturn = toReturn.map((key, value) => MapEntry(key, value/totalValues));
+    toReturn = toReturn.map((key, value) => MapEntry(key, value / totalValues));
     return toReturn;
   }
-
 }

@@ -12,11 +12,11 @@ part 'patch.g.dart';
 class Patch {
 
   //Time of the change
-  DateTime time;
+  final DateTime time;
   //Where was the data changed??
-  List<String> path;
+  final List<String> path;
   //JSON encoded data that this path should be patched with
-  String data;
+  final String data;
 
   Patch({required this.time, required this.path, required this.data});
 

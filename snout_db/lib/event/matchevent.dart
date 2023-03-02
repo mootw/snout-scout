@@ -7,16 +7,16 @@ part 'matchevent.g.dart';
 /// Match event that is recorded to the database
 @JsonSerializable()
 class MatchEvent {
-  int time;
-  String id;
-  String label;
+  final int time;
+  final String id;
+  final String label;
 
   //x, y position on the field
-  double x;
-  double y;
+  final double x;
+  final double y;
   //red team normalized x y position on the field
-  double nx;
-  double ny;
+  final double nx;
+  final double ny;
 
   MatchEvent(
       //Default match event time to zero to allow for defining an event in the season config

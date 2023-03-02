@@ -6,9 +6,9 @@ part 'matchresults.g.dart';
 @JsonSerializable()
 class MatchResults {
   
-  DateTime time;
-  Map<String, int> red;
-  Map<String, int> blue;
+  final DateTime time;
+  final Map<String, int> red;
+  final Map<String, int> blue;
 
   MatchResults({required this.time, required this.red,
   required this.blue});

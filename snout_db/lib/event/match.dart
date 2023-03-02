@@ -8,25 +8,25 @@ part 'match.g.dart';
 @JsonSerializable()
 class FRCMatch extends Comparable<FRCMatch> {
   ///The number of this match in the series
-  int number;
+  final int number;
 
   ///desciption aka the match name (Qualitication 1, Quarters 3 Match 1, Semifinals 2)
-  String description;
+  final String description;
 
   ///time the match was scheduled for, and is how matches should be sorted.
-  DateTime scheduledTime;
+  final DateTime scheduledTime;
 
   /// list of red teams
-  List<int> red;
+  final List<int> red;
 
   ///list of blue teams
-  List<int> blue;
+  final List<int> blue;
 
   ///results of the match (null if the match has not been played)
-  MatchResults? results;
+  final MatchResults? results;
 
   /// Performance of each robot during the match
-  Map<String, RobotMatchResults> robot;
+  final Map<String, RobotMatchResults> robot;
 
   FRCMatch(
       {

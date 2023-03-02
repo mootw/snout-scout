@@ -399,11 +399,18 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
       //Stop timer
       t?.cancel();
       _mode = MatchMode.finished;
-      //Scale auto times
-      for (final event in events) {
-        //Scale times to 15 seconds
-        event.time = ((event.time / _time) * matchLength.inSeconds).round();
-      }
+      //Scale event times to be within the match length
+      events = List.generate(events.length, (index) {
+        final event = events[index];
+        return MatchEvent(
+            time: ((event.time / _time) * matchLength.inSeconds).round(),
+            x: event.x,
+            y: event.y,
+            nx: event.nx,
+            ny: event.ny,
+            id: event.id,
+            label: event.label);
+      });
       _time = matchLength.inSeconds;
     }
     if (_mode == MatchMode.setup) {
