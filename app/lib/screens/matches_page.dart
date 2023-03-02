@@ -27,8 +27,10 @@ class _AllMatchesPageState extends State<AllMatchesPage> {
     final nextMatch = data.db.nextMatch;
     if (nextMatch != null) {
       WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-        _controller.jumpTo(data.db.matches.values.toList().indexOf(nextMatch) *
-            matchCardHeight);
+        _controller.positions.first.moveTo(
+            data.db.matches.values.toList().indexOf(nextMatch) *
+                matchCardHeight,
+            clamp: true);
       });
     }
   }
