@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:snout_db/config/matcheventconfig.dart';
 import 'package:snout_db/snout_db.dart';
@@ -9,7 +10,6 @@ part 'matchevent.g.dart';
 class MatchEvent {
   final int time;
   final String id;
-  final String label;
 
   //x, y position on the field
   final double x;
@@ -28,7 +28,6 @@ class MatchEvent {
       required this.nx,
       required this.ny,
       required this.id,
-      required this.label,
       });
 
   //Generates an event from the config template
@@ -38,7 +37,6 @@ class MatchEvent {
       required FieldPosition redNormalizedPosition,
       required this.time})
       : id = event.id,
-        label = event.label,
         x = position.x,
         y = position.y,
         nx = redNormalizedPosition.x,
@@ -48,7 +46,6 @@ class MatchEvent {
   MatchEvent.robotPositionEvent(
       {required this.time, required FieldPosition position, required FieldPosition redNormalizedPosition})
       : id = "robot_position",
-        label = "Robot Position",
         x = position.x,
         y = position.y,
         nx = redNormalizedPosition.x,
@@ -63,6 +60,10 @@ class MatchEvent {
   
   bool get isInAuto => time <= 17;
   bool get isPositionEvent => id == "robot_position";
+
+  /// Gets the event label from a specific event config. It will return Robot Position for all position events regardless
+  /// This setup while it does reduce the database redundancy can be problematic in the future if localization is desired for robot position events
+  String getLabelFromConfig (EventConfig config) => isPositionEvent ? "Robot Position" : config.matchscouting.events.firstWhereOrNull((element) => element.id == id)?.label ?? id;
 
   @override
   String toString () => 't:${time} id:${id} pos:${position}';

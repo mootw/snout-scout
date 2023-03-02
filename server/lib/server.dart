@@ -12,12 +12,11 @@ import 'package:snout_db/event/match.dart';
 
 import 'package:snout_db/patch.dart';
 
+//TODO compress response data using gzip
+
 final env = DotEnv(includePlatformEnvironment: true)..load();
-
 int serverPort = 6749;
-
 Map<String, EventData> loadedEvents = {};
-
 //To keep things simple we will just have 1 edit lock for all loaded events.
 EditLock editLock = EditLock();
 

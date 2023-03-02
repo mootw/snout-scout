@@ -92,20 +92,22 @@ class _EditMatchResultsState extends State<EditMatchResults> {
                           _matchEndTime.hour, _matchEndTime.minute);
                     }
 
-                    TimeOfDay? time = await showTimePicker(
+                    if(mounted) {
+                      TimeOfDay? time = await showTimePicker(
                         context: context,
                         initialTime: TimeOfDay(
                             hour: _matchEndTime.hour,
                             minute: _matchEndTime.minute));
-                    if (time != null) {
-                      _matchEndTime = DateTime(
-                          _matchEndTime.year,
-                          _matchEndTime.month,
-                          _matchEndTime.day,
-                          time.hour,
-                          time.minute);
+                      if (time != null) {
+                        _matchEndTime = DateTime(
+                            _matchEndTime.year,
+                            _matchEndTime.month,
+                            _matchEndTime.day,
+                            time.hour,
+                            time.minute);
+                      }
+                      setState(() {});
                     }
-                    setState(() {});
                   },
                 ),
               ),

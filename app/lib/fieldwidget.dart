@@ -232,7 +232,7 @@ class RobotMapEventView extends StatelessWidget {
             for (final event in allRecentEvents)
               Align(
                 alignment: Alignment(event.position.x, -event.position.y),
-                child: Text(event.label,
+                child: Text(event.getLabelFromConfig(context.watch<EventDB>().db.config),
                     style: const TextStyle(backgroundColor: Colors.black)),
               ),
           ]);
@@ -288,24 +288,24 @@ class FieldPaths extends StatelessWidget {
               eventLabels: eventLabels,
               useRedNormalized: useRedNormalized),
         ),
-      ],       
-          Align(
-            alignment: Alignment.bottomRight,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                if (eventLabels)
-                  for (final match in paths)
-                  for (final event
-                      in match.where((event) => !event.isPositionEvent))
-                    Text(event.label,
-                        style: TextStyle(
-                            color: getColorFromIndex(paths.indexOf(match)),
-                            fontSize: 10,
-                            backgroundColor: Colors.black45)),
-              ],
-            ),
-          ),
+      ],
+      Align(
+        alignment: Alignment.bottomRight,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            if (eventLabels)
+              for (final match in paths)
+                for (final event
+                    in match.where((event) => !event.isPositionEvent))
+                  Text(event.getLabelFromConfig(context.watch<EventDB>().db.config),
+                      style: TextStyle(
+                          color: getColorFromIndex(paths.indexOf(match)),
+                          fontSize: 10,
+                          backgroundColor: Colors.black45)),
+          ],
+        ),
+      ),
     ]);
   }
 }

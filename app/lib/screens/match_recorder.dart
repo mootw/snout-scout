@@ -107,7 +107,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(item.time.round().toString()),
-              Text(item.label),
+              Text(item.getLabelFromConfig(context.watch<EventDB>().db.config)),
               IconButton(
                 color: Theme.of(context).colorScheme.error,
                 icon: const Icon(Icons.remove),
@@ -421,8 +421,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
             y: event.y,
             nx: event.nx,
             ny: event.ny,
-            id: event.id,
-            label: event.label);
+            id: event.id);
       });
       _time = matchLength.inSeconds;
     }

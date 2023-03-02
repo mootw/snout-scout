@@ -13,14 +13,12 @@ MatchEvent _$MatchEventFromJson(Map<String, dynamic> json) => MatchEvent(
       nx: (json['nx'] as num).toDouble(),
       ny: (json['ny'] as num).toDouble(),
       id: json['id'] as String,
-      label: json['label'] as String,
     );
 
 Map<String, dynamic> _$MatchEventToJson(MatchEvent instance) =>
     <String, dynamic>{
       'time': instance.time,
       'id': instance.id,
-      'label': instance.label,
       'x': instance.x,
       'y': instance.y,
       'nx': instance.nx,
