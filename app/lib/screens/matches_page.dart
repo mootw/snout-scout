@@ -27,7 +27,7 @@ class _AllMatchesPageState extends State<AllMatchesPage> {
     final nextMatch = data.db.nextMatch;
     if (nextMatch != null) {
       WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-        _controller.positions.first.moveTo(
+          _controller.positions.first.moveTo(
             data.db.matches.values.toList().indexOf(nextMatch) *
                 matchCardHeight,
             clamp: true);

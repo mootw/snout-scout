@@ -117,6 +117,10 @@ class _DataSheetState extends State<DataSheet> {
                   color: Colors.white10,
                 )
               ),
+              //Make the data-table more compact (this basically fits 2 lines perfectly)
+              //This is definitely against best practice, but it significantly improves
+              //the readability of the table at the cost of touch target size
+              dataRowHeight: kMinInteractiveDimension - 8,
               columns: [
                 for (final column in widget.columns)
                   DataColumn(label: DefaultTextStyle(maxLines: 2, style: Theme.of(context).textTheme.bodySmall!, child: column.displayValue), onSort: updateSort),
@@ -124,7 +128,8 @@ class _DataSheetState extends State<DataSheet> {
               rows: [
                 for (final row in widget.rows)
                   DataRow(cells: [
-                    for (final cell in row) DataCell(cell.displayValue, onTap: cell.exportValue.length < 50 ? null : () {
+                    for (final cell in row) 
+                      DataCell(DefaultTextStyle(maxLines: 2, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.bodyMedium!, child: cell.displayValue), onTap: cell.exportValue.length < 50 ? null : () {
                       //If the cell's export value length (basically the text of whatever the display value is)
                       //we will have an on-tap that will display a dialog with the complete data
                       showDialog(context: context, builder: (context) => AlertDialog(
