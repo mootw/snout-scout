@@ -30,7 +30,6 @@ class AnalysisEventsHeatmap extends StatelessWidget {
             Text(eventType.label,
                 style: Theme.of(context).textTheme.titleMedium),
             FieldHeatMap(
-                useRedNormalized: true,
                 events: data.db.matches.values.fold(
                     [],
                     (previousValue, element) => [
@@ -48,7 +47,6 @@ class AnalysisEventsHeatmap extends StatelessWidget {
           Text("Driving Tendencies",
               style: Theme.of(context).textTheme.titleMedium),
           FieldHeatMap(
-              useRedNormalized: true,
               events: data.db.matches.values.fold(
                   [],
                   (previousValue, element) => [

@@ -336,7 +336,7 @@ Future loadScheduleFromTBA(FRCEvent eventData, String eventID) async {
 
       print(jsonEncode(patch));
 
-      final res = await http.put(
+      await http.put(
           Uri.parse("http://localhost:$serverPort/events/$eventID"),
           body: jsonEncode(patch));
     }

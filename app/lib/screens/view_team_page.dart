@@ -192,7 +192,6 @@ class _TeamViewPageState extends State<TeamViewPage> {
                       Text(eventType.label,
                           style: Theme.of(context).textTheme.titleMedium),
                       FieldHeatMap(
-                          useRedNormalized: true,
                           events: data.db
                               .teamRecordedMatches(widget.teamNumber)
                               .fold(
@@ -216,7 +215,6 @@ class _TeamViewPageState extends State<TeamViewPage> {
                         Text("Driving Tendencies",
                             style: Theme.of(context).textTheme.titleMedium),
                         FieldHeatMap(
-                            useRedNormalized: true,
                             events: data.db
                                 .teamRecordedMatches(widget.teamNumber)
                                 .fold(

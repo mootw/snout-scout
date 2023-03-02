@@ -282,7 +282,7 @@ class EventDB extends ChangeNotifier {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   // This widget is the root of your application.
   @override
@@ -296,7 +296,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key}) : super(key: key);
+  const MyHomePage({super.key});
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -526,8 +526,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
 Future<String?> showStringInputDialog(
     BuildContext context, String label, String currentValue) async {
-  final myController = TextEditingController();
-  myController.text = currentValue;
+  final myController = TextEditingController(text: currentValue);
   return await showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -535,22 +534,15 @@ Future<String?> showStringInputDialog(
           title: Text(label),
           content: TextField(
             controller: myController,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-            ),
           ),
           actions: [
             TextButton(
               child: const Text('Cancel'),
-              onPressed: () {
-                Navigator.of(context).pop(null);
-              },
+              onPressed: () => Navigator.of(context).pop(null),
             ),
             TextButton(
               child: const Text('Save'),
-              onPressed: () {
-                Navigator.of(context).pop(myController.text);
-              },
+              onPressed: () => Navigator.of(context).pop(myController.text),
             ),
           ],
         );

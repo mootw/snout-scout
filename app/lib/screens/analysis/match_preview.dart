@@ -142,15 +142,11 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                               color: getAllianceColor(_red.contains(team)
                                   ? Alliance.red
                                   : Alliance.blue))),
-                      onPressed: () {
-                        //Open this teams scouting page
-                        Navigator.push(
+                      onPressed: () => Navigator.push(
                           context,
                           MaterialPageRoute(
                               builder: (context) =>
-                                  TeamViewPage(teamNumber: team)),
-                        );
-                      },
+                                  TeamViewPage(teamNumber: team))),
                     ),
                     exportValue: team.toString(),
                     sortingValue: team),
@@ -179,18 +175,24 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                 child: Row(
                   children: [
                     for (final team in [..._red, ..._blue]) ...[
-                      const SizedBox(width: 8),
                       Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(team.toString(),
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleLarge
-                                  ?.copyWith(
-                                      color: getAllianceColor(_red.contains(team)
-                                          ? Alliance.red
-                                          : Alliance.blue))),
+                          TextButton(
+                              onPressed: () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          TeamViewPage(teamNumber: team))),
+                              child: Text(team.toString(),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleLarge
+                                      ?.copyWith(
+                                          color: getAllianceColor(
+                                              _red.contains(team)
+                                                  ? Alliance.red
+                                                  : Alliance.blue)))),
                           SizedBox(
                             width: 300,
                             child: Column(
@@ -226,7 +228,6 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                                         .titleMedium),
                                 FieldHeatMap(
                                     key: UniqueKey(),
-                                    useRedNormalized: true,
                                     events:
                                         data.db.teamRecordedMatches(team).fold(
                                             [],
@@ -252,7 +253,6 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                                           .textTheme
                                           .titleMedium),
                                   FieldHeatMap(
-                                      useRedNormalized: true,
                                       events: data.db
                                           .teamRecordedMatches(team)
                                           .fold(

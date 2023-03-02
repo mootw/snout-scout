@@ -245,7 +245,7 @@ class FieldHeatMap extends StatelessWidget {
   final bool useRedNormalized;
 
   const FieldHeatMap(
-      {super.key, required this.events, required this.useRedNormalized});
+      {super.key, required this.events, this.useRedNormalized = true});
 
   @override
   Widget build(BuildContext context) {
@@ -265,11 +265,13 @@ class FieldPaths extends StatelessWidget {
   final List<List<MatchEvent>> paths;
   final bool emphasizeStartPoint;
   final bool eventLabels;
+  final bool useRedNormalized;
 
   const FieldPaths(
       {super.key,
       required this.paths,
       this.emphasizeStartPoint = true,
+      this.useRedNormalized = true,
       this.eventLabels = true});
 
   @override
@@ -284,7 +286,7 @@ class FieldPaths extends StatelessWidget {
               color: getColorFromIndex(paths.indexOf(match)),
               events: match,
               eventLabels: eventLabels,
-              useRedNormalized: true),
+              useRedNormalized: useRedNormalized),
         ),
       ],       
           Align(

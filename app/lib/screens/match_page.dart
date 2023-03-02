@@ -143,7 +143,8 @@ class _MatchPageState extends State<MatchPage> {
                       sortingValue: team),
                   DataItem(
                       displayValue: TextButton(
-                        child: const Text("Record"),
+                        child: Text(
+                            "Record [${snoutData.db.teamRecordedMatches(team).length} other]"),
                         onPressed: () async {
                           RobotMatchResults? result =
                               await navigateWithEditLock(
@@ -298,6 +299,68 @@ class _MatchPageState extends State<MatchPage> {
                 ],
               ),
             ),
+          //Heatmaps for this specific match
+          Wrap(
+            spacing: 12,
+            alignment: WrapAlignment.center,
+            children: [
+              SizedBox(
+                width: 360,
+                child: Column(
+                  children: [
+                    const SizedBox(height: 16),
+                    Text("Autos",
+                        style: Theme.of(context).textTheme.titleMedium),
+                    FieldPaths(
+                      useRedNormalized: false,
+                      paths: [
+                        for (final robot in match.robot.values)
+                          robot.timelineInterpolated
+                              .where((element) => element.isInAuto)
+                              .toList()
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              for (final eventType in snoutData.db.config.matchscouting.events)
+                SizedBox(
+                  width: 360,
+                  child: Column(children: [
+                    const SizedBox(height: 16),
+                    Text(eventType.label,
+                        style: Theme.of(context).textTheme.titleMedium),
+                    FieldHeatMap(
+                        useRedNormalized: false,
+                        events: match.robot.values.fold(
+                            [],
+                            (previousValue, element) => [
+                                  ...previousValue,
+                                  ...element.timeline.where(
+                                      (event) => event.id == eventType.id)
+                                ])),
+                  ]),
+                ),
+              SizedBox(
+                  width: 360,
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 16),
+                      Text("Driving Tendencies",
+                          style: Theme.of(context).textTheme.titleMedium),
+                      FieldHeatMap(
+                          useRedNormalized: false,
+                          events: match.robot.values.fold(
+                              [],
+                              (previousValue, element) => [
+                                    ...previousValue,
+                                    ...element.timelineInterpolated
+                                        .where((event) => event.isPositionEvent)
+                                  ])),
+                    ],
+                  )),
+            ],
+          )
         ],
       ),
     );
