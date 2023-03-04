@@ -62,13 +62,12 @@ class _AllMatchesPageState extends State<AllMatchesPage> {
         if (teamNextMatch != null && scheduleDelay != null)
           Container(
             color: Theme.of(context).colorScheme.surfaceVariant,
-            padding: const EdgeInsets.only(bottom: 8),
             child: Column(
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Center(child: Text("Next Match")),
+                    Text("delay ${offsetDurationInMins(scheduleDelay)}"),
                     TextButton(
                       onPressed: () {
                         Navigator.push(
@@ -91,7 +90,7 @@ class _AllMatchesPageState extends State<AllMatchesPage> {
                         displayDurationDefault: true),
                   ],
                 ),
-                Text("delay: ${offsetDurationInMins(scheduleDelay)}"),
+                
               ],
             ),
           )

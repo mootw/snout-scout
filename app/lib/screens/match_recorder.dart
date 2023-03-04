@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:app/confirm_exit_dialog.dart';
+import 'package:app/datasheet.dart';
 import 'package:app/fieldwidget.dart';
 import 'package:app/helpers.dart';
 import 'package:app/main.dart';
@@ -71,7 +72,9 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
       child: FilledButton.tonal(
         style: FilledButton.styleFrom(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          foregroundColor: (toolColor?.computeLuminance() ?? 0) < 0.5 ? Colors.white : Colors.black,
+          foregroundColor: (toolColor?.computeLuminance() ?? 0) < 0.5
+              ? Colors.white
+              : Colors.black,
           backgroundColor: toolColor,
         ),
         onPressed: _mode == MatchMode.setup ||
@@ -102,35 +105,43 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
     );
   }
 
-  List<Widget> _getTimeline() {
-    return [
-      const Center(
-          child: Text(
-              "Check to see the map is rotated correctly! Press 'start' when you hear the field buzzer and see the field lights. It is more important to know the location of each event rather than the position of the robot at all times. Event buttons will disable if no position has been recently input.")),
-      const SizedBox(height: 32),
-      for (final item in _events.toList()) ...[
-        const Divider(height: 0),
-        Padding(
-          padding: const EdgeInsets.only(left: 12, right: 12),
+  Widget _getTimeline() {
+    return ScrollConfiguration(
+      behavior: MouseInteractableScrollBehavior(),
+      child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.only(bottom: 8),
+          reverse: true,
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(item.time.round().toString()),
-              Text(item.getLabelFromConfig(context.watch<EventDB>().db.config)),
-              IconButton(
-                color: Theme.of(context).colorScheme.error,
-                icon: const Icon(Icons.remove),
-                onPressed: () {
-                  setState(() {
-                    _events.remove(item);
-                  });
-                },
-              ),
+              Text("Tap to delete an event", style: TextStyle(color: Theme.of(context).hintColor),),
+              for (final item in _events)
+                TextButton(
+                    onPressed: () {
+                      setState(() {
+                        _events.remove(item);
+                      });
+                    },
+                    child: Text(
+                        '${item.time.round()}  ${item.getLabelFromConfig(context.watch<EventDB>().db.config)}',
+                        style: TextStyle(
+                            //TODO this lookup is really inefficient and not clean. But it does work
+                            color: item.isPositionEvent
+                                ? Theme.of(context).colorScheme.onBackground
+                                : item.getColorFromConfig(context
+                                            .watch<EventDB>()
+                                            .db
+                                            .config) !=
+                                        null
+                                    ? colorFromHex(item.getColorFromConfig(
+                                        context.watch<EventDB>().db.config)!)
+                                    : null))),
+              
+              // Text(
+              //     "Check to see the map is rotated correctly! Press 'start' when you hear the field buzzer and see the field lights. It is more important to know the location of each event rather than the position of the robot at all times. Event buttons will disable if no position has been recently input."),
             ],
-          ),
-        ),
-      ],
-    ];
+          )),
+    );
   }
 
   @override
@@ -195,22 +206,17 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
           body: Row(
             children: [
               SizedBox(
-                width: 120 * 3,
+                width: 140 * 2,
                 child: Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    Expanded(
-                      child: ListView(
-                        reverse: true,
-                        shrinkWrap: true,
-                        children: _getTimeline().reversed.toList(),
-                      ),
-                    ),
+                    _getTimeline(),
                     Wrap(
                       children: [
                         for (int i = 0; i < scoutingEvents.length; i++)
                           SizedBox(
-                            height: 60,
-                            width: 120, // -1 for some layout padding.
+                            height: 54,
+                            width: 140, // -1 for some layout padding.
                             child: _getEventButton(scoutingEvents[i]),
                           ),
                       ],
@@ -220,7 +226,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
               ),
               Expanded(
                 child: Container(
-                  constraints: const BoxConstraints(maxWidth: 600),
+                  constraints: const BoxConstraints(maxWidth: 690),
                   alignment: Alignment.bottomRight,
                   child: Transform.rotate(
                     angle: _mapRotation,
@@ -271,18 +277,14 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
         appBar: AppBar(
           title: Text("Team ${widget.team}"),
         ),
-        body: Flex(
-          direction: Axis.vertical,
+        body: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            Expanded(
-              child: ListView(
-                reverse: true,
-                children: _getTimeline().reversed.toList(),
-              ),
-            ),
             _statusAndToolBar(),
+            const Divider(),
+            _getTimeline(),
             Container(
-              width: 600,
+              width: 690,
               alignment: Alignment.bottomRight,
               child: Transform.rotate(
                 angle: _mapRotation,
@@ -325,9 +327,8 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
               children: [
                 for (int i = 0; i < scoutingEvents.length; i++)
                   SizedBox(
-                    height: 69,
-                    width: (MediaQuery.of(context).size.width / 3) -
-                        1, // -1 for some layout padding.
+                    height: 64,
+                    width: (MediaQuery.of(context).size.width / 3),
                     child: _getEventButton(scoutingEvents[i]),
                   ),
               ],
@@ -353,7 +354,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
     }
 
     return Padding(
-      padding: const EdgeInsets.all(8),
+      padding: const EdgeInsets.symmetric(horizontal: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -442,7 +443,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
         if (_mode != MatchMode.finished) {
           setState(() {
             _time++;
-            if (_time == 16) {
+            if (_time == 17) {
               //Buzz the device for end of auto
               HapticFeedback.heavyImpact();
               Timer(const Duration(milliseconds: 500), () {

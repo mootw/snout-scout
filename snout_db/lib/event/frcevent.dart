@@ -49,15 +49,15 @@ class FRCEvent {
   FRCMatch? get nextMatch => matches.values
       .toList()
       .reversed
-      .lastWhereOrNull((match) => match.results == null);
+      .lastWhereOrNull((match) => match.isComplete == false);
 
   FRCMatch? nextMatchForTeam(int team) => matchesWithTeam(team)
       .reversed
-      .lastWhereOrNull((match) => match.results == null);
+      .lastWhereOrNull((match) => match.isComplete == false);
 
   //Calculates the schedule delay by using the delay of the last match with results actual time versus the scheduled time.
   Duration? get scheduleDelay => matches.values
-      .lastWhereOrNull((match) => match.results != null)
+      .lastWhereOrNull((match) => match.isComplete)
       ?.scheduleDelay;
 
   /// Returns all matches that include a recording for a specific team

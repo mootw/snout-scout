@@ -53,4 +53,6 @@ class FRCMatch extends Comparable<FRCMatch> {
   Alliance getAllianceOf(int team) => red.contains(team) ? Alliance.red : Alliance.blue;
   
   Duration? get scheduleDelay => results?.time.difference(scheduledTime);
+
+  bool get isComplete => results != null || robot.entries.isNotEmpty;
 }

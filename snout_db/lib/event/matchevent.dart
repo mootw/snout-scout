@@ -61,9 +61,12 @@ class MatchEvent {
   bool get isInAuto => time <= 17;
   bool get isPositionEvent => id == "robot_position";
 
-  /// Gets the event label from a specific event config. It will return Robot Position for all position events regardless
+  /// Gets the event label from a specific event config. It will return Position for all position events regardless
   /// This setup while it does reduce the database redundancy can be problematic in the future if localization is desired for robot position events
-  String getLabelFromConfig (EventConfig config) => isPositionEvent ? "Robot Position" : config.matchscouting.events.firstWhereOrNull((element) => element.id == id)?.label ?? id;
+  String getLabelFromConfig (EventConfig config) => isPositionEvent ? "Position" : config.matchscouting.events.firstWhereOrNull((element) => element.id == id)?.label ?? id;
+
+  String? getColorFromConfig (EventConfig config) => config.matchscouting.events.firstWhereOrNull((element) => element.id == id)?.color;
+
 
   @override
   String toString () => 't:${time} id:${id} pos:${position}';

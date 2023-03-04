@@ -123,7 +123,6 @@ void main(List<String> args) async {
       } catch (e, s) {
         print(e);
         print(s);
-        request.response.statusCode = 500;
         request.response.write(e);
         request.response.close();
       }
