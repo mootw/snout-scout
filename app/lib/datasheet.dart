@@ -100,6 +100,7 @@ class _DataSheetState extends State<DataSheet> {
         ScrollConfiguration(
           behavior: MouseInteractableScrollBehavior(),
           child: SingleChildScrollView(
+            clipBehavior: Clip.none, //Maybe this improves the scrolling performance???
             scrollDirection: Axis.horizontal,
             child: DataTable(
               //This is to make the data more compact
@@ -160,7 +161,7 @@ class MouseInteractableScrollBehavior extends MaterialScrollBehavior {
       };
 }
 
-//Displays a rounded number or No Data if null or NaN
+/// Displays a rounded number to tenths place or No Data if null or NaN
 String numDisplay(double? input) {
   if (input == null || input.isNaN) {
     return noDataText;

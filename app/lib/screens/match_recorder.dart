@@ -111,7 +111,6 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
       behavior: MouseInteractableScrollBehavior(),
       child: SingleChildScrollView(
           scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.only(bottom: 8),
           reverse: true,
           child: Row(
             children: [
@@ -295,6 +294,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
             _statusAndToolBar(),
             const Divider(),
             _getTimeline(),
+            const SizedBox(height: 8),
             Container(
               width: 690,
               alignment: Alignment.bottomRight,
@@ -339,8 +339,8 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
               children: [
                 for (int i = 0; i < scoutingEvents.length; i++)
                   SizedBox(
-                    height: 64,
-                    width: (MediaQuery.of(context).size.width / 3),
+                    height: 54,
+                    width: (MediaQuery.of(context).size.width / 2),
                     child: _getEventButton(scoutingEvents[i]),
                   ),
               ],
@@ -379,15 +379,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
               },
               icon: const Icon(Icons.rotate_right)),
           const SizedBox(width: 12),
-          Text("Time: $_time"),
-          const SizedBox(width: 12),
-          Text(_mode == MatchMode.setup
-              ? "Waiting"
-              : _mode == MatchMode.playing
-                  ? _time > 17
-                      ? "teleop"
-                      : "auto"
-                  : ""),
+          Text("time $_time"),
           const SizedBox(width: 12),
           if (robotPicture == null) const Text("No Picture"),
           if (robotPicture != null)
