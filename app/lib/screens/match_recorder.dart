@@ -45,8 +45,9 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
       _events.toList().lastWhereOrNull((event) => event.isPositionEvent);
   FieldPosition? get robotPosition => lastMoveEvent?.position;
 
+  //Only use in buildcontext
   List<MatchEventConfig> get scoutingEvents =>
-      context.read<EventDB>().db.config.matchscouting.events;
+      context.watch<EventDB>().db.config.matchscouting.events;
 
   @override
   void dispose() {
@@ -100,7 +101,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                   }
                 });
               },
-        child: Text(tool.label),
+        child: Text(tool.label, textAlign: TextAlign.center),
       ),
     );
   }
@@ -114,7 +115,10 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
           reverse: true,
           child: Row(
             children: [
-              Text("Tap to delete an event", style: TextStyle(color: Theme.of(context).hintColor),),
+              Text(
+                "Tap to delete an event",
+                style: TextStyle(color: Theme.of(context).hintColor),
+              ),
               for (final item in _events)
                 TextButton(
                     onPressed: () {
@@ -136,7 +140,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                                     ? colorFromHex(item.getColorFromConfig(
                                         context.watch<EventDB>().db.config)!)
                                     : null))),
-              
+
               // Text(
               //     "Check to see the map is rotated correctly! Press 'start' when you hear the field buzzer and see the field lights. It is more important to know the location of each event rather than the position of the robot at all times. Event buttons will disable if no position has been recently input."),
             ],
@@ -206,20 +210,28 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
           body: Row(
             children: [
               SizedBox(
-                width: 140 * 2,
+                width: 130 * 2,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     _getTimeline(),
-                    Wrap(
-                      children: [
-                        for (int i = 0; i < scoutingEvents.length; i++)
-                          SizedBox(
-                            height: 54,
-                            width: 140, // -1 for some layout padding.
-                            child: _getEventButton(scoutingEvents[i]),
-                          ),
-                      ],
+                    Expanded(
+                      child: LayoutBuilder(builder: (context, constraints) {
+                        final newConstraints = constraints.tighten(height: 500);
+                        return Wrap(
+                          children: [
+                            for (int i = 0; i < scoutingEvents.length; i++)
+                              SizedBox(
+                                height: newConstraints.maxHeight /
+                                    ((scoutingEvents.length +
+                                            (scoutingEvents.length % 2)) /
+                                        2),
+                                width: 130,
+                                child: _getEventButton(scoutingEvents[i]),
+                              ),
+                          ],
+                        );
+                      }),
                     ),
                   ],
                 ),
