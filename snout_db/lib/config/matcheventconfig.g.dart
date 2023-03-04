@@ -11,6 +11,7 @@ MatchEventConfig _$MatchEventConfigFromJson(Map<String, dynamic> json) =>
       id: json['id'] as String,
       mode: $enumDecode(_$MatchSegmentEnumMap, json['mode']),
       label: json['label'] as String,
+      color: json['color'] as String?,
     );
 
 Map<String, dynamic> _$MatchEventConfigToJson(MatchEventConfig instance) =>
@@ -18,6 +19,7 @@ Map<String, dynamic> _$MatchEventConfigToJson(MatchEventConfig instance) =>
       'id': instance.id,
       'label': instance.label,
       'mode': _$MatchSegmentEnumMap[instance.mode]!,
+      'color': instance.color,
     };
 
 const _$MatchSegmentEnumMap = {

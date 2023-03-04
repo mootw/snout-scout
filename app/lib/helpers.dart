@@ -17,3 +17,9 @@ Color getAllianceColor (Alliance alliance) => alliance == Alliance.red ? Colors.
 Color getColorFromIndex(int index) =>
     HSVColor.fromAHSV(1, (100 + (index * pi * 10000)) % 360, 0.8, 0.7)
         .toColor();
+
+
+Color colorFromHex(String hexString) {
+  final hexCode = hexString.replaceAll('#', '');
+  return Color(int.parse('FF$hexCode', radix: 16));
+}

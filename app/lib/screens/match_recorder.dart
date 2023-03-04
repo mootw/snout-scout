@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:app/confirm_exit_dialog.dart';
 import 'package:app/fieldwidget.dart';
+import 'package:app/helpers.dart';
 import 'package:app/main.dart';
 import 'package:app/scouting_tools/scouting_tool.dart';
 import 'package:collection/collection.dart';
@@ -63,8 +64,16 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
     final bool disabledForTeleop =
         _time > 17 && tool.mode == MatchSegment.auto ? true : false;
 
-    return Card(
-      child: MaterialButton(
+    Color? toolColor = tool.color != null ? colorFromHex(tool.color!) : null;
+
+    return Padding(
+      padding: const EdgeInsets.all(2.0),
+      child: FilledButton.tonal(
+        style: FilledButton.styleFrom(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          foregroundColor: (toolColor?.computeLuminance() ?? 0) < 0.5 ? Colors.white : Colors.black,
+          backgroundColor: toolColor,
+        ),
         onPressed: _mode == MatchMode.setup ||
                 disabledForAuto ||
                 disabledForTeleop ||
@@ -367,7 +376,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                       : "auto"
                   : ""),
           const SizedBox(width: 12),
-          if (robotPicture == null) const Text("No Picture Available"),
+          if (robotPicture == null) const Text("No Picture"),
           if (robotPicture != null)
             Center(
               child: FilledButton.tonal(
@@ -385,7 +394,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                           );
                         });
                   },
-                  child: const Text("Robot Picture")),
+                  child: const Text("Picture")),
             ),
           const SizedBox(width: 12),
           FilledButton.icon(
