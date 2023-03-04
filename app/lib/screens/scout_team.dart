@@ -75,8 +75,6 @@ class _PitScoutTeamPageState extends State<PitScoutTeamPage> {
           child: ListView(
             shrinkWrap: true,
             children: [
-              const Text(
-                  "Pit scouting data should be subjective or complementary (photo, team name, intake/scoring ability, pick information)"),
               for (final item in widget.config.pitscouting)
                 Container(
                     padding: const EdgeInsets.all(12),
