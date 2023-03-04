@@ -1,1 +1,0 @@
-App has built in query where you can query the data and the app will try and display and transform it. This means that special care needs to be taken to make the database as queryable as possible, however some things like selecting a match will require the app ensure that 
