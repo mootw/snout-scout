@@ -35,3 +35,10 @@
 - A local area network is set up at compeition and origin server is on that network.
 - This is the most durable network setup but requires devices to tether to the network to update meaning higher latency.
 - Only devices physically located near the origin can update with it.
+
+
+# Data Size Estimate
+Snout Scout stores all data in a single JSON file. Here is an approximate breakdown of the rough **DISK** size of the a database including some of the parts. This is an estimate and real world results will vary.
+- Database for a 40 team 80 match event ~5MB (pit scouting with 1 image; 0.5MB metadata; 2MB pit scouting data; 2.5MB match data)
+- A match recording for 1 team could be as large as 4-8KB (~1KB compressed)
+- Image (As compressed and sized in the app): ~50KB

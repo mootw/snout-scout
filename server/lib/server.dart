@@ -12,7 +12,9 @@ import 'package:snout_db/event/match.dart';
 
 import 'package:snout_db/patch.dart';
 
-//TODO compress response data using gzip
+
+//TODO implement https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/ETag
+
 
 final env = DotEnv(includePlatformEnvironment: true)..load();
 int serverPort = 6749;
@@ -52,18 +54,21 @@ void main(List<String> args) async {
   //BY THE SERVER. IF I LEAVE PING DURATION NULL THE CONNECTION CLOSES 1006 AFTER 60 seconds
   //I think this is a client side or proxy side thing.
   Timer.periodic(Duration(seconds: 30), (timer) {
-    for(final event in loadedEvents.values) {
+    for (final event in loadedEvents.values) {
       for (final listener in event.listeners) {
         listener.add("PING");
       }
     }
   });
-  
 
   await loadEvents();
 
   HttpServer server =
       await HttpServer.bind(InternetAddress.anyIPv4, serverPort);
+  //Enable GZIP compression since every byte counts and the performance hit is
+  //negligable for the 30%+ compression depending on how much of the data is image
+  server.autoCompress = true;
+
   print('Server started: ${server.address} port ${server.port}');
 
   //Listen for requests
@@ -91,7 +96,8 @@ void main(List<String> args) async {
         //and used as the primary connection indicator. Maybe 30 seconds
         websocket.pingInterval = Duration(hours: 12);
         //Remove the websocket from the listeners when it is closed for any reason.
-        websocket.done.then((value) => loadedEvents[event]?.listeners.remove(websocket));
+        websocket.done
+            .then((value) => loadedEvents[event]?.listeners.remove(websocket));
         loadedEvents[event]?.listeners.add(websocket);
       });
       return;
@@ -100,7 +106,6 @@ void main(List<String> args) async {
     //Load schedule stuff.
     if (request.uri.pathSegments.length > 1 &&
         request.uri.pathSegments[0] == 'load_schedule') {
-
       final eventID = request.uri.pathSegments[1];
 
       File? f = loadedEvents[eventID]?.file;
@@ -116,7 +121,7 @@ void main(List<String> args) async {
         final eventData = FRCEvent.fromJson(jsonDecode(await f.readAsString()));
 
         await loadScheduleFromTBA(eventData, eventID);
-        
+
         request.response.write("Done adding matches");
         request.response.close();
         return;
@@ -162,7 +167,7 @@ void main(List<String> args) async {
                 '/${request.uri.pathSegments.sublist(2).join("/")}');
             dbJson = pointer.read(dbJson);
             request.response.headers.contentType =
-            new ContentType('application', 'json', charset: 'utf-8');
+                new ContentType('application', 'json', charset: 'utf-8');
             request.response.write(jsonEncode(dbJson));
             request.response.close();
             return;
@@ -249,11 +254,10 @@ void handleEditLockRequest(HttpRequest request) {
 
 //https://www.thebluealliance.com/apidocs/v3
 Future loadScheduleFromTBA(FRCEvent eventData, String eventID) async {
-
-  if(eventData.config.tbaEventId == null) {
+  if (eventData.config.tbaEventId == null) {
     throw Exception("TBA event ID cannot be null in the config!");
   }
-  
+
   //Get playoff level matches
   final apiData = await http.get(
       Uri.parse(
@@ -261,7 +265,6 @@ Future loadScheduleFromTBA(FRCEvent eventData, String eventID) async {
       headers: {
         'X-TBA-Auth-Key': env['X-TBA-Auth-Key']!,
       });
-  
 
   //Alright I THINK the timezone for the iso string is the one local to the event, but this would be chaotic
   //(and not to the ISO8601 standard since it should show timezone offset meaning the actual time is WRONG)
@@ -271,7 +274,8 @@ Future loadScheduleFromTBA(FRCEvent eventData, String eventID) async {
 
   for (final match in matches) {
     String key = match['key'];
-    DateTime startTime = DateTime.fromMillisecondsSinceEpoch(match['time'] * 1000, isUtc: true);
+    DateTime startTime =
+        DateTime.fromMillisecondsSinceEpoch(match['time'] * 1000, isUtc: true);
 
     //"red": {
     //   "dq_team_keys": [],
@@ -284,11 +288,11 @@ Future loadScheduleFromTBA(FRCEvent eventData, String eventID) async {
     //   ]
     // }
     List<int> red = [
-      for(String team in match['alliances']['red']['team_keys'])
+      for (String team in match['alliances']['red']['team_keys'])
         int.parse(team.substring(3)),
     ];
     List<int> blue = [
-      for(String team in match['alliances']['blue']['team_keys'])
+      for (String team in match['alliances']['blue']['team_keys'])
         int.parse(team.substring(3)),
     ];
 
@@ -298,11 +302,11 @@ Future loadScheduleFromTBA(FRCEvent eventData, String eventID) async {
     //Generate a human readable description for each match
     String description;
     //qm, ef, qf, sf, f
-    if(compLevel == "qm") {
+    if (compLevel == "qm") {
       description = "Quals $matchNumber";
     } else if (compLevel == "ef") {
       description = "Eighths $matchNumber Match $setNumber";
-    }else if (compLevel == "qf") {
+    } else if (compLevel == "qf") {
       description = "Quarters $matchNumber Match $setNumber";
     } else if (compLevel == "sf") {
       description = "Semis $matchNumber Match $setNumber";
@@ -334,8 +338,7 @@ Future loadScheduleFromTBA(FRCEvent eventData, String eventID) async {
 
       print(jsonEncode(patch));
 
-      await http.put(
-          Uri.parse("http://localhost:$serverPort/events/$eventID"),
+      await http.put(Uri.parse("http://localhost:$serverPort/events/$eventID"),
           body: jsonEncode(patch));
     }
   }
