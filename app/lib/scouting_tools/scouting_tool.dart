@@ -14,7 +14,8 @@ class ScoutingToolWidget extends StatefulWidget {
   final SurveyItem tool;
   final PitScoutResult survey;
 
-  const ScoutingToolWidget({super.key, required this.tool, required this.survey});
+  const ScoutingToolWidget(
+      {super.key, required this.tool, required this.survey});
 
   @override
   State<ScoutingToolWidget> createState() => _ScoutingToolWidgetState();
@@ -24,15 +25,13 @@ class _ScoutingToolWidgetState extends State<ScoutingToolWidget> {
   final _myController = TextEditingController();
 
   get _value => widget.survey[widget.tool.id];
-  set _value (dynamic newValue) => widget.survey[widget.tool.id] = newValue;
+  set _value(dynamic newValue) => widget.survey[widget.tool.id] = newValue;
 
   @override
   void initState() {
     super.initState();
-    if (_value == null && widget.tool.type == SurveyItemType.toggle) {
-      _value = false;
-    }
-    if (widget.tool.type == SurveyItemType.text || widget.tool.type == SurveyItemType.number) {
+    if (widget.tool.type == SurveyItemType.text ||
+        widget.tool.type == SurveyItemType.number) {
       _myController.text = _value?.toString() ?? "";
     }
   }
@@ -62,7 +61,7 @@ class _ScoutingToolWidgetState extends State<ScoutingToolWidget> {
       return TextFormField(
         //Numbers or no value only
         validator: (value) {
-          if(value == null || value == "") {
+          if (value == null || value == "") {
             //No value is fine
             return null;
           }
@@ -71,7 +70,7 @@ class _ScoutingToolWidgetState extends State<ScoutingToolWidget> {
         },
         controller: _myController,
         onChanged: (text) {
-          if(text == "") {
+          if (text == "") {
             //Empty input should be null
             _value = null;
           }
@@ -111,6 +110,33 @@ class _ScoutingToolWidgetState extends State<ScoutingToolWidget> {
     if (widget.tool.type == SurveyItemType.toggle) {
       return ListTile(
         title: Text(widget.tool.label),
+        trailing: SegmentedButton<bool?>(
+          segments: const <ButtonSegment<bool?>>[
+            ButtonSegment<bool?>(
+                value: false,
+                label: Text('false'),
+                icon: Icon(Icons.cancel, color: Colors.redAccent)),
+            ButtonSegment<bool?>(
+                value: null,
+                label: Text('null'),
+                // icon: Icon(Icons.calendar_view_week)
+            ),
+            ButtonSegment<bool?>(
+                value: true,
+                label: Text('true'),
+                icon: Icon(Icons.check_circle, color: Colors.greenAccent)),
+          ],
+          selected: {_value},
+          onSelectionChanged: (Set<bool?> newValue) {
+            setState(() {
+              _value = newValue.first;
+            });
+          },
+        ),
+      );
+
+      return ListTile(
+        title: Text(widget.tool.label),
         trailing: Switch(
             value: _value,
             onChanged: (newValue) {
@@ -128,8 +154,12 @@ class _ScoutingToolWidgetState extends State<ScoutingToolWidget> {
             onPressed: () async {
               //TAKE PHOTO
               final ImagePicker picker = ImagePicker();
-              final XFile? photo = await picker.pickImage(source: ImageSource.camera, maxWidth: scoutImageSize, maxHeight: scoutImageSize, imageQuality: 50);
-              if(photo != null) {
+              final XFile? photo = await picker.pickImage(
+                  source: ImageSource.camera,
+                  maxWidth: scoutImageSize,
+                  maxHeight: scoutImageSize,
+                  imageQuality: 50);
+              if (photo != null) {
                 Uint8List bytes = await photo.readAsBytes();
                 setState(() {
                   _value = base64Encode(bytes);
@@ -137,7 +167,12 @@ class _ScoutingToolWidgetState extends State<ScoutingToolWidget> {
               }
             }),
         title: Text(widget.tool.label),
-        subtitle: _value == null ? const Text("No Image") : SizedBox(height: scoutImageSize, child: Image.memory(Uint8List.fromList(base64Decode(_value).cast<int>()))),
+        subtitle: _value == null
+            ? const Text("No Image")
+            : SizedBox(
+                height: scoutImageSize,
+                child: Image.memory(
+                    Uint8List.fromList(base64Decode(_value).cast<int>()))),
       );
     }
 
