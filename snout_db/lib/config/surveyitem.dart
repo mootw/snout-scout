@@ -4,12 +4,12 @@ part 'surveyitem.g.dart';
 
 @JsonSerializable()
 class SurveyItem {
-  String id;
-  String label;
-  SurveyItemType type;
+  final String id;
+  final String label;
+  final SurveyItemType type;
 
   //Used by the selector type
-  List<String>? options;
+  final List<String>? options;
   //TODO automatically calculate scoring and whatnot; maybe an option in the future
   //List<dynamic>? options_values;
 

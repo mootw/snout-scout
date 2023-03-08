@@ -184,7 +184,7 @@ class EventDB extends ChangeNotifier {
       connected = false;
       notifyListeners();
       //Re-attempt a connection after some time
-      Timer(const Duration(seconds: 10), () {
+      Timer(const Duration(seconds: 4), () {
         if (connected == false) {
           reconnect();
         }

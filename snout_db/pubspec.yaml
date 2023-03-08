@@ -10,6 +10,8 @@ dependencies:
   json_annotation: ^4.8.0
 
   rfc_6901: ^0.1.1
+  
+  eval_ex: ^1.1.7
 
 dev_dependencies:
   build_runner: ^2.3.3

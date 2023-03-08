@@ -1,21 +1,19 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'matcheventconfig.dart';
+part of 'matchevent_process.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-MatchEventConfig _$MatchEventConfigFromJson(Map<String, dynamic> json) =>
-    MatchEventConfig(
-      id: json['id'] as String,
+MatchEventProcess _$MatchEventProcessFromJson(Map<String, dynamic> json) =>
+    MatchEventProcess(
       label: json['label'] as String,
-      color: json['color'] as String?,
+      expression: json['expression'] as String,
     );
 
-Map<String, dynamic> _$MatchEventConfigToJson(MatchEventConfig instance) =>
+Map<String, dynamic> _$MatchEventProcessToJson(MatchEventProcess instance) =>
     <String, dynamic>{
-      'id': instance.id,
       'label': instance.label,
-      'color': instance.color,
+      'expression': instance.expression,
     };

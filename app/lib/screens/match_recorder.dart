@@ -57,15 +57,6 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
 
   Widget _getEventButton(MatchEventConfig tool) {
     final fieldStyle = context.read<EventDB>().db.config.fieldStyle;
-
-    //Disable the button if it is for teleop ONLY during the auto phase.
-    final bool disabledForAuto =
-        _time <= 17 && tool.mode == MatchSegment.teleop ? true : false;
-
-    //Disable the button if it is for teleop ONLY during the auto phase.
-    final bool disabledForTeleop =
-        _time > 17 && tool.mode == MatchSegment.auto ? true : false;
-
     Color? toolColor = tool.color != null ? colorFromHex(tool.color!) : null;
 
     return Padding(
@@ -79,8 +70,6 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
           backgroundColor: toolColor,
         ),
         onPressed: _mode == MatchMode.setup ||
-                disabledForAuto ||
-                disabledForTeleop ||
                 lastMoveEvent == null ||
                 _time - lastMoveEvent!.time > 4
             ? null

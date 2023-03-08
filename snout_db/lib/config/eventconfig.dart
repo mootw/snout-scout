@@ -7,17 +7,17 @@ part 'eventconfig.g.dart';
 @JsonSerializable()
 class EventConfig {
   ///Human readable name for this event (the one displayed on the status bar)
-  String name;
+  final String name;
   //year for this season; used to determine which field to display
-  int season;
+  final int season;
   //Event ID on TBA used to link rankings and other data (Optional)
-  String? tbaEventId;
+  final String? tbaEventId;
   //Determines how the app will normalize event positions
-  FieldStyle fieldStyle;
+  final FieldStyle fieldStyle;
   //Your team number
-  int team;
-  List<SurveyItem> pitscouting;
-  MatchScouting matchscouting;
+  final int team;
+  final List<SurveyItem> pitscouting;
+  final MatchScouting matchscouting;
 
   EventConfig(
       {required this.name,

@@ -6,14 +6,12 @@ part 'matcheventconfig.g.dart';
 @JsonSerializable()
 class MatchEventConfig {
 
-  String id;
-  String label;
-  MatchSegment mode;
-  String? color;
+  final String id;
+  final String label;
+  final String? color;
 
   MatchEventConfig({
     required this.id,
-    required this.mode,
     required this.label,
     this.color,
   });
@@ -22,5 +20,3 @@ class MatchEventConfig {
       _$MatchEventConfigFromJson(json);
   Map<String, dynamic> toJson() => _$MatchEventConfigToJson(this);
 }
-
-enum MatchSegment { auto, teleop, both }
