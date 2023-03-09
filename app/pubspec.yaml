@@ -44,6 +44,8 @@ dependencies:
   fl_chart: ^0.61.0
   # Potential alternate charting package: https://pub.dev/packages/community_charts_flutter
 
+  eval_ex: ^1.1.7
+
   #TOOD unused right now, but sharing might make sense in the future
   #for things like giving people the app easily, and sharing data
   share_plus: ^6.3.1 

@@ -1,6 +1,13 @@
 import 'dart:collection';
 
+import 'package:decimal/decimal.dart';
+import 'package:eval_ex/built_ins.dart';
+import 'package:eval_ex/expression.dart';
+import 'package:eval_ex/func.dart';
+import 'package:eval_ex/lazy_function.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:snout_db/config/matchevent_process.dart';
+import 'package:snout_db/config/matcheventconfig.dart';
 import 'package:snout_db/event/matchevent.dart';
 import 'package:snout_db/event/pitscoutresult.dart';
 import 'match.dart';
@@ -26,9 +33,9 @@ class FRCEvent {
   //Enforce that all matches are sorted
   FRCEvent(
       {required this.config,
-      required this.teams,
-      required Map<String, FRCMatch> matches,
-      required this.pitscouting})
+      this.teams = const [],
+      Map<String, FRCMatch> matches = const {},
+      this.pitscouting = const {}})
       //Enforce that the matches are sorted correctly
       : matches = SplayTreeMap.from(matches,
             (key1, key2) => Comparable.compare(matches[key1]!, matches[key2]!));
@@ -115,5 +122,76 @@ class FRCEvent {
     //Convert the map to be a percentage rather than total sum
     toReturn = toReturn.map((key, value) => MapEntry(key, value / totalValues));
     return toReturn;
+  }
+
+  double? runMatchTimelineProcess(
+      MatchEventProcess process, Iterable<MatchEvent>? timeline) {
+    if (timeline == null) {
+      return null;
+    }
+    //Prefill the map of events with zero
+    // Map<String, int> sum = {
+    //   for (final event in config.matchscouting.events) event.id: 0,
+    // };
+    // timeline.forEach((element) {
+    //   sum[element.id] = (sum[element.id] ?? 0) + 1;
+    // });
+
+    //Load all scouting values into the expression
+    // sum.forEach((key, value) {
+    //   exp.setStringVariable(key, value.toString());
+    // });
+
+    final exp = Expression(process.expression);
+
+    //adder that counts the number of a specific event in the timeline
+    exp.addLazyFunction(LazyFunctionImpl("EVENT", 1, fEval: (params) {
+      int value = timeline
+          .where((element) => element.id == params[0].getString())
+          .length;
+      return LazyNumberImpl(
+          eval: () => Decimal.fromInt(value),
+          getString: () => value.toString());
+    }));
+
+    //adder that counts the number of a specific event in the timeline
+    exp.addLazyFunction(LazyFunctionImpl("AUTOEVENT", 1, fEval: (params) {
+      int value = timeline
+          .where((element) =>
+              element.isInAuto && element.id == params[0].getString())
+          .length;
+      return LazyNumberImpl(
+          eval: () => Decimal.fromInt(value),
+          getString: () => value.toString());
+    }));
+
+    try {
+      return exp.eval()?.toDouble();
+    } catch (e) {
+      print(e);
+      return null;
+    }
+  }
+
+  /// Returns the average value of a given metric per match over all recorded matches.
+  /// returns null if there is no data. Otherwise we get weird NaN stuff and
+  /// if you add NaN to anything it completely destroys the whole calculation
+  /// There is an optional where clause to filter the events out for a specific type
+  double? teamAverageProcess(int team, MatchEventProcess process) {
+    final recordedMatches = teamRecordedMatches(team);
+
+    if (recordedMatches.isEmpty) {
+      //TODO handle this nicer by testing for NaN as well on the fold operation
+      return null;
+    }
+
+    return recordedMatches.fold<double>(
+            0,
+            (previousValue, match) =>
+                previousValue +
+                (runMatchTimelineProcess(process,
+                        match.value.robot[team.toString()]?.timeline) ??
+                    0)) /
+        recordedMatches.length;
   }
 }

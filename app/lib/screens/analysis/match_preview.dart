@@ -73,12 +73,10 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
       ]),
       body: ListView(
         children: [
-          DataSheet(title: "Sum Alliance Average", columns: [
+          DataSheet(title: "Alliance Sum of Avg", columns: [
             DataItem.fromText("Alliance"),
-            for (final item in data.db.config.matchscouting.events)
+            for (final item in data.db.config.matchscouting.eventProcess)
               DataItem.fromText(item.label),
-            for (final item in data.db.config.matchscouting.events)
-              DataItem.fromText("Auto:\n${item.label}"),
           ], rows: [
             [
               const DataItem(
@@ -86,20 +84,12 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                       Text("RED", style: TextStyle(color: Colors.red)),
                   exportValue: "RED",
                   sortingValue: "RED"),
-              for (final event in data.db.config.matchscouting.events)
+              for (final item in data.db.config.matchscouting.eventProcess)
                 DataItem.fromNumber(_red.fold<double>(
                     0,
                     (previousValue, team) =>
                         previousValue +
-                        (data.db.teamAverageMetric(team, event.id) ?? 0))),
-              for (final event in data.db.config.matchscouting.events)
-                DataItem.fromNumber(_red.fold<double>(
-                    0,
-                    (previousValue, team) =>
-                        previousValue +
-                        (data.db.teamAverageMetric(
-                                team, event.id, (event) => event.isInAuto) ??
-                            0))),
+                        (data.db.teamAverageProcess(team, item) ?? 0))),
             ],
             [
               const DataItem(
@@ -107,29 +97,19 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                       Text("BLUE", style: TextStyle(color: Colors.blue)),
                   exportValue: "BLUE",
                   sortingValue: "BLUE"),
-              for (final event in data.db.config.matchscouting.events)
+              for (final item in data.db.config.matchscouting.eventProcess)
                 DataItem.fromNumber(_blue.fold<double>(
                     0,
                     (previousValue, team) =>
                         previousValue +
-                        (data.db.teamAverageMetric(team, event.id) ?? 0))),
-              for (final event in data.db.config.matchscouting.events)
-                DataItem.fromNumber(_blue.fold<double>(
-                    0,
-                    (previousValue, team) =>
-                        previousValue +
-                        (data.db.teamAverageMetric(
-                                team, event.id, (event) => event.isInAuto) ??
-                            0))),
+                        (data.db.teamAverageProcess(team, item) ?? 0))),
             ]
           ]),
           const Divider(height: 42),
           DataSheet(title: "Team Averages", columns: [
             DataItem.fromText("Team"),
-            for (final item in data.db.config.matchscouting.events)
+            for (final item in data.db.config.matchscouting.eventProcess)
               DataItem.fromText(item.label),
-            for (final item in data.db.config.matchscouting.events)
-              DataItem.fromText("AUTO\n${item.label}"),
             for (final item in data.db.config.matchscouting.postgame)
               DataItem.fromText(item.label),
           ], rows: [
@@ -150,12 +130,8 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                     ),
                     exportValue: team.toString(),
                     sortingValue: team),
-                for (final eventType in data.db.config.matchscouting.events)
-                  DataItem.fromNumber(
-                      data.db.teamAverageMetric(team, eventType.id)),
-                for (final eventType in data.db.config.matchscouting.events)
-                  DataItem.fromNumber(data.db.teamAverageMetric(
-                      team, eventType.id, (event) => event.isInAuto)),
+                for (final item in data.db.config.matchscouting.eventProcess)
+                  DataItem.fromNumber(data.db.teamAverageProcess(team, item)),
                 for (final item in data.db.config.matchscouting.postgame)
                   DataItem.fromText(data.db
                       .teamPostGameSurveyByFrequency(team, item.id)

@@ -23,10 +23,8 @@ class _DataTablePageState extends State<DataTablePage> {
       children: [
         DataSheet(title: 'Team Averages', columns: [
           DataItem.fromText("Team"),
-          for (final eventType in data.db.config.matchscouting.events)
-            DataItem.fromText(eventType.label),
-          for (final eventType in data.db.config.matchscouting.events)
-            DataItem.fromText("auto\n${eventType.label}"),
+          for (final item in data.db.config.matchscouting.eventProcess)
+              DataItem.fromText(item.label),
           for (final pitSurvey in data.db.config.pitscouting
               .where((element) => element.type != SurveyItemType.picture))
             DataItem.fromText(pitSurvey.label),
@@ -48,12 +46,9 @@ class _DataTablePageState extends State<DataTablePage> {
                   ),
                   exportValue: team.toString(),
                   sortingValue: team),
-              for (final eventType in data.db.config.matchscouting.events)
+              for (final item in data.db.config.matchscouting.eventProcess)
                 DataItem.fromNumber(
-                    data.db.teamAverageMetric(team, eventType.id)),
-              for (final eventType in data.db.config.matchscouting.events)
-                DataItem.fromNumber(
-                    data.db.teamAverageMetric(team, eventType.id, (event) => event.isInAuto)),
+                    data.db.teamAverageProcess(team, item)),
               for (final pitSurvey in data.db.config.pitscouting
                   .where((element) => element.type != SurveyItemType.picture))
                 DataItem.fromText(data
@@ -67,10 +62,8 @@ class _DataTablePageState extends State<DataTablePage> {
           columns: [
             DataItem.fromText("Match"),
             DataItem.fromText("Team"),
-            for (final item in data.db.config.matchscouting.events)
+            for (final item in data.db.config.matchscouting.eventProcess)
               DataItem.fromText(item.label),
-            for (final item in data.db.config.matchscouting.events)
-              DataItem.fromText("auto\n${item.label}"),
             for (final item in data.db.config.matchscouting.postgame)
               DataItem.fromText(item.label),
           ],
@@ -111,16 +104,9 @@ class _DataTablePageState extends State<DataTablePage> {
                       ),
                       exportValue: robot.key,
                       sortingValue: robot.key),
-                  for (final item in data.db.config.matchscouting.events)
-                    DataItem.fromNumber(match.value.robot[robot.key]?.timeline
-                        .where((event) => event.id == item.id)
-                        .length
-                        .toDouble()),
-                  for (final item in data.db.config.matchscouting.events)
-                    DataItem.fromNumber(match.value.robot[robot.key]?.timeline
-                        .where((event) => event.isInAuto && event.id == item.id)
-                        .length
-                        .toDouble()),
+                  for (final item in data.db.config.matchscouting.eventProcess)
+                    DataItem.fromNumber(data.db.runMatchTimelineProcess(
+                        item, match.value.robot[robot.key]?.timeline)),
                   for (final item in data.db.config.matchscouting.postgame
                       .where(
                           (element) => element.type != SurveyItemType.picture))

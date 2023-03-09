@@ -97,10 +97,8 @@ class _TeamViewPageState extends State<TeamViewPage> {
               //Data is a list of rows and columns
               columns: [
                 DataItem.fromText("Match"),
-                for (final event in data.db.config.matchscouting.events)
-                  DataItem.fromText(event.label),
-                for (final event in data.db.config.matchscouting.events)
-                  DataItem.fromText('auto\n${event.label}'),
+                for (final item in data.db.config.matchscouting.eventProcess)
+                  DataItem.fromText(item.label),
                 for (final pitSurvey in data.db.config.matchscouting.postgame
                     .where((element) => element.type != SurveyItemType.picture))
                   DataItem.fromText(pitSurvey.label),
@@ -133,19 +131,10 @@ class _TeamViewPageState extends State<TeamViewPage> {
                             )),
                         exportValue: match.description,
                         sortingValue: match),
-                    for (final eventId in data.db.config.matchscouting.events)
-                      DataItem.fromNumber(match
-                          .robot[widget.teamNumber.toString()]?.timeline
-                          .where((event) => event.id == eventId.id)
-                          .length
-                          .toDouble()),
-                    for (final eventId in data.db.config.matchscouting.events)
-                      DataItem.fromNumber(match
-                          .robot[widget.teamNumber.toString()]?.timeline
-                          .where((event) =>
-                              event.isInAuto && event.id == eventId.id)
-                          .length
-                          .toDouble()),
+                    for (final item
+                        in data.db.config.matchscouting.eventProcess)
+                      DataItem.fromNumber(data.db.runMatchTimelineProcess(item,
+                          match.robot[widget.teamNumber.toString()]?.timeline)),
                     for (final pitSurvey in data
                         .db.config.matchscouting.postgame
                         .where((element) =>

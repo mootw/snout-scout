@@ -120,7 +120,6 @@ class _ScoutingToolWidgetState extends State<ScoutingToolWidget> {
             ButtonSegment<bool?>(
                 value: null,
                 label: Text('unknown'),
-                // icon: Icon(Icons.calendar_view_week)
             ),
             ButtonSegment<bool?>(
                 value: true,

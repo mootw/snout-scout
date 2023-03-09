@@ -19,14 +19,15 @@ class EventConfig {
   final List<SurveyItem> pitscouting;
   final MatchScouting matchscouting;
 
-  EventConfig(
+  const EventConfig(
       {required this.name,
       required this.team,
       required this.season,
-      required this.tbaEventId,
-      required this.fieldStyle,
-      required this.pitscouting,
-      required this.matchscouting});
+      this.tbaEventId,
+      this.fieldStyle = FieldStyle.rotated,
+      this.pitscouting = const [],
+      this.matchscouting = const MatchScouting()
+      });
 
   factory EventConfig.fromJson(Map<String, dynamic> json) =>
       _$EventConfigFromJson(json);

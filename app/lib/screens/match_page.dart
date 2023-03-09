@@ -102,10 +102,8 @@ class _MatchPageState extends State<MatchPage> {
             columns: [
               DataItem.fromText("Team"),
               DataItem.fromText("Timeline"),
-              for (final item in snoutData.db.config.matchscouting.events)
+              for (final item in snoutData.db.config.matchscouting.eventProcess)
                 DataItem.fromText(item.label),
-              for (final item in snoutData.db.config.matchscouting.events)
-                DataItem.fromText('auto\n${item.label}'),
               for (final item in snoutData.db.config.matchscouting.postgame)
                 DataItem.fromText(item.label),
             ],
@@ -183,16 +181,10 @@ class _MatchPageState extends State<MatchPage> {
                       ),
                       exportValue: "Record",
                       sortingValue: "Record"),
-                  for (final item in snoutData.db.config.matchscouting.events)
-                    DataItem.fromNumber(match.robot[team.toString()]?.timeline
-                        .where((event) => event.id == item.id)
-                        .length
-                        .toDouble()),
-                  for (final item in snoutData.db.config.matchscouting.events)
-                    DataItem.fromNumber(match.robot[team.toString()]?.timeline
-                        .where((event) => event.isInAuto && event.id == item.id)
-                        .length
-                        .toDouble()),
+                  for (final item
+                      in snoutData.db.config.matchscouting.eventProcess)
+                    DataItem.fromNumber(snoutData.db.runMatchTimelineProcess(
+                        item, match.robot[team.toString()]?.timeline)),
                   for (final item in snoutData.db.config.matchscouting.postgame
                       .where(
                           (element) => element.type != SurveyItemType.picture))

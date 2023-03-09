@@ -12,5 +12,7 @@ dependencies:
   rfc_6901: ^0.1.1
   dotenv: ^4.0.1
   http: ^0.13.5
+  
+  eval_ex: ^1.1.7
 
 dev_dependencies:
