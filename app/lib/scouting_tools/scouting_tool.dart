@@ -111,6 +111,7 @@ class _ScoutingToolWidgetState extends State<ScoutingToolWidget> {
       return ListTile(
         title: Text(widget.tool.label),
         trailing: SegmentedButton<bool?>(
+          showSelectedIcon: false,
           segments: const <ButtonSegment<bool?>>[
             ButtonSegment<bool?>(
                 value: false,
@@ -118,7 +119,7 @@ class _ScoutingToolWidgetState extends State<ScoutingToolWidget> {
                 icon: Icon(Icons.cancel, color: Colors.redAccent)),
             ButtonSegment<bool?>(
                 value: null,
-                label: Text('null'),
+                label: Text('unknown'),
                 // icon: Icon(Icons.calendar_view_week)
             ),
             ButtonSegment<bool?>(
@@ -133,17 +134,6 @@ class _ScoutingToolWidgetState extends State<ScoutingToolWidget> {
             });
           },
         ),
-      );
-
-      return ListTile(
-        title: Text(widget.tool.label),
-        trailing: Switch(
-            value: _value,
-            onChanged: (newValue) {
-              setState(() {
-                _value = newValue;
-              });
-            }),
       );
     }
 
