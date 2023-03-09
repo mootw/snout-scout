@@ -11,12 +11,17 @@ EventConfig _$EventConfigFromJson(Map<String, dynamic> json) => EventConfig(
       team: json['team'] as int,
       season: json['season'] as int,
       tbaEventId: json['tbaEventId'] as String?,
-      fieldStyle: $enumDecode(_$FieldStyleEnumMap, json['fieldStyle']),
-      pitscouting: (json['pitscouting'] as List<dynamic>)
-          .map((e) => SurveyItem.fromJson(e as Map<String, dynamic>))
-          .toList(),
-      matchscouting:
-          MatchScouting.fromJson(json['matchscouting'] as Map<String, dynamic>),
+      fieldStyle:
+          $enumDecodeNullable(_$FieldStyleEnumMap, json['fieldStyle']) ??
+              FieldStyle.rotated,
+      pitscouting: (json['pitscouting'] as List<dynamic>?)
+              ?.map((e) => SurveyItem.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
+      matchscouting: json['matchscouting'] == null
+          ? const MatchScouting()
+          : MatchScouting.fromJson(
+              json['matchscouting'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$EventConfigToJson(EventConfig instance) =>
