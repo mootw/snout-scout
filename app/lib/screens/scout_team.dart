@@ -73,7 +73,6 @@ class _PitScoutTeamPageState extends State<PitScoutTeamPage> {
           autovalidateMode: AutovalidateMode.onUserInteraction,
           key: _formKey,
           child: ListView(
-            shrinkWrap: true,
             children: [
               for (final item in widget.config.pitscouting)
                 Container(

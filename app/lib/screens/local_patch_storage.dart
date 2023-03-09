@@ -98,6 +98,7 @@ class _LocalPatchStorageState extends State<LocalPatchStorage> {
                       onPressed: () async {
                         await snoutData
                             .addPatch(Patch.fromJson(jsonDecode(patch)));
+                        setState(() {});
                       },
                       icon: const Icon(Icons.refresh)),
                 ],

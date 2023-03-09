@@ -19,7 +19,7 @@ class _DataTablePageState extends State<DataTablePage> {
   Widget build(BuildContext context) {
     final data = context.watch<EventDB>();
     return ListView(
-      shrinkWrap: true,
+      cacheExtent: 5000,
       children: [
         DataSheet(title: 'Team Averages', columns: [
           DataItem.fromText("Team"),

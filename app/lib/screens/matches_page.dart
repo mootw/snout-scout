@@ -53,7 +53,7 @@ class _AllMatchesPageState extends State<AllMatchesPage> {
                 Container(
                     color: match == snoutData.db.nextMatch
                         ? Theme.of(context).colorScheme.onPrimary
-                        : null,
+                        : (match.hasTeam(snoutData.db.config.team) ? Theme.of(context).colorScheme.onSecondary : null),
                     child: MatchCard(
                         match: match, focusTeam: snoutData.db.config.team)),
             ],

@@ -58,7 +58,7 @@ class _TeamViewPageState extends State<TeamViewPage> {
           title: Text("Team ${widget.teamNumber}"),
         ),
         body: ListView(
-          shrinkWrap: true,
+          cacheExtent: 5000,
           children: [
             ScoutingResultsViewer(
                 teamNumber: widget.teamNumber, snoutData: data),
