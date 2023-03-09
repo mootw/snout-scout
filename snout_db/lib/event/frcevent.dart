@@ -18,11 +18,11 @@ part 'frcevent.g.dart';
 
 @JsonSerializable()
 class FRCEvent {
-  ///List of teams in the event, ideally ordered smallest number to largest
-  final List<int> teams;
-
   /// how should this event be tracked?
   final EventConfig config;
+
+  ///List of teams in the event, ideally ordered smallest number to largest
+  final List<int> teams;
 
   ///List of matches
   final SplayTreeMap<String, FRCMatch> matches;

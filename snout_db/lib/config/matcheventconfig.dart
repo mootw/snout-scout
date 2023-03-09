@@ -10,7 +10,7 @@ class MatchEventConfig {
   final String label;
   final String? color;
 
-  MatchEventConfig({
+  const MatchEventConfig({
     required this.id,
     required this.label,
     this.color,

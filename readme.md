@@ -12,6 +12,7 @@
 - client saves all data locally until it can sync with origin
 - Single compact (mostly) readable data JSON file to allow for durable data. The structure is also fully typed and null safe.
 - Sound null safety in the app and data for maximum reliability.
+- strong separation between live stats (like ranking position) and facts (like scouting match data)
 
 ## Snout-scout is NOT designed to:
 - track standings or scores directly (official scores are linked if TBA event key is provided)

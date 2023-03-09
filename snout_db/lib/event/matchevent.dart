@@ -18,7 +18,7 @@ class MatchEvent {
   final double nx;
   final double ny;
 
-  MatchEvent(
+  const MatchEvent(
       //Default match event time to zero to allow for defining an event in the season config
       //without a time, since that wouldn't make sense.
       {required this.time,
@@ -66,7 +66,6 @@ class MatchEvent {
   String getLabelFromConfig (EventConfig config) => isPositionEvent ? "Position" : config.matchscouting.events.firstWhereOrNull((element) => element.id == id)?.label ?? id;
 
   String? getColorFromConfig (EventConfig config) => config.matchscouting.events.firstWhereOrNull((element) => element.id == id)?.color;
-
 
   @override
   String toString () => 't:${time} id:${id} pos:${position}';

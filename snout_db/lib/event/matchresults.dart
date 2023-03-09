@@ -10,7 +10,7 @@ class MatchResults {
   final Map<String, int> red;
   final Map<String, int> blue;
 
-  MatchResults({required this.time, required this.red,
+  const MatchResults({required this.time, required this.red,
   required this.blue});
 
   factory MatchResults.fromJson(Map<String, dynamic> json) => _$MatchResultsFromJson(json);

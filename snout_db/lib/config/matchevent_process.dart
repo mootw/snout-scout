@@ -8,7 +8,7 @@ class MatchEventProcess {
   final String label;
   final String expression;
 
-  MatchEventProcess(
+  const MatchEventProcess(
       {required this.id, required this.label, required this.expression});
 
   factory MatchEventProcess.fromJson(Map<String, dynamic> json) =>

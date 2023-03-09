@@ -12,7 +12,7 @@ class RobotMatchResults {
   //Post game survey like pit scouting; but used for scoring too
   final PitScoutResult survey;
 
-  RobotMatchResults({required this.timeline, required this.survey});
+  const RobotMatchResults({required this.timeline, required this.survey});
 
   factory RobotMatchResults.fromJson(Map<String, dynamic> json) =>
       _$RobotMatchResultsFromJson(json);

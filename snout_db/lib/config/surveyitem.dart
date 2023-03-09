@@ -10,10 +10,9 @@ class SurveyItem {
 
   //Used by the selector type
   final List<String>? options;
-  //TODO automatically calculate scoring and whatnot; maybe an option in the future
   //List<dynamic>? options_values;
 
-  SurveyItem(
+  const SurveyItem(
       {required this.id,
       required this.type,
       required this.label,
