@@ -8,14 +8,17 @@ import 'dart:math' as math;
 /// in this situation -1, -1 is the bottom left corner where the field is between
 /// the viewer and the admin. -1, 0 is about where red 2 drivers station is.
 /// and 1,0 is where blue 2 is
+/// 
+/// values are rounded to 1/200 on the x and 1/100 on the y by
+/// assuming the field is 2x as long as it is tall.
 class FieldPosition {
 
   final double x;
   final double y;
 
   FieldPosition(double posX, double posY)
-      : x = math.max(-1, math.min(1, (posX * 1000).roundToDouble() / 1000)),
-        y = math.max(-1, math.min(1, (posY * 1000).roundToDouble() / 1000));
+      : x = math.max(-1, math.min(1, (posX * 200).roundToDouble() / 200)),
+        y = math.max(-1, math.min(1, (posY * 100).roundToDouble() / 100));
 
   /// Returns a new position rotated 180 degrees about the origin (center of field).
   /// This can be used to normalize recorded positions to always be as if it was

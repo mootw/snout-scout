@@ -97,7 +97,7 @@ class _TeamViewPageState extends State<TeamViewPage> {
               //Data is a list of rows and columns
               columns: [
                 DataItem.fromText("Match"),
-                for (final item in data.db.config.matchscouting.eventProcess)
+                for (final item in data.db.config.matchscouting.processes)
                   DataItem.fromText(item.label),
                 for (final pitSurvey in data.db.config.matchscouting.postgame
                     .where((element) => element.type != SurveyItemType.picture))
@@ -132,9 +132,9 @@ class _TeamViewPageState extends State<TeamViewPage> {
                         exportValue: match.description,
                         sortingValue: match),
                     for (final item
-                        in data.db.config.matchscouting.eventProcess)
-                      DataItem.fromNumber(data.db.runMatchTimelineProcess(item,
-                          match.robot[widget.teamNumber.toString()]?.timeline)),
+                        in data.db.config.matchscouting.processes)
+                      DataItem.fromNumber(data.db.runMatchResultsProcess(item,
+                          match.robot[widget.teamNumber.toString()])),
                     for (final pitSurvey in data
                         .db.config.matchscouting.postgame
                         .where((element) =>

@@ -75,7 +75,7 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
         children: [
           DataSheet(title: "Alliance Sum of Avg", columns: [
             DataItem.fromText("Alliance"),
-            for (final item in data.db.config.matchscouting.eventProcess)
+            for (final item in data.db.config.matchscouting.processes)
               DataItem.fromText(item.label),
           ], rows: [
             [
@@ -84,7 +84,7 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                       Text("RED", style: TextStyle(color: Colors.red)),
                   exportValue: "RED",
                   sortingValue: "RED"),
-              for (final item in data.db.config.matchscouting.eventProcess)
+              for (final item in data.db.config.matchscouting.processes)
                 DataItem.fromNumber(_red.fold<double>(
                     0,
                     (previousValue, team) =>
@@ -97,7 +97,7 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                       Text("BLUE", style: TextStyle(color: Colors.blue)),
                   exportValue: "BLUE",
                   sortingValue: "BLUE"),
-              for (final item in data.db.config.matchscouting.eventProcess)
+              for (final item in data.db.config.matchscouting.processes)
                 DataItem.fromNumber(_blue.fold<double>(
                     0,
                     (previousValue, team) =>
@@ -108,7 +108,7 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
           const Divider(height: 42),
           DataSheet(title: "Team Averages", columns: [
             DataItem.fromText("Team"),
-            for (final item in data.db.config.matchscouting.eventProcess)
+            for (final item in data.db.config.matchscouting.processes)
               DataItem.fromText(item.label),
             for (final item in data.db.config.matchscouting.postgame)
               DataItem.fromText(item.label),
@@ -130,7 +130,7 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                     ),
                     exportValue: team.toString(),
                     sortingValue: team),
-                for (final item in data.db.config.matchscouting.eventProcess)
+                for (final item in data.db.config.matchscouting.processes)
                   DataItem.fromNumber(data.db.teamAverageProcess(team, item)),
                 for (final item in data.db.config.matchscouting.postgame)
                   DataItem.fromText(data.db

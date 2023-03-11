@@ -3,13 +3,11 @@ import 'dart:collection';
 import 'package:decimal/decimal.dart';
 import 'package:eval_ex/built_ins.dart';
 import 'package:eval_ex/expression.dart';
-import 'package:eval_ex/func.dart';
-import 'package:eval_ex/lazy_function.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:snout_db/config/matchevent_process.dart';
-import 'package:snout_db/config/matcheventconfig.dart';
+import 'package:snout_db/config/matchresults_process.dart';
 import 'package:snout_db/event/matchevent.dart';
 import 'package:snout_db/event/pitscoutresult.dart';
+import 'package:snout_db/event/robotmatchresults.dart';
 import 'match.dart';
 import 'package:collection/collection.dart';
 import 'package:snout_db/config/eventconfig.dart';
@@ -124,29 +122,79 @@ class FRCEvent {
     return toReturn;
   }
 
-  double? runMatchTimelineProcess(
-      MatchEventProcess process, Iterable<MatchEvent>? timeline) {
-    if (timeline == null) {
+  double? runMatchResultsProcess(
+      MatchResultsProcess process, RobotMatchResults? matchResults) {
+    if (matchResults == null) {
       return null;
     }
-    //Prefill the map of events with zero
-    // Map<String, int> sum = {
-    //   for (final event in config.matchscouting.events) event.id: 0,
-    // };
-    // timeline.forEach((element) {
-    //   sum[element.id] = (sum[element.id] ?? 0) + 1;
-    // });
-
-    //Load all scouting values into the expression
-    // sum.forEach((key, value) {
-    //   exp.setStringVariable(key, value.toString());
-    // });
 
     final exp = Expression(process.expression);
 
     //adder that counts the number of a specific event in the timeline
     exp.addLazyFunction(LazyFunctionImpl("EVENT", 1, fEval: (params) {
-      int value = timeline
+      int value = matchResults.timeline
+          .where((element) => element.id == params[0].getString())
+          .length;
+      return LazyNumberImpl(
+          eval: () => Decimal.fromInt(value),
+          getString: () => value.toString());
+    }));
+
+    //Returns 1 if a post game survey item matches the value
+    exp.addLazyFunction(LazyFunctionImpl("POSTGAMEIS", 2, fEval: (params) {
+      if (matchResults.survey[params[0].getString()] == params[1].getString()) {
+        return LazyNumberImpl(
+            eval: () => Decimal.fromInt(1), getString: () => "1");
+      } else {
+        return LazyNumberImpl(
+            eval: () => Decimal.fromInt(0), getString: () => "0");
+      }
+    }));
+
+    // Returns number of events with a specific name within a bbox
+    //   -- O
+    // |    |
+    // |    |
+    // o --
+    // min x, min y, max X, max Y
+    exp.addLazyFunction(LazyFunctionImpl("EVENTINBBOX", 5, fEval: (params) {
+      int value = matchResults.timeline
+          .where((element) =>
+              element.id == params[0].getString() &&
+              element.position.x >= params[1].eval()!.toDouble() &&
+              element.position.y >= params[2].eval()!.toDouble() &&
+              element.position.x <= params[3].eval()!.toDouble() &&
+              element.position.y <= params[4].eval()!.toDouble())
+          .length;
+      return LazyNumberImpl(
+          eval: () => Decimal.fromInt(value),
+          getString: () => value.toString());
+    }));
+
+    // Returns number of events with a specific name within a bbox
+    //   -- O
+    // |    |
+    // |    |
+    // o --
+    // min x, min y, max X, max Y
+    exp.addLazyFunction(LazyFunctionImpl("AUTOEVENTINBBOX", 5, fEval: (params) {
+      int value = matchResults.timeline
+          .where((element) =>
+              element.isInAuto &&
+              element.id == params[0].getString() &&
+              element.position.x >= params[1].eval()!.toDouble() &&
+              element.position.y >= params[2].eval()!.toDouble() &&
+              element.position.x <= params[3].eval()!.toDouble() &&
+              element.position.y <= params[4].eval()!.toDouble())
+          .length;
+      return LazyNumberImpl(
+          eval: () => Decimal.fromInt(value),
+          getString: () => value.toString());
+    }));
+
+    //adder that counts the number of a specific event in the timeline
+    exp.addLazyFunction(LazyFunctionImpl("EVENT", 1, fEval: (params) {
+      int value = matchResults.timeline
           .where((element) => element.id == params[0].getString())
           .length;
       return LazyNumberImpl(
@@ -156,7 +204,7 @@ class FRCEvent {
 
     //adder that counts the number of a specific event in the timeline
     exp.addLazyFunction(LazyFunctionImpl("AUTOEVENT", 1, fEval: (params) {
-      int value = timeline
+      int value = matchResults.timeline
           .where((element) =>
               element.isInAuto && element.id == params[0].getString())
           .length;
@@ -177,7 +225,7 @@ class FRCEvent {
   /// returns null if there is no data. Otherwise we get weird NaN stuff and
   /// if you add NaN to anything it completely destroys the whole calculation
   /// There is an optional where clause to filter the events out for a specific type
-  double? teamAverageProcess(int team, MatchEventProcess process) {
+  double? teamAverageProcess(int team, MatchResultsProcess process) {
     final recordedMatches = teamRecordedMatches(team);
 
     if (recordedMatches.isEmpty) {
@@ -189,8 +237,8 @@ class FRCEvent {
             0,
             (previousValue, match) =>
                 previousValue +
-                (runMatchTimelineProcess(process,
-                        match.value.robot[team.toString()]?.timeline) ??
+                (runMatchResultsProcess(
+                        process, match.value.robot[team.toString()]) ??
                     0)) /
         recordedMatches.length;
   }

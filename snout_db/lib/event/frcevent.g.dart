@@ -21,8 +21,8 @@ FRCEvent _$FRCEventFromJson(Map<String, dynamic> json) => FRCEvent(
     );
 
 Map<String, dynamic> _$FRCEventToJson(FRCEvent instance) => <String, dynamic>{
-      'teams': instance.teams,
       'config': instance.config,
+      'teams': instance.teams,
       'matches': instance.matches,
       'pitscouting': instance.pitscouting,
     };

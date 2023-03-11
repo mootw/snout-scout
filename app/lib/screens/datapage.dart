@@ -23,7 +23,7 @@ class _DataTablePageState extends State<DataTablePage> {
       children: [
         DataSheet(title: 'Team Averages', columns: [
           DataItem.fromText("Team"),
-          for (final item in data.db.config.matchscouting.eventProcess)
+          for (final item in data.db.config.matchscouting.processes)
               DataItem.fromText(item.label),
           for (final pitSurvey in data.db.config.pitscouting
               .where((element) => element.type != SurveyItemType.picture))
@@ -46,7 +46,7 @@ class _DataTablePageState extends State<DataTablePage> {
                   ),
                   exportValue: team.toString(),
                   sortingValue: team),
-              for (final item in data.db.config.matchscouting.eventProcess)
+              for (final item in data.db.config.matchscouting.processes)
                 DataItem.fromNumber(
                     data.db.teamAverageProcess(team, item)),
               for (final pitSurvey in data.db.config.pitscouting
@@ -62,7 +62,7 @@ class _DataTablePageState extends State<DataTablePage> {
           columns: [
             DataItem.fromText("Match"),
             DataItem.fromText("Team"),
-            for (final item in data.db.config.matchscouting.eventProcess)
+            for (final item in data.db.config.matchscouting.processes)
               DataItem.fromText(item.label),
             for (final item in data.db.config.matchscouting.postgame)
               DataItem.fromText(item.label),
@@ -104,9 +104,9 @@ class _DataTablePageState extends State<DataTablePage> {
                       ),
                       exportValue: robot.key,
                       sortingValue: robot.key),
-                  for (final item in data.db.config.matchscouting.eventProcess)
-                    DataItem.fromNumber(data.db.runMatchTimelineProcess(
-                        item, match.value.robot[robot.key]?.timeline)),
+                  for (final item in data.db.config.matchscouting.processes)
+                    DataItem.fromNumber(data.db.runMatchResultsProcess(
+                        item, match.value.robot[robot.key])),
                   for (final item in data.db.config.matchscouting.postgame
                       .where(
                           (element) => element.type != SurveyItemType.picture))
