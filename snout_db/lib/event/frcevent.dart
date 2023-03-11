@@ -130,19 +130,9 @@ class FRCEvent {
 
     final exp = Expression(process.expression);
 
-    //adder that counts the number of a specific event in the timeline
-    exp.addLazyFunction(LazyFunctionImpl("EVENT", 1, fEval: (params) {
-      int value = matchResults.timeline
-          .where((element) => element.id == params[0].getString())
-          .length;
-      return LazyNumberImpl(
-          eval: () => Decimal.fromInt(value),
-          getString: () => value.toString());
-    }));
-
-    //Returns 1 if a post game survey item matches the value
+    //Returns 1 if a post game survey item matches the value 0 otherwise
     exp.addLazyFunction(LazyFunctionImpl("POSTGAMEIS", 2, fEval: (params) {
-      if (matchResults.survey[params[0].getString()] == params[1].getString()) {
+      if (matchResults.survey[params[0].getString()].toString() == params[1].getString()) {
         return LazyNumberImpl(
             eval: () => Decimal.fromInt(1), getString: () => "1");
       } else {
@@ -158,7 +148,7 @@ class FRCEvent {
     // o --
     // min x, min y, max X, max Y
     exp.addLazyFunction(LazyFunctionImpl("EVENTINBBOX", 5, fEval: (params) {
-      int value = matchResults.timeline
+      int value = matchResults.timelineInterpolated
           .where((element) =>
               element.id == params[0].getString() &&
               element.position.x >= params[1].eval()!.toDouble() &&
@@ -178,7 +168,7 @@ class FRCEvent {
     // o --
     // min x, min y, max X, max Y
     exp.addLazyFunction(LazyFunctionImpl("AUTOEVENTINBBOX", 5, fEval: (params) {
-      int value = matchResults.timeline
+      int value = matchResults.timelineInterpolated
           .where((element) =>
               element.isInAuto &&
               element.id == params[0].getString() &&
@@ -211,6 +201,24 @@ class FRCEvent {
       return LazyNumberImpl(
           eval: () => Decimal.fromInt(value),
           getString: () => value.toString());
+    }));
+
+    //returns the result of another process for this data.
+    exp.addLazyFunction(LazyFunctionImpl("PROCESS", 1, fEval: (params) {
+      String processID = params[0].getString();
+      if(process.id == processID) {
+        throw Exception("cannot recursively call a process");
+      }
+      MatchResultsProcess? otherProcess = config.matchscouting.processes
+          .firstWhereOrNull((element) => element.id == processID);
+      if(otherProcess == null) {
+        throw Exception("process ${processID} does not exist");
+      }
+      final result = runMatchResultsProcess(otherProcess, matchResults);
+      return LazyNumberImpl(
+          eval: () =>
+              Decimal.parse(result.toString()),
+          getString: () => result.toString());
     }));
 
     try {
