@@ -134,7 +134,7 @@ class _TeamViewPageState extends State<TeamViewPage> {
                     for (final item
                         in data.db.config.matchscouting.processes)
                       DataItem.fromNumber(data.db.runMatchResultsProcess(item,
-                          match.robot[widget.teamNumber.toString()])),
+                          match.robot[widget.teamNumber.toString()], widget.teamNumber)),
                     for (final pitSurvey in data
                         .db.config.matchscouting.postgame
                         .where((element) =>

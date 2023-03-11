@@ -184,7 +184,7 @@ class _MatchPageState extends State<MatchPage> {
                   for (final item
                       in snoutData.db.config.matchscouting.processes)
                     DataItem.fromNumber(snoutData.db.runMatchResultsProcess(
-                        item, match.robot[team.toString()])),
+                        item, match.robot[team.toString()], team)),
                   for (final item in snoutData.db.config.matchscouting.postgame
                       .where(
                           (element) => element.type != SurveyItemType.picture))

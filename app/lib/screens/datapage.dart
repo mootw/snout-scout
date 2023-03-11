@@ -106,7 +106,7 @@ class _DataTablePageState extends State<DataTablePage> {
                       sortingValue: robot.key),
                   for (final item in data.db.config.matchscouting.processes)
                     DataItem.fromNumber(data.db.runMatchResultsProcess(
-                        item, match.value.robot[robot.key])),
+                        item, match.value.robot[robot.key], int.tryParse(robot.key) ?? 0)),
                   for (final item in data.db.config.matchscouting.postgame
                       .where(
                           (element) => element.type != SurveyItemType.picture))

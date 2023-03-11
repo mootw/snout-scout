@@ -123,12 +123,23 @@ class FRCEvent {
   }
 
   double? runMatchResultsProcess(
-      MatchResultsProcess process, RobotMatchResults? matchResults) {
+      MatchResultsProcess process, RobotMatchResults? matchResults, int team) {
     if (matchResults == null) {
       return null;
     }
 
     final exp = Expression(process.expression);
+
+    //Returns 1 if the team's pit scouting data matches 0 otherwise.
+    exp.addLazyFunction(LazyFunctionImpl("PITSCOUTINGIS", 2, fEval: (params) {
+      if (pitscouting[team.toString()]?[params[0].getString()].toString() == params[1].getString()) {
+        return LazyNumberImpl(
+            eval: () => Decimal.fromInt(1), getString: () => "1");
+      } else {
+        return LazyNumberImpl(
+            eval: () => Decimal.fromInt(0), getString: () => "0");
+      }
+    }));
 
     //Returns 1 if a post game survey item matches the value 0 otherwise
     exp.addLazyFunction(LazyFunctionImpl("POSTGAMEIS", 2, fEval: (params) {
@@ -214,7 +225,7 @@ class FRCEvent {
       if(otherProcess == null) {
         throw Exception("process ${processID} does not exist");
       }
-      final result = runMatchResultsProcess(otherProcess, matchResults);
+      final result = runMatchResultsProcess(otherProcess, matchResults, team);
       return LazyNumberImpl(
           eval: () =>
               Decimal.parse(result.toString()),
@@ -246,7 +257,7 @@ class FRCEvent {
             (previousValue, match) =>
                 previousValue +
                 (runMatchResultsProcess(
-                        process, match.value.robot[team.toString()]) ??
+                        process, match.value.robot[team.toString()], team) ??
                     0)) /
         recordedMatches.length;
   }
