@@ -2,9 +2,11 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:app/api.dart';
+import 'package:app/fieldwidget.dart';
 import 'package:app/helpers.dart';
 import 'package:app/screens/analysis.dart';
 import 'package:app/screens/datapage.dart';
+import 'package:app/screens/debug_field_position.dart';
 import 'package:app/screens/edit_json.dart';
 import 'package:app/screens/edit_schedule.dart';
 import 'package:app/screens/local_patch_storage.dart';
@@ -423,7 +425,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: const Text("Download Event Data to File")),
             ),
           ),
-          const Divider(height: 64),
+          const Divider(),
           ListTile(
             title: const Text("Event Config"),
             subtitle: Text(data.db.config.name),
@@ -487,6 +489,17 @@ class _MyHomePageState extends State<MyHomePage> {
                   },
                   child: const Text("Edit Teams")),
             ),
+          ),
+          const Divider(),
+          ListTile(
+            title: const Text("DEBUG Field position"),
+            trailing: const Icon(Icons.crop_square_sharp),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const DebugFieldPosition()),
+              );
+            },
           ),
         ]),
       ),
