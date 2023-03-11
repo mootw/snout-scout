@@ -9,10 +9,12 @@ import 'package:app/screens/datapage.dart';
 import 'package:app/screens/debug_field_position.dart';
 import 'package:app/screens/edit_json.dart';
 import 'package:app/screens/edit_schedule.dart';
+import 'package:app/screens/ingest_qr_data.dart';
 import 'package:app/screens/local_patch_storage.dart';
 import 'package:app/screens/matches_page.dart';
 import 'package:app/screens/teams_page.dart';
 import 'package:app/search.dart';
+import 'package:camera/camera.dart';
 import 'package:download/download.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -153,6 +155,7 @@ class EventDB extends ChangeNotifier {
     //Do not close the stream if it already exists idk how that behaves
     //it might reuslt in the onDone being called unexpetedly.
     Uri serverUri = Uri.parse(serverURL);
+    
     channel = WebSocketChannel.connect(Uri.parse(
         '${serverURL.startsWith("https") ? "wss" : "ws"}://${serverUri.host}:${serverUri.port}/listen/${serverUri.pathSegments[1]}'));
 
@@ -409,6 +412,19 @@ class _MyHomePageState extends State<MyHomePage> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => const LocalPatchStorage(),
+                  ));
+            },
+          ),
+          ListTile(
+            title: const Text("Ingest QR Data"),
+            trailing: const Icon(Icons.qr_code),
+            onTap: () async {
+              final cameras = await availableCameras();
+              print(cameras.length);
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => IngestQRDataPage(cameras: cameras),
                   ));
             },
           ),

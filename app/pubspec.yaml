@@ -50,6 +50,12 @@ dependencies:
   #for things like giving people the app easily, and sharing data
   share_plus: ^6.3.1 
 
+  #For QR code data
+  qr: ^3.0.1
+  archive: ^3.3.6
+  camera: ^0.10.3+2
+  qr_code_vision: ^0.1.0
+
   #boolean_selector: ^2.1.1
 
   snout_db:
