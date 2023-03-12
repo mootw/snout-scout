@@ -23,3 +23,29 @@ Color colorFromHex(String hexString) {
   final hexCode = hexString.replaceAll('#', '');
   return Color(int.parse('FF$hexCode', radix: 16));
 }
+
+
+Future<String?> showStringInputDialog(
+    BuildContext context, String label, String currentValue) async {
+  final myController = TextEditingController(text: currentValue);
+  return await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(label),
+          content: TextField(
+            controller: myController,
+          ),
+          actions: [
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () => Navigator.of(context).pop(null),
+            ),
+            TextButton(
+              child: const Text('Save'),
+              onPressed: () => Navigator.of(context).pop(myController.text),
+            ),
+          ],
+        );
+      });
+}

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:app/api.dart';
+import 'package:app/eventdb_state.dart';
 import 'package:app/main.dart';
 import 'package:app/screens/edit_json.dart';
 import 'package:flutter/material.dart';
@@ -109,7 +110,7 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
     );
   }
 
-  Future editMatch(FRCMatch match, EventDB snoutData, String? matchID) async {
+  Future editMatch(FRCMatch match, EventDB data, String? matchID) async {
     String? result = await Navigator.of(context).push(MaterialPageRoute(
         builder: (context) => JSONEditor(
             source: const JsonEncoder.withIndent("    ").convert(match),
@@ -124,7 +125,7 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
             matchID ?? resultMatch.description,
           ],
           data: result);
-      await snoutData.addPatch(patch);
+      await data.addPatch(patch);
     }
   }
 }

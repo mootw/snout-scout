@@ -248,7 +248,6 @@ class FRCEvent {
     final recordedMatches = teamRecordedMatches(team);
 
     if (recordedMatches.isEmpty) {
-      //TODO handle this nicer by testing for NaN as well on the fold operation
       return null;
     }
 

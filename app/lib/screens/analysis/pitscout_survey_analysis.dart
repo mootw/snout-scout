@@ -1,5 +1,5 @@
+import 'package:app/eventdb_state.dart';
 import 'package:app/helpers.dart';
-import 'package:app/main.dart';
 import 'package:app/screens/teams_page.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';

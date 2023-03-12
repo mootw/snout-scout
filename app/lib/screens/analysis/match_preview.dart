@@ -1,9 +1,9 @@
 import 'dart:convert';
 
 import 'package:app/datasheet.dart';
+import 'package:app/eventdb_state.dart';
 import 'package:app/fieldwidget.dart';
 import 'package:app/helpers.dart';
-import 'package:app/main.dart';
 import 'package:app/screens/view_team_page.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';

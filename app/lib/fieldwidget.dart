@@ -2,8 +2,8 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:app/eventdb_state.dart';
 import 'package:app/helpers.dart';
-import 'package:app/main.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

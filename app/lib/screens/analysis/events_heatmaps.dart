@@ -1,5 +1,5 @@
+import 'package:app/eventdb_state.dart';
 import 'package:app/fieldwidget.dart';
-import 'package:app/main.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

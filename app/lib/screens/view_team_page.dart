@@ -3,9 +3,9 @@ import 'dart:typed_data';
 
 import 'package:app/datasheet.dart';
 import 'package:app/edit_lock.dart';
+import 'package:app/eventdb_state.dart';
 import 'package:app/fieldwidget.dart';
 import 'package:app/helpers.dart';
-import 'package:app/main.dart';
 import 'package:app/match_card.dart';
 import 'package:app/screens/match_page.dart';
 import 'package:app/screens/scout_team.dart';

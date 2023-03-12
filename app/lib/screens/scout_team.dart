@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:app/confirm_exit_dialog.dart';
-import 'package:app/main.dart';
+import 'package:app/eventdb_state.dart';
 import 'package:app/scouting_tools/scouting_tool.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

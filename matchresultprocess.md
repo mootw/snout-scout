@@ -13,9 +13,11 @@ Otherwise math syntax applies.
 
 ## Displaying the quantity of an event.
 A typical process might involve displaying how many of an event occurred:
+
 `EVENT("fumble")`
 
 For example there are 2 scoring locations for a game piece, and we want to display how many of that game piece was scored regardless of 'level':
+
 `EVENT("ball_high")+EVENT("ball_low")`
 
 Another example might be that we want to see how much a robot does something in auto. We could even filter for robots that intake more than 2 pieces in auto and score at least 1 ball high:

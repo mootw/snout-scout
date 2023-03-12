@@ -1,6 +1,6 @@
 import 'package:app/durationformat.dart';
+import 'package:app/eventdb_state.dart';
 import 'package:app/helpers.dart';
-import 'package:app/main.dart';
 import 'package:app/match_card.dart';
 import 'package:app/screens/match_page.dart';
 import 'package:app/timeduration.dart';

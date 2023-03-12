@@ -3,9 +3,9 @@ import 'dart:convert';
 
 import 'package:app/confirm_exit_dialog.dart';
 import 'package:app/datasheet.dart';
+import 'package:app/eventdb_state.dart';
 import 'package:app/fieldwidget.dart';
 import 'package:app/helpers.dart';
-import 'package:app/main.dart';
 import 'package:app/scouting_tools/scouting_tool.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
@@ -117,7 +117,6 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                     child: Text(
                         '${item.time.round()}  ${item.getLabelFromConfig(context.watch<EventDB>().db.config)}',
                         style: TextStyle(
-                            //TODO this lookup is really inefficient and not clean. But it does work
                             color: item.isPositionEvent
                                 ? Theme.of(context).colorScheme.onBackground
                                 : item.getColorFromConfig(context

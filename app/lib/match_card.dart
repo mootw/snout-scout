@@ -1,4 +1,4 @@
-import 'package:app/main.dart';
+import 'package:app/eventdb_state.dart';
 import 'package:app/timeduration.dart';
 import 'package:provider/provider.dart';
 import 'package:app/screens/match_page.dart';
