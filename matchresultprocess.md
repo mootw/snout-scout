@@ -7,7 +7,7 @@ snout scout uses [https://pub.dev/packages/eval_ex](https://pub.dev/packages/eva
 ## Syntax
 When editing a process in JSON, `""` may require escaping. For example: `EVENT(\"id\")`
 
-Otherwise math syntax applies.
+Otherwise math syntax applies. If your process is empty in the app (or all zeros) there was likely to be a syntax error. Internally the errors are being tracked verbosely, but currently they are not displayed in the app. (https://github.com/mootw/snout-scout/issues/2)
 
 # Example Processes
 
