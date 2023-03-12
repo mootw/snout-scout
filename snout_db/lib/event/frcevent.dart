@@ -193,6 +193,27 @@ class FRCEvent {
           getString: () => value.toString());
     }));
 
+    // Returns number of events with a specific name within a bbox
+    //   -- O
+    // |    |
+    // |    |
+    // o --
+    // min x, min y, max X, max Y
+    exp.addLazyFunction(LazyFunctionImpl("TELEOPEVENTINBBOX", 5, fEval: (params) {
+      int value = matchResults.timelineInterpolated
+          .where((element) =>
+              element.isInAuto == false &&
+              element.id == params[0].getString() &&
+              element.position.x >= params[1].eval()!.toDouble() &&
+              element.position.y >= params[2].eval()!.toDouble() &&
+              element.position.x <= params[3].eval()!.toDouble() &&
+              element.position.y <= params[4].eval()!.toDouble())
+          .length;
+      return LazyNumberImpl(
+          eval: () => Decimal.fromInt(value),
+          getString: () => value.toString());
+    }));
+
     //adder that counts the number of a specific event in the timeline
     exp.addLazyFunction(LazyFunctionImpl("EVENT", 1, fEval: (params) {
       int value = matchResults.timeline
@@ -208,6 +229,17 @@ class FRCEvent {
       int value = matchResults.timeline
           .where((element) =>
               element.isInAuto && element.id == params[0].getString())
+          .length;
+      return LazyNumberImpl(
+          eval: () => Decimal.fromInt(value),
+          getString: () => value.toString());
+    }));
+
+    //adder that counts the number of a specific event in the timeline
+    exp.addLazyFunction(LazyFunctionImpl("TELEOPEVENT", 1, fEval: (params) {
+      int value = matchResults.timeline
+          .where((element) =>
+              element.isInAuto == false && element.id == params[0].getString())
           .length;
       return LazyNumberImpl(
           eval: () => Decimal.fromInt(value),

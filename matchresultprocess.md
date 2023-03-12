@@ -25,9 +25,9 @@ Another example might be that we want to see how much a robot does something in 
 `AUTOEVENT("intake") > 2 && AUTOEVENT("ball_high") >= 2`
 
 ## Calculating scoring
-You may want to calculate a teams impact. Here are a few ways to calculate scoring. Firstly we can add up all of the events in auto and in teleop (by subtracting auto from total and multiply it by the points for each scoring piece). It might look like this. This process might have the id of "ball_score":
+You may want to calculate a teams impact. Here is a way to calculate scoring. Firstly we can add up all of the events in auto and in teleop and multiply it by the points for each scoring piece. It might look like this. This process might have the id of "ball_score":
 
-`(AUTOEVENT("balls_high")*4)+((EVENT("balls_high")-AUTOEVENT("balls_high"))*2)`
+`(AUTOEVENT("balls_high")*4)+(TELEOPEVENT("balls_high")*2)`
 
 We could caclulate auto_movement by checking if the number of robot_position events is greater than zero in a certain region in auto. returning 1 or 0 and then multiply it by scoring later:
 
@@ -41,9 +41,26 @@ The final score might be calculated as:
 
 `PROCESS("climb_score") + PROCESS("ball_score") + (PROCESS("auto_movement") * 3)`
 
+## Calculating 'Pickability'
+
+In this example we will use previous metrics and even pit scouting metrics to determine the 'pickability' of a team to assist in alliance selection. In this example, our strategy this year involves a partner climb. So we made these our goals:
+- positive bias robots that can climb reliabilty to high and are compatible with our climbing mechanism (via pit scouting data). 
+- negative bias robots that regularly drop things, so we will subtract the amount of fumbles with a bias
+- positive bias robots that appear to have aware drivers.
+
+We will create a separate driving_score_bias process to simplify the pickability expression:
+
+`(POSTGAMEIS("driving_awareness", "High") * 15) + (POSTGAMEIS("driving_awareness", "Medium") * 0) + (POSTGAMEIS("driving_awareness", "Low") * -10)`
+
+Our final 'pickability' expression looks like this. We might create multiple different pickability expressions with different biases or focuses:
+
+`PROCESS("score") + ((POSTGAMEIS("climb_level", "High") && PITSCOUTINGIS("climb_compatible", "true")) * 20) - (EVENT("fumble") * 10) + PROCESS("driving_score_bias")`
+
 
 # Functions and Variables
-There are no pre-defined variables at the moment. 
+There are no pre-defined variables at the moment.
+
+> **NOTE** Potentially in the future there will be variables for each team number, and lookup functions based on team number; or a more capable matchevent query system. There also might be a value lookup for survey items rather than just an equals function.
 
 ## snout scout functions
 
@@ -53,8 +70,10 @@ There are no pre-defined variables at the moment.
 | POSTGAMEIS ("id", "value") | Returns 1 if a post game survey item matches the value 0 otherwise |
 | EVENTINBBOX("id", minX, minY, maxX, maxY) | Returns number of events with a specific id within a bbox (uses interpolated timeline) |
 | AUTOEVENTINBBOX("id", minX, minY, maxX, maxY) | Returns number of auto events with a specific id within a bbox (uses interpolated timeline) |
+| TELEOPEVENTINBBOX("id", minX, minY, maxX, maxY) | Returns number of teleop events with a specific id within a bbox (uses interpolated timeline) |
 | EVENT("id") | adder that counts the number of a specific event |
-| AUTOEVENT("id") | adder that counts the number of a specific event during auto |\
+| AUTOEVENT("id") | adder that counts the number of a specific event during auto |
+| TELEOPEVENT("id") | adder that counts the number of a specific event during teleop |
 | PROCESS("id") | calls another process by id and returns the value |
 
 ## [eval_ex built in functions](https://github.com/RobluScouting/EvalEx#built-in-functions-and-operators)
