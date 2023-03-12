@@ -8,6 +8,9 @@ class MatchEventConfig {
 
   final String id;
   final String label;
+
+  /// #HEX color that identifies this event
+  /// the background of event buttons in match recorder
   final String? color;
 
   const MatchEventConfig({

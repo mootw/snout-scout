@@ -1,55 +1,52 @@
 
-# Commandments
+# Best Practices
 1. **Scout as little as possible**. Human input means errors in data collection.
     - DO automated collection where possible. (The Blue Alliance)
     - AVOID collecting duplicate information you can find elsewhere.
-        - > **EXAMPLE** collecting fumble events in match data and 
+        - > **EXAMPLE** collecting 'cycle time' since it is directly porportional to scoring, and can be calculated.
 2. **Collect only relevant information**
     - DO collect information relevant to your team's strategy for the year.
         > **NOTE** A partner climb may need the collection of weight for balancing, width for sizing, and or compatibility with a specific mechanism.
 3. **Collect quality data**
     - DO collect objective data.
         > **EXAMPLES** balls scored, scoring location, successful intake, 
-    - AVOID subjective data like 'driving skill'
-        > **NOTE** 
+    - CONSIDER AVOIDING subjective data like 'driving skill' since each scout will 'see' it differently.
+        > **NOTE** a metric like driving skill could be useful to determine a teams 'pickability'.
     - AVOID timing data.
-        > **NOTE** a scout might have a hard time determining when a robot starts climbing and stops climbing.
-
+        > **NOTE** a scout might have a hard time determining when a robot starts climbing and stops climbing. This could instead be part of pit scouting since a climb is generally consistent in timing, and not consistent in success.
 4. **Capabilies versus successes**
     - DO collect **CAPABILITIES** in pit scouting.
-        > **EXAMPLE** intake locations, climbing time
+        > **EXAMPLE** intake locations, climbing time, compatibility with a specific mechanism.
     - DO collect **SUCCESSES** in match scouting. 
         > **EXAMPLE** scoring quantity, scoring locations, did sucessfully climb, climbing level
 
 
 4. **Create a document that defines each datapoint**
+    - TODO snout scout should allow for documentation inside of the event config.
 
 
 
 
-# Best Practices
 
-## Human Match Scouting
+# Human Match Scouting
 - Collect events like intake, scoring, and maybe even scoring locations if relevant.
     - AVOID collecting more than 8 different events. The more data that you collect the more data entry errors there will be.
 
 Example: 2023
-- Cubes and cones. We could collect a separate event for ["Cone High", "Cone Medium", "Cone Low", "Cube High", "Cube Medium", "Cube Low"] OR we could collect ["Scored Cone", "Scored Cube", "Scored High", "Scored Middle", "Scored Low"]
-- TODO Create events based on other events (for instance "cones scored" = "cone high" + "cone medium" + "cone low")
-
+- Cubes and cones. We could collect a separate event for ["Scored Cone", "Scored Cube", "Scored High", "Scored Middle", "Scored Low", "Inake", "Fumble"]
 - CONSIDER NOT collecting the type of game piece that has been intaked
-
 - Post match survey: climbing level, did play defense, apparent driving skill, note any issues or downtime, have an extra comments box, note fouls
 
-## Human PIT scouting
+# Human PIT scouting
 - DO collect pictures
 - DO keep it short
+- DO make it personal (ask for robot name, or questions to encourage conversation)
 - DO collect preferences
 - DO collect CAPABILITIES like automation, climbing time (verify with match data).
 - DO collect compatibility information.
-- AVOID collecting information that can be obtained via match scouting like Balls scored, climbing level
+- DO NOT collect information that can be obtained via match scouting like Balls scored, climbing level
 
-## Data
-- AVOID collecting "cycle time" since it is directly porportional to scoring.
+# Data
 
 ## Naming conventions
+- Keep names short and unambiguous

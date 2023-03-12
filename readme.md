@@ -1,9 +1,16 @@
+# Docs
+[scouting](scouting.md)
+
+[config_setup](config_setup.md)
+
+[matchresultprocess](matchresultprocess.md)
+
 # About
 ## Design Goals:
 - make scouting have real time impact for match planning with completely automated digests.
-- game agnostic; the app is fully configurable using a json file (available in the UI)
-- device agnostic. PWA first with native apps for all platforms via Flutter
-- all data processing is/can be done on client for offline support
+- game agnostic; the app is fully configurable using a json file. The only code that needs to change year over year is adding the latest field image
+- device agnostic; PWA first with native apps for all platforms via Flutter
+- all data processing is done on client for offline support
 - export of each event into multiple formats like csv and json
 - function in low bandwidth scenarios and provide reliable low latency sync to origin
 - origin only handles authentication/autorizaton (TBD) and as the source of truth

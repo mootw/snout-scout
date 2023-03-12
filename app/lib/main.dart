@@ -492,6 +492,11 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           const Divider(),
           ListTile(
+            title: const Text("Read DOCS"),
+            trailing: const Icon(Icons.menu_book),
+            onTap: () => launchUrlString("https://github.com/mootw/snout-scout/blob/main/readme.md"),
+          ),
+          ListTile(
             title: const Text("DEBUG Field position"),
             trailing: const Icon(Icons.crop_square_sharp),
             onTap: () {
