@@ -41,9 +41,9 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
   double _mapRotation = 0;
   Timer? _t;
 
-  MatchEvent? get lastMoveEvent =>
+  MatchEvent? get _lastMoveEvent =>
       _events.toList().lastWhereOrNull((event) => event.isPositionEvent);
-  FieldPosition? get robotPosition => lastMoveEvent?.position;
+  FieldPosition? get _robotPosition => _lastMoveEvent?.position;
 
   //Only use in buildcontext
   List<MatchEventConfig> get scoutingEvents =>
@@ -70,23 +70,22 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
           backgroundColor: toolColor,
         ),
         onPressed: _mode == MatchMode.setup ||
-                lastMoveEvent == null ||
-                _time - lastMoveEvent!.time > 4
+                _lastMoveEvent == null
             ? null
             : () {
                 HapticFeedback.mediumImpact();
                 setState(() {
-                  if (_mode != MatchMode.setup && robotPosition != null) {
+                  if (_mode != MatchMode.setup && _robotPosition != null) {
                     _events.add(MatchEvent.fromEventConfig(
                         time: _time,
                         event: tool,
-                        position: robotPosition!,
+                        position: _robotPosition!,
                         redNormalizedPosition:
                             widget.teamAlliance == Alliance.red
-                                ? robotPosition!
+                                ? _robotPosition!
                                 : fieldStyle == FieldStyle.rotated
-                                    ? robotPosition!.inverted
-                                    : robotPosition!.mirrored));
+                                    ? _robotPosition!.inverted
+                                    : _robotPosition!.mirrored));
                   }
                 });
               },
@@ -237,7 +236,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                               : -1,
                       teamNumber: widget.team,
                       alliance: widget.teamAlliance,
-                      robotPosition: robotPosition,
+                      robotPosition: _robotPosition,
                       onTap: (robotPosition) {
                         HapticFeedback.lightImpact();
                         setState(() {
@@ -296,7 +295,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                           ? 1
                           : -1,
                   alliance: widget.teamAlliance,
-                  robotPosition: robotPosition,
+                  robotPosition: _robotPosition,
                   onTap: (robotPosition) {
                     HapticFeedback.lightImpact();
                     setState(() {
@@ -396,7 +395,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                 ? FilledButton.styleFrom(
                     backgroundColor: Colors.red, foregroundColor: Colors.white)
                 : null,
-            onPressed: lastMoveEvent == null ? null : _handleNextSection,
+            onPressed: _lastMoveEvent == null ? null : _handleNextSection,
             label: Text(_mode == MatchMode.setup
                 ? "Start"
                 : _mode == MatchMode.playing

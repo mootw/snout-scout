@@ -35,8 +35,8 @@ class RobotMatchResults {
       //Amount of seconds that need to be interpolated
       final width = pos2.time - pos1.time;
 
-      if (width > 15) {
-        //Just teleport the robot if there is a 15 second gap to interpolate, too much missing data.
+      if (width > 8) {
+        //Teleport the robot if there is a large gap; too much missing data.
         continue;
       }
 
@@ -73,7 +73,6 @@ class RobotMatchResults {
     return interpolated;
   }
 }
-
 
 double lerp(double xa, double ya, double xb, double yb, double t) {
   return ya + ((yb - ya) * ((t - xa) / (xb - xa)));

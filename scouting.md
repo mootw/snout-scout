@@ -1,7 +1,7 @@
 
 # Best Practices
 1. **Scout as little as possible**. Human input means errors in data collection.
-    - DO automated collection where possible. (The Blue Alliance)
+    - DO automated collection where possible. (The Blue Alliance, statbotics)
     - AVOID collecting duplicate information you can find elsewhere.
         - > **EXAMPLE** collecting 'cycle time' since it is directly porportional to scoring, and can be calculated.
 2. **Collect only relevant information**

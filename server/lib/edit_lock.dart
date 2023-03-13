@@ -11,7 +11,7 @@ class EditLock {
       print(locks);
       final value = locks[key];
       if(value != null) {
-        if(value.add(Duration(minutes: 5)).isAfter(DateTime.now())) {
+        if(value.add(Duration(minutes: 15)).isAfter(DateTime.now())) {
           return true;
         }
       }
