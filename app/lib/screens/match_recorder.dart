@@ -69,8 +69,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
               : Colors.black,
           backgroundColor: toolColor,
         ),
-        onPressed: _mode == MatchMode.setup ||
-                _lastMoveEvent == null
+        onPressed: _mode == MatchMode.setup || _lastMoveEvent == null
             ? null
             : () {
                 HapticFeedback.mediumImpact();
@@ -156,7 +155,9 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                     Navigator.pop(
                         context,
                         RobotMatchResults(
-                            timeline: _events, survey: _postGameSurvey));
+                            // alliance: widget.teamAlliance,
+                            timeline: _events,
+                            survey: _postGameSurvey));
                   },
                   icon: const Icon(Icons.save)),
             ],

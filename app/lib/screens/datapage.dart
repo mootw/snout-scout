@@ -24,7 +24,7 @@ class _DataTablePageState extends State<DataTablePage> {
         DataSheet(title: 'Team Averages', columns: [
           DataItem.fromText("Team"),
           for (final item in data.db.config.matchscouting.processes)
-              DataItem.fromText(item.label),
+            DataItem.fromText(item.label),
           for (final pitSurvey in data.db.config.pitscouting
               .where((element) => element.type != SurveyItemType.picture))
             DataItem.fromText(pitSurvey.label),
@@ -47,8 +47,7 @@ class _DataTablePageState extends State<DataTablePage> {
                   exportValue: team.toString(),
                   sortingValue: team),
               for (final item in data.db.config.matchscouting.processes)
-                DataItem.fromNumber(
-                    data.db.teamAverageProcess(team, item)),
+                DataItem.fromNumber(data.db.teamAverageProcess(team, item)),
               for (final pitSurvey in data.db.config.pitscouting
                   .where((element) => element.type != SurveyItemType.picture))
                 DataItem.fromText(data
@@ -90,8 +89,7 @@ class _DataTablePageState extends State<DataTablePage> {
                       displayValue: TextButton(
                         child: Text(robot.key,
                             style: TextStyle(
-                                color: getAllianceColor(match.value
-                                    .getAllianceOf(int.parse(robot.key))))),
+                                color: getAllianceColor(robot.value.alliance))),
                         onPressed: () {
                           //Open this teams scouting page
                           Navigator.push(
@@ -106,7 +104,9 @@ class _DataTablePageState extends State<DataTablePage> {
                       sortingValue: robot.key),
                   for (final item in data.db.config.matchscouting.processes)
                     DataItem.fromNumber(data.db.runMatchResultsProcess(
-                        item, match.value.robot[robot.key], int.tryParse(robot.key) ?? 0)),
+                        item,
+                        match.value.robot[robot.key],
+                        int.tryParse(robot.key) ?? 0)),
                   for (final item in data.db.config.matchscouting.postgame
                       .where(
                           (element) => element.type != SurveyItemType.picture))

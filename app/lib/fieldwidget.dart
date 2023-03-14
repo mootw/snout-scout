@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 import 'package:simple_cluster/simple_cluster.dart';
 import 'package:snout_db/event/match.dart';
 import 'package:snout_db/event/matchevent.dart';
+import 'package:snout_db/event/robotmatchresults.dart';
 import 'package:snout_db/snout_db.dart';
 
 double mapRatio = 0.5;
@@ -129,11 +130,11 @@ class _FieldTimelineViewerState extends State<FieldTimelineViewer> {
     return Column(
       children: [
         FieldMap(children: [
-          for (final robot in widget.match.robot.keys)
+          for (final robot in widget.match.robot.entries)
             RobotMapEventView(
                 time: _animationTime,
-                match: widget.match,
-                team: robot,
+                robotRecording: robot.value,
+                team: robot.key,
                 isAnimating: _isPlaying),
         ]),
         Row(
@@ -177,17 +178,17 @@ class RobotMapEventView extends StatelessWidget {
       {super.key,
       required this.isAnimating,
       required this.time,
-      required this.match,
+      required this.robotRecording,
       required this.team});
 
   final bool isAnimating;
   final int time;
+  final RobotMatchResults robotRecording;
   final String team;
-  final FRCMatch match;
 
   @override
   Widget build(BuildContext context) {
-    final posEvent = match.robot[team]!.timelineInterpolated.lastWhereOrNull(
+    final posEvent = robotRecording.timelineInterpolated.lastWhereOrNull(
         (event) => event.time <= time && event.isPositionEvent);
     if (posEvent == null) {
       //A position event is required to show the robot on the timeline
@@ -195,11 +196,10 @@ class RobotMapEventView extends StatelessWidget {
     }
     FieldPosition robotPosition = posEvent.position;
 
-    final allRecentEvents = match.robot[team]!.timelineInterpolated.where(
-        (event) =>
-            event.time >= time &&
-            event.time < time + 2 &&
-            event.isPositionEvent == false);
+    final allRecentEvents = robotRecording.timelineInterpolated.where((event) =>
+        event.time >= time &&
+        event.time < time + 2 &&
+        event.isPositionEvent == false);
 
     return LayoutBuilder(
         key: Key(team),
@@ -222,7 +222,7 @@ class RobotMapEventView extends StatelessWidget {
                 alignment: Alignment.center,
                 width: robotPorportionalSize * constraints.maxWidth,
                 height: robotPorportionalSize * constraints.maxWidth,
-                color: getAllianceColor(match.getAllianceOf(int.parse(team))),
+                color: getAllianceColor(robotRecording.alliance),
                 child: Text(team,
                     style: TextStyle(
                         fontSize: 13 *
@@ -232,7 +232,9 @@ class RobotMapEventView extends StatelessWidget {
             for (final event in allRecentEvents)
               Align(
                 alignment: Alignment(event.position.x, -event.position.y),
-                child: Text(event.getLabelFromConfig(context.watch<EventDB>().db.config),
+                child: Text(
+                    event
+                        .getLabelFromConfig(context.watch<EventDB>().db.config),
                     style: const TextStyle(backgroundColor: Colors.black)),
               ),
           ]);
@@ -298,7 +300,9 @@ class FieldPaths extends StatelessWidget {
               for (final match in paths)
                 for (final event
                     in match.where((event) => !event.isPositionEvent))
-                  Text(event.getLabelFromConfig(context.watch<EventDB>().db.config),
+                  Text(
+                      event.getLabelFromConfig(
+                          context.watch<EventDB>().db.config),
                       style: TextStyle(
                           color: getColorFromIndex(paths.indexOf(match)),
                           fontSize: 10,

@@ -1,18 +1,26 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:snout_db/event/pitscoutresult.dart';
-import 'package:snout_db/fieldposition.dart';
 import 'package:snout_db/event/matchevent.dart';
+import 'package:snout_db/snout_db.dart';
 
 part 'robotmatchresults.g.dart';
 
 @JsonSerializable()
 class RobotMatchResults {
+  /// The alliance that the robot was on
+  final Alliance alliance;
+
   /// List of events this robot did during the match
   final List<MatchEvent> timeline;
   //Post game survey like pit scouting; but used for scoring too
   final PitScoutResult survey;
 
-  const RobotMatchResults({required this.timeline, required this.survey});
+  /// Independent data structure that contains all data
+  /// of a single robot in a match.
+  RobotMatchResults(
+      {Alliance? alliance, required this.timeline, required this.survey})
+      : this.alliance =
+            alliance ?? (timeline[0].x > 0 ? Alliance.blue : Alliance.red);
 
   factory RobotMatchResults.fromJson(Map<String, dynamic> json) =>
       _$RobotMatchResultsFromJson(json);

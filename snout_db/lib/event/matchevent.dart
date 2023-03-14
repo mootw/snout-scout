@@ -18,17 +18,15 @@ class MatchEvent {
   final double nx;
   final double ny;
 
-  const MatchEvent(
-      //Default match event time to zero to allow for defining an event in the season config
-      //without a time, since that wouldn't make sense.
-      {required this.time,
-      required this.x,
-      required this.y,
-      //TODO instead of storing the normalized position, store the team?
-      required this.nx,
-      required this.ny,
-      required this.id,
-      });
+  const MatchEvent({
+    required this.time,
+    required this.x,
+    required this.y,
+    //TODO instead of storing the normalized position, store the team?
+    required this.nx,
+    required this.ny,
+    required this.id,
+  });
 
   //Generates an event from the config template
   MatchEvent.fromEventConfig(
@@ -44,7 +42,9 @@ class MatchEvent {
 
   //Generates a new robot position event
   MatchEvent.robotPositionEvent(
-      {required this.time, required FieldPosition position, required FieldPosition redNormalizedPosition})
+      {required this.time,
+      required FieldPosition position,
+      required FieldPosition redNormalizedPosition})
       : id = "robot_position",
         x = position.x,
         y = position.y,
@@ -57,16 +57,24 @@ class MatchEvent {
 
   FieldPosition get position => FieldPosition(x, y);
   FieldPosition get positionTeamNormalized => FieldPosition(nx, ny);
-  
-  bool get isInAuto => time <= 17;
+
+  /// Since the timer is floored to seconds, this includes up to 18.
+  bool get isInAuto => time <= 17; 
   bool get isPositionEvent => id == "robot_position";
 
   /// Gets the event label from a specific event config. It will return Position for all position events regardless
-  /// This setup while it does reduce the database redundancy can be problematic in the future if localization is desired for robot position events
-  String getLabelFromConfig (EventConfig config) => isPositionEvent ? "Position" : config.matchscouting.events.firstWhereOrNull((element) => element.id == id)?.label ?? id;
+  /// This setup while it does reduce the database redundancy can be problematic in the future if localization is desired for robot position event label
+  String getLabelFromConfig(EventConfig config) => isPositionEvent
+      ? "Position"
+      : config.matchscouting.events
+              .firstWhereOrNull((element) => element.id == id)
+              ?.label ??
+          id;
 
-  String? getColorFromConfig (EventConfig config) => config.matchscouting.events.firstWhereOrNull((element) => element.id == id)?.color;
+  String? getColorFromConfig(EventConfig config) => config.matchscouting.events
+      .firstWhereOrNull((element) => element.id == id)
+      ?.color;
 
   @override
-  String toString () => 't:${time} id:${id} pos:${position}';
+  String toString() => 't:${time} id:${id} pos:${position}';
 }

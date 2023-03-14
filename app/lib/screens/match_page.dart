@@ -132,7 +132,7 @@ class _MatchPageState extends State<MatchPage> {
                                     : ""),
                             style: TextStyle(
                                 color: match.hasTeam(team) == false
-                                    ? null
+                                    ? getAllianceColor(match.robot[team.toString()]!.alliance)
                                     : getAllianceColor(
                                         match.getAllianceOf(team)))),
                         onPressed: () {
