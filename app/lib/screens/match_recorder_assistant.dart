@@ -40,24 +40,32 @@ class _MatchRecorderAssistantPageState
     super.initState();
     final snoutData = context.read<EventDB>();
     FRCMatch match = snoutData.db.matches[widget.matchid]!;
-    final teamsInMatch = [...match.red, ...match.blue];
 
     //Pick a recommended team that is not already being scouted
     () async {
-      final teams = {...teamsInMatch};
-      for (final scoutedTeam in await _getScoutedTeams(match, teamsInMatch)) {
+      final teams = {...match.red, ...match.blue};
+      for (final scoutedTeam in await _getScoutedTeams(match, teams)) {
         teams.remove(scoutedTeam);
       }
       setState(() {
-        _recommended = (teams.toList()..shuffle())[0];
+        final list = (teams.toList()..shuffle());
+        if (list.isNotEmpty) {
+          _recommended = list.first;
+        }
       });
     }();
   }
 
   //Updates teams that are already being scouted.
-  Future<List<int>> _getScoutedTeams(FRCMatch match, List<int> teams) async {
-    final alreadyScouted = <int>[];
-    //all 6 calls will occur at the same time.
+  Future<Set<int>> _getScoutedTeams(FRCMatch match, Set<int> teams) async {
+    final alreadyScouted = <int>{};
+    //Add teams that already have recordings
+    for (final team in teams) {
+      if (match.robot[team.toString()] != null) {
+        alreadyScouted.add(team);
+      }
+    }
+    //all calls will occur at the same time.
     List<Future> futures = [];
     for (final team in teams) {
       futures.add(apiClient
@@ -214,7 +222,6 @@ class _MatchRecorderAssistantPageState
     );
   }
 
-  //TODO test this extensively!
   void _recordTeam(String matchid, int team, Alliance alliance) async {
     final snoutData = context.read<EventDB>();
     RobotMatchResults? result = await navigateWithEditLock(

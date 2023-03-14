@@ -26,6 +26,27 @@ class RobotMatchResults {
       _$RobotMatchResultsFromJson(json);
   Map<String, dynamic> toJson() => _$RobotMatchResultsToJson(this);
 
+  List<MatchEvent> timelineRedNormalized(FieldStyle fieldStyle) =>
+      _normalizeRed(timeline, fieldStyle);
+  List<MatchEvent> timelineInterpolatedRedNormalized(FieldStyle fieldStyle) =>
+      _normalizeRed(timelineInterpolated, fieldStyle);
+
+  //internal function to normalize the timeline as red.
+  _normalizeRed(List<MatchEvent> events, FieldStyle fieldStyle) {
+    if (alliance == Alliance.blue) {
+      return List.generate(events.length, (index) {
+        MatchEvent event = events[index];
+        FieldPosition position = fieldStyle == FieldStyle.rotated
+            ? event.position.rotated
+            : event.position.mirrored;
+        return MatchEvent(
+            time: event.time, id: event.id, x: position.x, y: position.y);
+      });
+    } else {
+      return events;
+    }
+  }
+
   /// attempts to guess where the robot is inbetween the reported positions.
   /// Since scouts cannot track everything, we have to make a best guess interpolation.
   /// Generally we just linearly interpolate however, if the points are more than 15 seconds apart
@@ -53,19 +74,6 @@ class RobotMatchResults {
         final newTime = pos1.time + x;
         interpolated.add(MatchEvent.robotPositionEvent(
             time: newTime,
-            redNormalizedPosition: FieldPosition(
-                lerp(
-                    pos1.time.toDouble(),
-                    pos1.positionTeamNormalized.x,
-                    pos2.time.toDouble(),
-                    pos2.positionTeamNormalized.x,
-                    newTime.toDouble()),
-                lerp(
-                    pos1.time.toDouble(),
-                    pos1.positionTeamNormalized.y,
-                    pos2.time.toDouble(),
-                    pos2.positionTeamNormalized.y,
-                    newTime.toDouble())),
             position: FieldPosition(
                 lerp(pos1.time.toDouble(), pos1.position.x,
                     pos2.time.toDouble(), pos2.position.x, newTime.toDouble()),

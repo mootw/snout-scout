@@ -56,7 +56,6 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
   }
 
   Widget _getEventButton(MatchEventConfig tool) {
-    final fieldStyle = context.read<EventDB>().db.config.fieldStyle;
     Color? toolColor = tool.color != null ? colorFromHex(tool.color!) : null;
 
     return Padding(
@@ -76,15 +75,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                 setState(() {
                   if (_mode != MatchMode.setup && _robotPosition != null) {
                     _events.add(MatchEvent.fromEventConfig(
-                        time: _time,
-                        event: tool,
-                        position: _robotPosition!,
-                        redNormalizedPosition:
-                            widget.teamAlliance == Alliance.red
-                                ? _robotPosition!
-                                : fieldStyle == FieldStyle.rotated
-                                    ? _robotPosition!.inverted
-                                    : _robotPosition!.mirrored));
+                        time: _time, event: tool, position: _robotPosition!));
                   }
                 });
               },
@@ -137,8 +128,6 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
   Widget build(BuildContext context) {
     //Allow slightly wide to be considered vertical for foldable devices or near-square devices
     final isHorizontal = MediaQuery.of(context).size.aspectRatio > 1.2;
-    //used to normalize the field position
-    final fieldStyle = context.watch<EventDB>().db.config.fieldStyle;
 
     if (_mode == MatchMode.finished) {
       return ConfirmExitDialog(
@@ -251,14 +240,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                             }
                           }
                           _events.add(MatchEvent.robotPositionEvent(
-                              time: _time,
-                              position: robotPosition,
-                              redNormalizedPosition:
-                                  widget.teamAlliance == Alliance.red
-                                      ? robotPosition
-                                      : fieldStyle == FieldStyle.rotated
-                                          ? robotPosition.inverted
-                                          : robotPosition.mirrored));
+                              time: _time, position: robotPosition));
                         });
                       },
                     ),
@@ -310,14 +292,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                         }
                       }
                       _events.add(MatchEvent.robotPositionEvent(
-                          time: _time,
-                          position: robotPosition,
-                          redNormalizedPosition:
-                              widget.teamAlliance == Alliance.red
-                                  ? robotPosition
-                                  : fieldStyle == FieldStyle.rotated
-                                      ? robotPosition.inverted
-                                      : robotPosition.mirrored));
+                          time: _time, position: robotPosition));
                     });
                   },
                 ),
@@ -421,8 +396,6 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
             time: ((event.time / _time) * matchLength.inSeconds).round(),
             x: event.x,
             y: event.y,
-            nx: event.nx,
-            ny: event.ny,
             id: event.id);
       });
       _time = matchLength.inSeconds;

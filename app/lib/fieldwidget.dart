@@ -244,10 +244,8 @@ class RobotMapEventView extends StatelessWidget {
 
 class FieldHeatMap extends StatelessWidget {
   final List<MatchEvent> events;
-  final bool useRedNormalized;
 
-  const FieldHeatMap(
-      {super.key, required this.events, this.useRedNormalized = true});
+  const FieldHeatMap({super.key, required this.events});
 
   @override
   Widget build(BuildContext context) {
@@ -256,7 +254,7 @@ class FieldHeatMap extends StatelessWidget {
         Container(color: Colors.black26),
         CustomPaint(
           size: Size.infinite,
-          painter: HeatMap(events: events, useRedNormalized: useRedNormalized),
+          painter: HeatMap(events: events),
         )
       ],
     );
@@ -287,8 +285,7 @@ class FieldPaths extends StatelessWidget {
               emphasizeStartPoint: emphasizeStartPoint,
               color: getColorFromIndex(paths.indexOf(match)),
               events: match,
-              eventLabels: eventLabels,
-              useRedNormalized: useRedNormalized),
+              eventLabels: eventLabels),
         ),
       ],
       Align(
@@ -316,9 +313,8 @@ class FieldPaths extends StatelessWidget {
 
 class HeatMap extends CustomPainter {
   List<MatchEvent> events;
-  bool useRedNormalized;
 
-  HeatMap({required this.events, required this.useRedNormalized});
+  HeatMap({required this.events});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -331,19 +327,8 @@ class HeatMap extends CustomPainter {
     List<List<double>> ls = List.generate(
         events.length,
         (index) => [
-              (((useRedNormalized
-                              ? events[index].positionTeamNormalized.x
-                              : events[index].position.x) +
-                          1) /
-                      2) *
-                  size.width,
-              (1 -
-                      (((useRedNormalized
-                                  ? events[index].positionTeamNormalized.y
-                                  : events[index].position.y) +
-                              1) /
-                          2)) *
-                  size.height
+              ((events[index].position.x + 1) / 2) * size.width,
+              (1 - ((events[index].position.y + 1) / 2)) * size.height
             ]);
 
     final result = dbscan.run(ls);
@@ -379,13 +364,11 @@ class HeatMap extends CustomPainter {
 class MapLine extends CustomPainter {
   Color color;
   List<MatchEvent> events;
-  bool useRedNormalized;
   bool emphasizeStartPoint;
   bool eventLabels;
 
   MapLine(
       {required this.events,
-      required this.useRedNormalized,
       required this.emphasizeStartPoint,
       required this.eventLabels,
       this.color = Colors.green});
@@ -425,17 +408,8 @@ class MapLine extends CustomPainter {
   // Returns [x, y]
   getFieldPosition(MatchEvent event, Size renderSize) {
     return [
-      (((useRedNormalized ? event.positionTeamNormalized.x : event.position.x) +
-                  1) /
-              2) *
-          renderSize.width,
-      (1 -
-              (((useRedNormalized
-                          ? event.positionTeamNormalized.y
-                          : event.position.y) +
-                      1) /
-                  2)) *
-          renderSize.height
+      ((event.position.x + 1) / 2) * renderSize.width,
+      (1 - ((event.position.y + 1) / 2)) * renderSize.height
     ];
   }
 

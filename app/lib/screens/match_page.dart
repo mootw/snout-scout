@@ -7,7 +7,6 @@ import 'package:app/fieldwidget.dart';
 import 'package:app/helpers.dart';
 import 'package:app/screens/analysis/match_preview.dart';
 import 'package:app/screens/edit_match_results.dart';
-import 'package:app/screens/match_recorder.dart';
 import 'package:app/screens/match_recorder_assistant.dart';
 import 'package:app/screens/view_team_page.dart';
 import 'package:collection/collection.dart';
@@ -16,9 +15,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:snout_db/config/surveyitem.dart';
 import 'package:snout_db/event/match.dart';
-import 'package:snout_db/event/robotmatchresults.dart';
 import 'package:snout_db/patch.dart';
-import 'package:snout_db/snout_db.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class MatchPage extends StatefulWidget {
@@ -207,7 +204,6 @@ class _MatchPageState extends State<MatchPage> {
                     Text("Autos",
                         style: Theme.of(context).textTheme.titleMedium),
                     FieldPaths(
-                      useRedNormalized: false,
                       paths: [
                         for (final robot in match.robot.values)
                           robot.timelineInterpolated
@@ -226,7 +222,6 @@ class _MatchPageState extends State<MatchPage> {
                     Text(eventType.label,
                         style: Theme.of(context).textTheme.titleMedium),
                     FieldHeatMap(
-                        useRedNormalized: false,
                         events: match.robot.values.fold(
                             [],
                             (previousValue, element) => [
@@ -244,7 +239,6 @@ class _MatchPageState extends State<MatchPage> {
                       Text("Driving Tendencies",
                           style: Theme.of(context).textTheme.titleMedium),
                       FieldHeatMap(
-                          useRedNormalized: false,
                           events: match.robot.values.fold(
                               [],
                               (previousValue, element) => [

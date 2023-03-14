@@ -38,8 +38,11 @@ class AnalysisEventsHeatmap extends StatelessWidget {
                               [],
                               (previousValue, element) => [
                                     ...previousValue,
-                                    ...element.timeline.where(
-                                        (event) => event.id == eventType.id)
+                                    ...element
+                                        .timelineRedNormalized(
+                                            data.db.config.fieldStyle)
+                                        .where(
+                                            (event) => event.id == eventType.id)
                                   ])
                         ])),
           ],
@@ -55,8 +58,10 @@ class AnalysisEventsHeatmap extends StatelessWidget {
                             [],
                             (previousValue, element) => [
                                   ...previousValue!,
-                                  ...element.value.timelineInterpolated.where(
-                                      (event) => event.isPositionEvent)
+                                  ...element.value
+                                      .timelineInterpolatedRedNormalized(
+                                          data.db.config.fieldStyle)
+                                      .where((event) => event.isPositionEvent)
                                 ])
                       ])),
         ],

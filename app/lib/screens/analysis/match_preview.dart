@@ -184,7 +184,7 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                                     for (final match
                                         in data.db.teamRecordedMatches(team))
                                       match.value.robot[team.toString()]!
-                                          .timelineInterpolated
+                                          .timelineInterpolatedRedNormalized(data.db.config.fieldStyle)
                                           .where((element) => element.isInAuto)
                                           .toList()
                                   ],
@@ -212,7 +212,7 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                                                   ...?element
                                                       .value
                                                       .robot[team.toString()]
-                                                      ?.timeline
+                                                      ?.timelineRedNormalized(data.db.config.fieldStyle)
                                                       .where((event) =>
                                                           event.id ==
                                                           eventType.id)
@@ -238,7 +238,7 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                                                     ...?element
                                                         .value
                                                         .robot[team.toString()]
-                                                        ?.timelineInterpolated
+                                                        ?.timelineInterpolatedRedNormalized(data.db.config.fieldStyle)
                                                         .where((event) => event
                                                             .isPositionEvent)
                                                   ])),

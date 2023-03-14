@@ -14,49 +14,36 @@ class MatchEvent {
   //x, y position on the field
   final double x;
   final double y;
-  //red team normalized x y position on the field
-  final double nx;
-  final double ny;
 
   const MatchEvent({
     required this.time,
+    required this.id,
     required this.x,
     required this.y,
-    //TODO instead of storing the normalized position, store the team?
-    required this.nx,
-    required this.ny,
-    required this.id,
   });
 
   //Generates an event from the config template
   MatchEvent.fromEventConfig(
       {required MatchEventConfig event,
       required FieldPosition position,
-      required FieldPosition redNormalizedPosition,
       required this.time})
       : id = event.id,
         x = position.x,
-        y = position.y,
-        nx = redNormalizedPosition.x,
-        ny = redNormalizedPosition.y;
+        y = position.y;
 
   //Generates a new robot position event
   MatchEvent.robotPositionEvent(
       {required this.time,
-      required FieldPosition position,
-      required FieldPosition redNormalizedPosition})
+      required FieldPosition position})
       : id = "robot_position",
         x = position.x,
-        y = position.y,
-        nx = redNormalizedPosition.x,
-        ny = redNormalizedPosition.y;
+        y = position.y;
 
   factory MatchEvent.fromJson(Map<String, dynamic> json) =>
       _$MatchEventFromJson(json);
   Map<String, dynamic> toJson() => _$MatchEventToJson(this);
 
   FieldPosition get position => FieldPosition(x, y);
-  FieldPosition get positionTeamNormalized => FieldPosition(nx, ny);
 
   /// Since the timer is floored to seconds, this includes up to 18.
   bool get isInAuto => time <= 17; 
