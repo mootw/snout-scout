@@ -41,6 +41,8 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
   double _mapRotation = 0;
   Timer? _t;
 
+  bool _showSurvey = false;
+
   MatchEvent? get _lastMoveEvent =>
       _events.toList().lastWhereOrNull((event) => event.isPositionEvent);
   FieldPosition? get _robotPosition => _lastMoveEvent?.position;
@@ -129,12 +131,18 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
     //Allow slightly wide to be considered vertical for foldable devices or near-square devices
     final isHorizontal = MediaQuery.of(context).size.aspectRatio > 1.2;
 
-    if (_mode == MatchMode.finished) {
+    if (_showSurvey || _mode == MatchMode.finished) {
       return ConfirmExitDialog(
         child: Scaffold(
           appBar: AppBar(
             title: Text("Team ${widget.team}"),
             actions: [
+              if(_mode != MatchMode.finished)
+                FilledButton.tonal(onPressed: () {
+                  setState (() {
+                    _showSurvey = !_showSurvey;
+                  });
+                }, child: const Text("Show Recorder")),
               IconButton(
                   onPressed: () {
                     if (_formKey.currentState!.validate() == false) {
@@ -181,7 +189,13 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
         child: Scaffold(
           appBar: AppBar(
             title: Text("Team ${widget.team}"),
-            actions: [_statusAndToolBar()],
+            actions: [
+              FilledButton.tonal(onPressed: () {
+                  setState (() {
+                    _showSurvey = !_showSurvey;
+                  });
+                }, child: const Text("Show Survey")),
+              _statusAndToolBar()],
           ),
           body: Row(
             children: [
@@ -257,6 +271,14 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
       child: Scaffold(
         appBar: AppBar(
           title: Text("Team ${widget.team}"),
+          actions: [
+            FilledButton.tonal(onPressed: () {
+                  setState (() {
+                    _showSurvey = !_showSurvey;
+                  });
+                }, child: const Text("Show Survey")),
+            const SizedBox(width: 32),
+          ],
         ),
         body: Column(
           mainAxisAlignment: MainAxisAlignment.end,
@@ -341,13 +363,13 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                 });
               },
               icon: const Icon(Icons.rotate_right)),
-          const SizedBox(width: 12),
+          const SizedBox(width: 8),
           Text("time $_time"),
-          const SizedBox(width: 12),
+          const SizedBox(width: 8),
           if (robotPicture == null) const Text("No Picture"),
           if (robotPicture != null)
             Center(
-              child: FilledButton.tonal(
+              child: TextButton(
                   onPressed: () {
                     showDialog(
                         context: context,
@@ -362,9 +384,9 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                           );
                         });
                   },
-                  child: const Text("Picture")),
+                  child: const Text("Show Picture")),
             ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 8),
           FilledButton.icon(
             icon: const Icon(Icons.arrow_forward),
             style: _mode == MatchMode.playing
