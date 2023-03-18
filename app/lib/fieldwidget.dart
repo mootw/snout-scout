@@ -13,9 +13,14 @@ import 'package:snout_db/event/matchevent.dart';
 import 'package:snout_db/event/robotmatchresults.dart';
 import 'package:snout_db/snout_db.dart';
 
-double mapRatio = 0.5;
-double fieldWidthSizeInches = 649;
-double robotPorportionalSize = 32 / fieldWidthSizeInches;
+const double mapRatio = 0.5;
+const double fieldWidthMeters = 16.48;
+const double robotSizeMeters = 0.8;
+const double robotFieldProportion = robotSizeMeters / fieldWidthMeters;
+
+//For consistent UI sizing
+const double largeFieldSize = 350;
+const double smallFieldSize = 250;
 
 class FieldPositionSelector extends StatelessWidget {
   const FieldPositionSelector(
@@ -62,30 +67,29 @@ class FieldPositionSelector extends StatelessWidget {
                         color: Colors.black54)),
               if (robotPosition != null)
                 Container(
-                  alignment: Alignment(
-                      robotPosition!.x *
-                          (1 +
-                              ((robotPorportionalSize * constraints.maxWidth) /
-                                  constraints.maxWidth)),
-                      -robotPosition!.y *
-                          (1 +
-                              //Use 1/mapratio for the height since we are ONLY using the width constraint
-                              //IDK it seems to work here, not sure why it isn't a problem elseware.
-                              (((1 / mapRatio) *
-                                      robotPorportionalSize *
-                                      constraints.maxWidth) /
-                                  constraints.maxWidth))),
-                  child: Container(
-                      alignment: Alignment.center,
-                      width: robotPorportionalSize * constraints.maxWidth,
-                      height: robotPorportionalSize * constraints.maxWidth,
-                      color: getAllianceColor(alliance),
-                      child: Text(teamNumber.toString(),
-                          style: TextStyle(
-                              fontSize: 13 *
-                                  (constraints.maxWidth /
-                                      fieldWidthSizeInches)))),
-                ),
+                    alignment: Alignment(
+                        robotPosition!.x *
+                            (1 +
+                                ((robotFieldProportion * constraints.maxWidth) /
+                                    constraints.maxWidth)),
+                        -robotPosition!.y *
+                            (1 +
+                                //Use 1/mapratio for the height since we are ONLY using the width constraint
+                                //IDK it seems to work here, not sure why it isn't a problem elseware.
+                                (((1 / mapRatio) *
+                                        robotFieldProportion *
+                                        constraints.maxWidth) /
+                                    constraints.maxWidth))),
+                    child: Container(
+                        alignment: Alignment.center,
+                        width: robotFieldProportion * constraints.maxWidth,
+                        height: robotFieldProportion * constraints.maxWidth,
+                        color: getAllianceColor(alliance),
+                        child: Text(teamNumber.toString(),
+                            style: TextStyle(
+                                fontSize: 0.3 *
+                                    (constraints.maxWidth /
+                                        fieldWidthMeters))))),
             ],
           ),
         );
@@ -212,21 +216,21 @@ class RobotMapEventView extends StatelessWidget {
               alignment: Alignment(
                   robotPosition.x *
                       (1 +
-                          ((robotPorportionalSize * constraints.maxWidth) /
+                          ((robotFieldProportion * constraints.maxWidth) /
                               constraints.maxWidth)),
                   -robotPosition.y *
                       (1 +
-                          ((robotPorportionalSize * constraints.maxWidth) /
+                          ((robotFieldProportion * constraints.maxWidth) /
                               constraints.maxHeight))),
               child: Container(
                 alignment: Alignment.center,
-                width: robotPorportionalSize * constraints.maxWidth,
-                height: robotPorportionalSize * constraints.maxWidth,
+                width: robotFieldProportion * constraints.maxWidth,
+                height: robotFieldProportion * constraints.maxWidth,
                 color: getAllianceColor(robotRecording.alliance),
                 child: Text(team,
                     style: TextStyle(
-                        fontSize: 13 *
-                            (constraints.maxWidth / fieldWidthSizeInches))),
+                        fontSize:
+                            0.3 * (constraints.maxWidth / fieldWidthMeters))),
               ),
             ),
             for (final event in allRecentEvents)
@@ -319,7 +323,7 @@ class HeatMap extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     DBSCAN dbscan = DBSCAN(
-      epsilon: robotPorportionalSize / 3.5 * size.width,
+      epsilon: robotFieldProportion / 5 * size.width,
       //Allow for clusters of single points
       minPoints: 1,
     );
@@ -345,10 +349,14 @@ class HeatMap extends CustomPainter {
       Paint p = Paint();
       p.maskFilter =
           MaskFilter.blur(BlurStyle.normal, math.sqrt(group.length * 0.1) + 1);
-      // p.color = HSVColor.fromAHSV(
-      //         1, (1 - (group.length / maxGroupLength)) * 225, 1, 1)
-      //     .toColor();
-      p.color = const HSVColor.fromAHSV(1, 100, 1, 1).toColor();
+      //Make the intensity of each dot based on the amount of events within its approximate area
+
+      p.color = HSVColor.fromAHSV(
+              math.min(1, math.max(((group.length + 1) / maxGroupLength), 0.3)),
+              100,
+              1,
+              1)
+          .toColor();
       //Draw more and more green circles with increasing opacity
       canvas.drawCircle(Offset(ls[group[0]][0], ls[group[0]][1]),
           4 + math.sqrt(group.length * 0.5), p);

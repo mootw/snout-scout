@@ -19,9 +19,11 @@
         > **EXAMPLE** intake locations, climbing time, compatibility with a specific mechanism.
     - DO collect **SUCCESSES** in match scouting. 
         > **EXAMPLE** scoring quantity, scoring locations, did sucessfully climb, climbing level
-
-
-4. **Create a document that defines each datapoint**
+5. **Order is easier than disorder**
+    - DO collect scouting information in order.
+        > **EXAMPLE** A match recording survey should ask for things in auto before endgame.
+        > **EXAMPLE** Pit scouting questions should have a natural order that encurages a good conversation flow.
+6. **Create a document that defines each datapoint**
     - TODO snout scout should allow for documentation inside of the event config.
 
 

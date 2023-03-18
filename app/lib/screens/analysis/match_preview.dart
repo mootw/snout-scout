@@ -173,7 +173,6 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                             width: 300,
                             child: Column(
                               children: [
-                                const SizedBox(height: 16),
                                 Text("Autos",
                                     style: Theme.of(context)
                                         .textTheme
@@ -184,7 +183,8 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                                     for (final match
                                         in data.db.teamRecordedMatches(team))
                                       match.value.robot[team.toString()]!
-                                          .timelineInterpolatedRedNormalized(data.db.config.fieldStyle)
+                                          .timelineInterpolatedRedNormalized(
+                                              data.db.config.fieldStyle)
                                           .where((element) => element.isInAuto)
                                           .toList()
                                   ],
@@ -195,9 +195,9 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                           for (final eventType
                               in data.db.config.matchscouting.events)
                             SizedBox(
-                              width: 300,
+                              width: smallFieldSize,
                               child: Column(children: [
-                                const SizedBox(height: 16),
+                                const SizedBox(height: 8),
                                 Text(eventType.label,
                                     style: Theme.of(context)
                                         .textTheme
@@ -209,10 +209,11 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                                             [],
                                             (previousValue, element) => [
                                                   ...previousValue,
-                                                  ...?element
-                                                      .value
+                                                  ...?element.value
                                                       .robot[team.toString()]
-                                                      ?.timelineRedNormalized(data.db.config.fieldStyle)
+                                                      ?.timelineRedNormalized(
+                                                          data.db.config
+                                                              .fieldStyle)
                                                       .where((event) =>
                                                           event.id ==
                                                           eventType.id)
@@ -220,10 +221,10 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                               ]),
                             ),
                           SizedBox(
-                              width: 300,
+                              width: smallFieldSize,
                               child: Column(
                                 children: [
-                                  const SizedBox(height: 16),
+                                  const SizedBox(height: 8),
                                   Text("Driving Tendencies",
                                       style: Theme.of(context)
                                           .textTheme
@@ -235,10 +236,11 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                                               [],
                                               (previousValue, element) => [
                                                     ...previousValue,
-                                                    ...?element
-                                                        .value
+                                                    ...?element.value
                                                         .robot[team.toString()]
-                                                        ?.timelineInterpolatedRedNormalized(data.db.config.fieldStyle)
+                                                        ?.timelineInterpolatedRedNormalized(
+                                                            data.db.config
+                                                                .fieldStyle)
                                                         .where((event) => event
                                                             .isPositionEvent)
                                                   ])),
@@ -246,7 +248,6 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                               )),
                         ],
                       ),
-                      const SizedBox(width: 8),
                     ]
                   ],
                 )),

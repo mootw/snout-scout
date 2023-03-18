@@ -28,7 +28,6 @@ class MatchPage extends StatefulWidget {
 }
 
 class _MatchPageState extends State<MatchPage> {
-
   @override
   Widget build(BuildContext context) {
     final snoutData = context.watch<EventDB>();
@@ -37,15 +36,6 @@ class _MatchPageState extends State<MatchPage> {
       appBar: AppBar(
         title: Text(match.description),
         actions: [
-          //If there is a TBA event ID we will add a button to view the match id
-          //since we will assume that all of the matches (or at least most)
-          //have been imported to match the tba id format
-          if (snoutData.db.config.tbaEventId != null)
-            FilledButton.tonal(
-              child: const Text("TBA"),
-              onPressed: () => launchUrlString(
-                  "https://www.thebluealliance.com/match/${widget.matchid}"),
-            ),
           TextButton(
             child: match.results == null
                 ? const Text("Add Results")
@@ -79,7 +69,7 @@ class _MatchPageState extends State<MatchPage> {
           const SizedBox(height: 8),
           Wrap(
             children: [
-              const SizedBox(width: 16),
+              const SizedBox(width: 12),
               FilledButton(
                   onPressed: () {
                     Navigator.push(
@@ -89,7 +79,7 @@ class _MatchPageState extends State<MatchPage> {
                                 matchid: widget.matchid)));
                   },
                   child: const Text("Scout This Match")),
-              const SizedBox(width: 16),
+              const SizedBox(width: 12),
               FilledButton.tonal(
                   onPressed: () {
                     Navigator.push(
@@ -99,6 +89,16 @@ class _MatchPageState extends State<MatchPage> {
                                 red: match.red, blue: match.blue)));
                   },
                   child: const Text("Match Preview")),
+              const SizedBox(width: 12),
+              //If there is a TBA event ID we will add a button to view the match id
+              //since we will assume that all of the matches (or at least most)
+              //have been imported to match the tba id format
+              if (snoutData.db.config.tbaEventId != null)
+                FilledButton.tonal(
+                  child: const Text("TBA"),
+                  onPressed: () => launchUrlString(
+                      "https://www.thebluealliance.com/match/${widget.matchid}"),
+                ),
             ],
           ),
           const SizedBox(height: 8),
@@ -129,7 +129,8 @@ class _MatchPageState extends State<MatchPage> {
                                     : ""),
                             style: TextStyle(
                                 color: match.hasTeam(team) == false
-                                    ? getAllianceColor(match.robot[team.toString()]!.alliance)
+                                    ? getAllianceColor(
+                                        match.robot[team.toString()]!.alliance)
                                     : getAllianceColor(
                                         match.getAllianceOf(team)))),
                         onPressed: () {
@@ -197,7 +198,7 @@ class _MatchPageState extends State<MatchPage> {
             alignment: WrapAlignment.center,
             children: [
               SizedBox(
-                width: 360,
+                width: largeFieldSize,
                 child: Column(
                   children: [
                     const SizedBox(height: 16),
@@ -216,7 +217,7 @@ class _MatchPageState extends State<MatchPage> {
               ),
               for (final eventType in snoutData.db.config.matchscouting.events)
                 SizedBox(
-                  width: 360,
+                  width: smallFieldSize,
                   child: Column(children: [
                     const SizedBox(height: 16),
                     Text(eventType.label,
@@ -232,7 +233,7 @@ class _MatchPageState extends State<MatchPage> {
                   ]),
                 ),
               SizedBox(
-                  width: 360,
+                  width: smallFieldSize,
                   child: Column(
                     children: [
                       const SizedBox(height: 16),

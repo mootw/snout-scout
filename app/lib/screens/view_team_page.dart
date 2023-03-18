@@ -154,7 +154,7 @@ class _TeamViewPageState extends State<TeamViewPage> {
               alignment: WrapAlignment.center,
               children: [
                 SizedBox(
-                  width: 360,
+                  width: largeFieldSize,
                   child: Column(
                     children: [
                       const SizedBox(height: 16),
@@ -175,7 +175,7 @@ class _TeamViewPageState extends State<TeamViewPage> {
                 ),
                 for (final eventType in data.db.config.matchscouting.events)
                   SizedBox(
-                    width: 360,
+                    width: smallFieldSize,
                     child: Column(children: [
                       const SizedBox(height: 16),
                       Text(eventType.label,
@@ -197,7 +197,7 @@ class _TeamViewPageState extends State<TeamViewPage> {
                     ]),
                   ),
                 SizedBox(
-                    width: 360,
+                    width: smallFieldSize,
                     child: Column(
                       children: [
                         const SizedBox(height: 16),
