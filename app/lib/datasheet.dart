@@ -19,11 +19,7 @@ class DataItem {
             number == null || number.isNaN ? double.negativeInfinity : number;
 
   DataItem.fromText(String? text)
-      : displayValue = ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 180),
-            //Make the text smaller so that long text fits
-            //This is more of a hack than best practice
-            child: Text(text ?? noDataText)),
+      : displayValue = Text(text ?? noDataText),
         exportValue = text ?? noDataText,
         //Empty string will sort to the bottom by default
         sortingValue = text?.toLowerCase() ?? "";
@@ -42,7 +38,8 @@ class DataItem {
 }
 
 class DataSheet extends StatefulWidget {
-  const DataSheet({super.key, this.title, required this.columns, required this.rows});
+  const DataSheet(
+      {super.key, this.title, required this.columns, required this.rows});
 
   ///Rows<Columns<DataItem<Comparable>>
   final String? title;
@@ -85,13 +82,18 @@ class _DataSheetState extends State<DataSheet> {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
           child: Wrap(
             children: [
-              if(widget.title != null)
-                Text('${widget.title}', style: Theme.of(context).textTheme.titleLarge),
+              if (widget.title != null)
+                Text('${widget.title}',
+                    style: Theme.of(context).textTheme.titleLarge),
               TextButton(
                   onPressed: () async {
                     final stream = Stream.fromIterable(utf8
                         .encode(dataTableToCSV(widget.columns, widget.rows)));
-                    download(stream, widget.title != null ? '${widget.title}.csv' : 'table.csv');
+                    download(
+                        stream,
+                        widget.title != null
+                            ? '${widget.title}.csv'
+                            : 'table.csv');
                   },
                   child: const Text("Export CSV")),
             ],
@@ -100,7 +102,8 @@ class _DataSheetState extends State<DataSheet> {
         ScrollConfiguration(
           behavior: MouseInteractableScrollBehavior(),
           child: SingleChildScrollView(
-            clipBehavior: Clip.none, //Maybe this improves the scrolling performance???
+            clipBehavior:
+                Clip.none, //Maybe this improves the scrolling performance???
             scrollDirection: Axis.horizontal,
             child: DataTable(
               //This is to make the data more compact
@@ -108,33 +111,60 @@ class _DataSheetState extends State<DataSheet> {
               sortAscending: _sortAscending,
               sortColumnIndex: _currentSortColumn,
               border: const TableBorder(
-                verticalInside: BorderSide(
-                  width: 1,
-                  color: Colors.white10,
-                )
-              ),
+                  verticalInside: BorderSide(
+                width: 1,
+                color: Colors.white10,
+              )),
               //Make the data-table more compact (this basically fits 2 lines perfectly)
               //This is definitely against best practice, but it significantly improves
               //the readability of the table at the cost of touch target size
-              dataRowHeight: kMinInteractiveDimension - 8,
+              dataRowMaxHeight: kMinInteractiveDimension - 8,
+              dataRowMinHeight: kMinInteractiveDimension - 8,
               columns: [
                 for (final column in widget.columns)
-                  DataColumn(label: DefaultTextStyle(maxLines: 2, style: Theme.of(context).textTheme.bodySmall!, child: column.displayValue), onSort: updateSort),
+                  DataColumn(
+                      label: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 160),
+                          //Make the text smaller so that long text fits
+                          //This is more of a hack than best practice
+                          child: DefaultTextStyle(
+                              maxLines: 2,
+                              style: Theme.of(context).textTheme.bodySmall!,
+                              child: column.displayValue)),
+                      onSort: updateSort),
               ],
               rows: [
                 for (final row in widget.rows)
                   DataRow(cells: [
-                    for (final cell in row) 
-                      DataCell(DefaultTextStyle(maxLines: 2, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.bodyMedium!, child: cell.displayValue), onTap: cell.exportValue.length < 50 ? null : () {
-                      //If the cell's export value length (basically the text of whatever the display value is)
-                      //we will have an on-tap that will display a dialog with the complete data
-                      showDialog(context: context, builder: (context) => AlertDialog(
-                        content: cell.displayValue,
-                        actions: [
-                          TextButton(onPressed: () => Navigator.pop(context), child: const Text("Ok")),
-                        ],
-                      ));
-                    })
+                    for (final cell in row)
+                      DataCell(
+                          ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 160),
+                              //Make the text smaller so that long text fits
+                              //This is more of a hack than best practice
+                              child: DefaultTextStyle(
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style:
+                                      Theme.of(context).textTheme.bodyMedium!,
+                                  child: cell.displayValue)),
+                          onTap: cell.exportValue.length < 42
+                              ? null
+                              : () {
+                                  //If the cell's export value length (basically the text of whatever the display value is)
+                                  //we will have an on-tap that will display a dialog with the complete data
+                                  showDialog(
+                                      context: context,
+                                      builder: (context) => AlertDialog(
+                                            content: cell.displayValue,
+                                            actions: [
+                                              TextButton(
+                                                  onPressed: () =>
+                                                      Navigator.pop(context),
+                                                  child: const Text("Ok")),
+                                            ],
+                                          ));
+                                })
                   ]),
               ],
             ),

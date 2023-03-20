@@ -67,7 +67,7 @@ class _DataTablePageState extends State<DataTablePage> {
               DataItem.fromText(item.label),
           ],
           rows: [
-            for (final match in data.db.matches.entries)
+            for (final match in data.db.matches.entries.toList().reversed)
               for (final robot in match.value.robot.entries)
                 [
                   DataItem(
