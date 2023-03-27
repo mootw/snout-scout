@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:app/eventdb_state.dart';
 import 'package:app/screens/match_page.dart';
 import 'package:app/screens/view_team_page.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:snout_db/config/surveyitem.dart';
@@ -110,8 +111,12 @@ class SnoutScoutSearch extends SearchDelegate {
       }
 
       for (final item in pitScouting.entries) {
+        
         final surveyItem = db.db.config.pitscouting
-            .firstWhere((element) => element.id == item.key);
+            .firstWhereOrNull((element) => element.id == item.key);
+        if(surveyItem == null) {
+          continue;
+        }
         if (surveyItem.type == SurveyItemType.picture) {
           //Do not include image data.
           continue;

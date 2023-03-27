@@ -1,3 +1,4 @@
+import 'package:app/screens/analysis/boxplot_analysis.dart';
 import 'package:app/screens/analysis/events_heatmaps.dart';
 import 'package:app/screens/analysis/match_preview.dart';
 import 'package:app/screens/analysis/pitscout_survey_analysis.dart';
@@ -19,6 +20,16 @@ class _AnalysisPageState extends State<AnalysisPage> {
       const Text(
           "Scoreboard (shows average value of all metrics for each team, like heatmaps) - Metrics Explorer - Maybe allow for more 'sql' like queries here??"),
       
+      ListTile(
+        title: const Text("Consistency Analysis"),
+        onTap: () {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (builder) => const BoxPlotAnalysis()));
+        },
+      ),
+
       ListTile(
         title: const Text("Match Preview"),
         onTap: () {
