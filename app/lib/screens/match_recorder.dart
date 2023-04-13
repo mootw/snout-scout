@@ -152,7 +152,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                     Navigator.pop(
                         context,
                         RobotMatchResults(
-                            // alliance: widget.teamAlliance,
+                            alliance: widget.teamAlliance,
                             timeline: _events,
                             survey: _postGameSurvey));
                   },

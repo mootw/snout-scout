@@ -83,7 +83,7 @@ class _BoxPlotAnalysisState extends State<BoxPlotAnalysis> {
 
     return Scaffold(
       appBar: AppBar(title: const Text("Consistency Analysis")),
-      body: ListView(
+      body: Column(
         children: [
           DropdownButton<MatchResultsProcess>(
             value: _selectedProcess,
@@ -113,27 +113,34 @@ class _BoxPlotAnalysisState extends State<BoxPlotAnalysis> {
                           MediaQuery.of(context).size.height))),
               const SizedBox(width: 32),
             ]),
-          if (valuesSorted != null)
-            for (final entry in valuesSorted.entries)
-              Row(children: [
-                SizedBox(
-                    width: 100,
-                    child: TextButton(
-                      child: Text(entry.key.toString()),
-                      onPressed: () {
-                        //Open this teams scouting page
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) =>
-                                  TeamViewPage(teamNumber: entry.key)),
-                        );
-                      },
-                    )),
-                Expanded(
-                    child: BoxPlot(max: max, min: min, values: entry.value)),
-                const SizedBox(width: 32),
-              ]),
+          Expanded(
+            child: ListView(
+              children: [
+                if (valuesSorted != null)
+                  for (final entry in valuesSorted.entries)
+                    Row(children: [
+                      SizedBox(
+                          width: 100,
+                          child: TextButton(
+                            child: Text(entry.key.toString()),
+                            onPressed: () {
+                              //Open this teams scouting page
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        TeamViewPage(teamNumber: entry.key)),
+                              );
+                            },
+                          )),
+                      Expanded(
+                          child:
+                              BoxPlot(max: max, min: min, values: entry.value)),
+                      const SizedBox(width: 32),
+                    ]),
+              ],
+            ),
+          ),
         ],
       ),
     );

@@ -25,10 +25,7 @@
 - track standings or scores directly (official scores are linked if TBA event key is provided)
 - analyse multiple events at once (multiple events can be queried at the server level)
 - retain compatibility with older versions
-- sync data between multiple clients peer-to-peer due to generally requiring human interaction to sync and thus have high latency (>1hr).
-
-# Known Issues
-- Emojis render in black and white due to canvaskit https://github.com/flutter/flutter/issues/119536 https://stackoverflow.com/questions/75439788/flutter-web-shows-emojis-in-blackwhite
+- sync data between multiple clients peer-to-peer due to generally requiring human interaction to sync on modern smartphones without dedicated hardware and software and thus have high latency for changes to propagate (>1hr).
 
 
 # Network/sync methodologies

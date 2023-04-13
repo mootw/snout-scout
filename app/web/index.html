@@ -52,7 +52,11 @@
           // Use the canvas kit renderer to enforce consistency!!!
           //This uses more data to download but it also increases runtime performance.
           let config = {
-            renderer: "canvaskit",
+            //flutter/flutter#119536
+            //The html renderer does not lag when scrolling the data-tables. canvaskit does on web builds
+            //canvaskit does not use platform emoji but html has some rendering oddities.
+            renderer: "html",
+            useColorEmoji: true //For canvaskit to render color emoji
           }
           let appRunner = await engineInitializer.initializeEngine(config);
           await appRunner.runApp();

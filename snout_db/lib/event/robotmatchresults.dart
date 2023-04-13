@@ -10,20 +10,19 @@ class RobotMatchResults {
   /// The alliance that the robot was on
   final Alliance alliance;
 
+  //Post game survey like pit scouting; but used for scoring too
+  final PitScoutResult survey;
+
   /// List of events this robot did during the match
   final List<MatchEvent> timeline;
   final List<MatchEvent> timelineInterpolated;
-  //Post game survey like pit scouting; but used for scoring too
-  final PitScoutResult survey;
 
   /// Independent data structure that contains all data
   /// of a single robot in a match.
   /// Initializing this object will also pre-calculate an interpolated timeline
   RobotMatchResults(
-      {Alliance? alliance, required this.timeline, required this.survey})
-      : this.timelineInterpolated = _interpolateTimeline(timeline),
-        this.alliance =
-            alliance ?? (timeline[0].x > 0 ? Alliance.blue : Alliance.red);
+      {required this.alliance, required this.survey, required this.timeline})
+      : this.timelineInterpolated = _interpolateTimeline(timeline);
 
   factory RobotMatchResults.fromJson(Map<String, dynamic> json) =>
       _$RobotMatchResultsFromJson(json);

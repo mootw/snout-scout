@@ -18,7 +18,7 @@ class _AnalysisPageState extends State<AnalysisPage> {
   Widget build(BuildContext context) {
     return ListView(children: [
       const Text(
-          "Scoreboard (shows average value of all metrics for each team, like heatmaps) - Metrics Explorer - Maybe allow for more 'sql' like queries here??"),
+          "Scoreboard (shows average value of all metrics for each team, like heatmaps) - Metrics Explorer - Maybe allow for more 'sql' like queries here?? - Scatter plot!!! AND PLOT FOR METRIC OVER TIME"),
       
       ListTile(
         title: const Text("Consistency Analysis"),
@@ -67,9 +67,6 @@ class _AnalysisPageState extends State<AnalysisPage> {
                   builder: (builder) => const AnalysisPostMatchSurvey()));
         },
       ),
-
-      const Text(
-              "Analysis PER data point (like box and whisper plots and Scatter plot)"),
     ]);
   }
 }

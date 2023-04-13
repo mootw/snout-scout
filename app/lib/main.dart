@@ -203,9 +203,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: const Text("Rankings")),
             ),
           IconButton(
-              onPressed: () {
-                showSearch(context: context, delegate: SnoutScoutSearch());
-              },
+              onPressed: () =>
+                  showSearch(context: context, delegate: SnoutScoutSearch()),
               icon: const Icon(Icons.search))
         ],
       ),
@@ -333,7 +332,8 @@ class _MyHomePageState extends State<MyHomePage> {
           ListTile(
             title: const Text("Read DOCS"),
             trailing: const Icon(Icons.menu_book),
-            onTap: () => launchUrlString("https://github.com/mootw/snout-scout/blob/main/readme.md"),
+            onTap: () => launchUrlString(
+                "https://github.com/mootw/snout-scout/blob/main/readme.md"),
           ),
           ListTile(
             title: const Text("DEBUG Field position"),
@@ -341,7 +341,8 @@ class _MyHomePageState extends State<MyHomePage> {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const DebugFieldPosition()),
+                MaterialPageRoute(
+                    builder: (context) => const DebugFieldPosition()),
               );
             },
           ),
