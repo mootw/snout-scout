@@ -65,8 +65,6 @@ class _BoxPlotAnalysisState extends State<BoxPlotAnalysis> {
                     : element.max) ??
         0;
 
-    print(min);
-    print(max);
 
     //Sort them by the average
     SplayTreeMap<int, List<num>>? valuesSorted;
@@ -109,7 +107,7 @@ class _BoxPlotAnalysisState extends State<BoxPlotAnalysis> {
               Expanded(
                   child: CustomPaint(
                       painter: BoxPlotLabelPainter(
-                          BoxPlot(values: [], min: min, max: max),
+                          BoxPlot(values: const [], min: min, max: max),
                           MediaQuery.of(context).size.height))),
               const SizedBox(width: 32),
             ]),

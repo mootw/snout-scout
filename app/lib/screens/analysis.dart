@@ -1,5 +1,6 @@
 import 'package:app/screens/analysis/boxplot_analysis.dart';
 import 'package:app/screens/analysis/events_heatmaps.dart';
+import 'package:app/screens/analysis/heatmap_event_type.dart';
 import 'package:app/screens/analysis/match_preview.dart';
 import 'package:app/screens/analysis/pitscout_survey_analysis.dart';
 import 'package:app/screens/analysis/postmatch_survey_analysis.dart';
@@ -37,6 +38,16 @@ class _AnalysisPageState extends State<AnalysisPage> {
               context,
               MaterialPageRoute(
                   builder: (builder) => const AnalysisMatchPreview(red: [], blue: [])));
+        },
+      ),
+
+      ListTile(
+        title: const Text("Heatmap by Event Type"),
+        onTap: () {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (builder) => const AnalysisHeatMapByEventType()));
         },
       ),
       

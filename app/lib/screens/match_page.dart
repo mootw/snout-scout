@@ -71,23 +71,19 @@ class _MatchPageState extends State<MatchPage> {
             children: [
               const SizedBox(width: 12),
               FilledButton(
-                  onPressed: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (builder) => MatchRecorderAssistantPage(
-                                matchid: widget.matchid)));
-                  },
+                  onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (builder) => MatchRecorderAssistantPage(
+                              matchid: widget.matchid))),
                   child: const Text("Scout This Match")),
               const SizedBox(width: 12),
               FilledButton.tonal(
-                  onPressed: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (builder) => AnalysisMatchPreview(
-                                red: match.red, blue: match.blue)));
-                  },
+                  onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (builder) => AnalysisMatchPreview(
+                              red: match.red, blue: match.blue))),
                   child: const Text("Match Preview")),
               const SizedBox(width: 12),
               //If there is a TBA event ID we will add a button to view the match id
@@ -122,27 +118,23 @@ class _MatchPageState extends State<MatchPage> {
                 [
                   DataItem(
                       displayValue: TextButton(
-                        child: Text(
-                            team.toString() +
-                                (match.hasTeam(team) == false
-                                    ? " [surrogate]"
-                                    : ""),
-                            style: TextStyle(
-                                color: match.hasTeam(team) == false
-                                    ? getAllianceColor(
-                                        match.robot[team.toString()]!.alliance)
-                                    : getAllianceColor(
-                                        match.getAllianceOf(team)))),
-                        onPressed: () {
-                          //Open this teams scouting page
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    TeamViewPage(teamNumber: team)),
-                          );
-                        },
-                      ),
+                          child: Text(
+                              team.toString() +
+                                  (match.hasTeam(team) == false
+                                      ? " [surrogate]"
+                                      : ""),
+                              style: TextStyle(
+                                  color: match.hasTeam(team) == false
+                                      ? getAllianceColor(match
+                                          .robot[team.toString()]!.alliance)
+                                      : getAllianceColor(
+                                          match.getAllianceOf(team)))),
+                          onPressed: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        TeamViewPage(teamNumber: team)),
+                              )),
                       exportValue: team.toString(),
                       sortingValue: team),
                   for (final item

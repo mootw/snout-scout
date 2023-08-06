@@ -18,7 +18,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.17.0 <3.0.0"
+  sdk: '>=3.0.0 <4.0.0'
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -30,25 +30,26 @@ dependencies:
   flutter:
     sdk: flutter
 
+  logging: ^1.2.0
   provider: ^6.0.5
-  collection: ^1.17.1
+  collection: ^1.17.2
   intl: ^0.18.0
-  shared_preferences: ^2.0.16
-  http: ^0.13.5
-  image_picker: ^0.8.6
+  shared_preferences: ^2.2.0
+  http: ^1.1.0
+  image_picker: ^1.0.2
   web_socket_channel: ^2.3.0
   simple_cluster: ^0.3.0
   url_launcher: ^6.1.7
   download: ^1.0.0
   csv: ^5.0.1
-  fl_chart: ^0.61.0
+  fl_chart: ^0.63.0
   # Potential alternate charting package: https://pub.dev/packages/community_charts_flutter
 
-  eval_ex: ^1.1.7
+  eval_ex: ^1.1.8
 
   #TOOD unused right now, but sharing might make sense in the future
   #for things like giving people the app easily, and sharing data
-  share_plus: ^6.3.1 
+  share_plus: ^7.1.0 
 
   #boolean_selector: ^2.1.1
 

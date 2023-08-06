@@ -25,14 +25,12 @@ class MatchCard extends StatelessWidget {
     return SizedBox(
       height: matchCardHeight,
       child: InkWell(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) =>
-                    MatchPage(matchid: snoutData.db.matchIDFromMatch(match))),
-          );
-        },
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) =>
+                  MatchPage(matchid: snoutData.db.matchIDFromMatch(match))),
+        ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [

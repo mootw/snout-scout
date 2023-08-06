@@ -33,17 +33,13 @@ class _DataTablePageState extends State<DataTablePage> {
             [
               DataItem(
                   displayValue: TextButton(
-                    child: Text(team.toString()),
-                    onPressed: () {
-                      //Open this teams scouting page
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) =>
-                                TeamViewPage(teamNumber: team)),
-                      );
-                    },
-                  ),
+                      child: Text(team.toString()),
+                      onPressed: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    TeamViewPage(teamNumber: team)),
+                          )),
                   exportValue: team.toString(),
                   sortingValue: team),
               for (final item in data.db.config.matchscouting.processes)
@@ -72,34 +68,27 @@ class _DataTablePageState extends State<DataTablePage> {
                 [
                   DataItem(
                       displayValue: TextButton(
-                        child: Text(match.value.description),
-                        onPressed: () {
-                          //Open this teams scouting page
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    MatchPage(matchid: match.key)),
-                          );
-                        },
-                      ),
+                          child: Text(match.value.description),
+                          onPressed: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        MatchPage(matchid: match.key)),
+                              )),
                       exportValue: match.value.description,
                       sortingValue: match.value),
                   DataItem(
                       displayValue: TextButton(
-                        child: Text(robot.key,
-                            style: TextStyle(
-                                color: getAllianceColor(robot.value.alliance))),
-                        onPressed: () {
-                          //Open this teams scouting page
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => TeamViewPage(
-                                    teamNumber: int.parse(robot.key))),
-                          );
-                        },
-                      ),
+                          child: Text(robot.key,
+                              style: TextStyle(
+                                  color:
+                                      getAllianceColor(robot.value.alliance))),
+                          onPressed: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => TeamViewPage(
+                                        teamNumber: int.parse(robot.key))),
+                              )),
                       exportValue: robot.key,
                       sortingValue: robot.key),
                   for (final item in data.db.config.matchscouting.processes)

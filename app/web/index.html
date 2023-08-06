@@ -55,7 +55,7 @@
             //flutter/flutter#119536
             //The html renderer does not lag when scrolling the data-tables. canvaskit does on web builds
             //canvaskit does not use platform emoji but html has some rendering oddities.
-            renderer: "html",
+            renderer: "canvaskit",
             useColorEmoji: true //For canvaskit to render color emoji
           }
           let appRunner = await engineInitializer.initializeEngine(config);

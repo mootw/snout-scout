@@ -100,11 +100,9 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
               ),
               for (final item in _events)
                 TextButton(
-                    onPressed: () {
-                      setState(() {
-                        _events.remove(item);
-                      });
-                    },
+                    onPressed: () => setState(() {
+                          _events.remove(item);
+                        }),
                     child: Text(
                         '${item.time.round()}  ${item.getLabelFromConfig(context.watch<EventDB>().db.config)}',
                         style: TextStyle(
@@ -137,12 +135,12 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
           appBar: AppBar(
             title: Text("Team ${widget.team}"),
             actions: [
-              if(_mode != MatchMode.finished)
-                FilledButton.tonal(onPressed: () {
-                  setState (() {
-                    _showSurvey = !_showSurvey;
-                  });
-                }, child: const Text("Show Recorder")),
+              if (_mode != MatchMode.finished)
+                FilledButton.tonal(
+                    onPressed: () => setState(() {
+                          _showSurvey = !_showSurvey;
+                        }),
+                    child: const Text("Show Recorder")),
               IconButton(
                   onPressed: () {
                     if (_formKey.currentState!.validate() == false) {
@@ -190,12 +188,13 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
           appBar: AppBar(
             title: Text("Team ${widget.team}"),
             actions: [
-              FilledButton.tonal(onPressed: () {
-                  setState (() {
-                    _showSurvey = !_showSurvey;
-                  });
-                }, child: const Text("Show Survey")),
-              _statusAndToolBar()],
+              FilledButton.tonal(
+                  onPressed: () => setState(() {
+                        _showSurvey = !_showSurvey;
+                      }),
+                  child: const Text("Show Survey")),
+              _statusAndToolBar()
+            ],
           ),
           body: Row(
             children: [
@@ -272,11 +271,11 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
         appBar: AppBar(
           title: Text("Team ${widget.team}"),
           actions: [
-            FilledButton.tonal(onPressed: () {
-                  setState (() {
-                    _showSurvey = !_showSurvey;
-                  });
-                }, child: const Text("Show Survey")),
+            FilledButton.tonal(
+                onPressed: () => setState(() {
+                      _showSurvey = !_showSurvey;
+                    }),
+                child: const Text("Show Survey")),
             const SizedBox(width: 32),
           ],
         ),
@@ -357,11 +356,9 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
         children: [
           IconButton(
               tooltip: "Rotate Map",
-              onPressed: () {
-                setState(() {
-                  _mapRotation += math.pi;
-                });
-              },
+              onPressed: () => setState(() {
+                    _mapRotation += math.pi;
+                  }),
               icon: const Icon(Icons.rotate_right)),
           const SizedBox(width: 8),
           Text("time $_time"),
@@ -370,20 +367,18 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
           if (robotPicture != null)
             Center(
               child: TextButton(
-                  onPressed: () {
-                    showDialog(
-                        context: context,
-                        builder: (bc) {
-                          return AlertDialog(
-                            content: robotPicture!,
-                            actions: [
-                              TextButton(
-                                  onPressed: () => Navigator.pop(bc),
-                                  child: const Text("Okay")),
-                            ],
-                          );
-                        });
-                  },
+                  onPressed: () => showDialog(
+                      context: context,
+                      builder: (bc) {
+                        return AlertDialog(
+                          content: robotPicture!,
+                          actions: [
+                            TextButton(
+                                onPressed: () => Navigator.pop(bc),
+                                child: const Text("Okay")),
+                          ],
+                        );
+                      }),
                   child: const Text("Show Picture")),
             ),
           const SizedBox(width: 8),

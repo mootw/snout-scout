@@ -6,7 +6,7 @@ import 'package:snout_db/game.dart';
 part 'match.g.dart';
 
 @JsonSerializable()
-class FRCMatch extends Comparable<FRCMatch> {
+class FRCMatch implements Comparable<FRCMatch> {
   ///The number of this match in the series
   final int number;
 
