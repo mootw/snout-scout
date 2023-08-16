@@ -2,16 +2,15 @@ import 'package:app/eventdb_state.dart';
 import 'package:app/timeduration.dart';
 import 'package:provider/provider.dart';
 import 'package:app/screens/match_page.dart';
-import 'package:app/screens/view_team_page.dart';
 import 'package:flutter/material.dart';
 import 'package:snout_db/event/match.dart';
 import 'package:snout_db/snout_db.dart';
 
-const double matchCardHeight = 60;
+const double matchCardHeight = 48;
 
-const TextStyle whiteText = TextStyle(color: Colors.white70, fontSize: 13);
+const TextStyle whiteText = TextStyle(color: Colors.white, fontSize: 12);
 const TextStyle whiteTextBold =
-    TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13);
+    TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12);
 
 class MatchCard extends StatelessWidget {
   final FRCMatch match;
@@ -35,7 +34,7 @@ class MatchCard extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             SizedBox(
-                width: 130,
+                width: 120,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -46,37 +45,23 @@ class MatchCard extends StatelessWidget {
                             : match.scheduledTime),
                   ],
                 )),
-            Column(
+            Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                  height: 28,
-                  width: 180,
+                  height: 25,
+                  width: 150,
                   color: Colors.redAccent,
                   child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
                         for (final team in match.red)
-                          TextButton(
-                              style: TextButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 8, vertical: 4),
-                                minimumSize: const Size(0, 30),
-                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                              ),
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          TeamViewPage(teamNumber: team)),
-                                );
-                              },
-                              child: Text("$team",
+                          Text("$team",
                                   style: focusTeam == team
                                       ? whiteTextBold
-                                      : whiteText)),
-                        SizedBox(
+                                      : whiteText),
+                        Container(
+                  color: Colors.red,
                           width: 32,
                           child: Text(
                             match.results?.red['points'] != null
@@ -85,40 +70,26 @@ class MatchCard extends StatelessWidget {
                             style: match.results?.winner == Alliance.red ||
                                     match.results?.winner == Alliance.tie
                                 ? whiteTextBold
-                                : null,
+                                : whiteText,
                             textAlign: TextAlign.center,
                           ),
                         ),
                       ]),
                 ),
                 Container(
-                  height: 28,
-                  width: 180,
+                  height: 25,
+                  width: 150,
                   color: Colors.blueAccent,
                   child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
                         for (final team in match.blue)
-                          TextButton(
-                              style: TextButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 8, vertical: 4),
-                                minimumSize: const Size(0, 30),
-                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                              ),
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          TeamViewPage(teamNumber: team)),
-                                );
-                              },
-                              child: Text("$team",
+                          Text("$team",
                                   style: focusTeam == team
                                       ? whiteTextBold
-                                      : whiteText)),
-                        SizedBox(
+                                      : whiteText),
+                        Container(
+  color: Colors.blue,
                           width: 32,
                           child: Text(
                             match.results?.blue['points'] != null
@@ -127,7 +98,7 @@ class MatchCard extends StatelessWidget {
                             style: match.results?.winner == Alliance.blue ||
                                     match.results?.winner == Alliance.tie
                                 ? whiteTextBold
-                                : null,
+                                : whiteText,
                             textAlign: TextAlign.center,
                           ),
                         ),

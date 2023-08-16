@@ -91,7 +91,7 @@ class _MatchRecorderAssistantPageState
     final snoutData = context.watch<EventDB>();
     FRCMatch match = snoutData.db.matches[widget.matchid]!;
     return Scaffold(
-      appBar: AppBar(title: Text("Match Recording: ${match.description}")),
+      appBar: AppBar(title: Text("Recording ${match.description}")),
       body: ListView(
         children: [
           Row(
@@ -198,13 +198,13 @@ class _MatchRecorderAssistantPageState
         color: isRecommended ? Theme.of(context).colorScheme.onPrimary : null,
         child: Row(children: [
           SizedBox(
-              height: 120,
-              width: 120,
+              height: 128,
+              width: 128,
               child: Padding(
                 padding: const EdgeInsets.all(8),
                 child: Center(child: image ?? const Text("No Image")),
               )),
-          const SizedBox(width: 16),
+          const SizedBox(width: 8),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

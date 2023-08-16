@@ -133,7 +133,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
       return ConfirmExitDialog(
         child: Scaffold(
           appBar: AppBar(
-            title: Text("Team ${widget.team}"),
+            title: Text("${widget.team}"),
             actions: [
               if (_mode != MatchMode.finished)
                 FilledButton.tonal(
@@ -186,7 +186,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
       return ConfirmExitDialog(
         child: Scaffold(
           appBar: AppBar(
-            title: Text("Team ${widget.team}"),
+            title: Text("${widget.team}"),
             actions: [
               FilledButton.tonal(
                   onPressed: () => setState(() {
@@ -269,7 +269,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
     return ConfirmExitDialog(
       child: Scaffold(
         appBar: AppBar(
-          title: Text("Team ${widget.team}"),
+          title: Text("${widget.team}"),
           actions: [
             FilledButton.tonal(
                 onPressed: () => setState(() {

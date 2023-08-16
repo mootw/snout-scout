@@ -115,15 +115,16 @@ class _ScoutingToolWidgetState extends State<ScoutingToolWidget> {
           segments: const <ButtonSegment<bool?>>[
             ButtonSegment<bool?>(
                 value: false,
-                label: Text('false'),
+                // label: Text('false'),
                 icon: Icon(Icons.cancel, color: Colors.redAccent)),
             ButtonSegment<bool?>(
                 value: null,
-                label: Text('unknown'),
+                // label: Text('unknown'),
+                icon: Icon(Icons.question_mark),
             ),
             ButtonSegment<bool?>(
                 value: true,
-                label: Text('true'),
+                // label: Text('true'),
                 icon: Icon(Icons.check_circle, color: Colors.greenAccent)),
           ],
           selected: {_value},
