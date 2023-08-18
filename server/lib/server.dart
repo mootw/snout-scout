@@ -321,7 +321,6 @@ Future loadScheduleFromTBA(FRCEvent eventData, String eventID) async {
       print("match ${key} does not exist; adding...");
       FRCMatch newMatch = FRCMatch(
           description: description,
-          number: matchNumber,
           scheduledTime: startTime,
           blue: blue,
           red: red,

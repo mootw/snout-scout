@@ -6,15 +6,22 @@ part of 'matchresults.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-MatchResults _$MatchResultsFromJson(Map<String, dynamic> json) => MatchResults(
+MatchResultValues _$MatchResultValuesFromJson(Map<String, dynamic> json) =>
+    MatchResultValues(
       time: DateTime.parse(json['time'] as String),
-      red: Map<String, int>.from(json['red'] as Map),
-      blue: Map<String, int>.from(json['blue'] as Map),
+      redScore: json['redScore'] as int,
+      redRankingPoints: json['redRankingPoints'] as int,
+      blueScore: json['blueScore'] as int,
+      blueRankingPoints: json['blueRankingPoints'] as int,
+      values: json['values'] as Map<String, dynamic>? ?? const {},
     );
 
-Map<String, dynamic> _$MatchResultsToJson(MatchResults instance) =>
+Map<String, dynamic> _$MatchResultValuesToJson(MatchResultValues instance) =>
     <String, dynamic>{
       'time': instance.time.toIso8601String(),
-      'red': instance.red,
-      'blue': instance.blue,
+      'redScore': instance.redScore,
+      'redRankingPoints': instance.redRankingPoints,
+      'blueScore': instance.blueScore,
+      'blueRankingPoints': instance.blueRankingPoints,
+      'values': instance.values,
     };

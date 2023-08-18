@@ -57,15 +57,15 @@ class MatchCard extends StatelessWidget {
                       children: [
                         for (final team in match.red)
                           Text("$team",
-                                  style: focusTeam == team
-                                      ? whiteTextBold
-                                      : whiteText),
+                              style: focusTeam == team
+                                  ? whiteTextBold
+                                  : whiteText),
                         Container(
-                  color: Colors.red,
+                          color: Colors.red,
                           width: 32,
                           child: Text(
-                            match.results?.red['points'] != null
-                                ? match.results!.red['points'].toString()
+                            match.results?.redScore != null
+                                ? match.results!.redScore.toString()
                                 : "?",
                             style: match.results?.winner == Alliance.red ||
                                     match.results?.winner == Alliance.tie
@@ -85,15 +85,15 @@ class MatchCard extends StatelessWidget {
                       children: [
                         for (final team in match.blue)
                           Text("$team",
-                                  style: focusTeam == team
-                                      ? whiteTextBold
-                                      : whiteText),
+                              style: focusTeam == team
+                                  ? whiteTextBold
+                                  : whiteText),
                         Container(
-  color: Colors.blue,
+                          color: Colors.blue,
                           width: 32,
                           child: Text(
-                            match.results?.blue['points'] != null
-                                ? match.results!.blue['points'].toString()
+                            match.results?.blueScore != null
+                                ? match.results!.blueScore.toString()
                                 : "?",
                             style: match.results?.winner == Alliance.blue ||
                                     match.results?.winner == Alliance.tie

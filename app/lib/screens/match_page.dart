@@ -105,7 +105,7 @@ class _MatchPageState extends State<MatchPage> {
               DataItem.fromText("Team"),
               for (final item in snoutData.db.config.matchscouting.processes)
                 DataItem.fromText(item.label),
-              for (final item in snoutData.db.config.matchscouting.postgame)
+              for (final item in snoutData.db.config.matchscouting.survey)
                 DataItem.fromText(item.label),
             ],
             rows: [
@@ -141,7 +141,7 @@ class _MatchPageState extends State<MatchPage> {
                       in snoutData.db.config.matchscouting.processes)
                     DataItem.fromNumber(snoutData.db.runMatchResultsProcess(
                         item, match.robot[team.toString()], team)),
-                  for (final item in snoutData.db.config.matchscouting.postgame
+                  for (final item in snoutData.db.config.matchscouting.survey
                       .where(
                           (element) => element.type != SurveyItemType.picture))
                     DataItem.fromText(match
@@ -175,11 +175,15 @@ class _MatchPageState extends State<MatchPage> {
                   DataColumn(label: Text("Blue")),
                 ],
                 rows: [
-                  for (final type in snoutData.db.config.matchscouting.scoring)
+                  DataRow(cells: [
+                      const DataCell(Text("Score")),
+                      DataCell(Text(match.results!.redScore.toString())),
+                      DataCell(Text(match.results!.blueScore.toString())),
+                    ]),
                     DataRow(cells: [
-                      DataCell(Text(type)),
-                      DataCell(Text(match.results!.red[type].toString())),
-                      DataCell(Text(match.results!.blue[type].toString())),
+                      const DataCell(Text("RP")),
+                      DataCell(Text(match.results!.redRankingPoints.toString())),
+                      DataCell(Text(match.results!.blueRankingPoints.toString())),
                     ]),
                 ],
               ),

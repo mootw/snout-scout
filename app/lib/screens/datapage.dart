@@ -59,7 +59,7 @@ class _DataTablePageState extends State<DataTablePage> {
             DataItem.fromText("Team"),
             for (final item in data.db.config.matchscouting.processes)
               DataItem.fromText(item.label),
-            for (final item in data.db.config.matchscouting.postgame)
+            for (final item in data.db.config.matchscouting.survey)
               DataItem.fromText(item.label),
           ],
           rows: [
@@ -96,9 +96,8 @@ class _DataTablePageState extends State<DataTablePage> {
                         item,
                         match.value.robot[robot.key],
                         int.tryParse(robot.key) ?? 0)),
-                  for (final item in data.db.config.matchscouting.postgame
-                      .where(
-                          (element) => element.type != SurveyItemType.picture))
+                  for (final item in data.db.config.matchscouting.survey.where(
+                      (element) => element.type != SurveyItemType.picture))
                     DataItem.fromText(match
                         .value.robot[robot.key]?.survey[item.id]
                         ?.toString()),

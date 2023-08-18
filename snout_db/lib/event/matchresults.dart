@@ -4,30 +4,40 @@ import 'package:snout_db/game.dart';
 part 'matchresults.g.dart';
 
 @JsonSerializable()
-class MatchResults {
-  
+class MatchResultValues {
+  ///the time when the match actually started
   final DateTime time;
-  final Map<String, int> red;
-  final Map<String, int> blue;
 
-  const MatchResults({required this.time, required this.red,
-  required this.blue});
+  final int redScore;
+  final int redRankingPoints;
+  final int blueScore;
+  final int blueRankingPoints;
 
-  factory MatchResults.fromJson(Map<String, dynamic> json) => _$MatchResultsFromJson(json);
-  Map<String, dynamic> toJson() => _$MatchResultsToJson(this);
+  /// 'user-defined' values that pertain to the years specific game
+  /// maybe this includes scoring positions, or a specific sub-score category
+  /// TODO this is currently unused. eventually write tba data autofill to this?
+  final Map<String, dynamic> values;
+
+  const MatchResultValues(
+      {required this.time,
+      required this.redScore,
+      required this.redRankingPoints,
+      required this.blueScore,
+      required this.blueRankingPoints,
+      this.values = const {}});
+
+  factory MatchResultValues.fromJson(Map<String, dynamic> json) =>
+      _$MatchResultValuesFromJson(json);
+  Map<String, dynamic> toJson() => _$MatchResultValuesToJson(this);
 
   Alliance get winner {
-    int redPts = red['points']!;
-    int bluePts = blue['points']!;
-    if(redPts == bluePts) {
+    if (redScore == blueScore) {
       return Alliance.tie;
     }
-    if(redPts > bluePts) {
+    if (redScore > blueScore) {
       return Alliance.red;
     } else {
       return Alliance.blue;
     }
   }
 }
-
-

@@ -95,7 +95,6 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
               onPressed: () async {
                 FRCMatch match = FRCMatch(
                     description: "Some name",
-                    number: 0,
                     scheduledTime: DateTime.now(),
                     blue: [],
                     red: [],

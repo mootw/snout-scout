@@ -1,5 +1,3 @@
-/// Stores game type data and things
-
 /// 0 seconds is reserved for events before the match starts like starting pos
 /// 1 to 16 seconds are for auto (15 seconds)
 /// 16-18; the delay between teleop and auto is treated as auto

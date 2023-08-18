@@ -163,12 +163,8 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
             child: ListView(
               shrinkWrap: true,
               children: [
-                for (final item in context
-                    .watch<EventDB>()
-                    .db
-                    .config
-                    .matchscouting
-                    .postgame)
+                for (final item
+                    in context.watch<EventDB>().db.config.matchscouting.survey)
                   Container(
                       padding: const EdgeInsets.all(12),
                       child: ScoutingToolWidget(

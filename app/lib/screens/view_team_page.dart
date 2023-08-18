@@ -99,7 +99,7 @@ class _TeamViewPageState extends State<TeamViewPage> {
                 DataItem.fromText("Match"),
                 for (final item in data.db.config.matchscouting.processes)
                   DataItem.fromText(item.label),
-                for (final pitSurvey in data.db.config.matchscouting.postgame
+                for (final pitSurvey in data.db.config.matchscouting.survey
                     .where((element) => element.type != SurveyItemType.picture))
                   DataItem.fromText(pitSurvey.label),
               ],
@@ -131,12 +131,12 @@ class _TeamViewPageState extends State<TeamViewPage> {
                             )),
                         exportValue: match.description,
                         sortingValue: match),
-                    for (final item
-                        in data.db.config.matchscouting.processes)
-                      DataItem.fromNumber(data.db.runMatchResultsProcess(item,
-                          match.robot[widget.teamNumber.toString()], widget.teamNumber)),
-                    for (final pitSurvey in data
-                        .db.config.matchscouting.postgame
+                    for (final item in data.db.config.matchscouting.processes)
+                      DataItem.fromNumber(data.db.runMatchResultsProcess(
+                          item,
+                          match.robot[widget.teamNumber.toString()],
+                          widget.teamNumber)),
+                    for (final pitSurvey in data.db.config.matchscouting.survey
                         .where((element) =>
                             element.type != SurveyItemType.picture))
                       DataItem.fromText(match
@@ -165,7 +165,8 @@ class _TeamViewPageState extends State<TeamViewPage> {
                           for (final match
                               in data.db.teamRecordedMatches(widget.teamNumber))
                             match.value.robot[widget.teamNumber.toString()]!
-                                .timelineInterpolatedRedNormalized(data.db.config.fieldStyle)
+                                .timelineInterpolatedRedNormalized(
+                                    data.db.config.fieldStyle)
                                 .where((element) => element.isInAuto)
                                 .toList()
                         ],
@@ -187,10 +188,10 @@ class _TeamViewPageState extends State<TeamViewPage> {
                                   [],
                                   (previousValue, element) => [
                                         ...previousValue,
-                                        ...?element
-                                            .value
+                                        ...?element.value
                                             .robot[widget.teamNumber.toString()]
-                                            ?.timelineRedNormalized(data.db.config.fieldStyle)
+                                            ?.timelineRedNormalized(
+                                                data.db.config.fieldStyle)
                                             .where((event) =>
                                                 event.id == eventType.id)
                                       ])),
@@ -214,7 +215,8 @@ class _TeamViewPageState extends State<TeamViewPage> {
                                               .value
                                               .robot[
                                                   widget.teamNumber.toString()]
-                                              ?.timelineInterpolatedRedNormalized(data.db.config.fieldStyle)
+                                              ?.timelineInterpolatedRedNormalized(
+                                                  data.db.config.fieldStyle)
                                               .where((event) =>
                                                   event.isPositionEvent)
                                         ])),

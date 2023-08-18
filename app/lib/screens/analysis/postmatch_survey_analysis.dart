@@ -21,7 +21,7 @@ class AnalysisPostMatchSurvey extends StatelessWidget {
             runSpacing: 42,
             alignment: WrapAlignment.center,
             children: [
-              for (final surveyItem in data.db.config.matchscouting.postgame
+              for (final surveyItem in data.db.config.matchscouting.survey
                   .where((element) => element.type != SurveyItemType.picture))
                 PostGameRatioChart(surveyItem: surveyItem),
             ],

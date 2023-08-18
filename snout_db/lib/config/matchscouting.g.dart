@@ -17,20 +17,15 @@ MatchScouting _$MatchScoutingFromJson(Map<String, dynamic> json) =>
                   MatchResultsProcess.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const [],
-      postgame: (json['postgame'] as List<dynamic>?)
+      survey: (json['survey'] as List<dynamic>?)
               ?.map((e) => SurveyItem.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const [],
-      scoring: (json['scoring'] as List<dynamic>?)
-              ?.map((e) => e as String)
-              .toList() ??
-          const ['points', 'rp'],
     );
 
 Map<String, dynamic> _$MatchScoutingToJson(MatchScouting instance) =>
     <String, dynamic>{
       'events': instance.events,
       'processes': instance.processes,
-      'postgame': instance.postgame,
-      'scoring': instance.scoring,
+      'survey': instance.survey,
     };

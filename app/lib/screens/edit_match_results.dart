@@ -6,7 +6,7 @@ import 'package:snout_db/snout_db.dart';
 
 class EditMatchResults extends StatefulWidget {
   final EventConfig config;
-  final MatchResults? results;
+  final MatchResultValues? results;
 
   const EditMatchResults(
       {super.key, required this.config, required this.results});
@@ -19,8 +19,10 @@ class _EditMatchResultsState extends State<EditMatchResults> {
   final _form = GlobalKey<FormState>();
   DateTime _matchEndTime = DateTime.now();
 
-  final Map<String, TextEditingController> _red = {};
-  final Map<String, TextEditingController> _blue = {};
+  late TextEditingController _redScore;
+  late TextEditingController _blueScore;
+  late TextEditingController _redRP;
+  late TextEditingController _blueRP;
 
   @override
   void initState() {
@@ -33,19 +35,13 @@ class _EditMatchResultsState extends State<EditMatchResults> {
       _matchEndTime = DateTime.now();
     }
 
-    //Pre-fill result scores
-    for (final resultValue in widget.config.matchscouting.scoring) {
-      _red[resultValue] = TextEditingController(
-          text: widget.results?.red[resultValue]?.toString());
-      _blue[resultValue] = TextEditingController(
-          text: widget.results?.blue[resultValue]?.toString());
-    }
-  }
-
-  //Converts text editing controller to number
-  Map<String, int> _mapTo(Map<String, TextEditingController> input) {
-    return input
-        .map((key, value) => MapEntry(key, int.parse(input[key]!.text)));
+    _redScore = TextEditingController(text: widget.results?.redScore.toString());
+    _blueScore =
+        TextEditingController(text: widget.results?.blueScore.toString());
+    _redRP = TextEditingController(
+        text: widget.results?.redRankingPoints.toString());
+    _blueRP = TextEditingController(
+        text: widget.results?.blueRankingPoints.toString());
   }
 
   @override
@@ -59,10 +55,12 @@ class _EditMatchResultsState extends State<EditMatchResults> {
                   if (_form.currentState?.validate() ?? false) {
                     //Input is valid
                     //Construct match results object
-                    MatchResults results = MatchResults(
+                    MatchResultValues results = MatchResultValues(
                       time: _matchEndTime.subtract(matchLength),
-                      red: _mapTo(_red),
-                      blue: _mapTo(_blue),
+                      redScore: int.parse(_redScore.text),
+                      blueRankingPoints: int.parse(_blueRP.text),
+                      blueScore: int.parse(_blueScore.text),
+                      redRankingPoints: int.parse(_redRP.text)
                     );
                     Navigator.pop(context, results);
                   }
@@ -92,12 +90,12 @@ class _EditMatchResultsState extends State<EditMatchResults> {
                           _matchEndTime.hour, _matchEndTime.minute);
                     }
 
-                    if(mounted) {
+                    if (mounted) {
                       TimeOfDay? time = await showTimePicker(
-                        context: context,
-                        initialTime: TimeOfDay(
-                            hour: _matchEndTime.hour,
-                            minute: _matchEndTime.minute));
+                          context: context,
+                          initialTime: TimeOfDay(
+                              hour: _matchEndTime.hour,
+                              minute: _matchEndTime.minute));
                       if (time != null) {
                         _matchEndTime = DateTime(
                             _matchEndTime.year,
@@ -118,16 +116,28 @@ class _EditMatchResultsState extends State<EditMatchResults> {
                   DataColumn(label: Text("Blue")),
                 ],
                 rows: [
-                  for (final item in widget.config.matchscouting.scoring)
                     DataRow(
                       cells: [
-                        DataCell(Text(item)),
+                        DataCell(Text("Score")),
                         DataCell(TextFormField(
-                          controller: _red[item],
+                          controller: _redScore,
                           validator: _checkIsNumber,
                         )),
                         DataCell(TextFormField(
-                          controller: _blue[item],
+                          controller: _blueScore,
+                          validator: _checkIsNumber,
+                        )),
+                      ],
+                    ),
+                    DataRow(
+                      cells: [
+                        DataCell(Text("RP")),
+                        DataCell(TextFormField(
+                          controller: _redRP,
+                          validator: _checkIsNumber,
+                        )),
+                        DataCell(TextFormField(
+                          controller: _blueRP,
                           validator: _checkIsNumber,
                         )),
                       ],

@@ -8,21 +8,20 @@ part 'matchscouting.g.dart';
 @JsonSerializable()
 class MatchScouting {
   
-  //Buttons that show to scouts to record specific events
+  /// Buttons that show to scouts to record specific events
   final List<MatchEventConfig> events;
-  //Defines how the events are calculated and displayed.
+
+  /// Defines how the match datas are calculated and displayed.
   final List<MatchResultsProcess> processes;
-  //survey that is displayed at the end of the game related
-  //to the team that the scout was watching. 
-  final List<SurveyItem> postgame;
-  //generally just 'points' and 'rp'
-  final List<String> scoring;
+
+  /// survey that is displayed at the end of the game related
+  /// to the team that the scout was watching. 
+  final List<SurveyItem> survey;
 
   const MatchScouting(
       {this.events = const [],
       this.processes = const [],
-      this.postgame = const [],
-      this.scoring = const ['points', 'rp']});
+      this.survey = const []});
 
   factory MatchScouting.fromJson(Map<String, dynamic> json) =>
       _$MatchScoutingFromJson(json);
