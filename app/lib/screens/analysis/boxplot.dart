@@ -1,10 +1,9 @@
-//TODO use a record when upgrading to dart 3
-//https://github.com/dart-lang/language/blob/master/accepted/future-releases/records/records-feature-specification.md
 import 'package:app/datasheet.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
-List<num> getQuartiles(List<num> numbers) {
+({num min, num lower, num median, num upper, num max}) getQuartiles(
+    List<num> numbers) {
   assert(numbers.isNotEmpty);
   final nums = numbers.toList();
   nums.sort();
@@ -19,13 +18,20 @@ List<num> getQuartiles(List<num> numbers) {
     }
   }
 
+  //Get the median before modifying the list
   final median = getPart(0.5);
 
   if (nums.length % 2 == 0) {
     nums.removeAt((nums.length / 2).floor());
   }
 
-  return [nums.first, getPart(0.25), median, getPart(0.75), nums.last];
+  return (
+    min: nums.first,
+    lower: getPart(0.25),
+    median: median,
+    upper: getPart(0.75),
+    max: nums.last
+  );
 }
 
 /// Renders a box plot given a set of values
@@ -72,30 +78,30 @@ class BoxPlotPainter extends CustomPainter {
     final quartiles = getQuartiles(boxPlotData.values);
 
     //Median
-    canvas.drawLine(getOffset(size, quartiles[2]) + Offset(0, plotHeight),
-        getOffset(size, quartiles[2]) + Offset(0, -plotHeight), p);
+    canvas.drawLine(getOffset(size, quartiles.median) + Offset(0, plotHeight),
+        getOffset(size, quartiles.median) + Offset(0, -plotHeight), p);
 
     //1st and 3rd quartile
     canvas.drawRRect(
         RRect.fromLTRBR(
-            getPercent(quartiles[1]) * size.width,
+            getPercent(quartiles.lower) * size.width,
             (size.height / 2) + plotHeight,
-            getPercent(quartiles[3]) * size.width,
+            getPercent(quartiles.upper) * size.width,
             (size.height / 2) - plotHeight,
             Radius.zero),
         p);
 
-    final iqr = quartiles[3] - quartiles[1];
+    final iqr = quartiles.upper - quartiles.lower;
 
     final maxWithinIQR = boxPlotData.values
-        .lastWhereOrNull((element) => element <= quartiles[3] + (iqr * 1.5));
-    final minWithinIQR = boxPlotData.values
-        .firstWhereOrNull((element) => element >= quartiles[1] - (iqr * 1.5));
+        .lastWhereOrNull((element) => element <= quartiles.upper + (iqr * 1.5));
+    final minWithinIQR = boxPlotData.values.firstWhereOrNull(
+        (element) => element >= quartiles.lower - (iqr * 1.5));
 
     //Top IQR
     if (maxWithinIQR != null) {
       canvas.drawLine(
-          getOffset(size, quartiles[3]), getOffset(size, maxWithinIQR), p);
+          getOffset(size, quartiles.upper), getOffset(size, maxWithinIQR), p);
       canvas.drawLine(getOffset(size, maxWithinIQR) + Offset(0, plotHeight / 2),
           getOffset(size, maxWithinIQR) + Offset(0, -plotHeight / 2), p);
     }
@@ -103,15 +109,15 @@ class BoxPlotPainter extends CustomPainter {
     //bot IQR
     if (minWithinIQR != null) {
       canvas.drawLine(
-          getOffset(size, quartiles[1]), getOffset(size, minWithinIQR), p);
+          getOffset(size, quartiles.lower), getOffset(size, minWithinIQR), p);
       canvas.drawLine(getOffset(size, minWithinIQR) + Offset(0, plotHeight / 2),
           getOffset(size, minWithinIQR) + Offset(0, -plotHeight / 2), p);
     }
 
     //Outliers
     for (final point in boxPlotData.values) {
-      if (point > quartiles[3] + (iqr * 1.5) ||
-          point < quartiles[1] - (iqr * 1.5)) {
+      if (point > quartiles.upper + (iqr * 1.5) ||
+          point < quartiles.lower - (iqr * 1.5)) {
         canvas.drawCircle(getOffset(size, point), 2, p);
       }
     }
@@ -153,13 +159,15 @@ class BoxPlotLabelPainter extends CustomPainter {
 
     for (int i = 0; i <= divisions; i++) {
       final value = boxPlotData.min + ((range / divisions) * i);
-      
-      //Just draw the whole thing down the entire display height height
-      canvas.drawLine(getOffset(size, value) + Offset(0, plotHeight + screenHeight),
-          getOffset(size, value) + Offset(0, -plotHeight), p);
 
-      TextSpan span =
-          TextSpan(style: const TextStyle(color: Colors.white), text: numDisplay(value));
+      //Just draw the whole thing down the entire display height height
+      canvas.drawLine(
+          getOffset(size, value) + Offset(0, plotHeight + screenHeight),
+          getOffset(size, value) + Offset(0, -plotHeight),
+          p);
+
+      TextSpan span = TextSpan(
+          style: const TextStyle(color: Colors.white), text: numDisplay(value));
       TextPainter tp = TextPainter(
           text: span,
           textAlign: TextAlign.end,
