@@ -12,7 +12,7 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 
 class EventDB extends ChangeNotifier {
 
-  late String serverURL;
+  String serverURL = "http://localhost:6749";
 
   FRCEvent db = emptyEvent;
 
