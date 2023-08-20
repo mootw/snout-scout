@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:app/api.dart';
 import 'package:app/eventdb_state.dart';
 import 'package:app/helpers.dart';
 import 'package:app/screens/analysis.dart';
@@ -16,110 +15,26 @@ import 'package:app/search.dart';
 import 'package:download/download.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:snout_db/config/eventconfig.dart';
-import 'package:snout_db/event/frcevent.dart';
 import 'package:snout_db/patch.dart';
 import 'package:snout_db/snout_db.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
-late String serverURL;
-
-Future setServer(String newServer) async {
-  final prefs = await SharedPreferences.getInstance();
-  prefs.setString("server", newServer);
-  serverURL = newServer;
-
-  //Reset the last origin sync value
-  prefs.remove("lastoriginsync");
-
-  //Literally re-initialize the app when changing the server.
-  main();
-}
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  //Load data and initialize the app
-  final prefs = await SharedPreferences.getInstance();
-  serverURL = prefs.getString("server") ?? "http://localhost:6749";
+  Logger.root.onRecord.listen((record) {
+    // For now logging will always print to console,
+    // since the app is open source we're ok with that..
+    // at some point it might make sense to actually write
+    // these logs to a file so they can be pulled later!
+    // ignore: avoid_print
+    print('${record.level.name}: ${record.time}: ${record.message}');
+  });
 
-  FRCEvent event;
-
-  try {
-    //Load season config from server
-    final data = await apiClient.get(Uri.parse(serverURL));
-    event = FRCEvent.fromJson(jsonDecode(data.body));
-    prefs.setString(serverURL, data.body);
-    prefs.setString("lastoriginsync", DateTime.now().toIso8601String());
-  } catch (e) {
-    try {
-      //Load from cache
-      String? dbCache = prefs.getString(serverURL);
-      event = FRCEvent.fromJson(jsonDecode(dbCache!));
-    } catch (e) {
-      //Really bad we have no cache or server connection
-      runApp(const SetupApp());
-      return;
-    }
-  }
-
-  EventDB data = EventDB(event);
-
-  runApp(ChangeNotifierProvider(
-    create: (context) => data,
-    child: const MyApp(),
-  ));
-}
-
-class SetupApp extends StatefulWidget {
-  const SetupApp({super.key});
-
-  @override
-  State<SetupApp> createState() => _SetupAppState();
-}
-
-class _SetupAppState extends State<SetupApp> {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Snout Scout',
-      theme: defaultTheme,
-      home: const SetupAppScreen(),
-    );
-  }
-}
-
-class SetupAppScreen extends StatelessWidget {
-  const SetupAppScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Error Connecting"),
-      ),
-      body: ListView(
-        children: [
-          ListTile(
-            title: const Text("Server"),
-            subtitle: Text(serverURL),
-            trailing: IconButton(
-              icon: const Icon(Icons.edit),
-              onPressed: () async {
-                final result =
-                    await showStringInputDialog(context, "Server", serverURL);
-                if (result != null) {
-                  await setServer(result);
-                }
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -128,11 +43,13 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Snout Scout',
-      theme: defaultTheme,
-      home: const MyHomePage(),
-    );
+    return ChangeNotifierProvider(
+        create: (context) => EventDB(),
+        child: MaterialApp(
+          title: 'Snout Scout',
+          theme: defaultTheme,
+          home: const MyHomePage(),
+        ));
   }
 }
 
@@ -218,15 +135,14 @@ class _MyHomePageState extends State<MyHomePage> {
         child: ListView(children: [
           ListTile(
             title: const Text("Server"),
-            subtitle: Text(serverURL),
+            subtitle: Text(context.watch<EventDB>().serverURL),
             trailing: IconButton(
               icon: const Icon(Icons.edit),
               onPressed: () async {
-                final result =
-                    await showStringInputDialog(context, "Server", serverURL);
-                if (result != null) {
-                  await setServer(result);
-                  setState(() {});
+                final result = await showStringInputDialog(
+                    context, "Server", context.read<EventDB>().serverURL);
+                if (result != null && context.mounted) {
+                  await context.read<EventDB>().setServer(result);
                 }
               },
             ),
@@ -274,8 +190,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       MaterialPageRoute(
                         builder: (context) => JSONEditor(
                           validate: EventConfig.fromJson,
-                          source: const JsonEncoder.withIndent("    ")
-                              .convert(context.read<EventDB>().db.config),
+                          source: context.read<EventDB>().db.config,
                         ),
                       ));
 
@@ -313,8 +228,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         MaterialPageRoute(
                           builder: (context) => JSONEditor(
                             validate: (item) {},
-                            source: const JsonEncoder.withIndent("    ")
-                                .convert(context.watch<EventDB>().db.teams),
+                            source: context.watch<EventDB>().db.teams,
                           ),
                         ));
 

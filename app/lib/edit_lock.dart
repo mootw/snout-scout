@@ -1,16 +1,19 @@
 //Allow for edit locking using a unique key.
 
 import 'package:app/api.dart';
-import 'package:app/main.dart';
+import 'package:app/eventdb_state.dart';
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
+import 'package:provider/provider.dart';
 
-Uri editLockUri = Uri.parse(
-      "${Uri.parse(serverURL).scheme}://${Uri.parse(serverURL).host}:${Uri.parse(serverURL).port}/edit_lock");
 
 //Route should return when editing is complete. This is the signal to clear the edit lock.
 //This function will not throw an exception and always fail safe by navigating to the other page.
 Future<dynamic> navigateWithEditLock(
     BuildContext context, String key, Function navigteFunction) async {
+    final serverURL = context.read<EventDB>().serverURL;
+    Uri editLockUri = Uri.parse(
+      "${Uri.parse(serverURL).origin}/edit_lock");
   //Check if this key is being edited
   try {
     final isLocked = await apiClient.get(editLockUri,
@@ -51,7 +54,7 @@ Future<dynamic> navigateWithEditLock(
         await apiClient.post(editLockUri,
             headers: {"key": key}).timeout(const Duration(seconds: 1));
       } catch (e) {
-        print(e);
+        Logger.root.warning("Error applying edit lock", e);
       }
       //Navigate
       final result = await navigteFunction();
@@ -60,13 +63,13 @@ Future<dynamic> navigateWithEditLock(
         await apiClient.delete(editLockUri,
             headers: {"key": key}).timeout(const Duration(seconds: 1));
       } catch (e) {
-        print(e);
+        Logger.root.warning("Error clearing edit lock", e);
       }
       //Return data
       return result;
     }
   } catch (e) {
-    print(e);
+        Logger.root.warning("edit lock error", e);
     //Fail save and navigate anyways
     return await navigteFunction();
   }

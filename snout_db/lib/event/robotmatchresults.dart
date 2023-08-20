@@ -52,7 +52,7 @@ class RobotMatchResults {
 
 /// attempts to guess where the robot is inbetween the reported positions.
 /// Since scouts cannot track everything, we have to make a best guess interpolation.
-/// Generally we just linearly interpolate however, if the points are more than 15 seconds apart
+/// Generally we just linearly interpolate however, if the points are more than some seconds apart
 /// we will just teleport the robot to the new position
 List<MatchEvent> _interpolateTimeline(List<MatchEvent> timeline) {
   final interpolated = timeline.toList();
@@ -88,6 +88,7 @@ List<MatchEvent> _interpolateTimeline(List<MatchEvent> timeline) {
   return interpolated;
 }
 
+/// linear interpolation betweent two points given a time
 double lerp(double xa, double ya, double xb, double yb, double t) {
   return ya + ((yb - ya) * ((t - xa) / (xb - xa)));
 }

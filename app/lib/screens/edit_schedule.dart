@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:app/api.dart';
 import 'package:app/eventdb_state.dart';
-import 'package:app/main.dart';
 import 'package:app/screens/edit_json.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -30,7 +29,7 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
             child: const Text("LOAD MATCHES FROM TBA"),
             onPressed: () async {
               final result = await apiClient.get(
-                  Uri.parse(serverURL.replaceFirst("events", "load_schedule")));
+                  Uri.parse(context.read<EventDB>().serverURL.replaceFirst("events", "load_schedule")));
 
               if (mounted) {
                 showDialog(
@@ -112,7 +111,7 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
   Future editMatch(FRCMatch match, EventDB data, String? matchID) async {
     String? result = await Navigator.of(context).push(MaterialPageRoute(
         builder: (context) => JSONEditor(
-            source: const JsonEncoder.withIndent("    ").convert(match),
+            source: match,
             validate: FRCMatch.fromJson)));
 
     if (result != null) {

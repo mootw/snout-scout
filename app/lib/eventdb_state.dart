@@ -1,17 +1,20 @@
-
 import 'dart:async';
 import 'dart:convert';
 
 import 'package:app/api.dart';
-import 'package:app/main.dart';
+import 'package:app/screens/configure_source.dart';
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:snout_db/event/frcevent.dart';
 import 'package:snout_db/patch.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 class EventDB extends ChangeNotifier {
-  FRCEvent db;
+
+  late String serverURL;
+
+  FRCEvent db = emptyEvent;
 
   DateTime? lastOriginSync;
   bool connected = true;
@@ -19,19 +22,18 @@ class EventDB extends ChangeNotifier {
   //This timer is set and will trigger a re-connect if a ping is not recieved
   //It will also
   //within a certain amount of time.
-  Timer? connectionTimer;
-
-  WebSocketChannel? channel;
+  Timer? _connectionTimer;
+  WebSocketChannel? _channel;
 
   //Used in the UI to see failed and successful patches
   List<String> successfulPatches = <String>[];
   List<String> failedPatches = <String>[];
 
   void resetConnectionTimer() {
-    connectionTimer?.cancel();
-    connectionTimer = Timer(const Duration(seconds: 61), () {
+    _connectionTimer?.cancel();
+    _connectionTimer = Timer(const Duration(seconds: 61), () {
       //No message has been recieved in 60 seconds, close down the connection.
-      channel?.sink.close();
+      _channel?.sink.close();
       connected = false;
     });
   }
@@ -40,10 +42,10 @@ class EventDB extends ChangeNotifier {
     //Do not close the stream if it already exists idk how that behaves
     //it might reuslt in the onDone being called unexpetedly.
     Uri serverUri = Uri.parse(serverURL);
-    channel = WebSocketChannel.connect(Uri.parse(
+    _channel = WebSocketChannel.connect(Uri.parse(
         '${serverURL.startsWith("https") ? "wss" : "ws"}://${serverUri.host}:${serverUri.port}/listen/${serverUri.pathSegments[1]}'));
 
-    channel!.ready.then((_) {
+    _channel!.ready.then((_) {
       if (connected == false) {
         //Only do an origin sync if we were previouosly not connected
         //Since the db is syncronized before creating this object
@@ -56,11 +58,11 @@ class EventDB extends ChangeNotifier {
       resetConnectionTimer();
     });
 
-    channel!.stream.listen((event) async {
+    _channel!.stream.listen((event) async {
       resetConnectionTimer();
       //REALLY JANK PING PONG SYSTEM THIS SHOULD BE FIXED!!!!
       if (event == "PING") {
-        channel!.sink.add("PONG");
+        _channel!.sink.add("PONG");
         return;
       }
 
@@ -80,7 +82,7 @@ class EventDB extends ChangeNotifier {
       });
     }, onError: (e) {
       //Dont try and reconnect on an error
-      print(e);
+      Logger.root.warning("DB Listener Error; not attempting to reconnect", e);
       notifyListeners();
     });
   }
@@ -98,11 +100,11 @@ class EventDB extends ChangeNotifier {
           .now(); //FOR easy UI update. This is slowly becoming spaghetti
       notifyListeners();
     } catch (e) {
-      print(e);
+      Logger.root.warning("origin sync error", e);
     }
   }
 
-  EventDB(this.db) {
+  EventDB() {
     reconnect();
 
     //Initialize the patches array to be used in the UI.
@@ -112,7 +114,37 @@ class EventDB extends ChangeNotifier {
       failedPatches = prefs.getStringList("failed_patches") ?? [];
       lastOriginSync =
           DateTime.tryParse(prefs.getString("lastoriginsync") ?? "");
+
+      //Load data and initialize the app
+      serverURL = prefs.getString("server") ?? "http://localhost:6749";
+
+      try {
+        //Load season config from server
+        final data = await apiClient.get(Uri.parse(serverURL));
+        db = FRCEvent.fromJson(jsonDecode(data.body));
+        prefs.setString(serverURL, data.body);
+        prefs.setString("lastoriginsync", DateTime.now().toIso8601String());
+      } catch (e) {
+        try {
+          //Load from cache
+          String? dbCache = prefs.getString(serverURL);
+          db = FRCEvent.fromJson(jsonDecode(dbCache!));
+        } catch (e) {
+          //Really bad we have no cache or server connection
+          return;
+        }
+      }
     }();
+  }
+
+  Future setServer(String newServer) async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setString("server", newServer);
+    serverURL = newServer;
+
+    //Reset the last origin sync value
+    prefs.remove("lastoriginsync");
+    notifyListeners();
   }
 
   //Writes a patch to local disk and submits it to the server.

@@ -118,7 +118,7 @@ class _EditMatchResultsState extends State<EditMatchResults> {
                 rows: [
                     DataRow(
                       cells: [
-                        DataCell(Text("Score")),
+                        const DataCell(Text("Score")),
                         DataCell(TextFormField(
                           controller: _redScore,
                           validator: _checkIsNumber,
@@ -131,7 +131,7 @@ class _EditMatchResultsState extends State<EditMatchResults> {
                     ),
                     DataRow(
                       cells: [
-                        DataCell(Text("RP")),
+                        const DataCell(Text("RP")),
                         DataCell(TextFormField(
                           controller: _redRP,
                           validator: _checkIsNumber,

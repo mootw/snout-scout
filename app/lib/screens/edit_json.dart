@@ -8,7 +8,7 @@ class JSONEditor extends StatefulWidget {
 
   //Throws an exception if data is invalid
   final Function validate;
-  final String source;
+  final Object source;
 
   @override
   State<JSONEditor> createState() => _JSONEditorState();
@@ -21,7 +21,7 @@ class _JSONEditorState extends State<JSONEditor> {
   @override
   void initState() {
     super.initState();
-    _controller.text = widget.source;
+    _controller.text = const JsonEncoder.withIndent("    ").convert(widget.source);
   }
 
   @override

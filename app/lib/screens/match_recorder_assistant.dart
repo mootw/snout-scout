@@ -8,6 +8,7 @@ import 'package:app/eventdb_state.dart';
 import 'package:app/helpers.dart';
 import 'package:app/screens/match_recorder.dart';
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 import 'package:snout_db/event/match.dart';
 import 'package:snout_db/event/robotmatchresults.dart';
@@ -69,7 +70,8 @@ class _MatchRecorderAssistantPageState
     List<Future> futures = [];
     for (final team in teams) {
       futures.add(apiClient
-          .get(editLockUri,
+          .get(Uri.parse(
+      "${Uri.parse(context.read<EventDB>().serverURL).origin}/edit_lock"),
               headers: {"key": "match:${widget.matchid}:$team:timeline"})
           .timeout(const Duration(seconds: 1))
           .then((isLocked) {
@@ -81,7 +83,7 @@ class _MatchRecorderAssistantPageState
     try {
       await Future.wait(futures);
     } catch (e) {
-      print(e);
+      Logger.root.warning("error getting teams being scouted", e);
     }
     return alreadyScouted;
   }
