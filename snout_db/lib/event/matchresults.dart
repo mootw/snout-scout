@@ -9,22 +9,12 @@ class MatchResultValues {
   final DateTime time;
 
   final int redScore;
-  final int redRankingPoints;
   final int blueScore;
-  final int blueRankingPoints;
-
-  /// 'user-defined' values that pertain to the years specific game
-  /// maybe this includes scoring positions, or a specific sub-score category
-  /// TODO this is currently unused. eventually write tba data autofill to this?
-  final Map<String, dynamic> values;
 
   const MatchResultValues(
       {required this.time,
       required this.redScore,
-      required this.redRankingPoints,
-      required this.blueScore,
-      required this.blueRankingPoints,
-      this.values = const {}});
+      required this.blueScore});
 
   factory MatchResultValues.fromJson(Map<String, dynamic> json) =>
       _$MatchResultValuesFromJson(json);

@@ -1,5 +1,5 @@
 import 'package:app/providers/data_provider.dart';
-import 'package:app/fieldwidget.dart';
+import 'package:app/widgets/fieldwidget.dart';
 import 'package:app/screens/view_team_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -16,6 +16,13 @@ class AnalysisHeatMapByEventType extends StatefulWidget {
 class _AnalysisHeatMapByEventTypeState
     extends State<AnalysisHeatMapByEventType> {
   MatchEventConfig? _selectedEvent;
+
+  @override
+  void initState() {
+    super.initState();
+    //select the first event type if it is exists
+    _selectedEvent = context.read<DataProvider>().db.config.matchscouting.events.firstOrNull;
+  }
 
   @override
   Widget build(BuildContext context) {

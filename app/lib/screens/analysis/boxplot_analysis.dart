@@ -16,11 +16,14 @@ class BoxPlotAnalysis extends StatefulWidget {
 }
 
 class _BoxPlotAnalysisState extends State<BoxPlotAnalysis> {
+
   MatchResultsProcess? _selectedProcess;
 
   @override
   void initState() {
     super.initState();
+    //Automatically select the first process by default if it exists (it might be null!)
+    _selectedProcess = context.read<DataProvider>().db.config.matchscouting.processes.firstOrNull;
   }
 
   @override

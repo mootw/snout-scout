@@ -1,4 +1,4 @@
-import 'package:app/confirm_exit_dialog.dart';
+import 'package:app/widgets/confirm_exit_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:snout_db/event/matchresults.dart';
@@ -16,13 +16,12 @@ class EditMatchResults extends StatefulWidget {
 }
 
 class _EditMatchResultsState extends State<EditMatchResults> {
+
   final _form = GlobalKey<FormState>();
   DateTime _matchEndTime = DateTime.now();
 
   late TextEditingController _redScore;
   late TextEditingController _blueScore;
-  late TextEditingController _redRP;
-  late TextEditingController _blueRP;
 
   @override
   void initState() {
@@ -38,10 +37,6 @@ class _EditMatchResultsState extends State<EditMatchResults> {
     _redScore = TextEditingController(text: widget.results?.redScore.toString());
     _blueScore =
         TextEditingController(text: widget.results?.blueScore.toString());
-    _redRP = TextEditingController(
-        text: widget.results?.redRankingPoints.toString());
-    _blueRP = TextEditingController(
-        text: widget.results?.blueRankingPoints.toString());
   }
 
   @override
@@ -58,9 +53,7 @@ class _EditMatchResultsState extends State<EditMatchResults> {
                     MatchResultValues results = MatchResultValues(
                       time: _matchEndTime.subtract(matchLength),
                       redScore: int.parse(_redScore.text),
-                      blueRankingPoints: int.parse(_blueRP.text),
                       blueScore: int.parse(_blueScore.text),
-                      redRankingPoints: int.parse(_redRP.text)
                     );
                     Navigator.pop(context, results);
                   }
@@ -111,7 +104,7 @@ class _EditMatchResultsState extends State<EditMatchResults> {
               ),
               DataTable(
                 columns: const [
-                  DataColumn(label: Text("Score")),
+                  DataColumn(label: Text("Results")),
                   DataColumn(label: Text("Red")),
                   DataColumn(label: Text("Blue")),
                 ],
@@ -129,19 +122,6 @@ class _EditMatchResultsState extends State<EditMatchResults> {
                         )),
                       ],
                     ),
-                    DataRow(
-                      cells: [
-                        const DataCell(Text("RP")),
-                        DataCell(TextFormField(
-                          controller: _redRP,
-                          validator: _checkIsNumber,
-                        )),
-                        DataCell(TextFormField(
-                          controller: _blueRP,
-                          validator: _checkIsNumber,
-                        )),
-                      ],
-                    )
                 ],
               ),
             ],

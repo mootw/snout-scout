@@ -1,10 +1,10 @@
 import 'package:app/durationformat.dart';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/helpers.dart';
-import 'package:app/match_card.dart';
+import 'package:app/widgets/match_card.dart';
 import 'package:app/screens/edit_schedule.dart';
 import 'package:app/screens/match_page.dart';
-import 'package:app/timeduration.dart';
+import 'package:app/widgets/timeduration.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:snout_db/event/match.dart';
@@ -23,14 +23,14 @@ class _AllMatchesPageState extends State<AllMatchesPage> {
   void initState() {
     super.initState();
 
-    //Scroll to the next match automatically if it is not null.
+    //Scroll to the next match with an offset automatically if it is not null.
     DataProvider data = context.read<DataProvider>();
     final nextMatch = data.db.nextMatch;
     if (nextMatch != null) {
       WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
         _controller.positions.first.moveTo(
-            data.db.matches.values.toList().indexOf(nextMatch) *
-                matchCardHeight,
+            (data.db.matches.values.toList().indexOf(nextMatch) *
+                matchCardHeight) - (matchCardHeight * 2),
             clamp: true);
       });
     }

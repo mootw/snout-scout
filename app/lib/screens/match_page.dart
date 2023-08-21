@@ -1,9 +1,9 @@
 import 'dart:convert';
 
-import 'package:app/datasheet.dart';
+import 'package:app/widgets/datasheet.dart';
 import 'package:app/edit_lock.dart';
 import 'package:app/providers/data_provider.dart';
-import 'package:app/fieldwidget.dart';
+import 'package:app/widgets/fieldwidget.dart';
 import 'package:app/helpers.dart';
 import 'package:app/screens/analysis/match_preview.dart';
 import 'package:app/screens/edit_match_results.dart';
@@ -154,42 +154,6 @@ class _MatchPageState extends State<MatchPage> {
           ),
           const SizedBox(height: 32),
           FieldTimelineViewer(match: match),
-          ListTile(
-            title: const Text("Scheduled Time"),
-            subtitle: Text(DateFormat.jm()
-                .add_yMd()
-                .format(match.scheduledTime.toLocal())),
-          ),
-          if (match.results != null)
-            ListTile(
-              title: const Text("Actual Time"),
-              subtitle: Text(DateFormat.jm()
-                  .add_yMd()
-                  .format(match.results!.time.toLocal())),
-            ),
-          if (match.results != null)
-            Align(
-              alignment: Alignment.center,
-              child: DataTable(
-                columns: const [
-                  DataColumn(label: Text("Results")),
-                  DataColumn(label: Text("Red")),
-                  DataColumn(label: Text("Blue")),
-                ],
-                rows: [
-                  DataRow(cells: [
-                      const DataCell(Text("Score")),
-                      DataCell(Text(match.results!.redScore.toString())),
-                      DataCell(Text(match.results!.blueScore.toString())),
-                    ]),
-                    DataRow(cells: [
-                      const DataCell(Text("RP")),
-                      DataCell(Text(match.results!.redRankingPoints.toString())),
-                      DataCell(Text(match.results!.blueRankingPoints.toString())),
-                    ]),
-                ],
-              ),
-            ),
           //Heatmaps for this specific match
           Wrap(
             spacing: 12,
@@ -248,7 +212,39 @@ class _MatchPageState extends State<MatchPage> {
                     ],
                   )),
             ],
-          )
+          ),
+
+          ListTile(
+            title: const Text("Scheduled Time"),
+            subtitle: Text(DateFormat.jm()
+                .add_yMd()
+                .format(match.scheduledTime.toLocal())),
+          ),
+          if (match.results != null)
+            ListTile(
+              title: const Text("Actual Time"),
+              subtitle: Text(DateFormat.jm()
+                  .add_yMd()
+                  .format(match.results!.time.toLocal())),
+            ),
+          if (match.results != null)
+            Align(
+              alignment: Alignment.center,
+              child: DataTable(
+                columns: const [
+                  DataColumn(label: Text("Results")),
+                  DataColumn(label: Text("Red")),
+                  DataColumn(label: Text("Blue")),
+                ],
+                rows: [
+                  DataRow(cells: [
+                      const DataCell(Text("Score")),
+                      DataCell(Text(match.results!.redScore.toString())),
+                      DataCell(Text(match.results!.blueScore.toString())),
+                    ]),
+                ],
+              ),
+            ),
         ],
       ),
     );

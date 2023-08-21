@@ -5,11 +5,10 @@ import 'package:app/providers/data_provider.dart';
 import 'package:app/helpers.dart';
 import 'package:app/providers/server_connection_provider.dart';
 import 'package:app/screens/analysis.dart';
-import 'package:app/screens/datapage.dart';
 import 'package:app/screens/debug_field_position.dart';
 import 'package:app/screens/edit_json.dart';
 import 'package:app/screens/local_patch_storage.dart';
-import 'package:app/screens/matches_page.dart';
+import 'package:app/screens/schedule_page.dart';
 import 'package:app/screens/teams_page.dart';
 import 'package:app/search.dart';
 import 'package:download/download.dart';
@@ -133,7 +132,6 @@ class _MyHomePageState extends State<MyHomePage> {
       body: [
         const AllMatchesPage(),
         const TeamGridList(),
-        const DataTablePage(),
         const AnalysisPage(),
       ][_currentPageIndex],
       drawer: Drawer(
@@ -245,11 +243,6 @@ class _MyHomePageState extends State<MyHomePage> {
             selectedIcon: Icon(Icons.people),
             icon: Icon(Icons.people_alt_outlined),
             label: 'Teams',
-          ),
-          NavigationDestination(
-            selectedIcon: Icon(Icons.table_chart),
-            icon: Icon(Icons.table_chart_outlined),
-            label: 'Data',
           ),
           NavigationDestination(
             selectedIcon: Icon(Icons.analytics),

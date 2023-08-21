@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:app/confirm_exit_dialog.dart';
+import 'package:app/widgets/confirm_exit_dialog.dart';
 import 'package:flutter/material.dart';
 
 class JSONEditor extends StatefulWidget {

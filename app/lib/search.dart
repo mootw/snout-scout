@@ -13,8 +13,6 @@ class SnoutScoutSearch extends SearchDelegate {
   @override
   String get searchFieldLabel => 'Search Data';
 
-  
-
   @override
   List<Widget>? buildActions(BuildContext context) {
     return [

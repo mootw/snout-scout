@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:app/confirm_exit_dialog.dart';
+import 'package:app/widgets/confirm_exit_dialog.dart';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/scouting_tools/scouting_tool.dart';
 import 'package:flutter/material.dart';

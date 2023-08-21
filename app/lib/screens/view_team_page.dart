@@ -1,12 +1,12 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:app/datasheet.dart';
+import 'package:app/widgets/datasheet.dart';
 import 'package:app/edit_lock.dart';
 import 'package:app/providers/data_provider.dart';
-import 'package:app/fieldwidget.dart';
+import 'package:app/widgets/fieldwidget.dart';
 import 'package:app/helpers.dart';
-import 'package:app/match_card.dart';
+import 'package:app/widgets/match_card.dart';
 import 'package:app/screens/match_page.dart';
 import 'package:app/screens/scout_team.dart';
 import 'package:app/scouting_tools/scouting_tool.dart';

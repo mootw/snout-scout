@@ -2,7 +2,7 @@
 
 
 
-import 'package:app/fieldwidget.dart';
+import 'package:app/widgets/fieldwidget.dart';
 import 'package:flutter/material.dart';
 import 'package:snout_db/snout_db.dart';
 
