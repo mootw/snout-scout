@@ -36,7 +36,42 @@ class _MatchPageState extends State<MatchPage> {
       appBar: AppBar(
         title: Text(match.description),
         actions: [
-          TextButton(
+          //If there is a TBA event ID we will add a button to view the match id
+              //since we will assume that all of the matches (or at least most)
+              //have been imported to match the tba id format
+              if (snoutData.db.config.tbaEventId != null)
+                FilledButton.tonal(
+                  child: const Text("TBA"),
+                  onPressed: () => launchUrlString(
+                      "https://www.thebluealliance.com/match/${widget.matchid}"),
+                ),
+
+          const SizedBox(width: 12),
+        ],
+      ),
+      body: ListView(
+        children: [
+          const SizedBox(height: 8),
+          Wrap(
+            children: [
+              const SizedBox(width: 12),
+              FilledButton(
+                  onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (builder) => MatchRecorderAssistantPage(
+                              matchid: widget.matchid))),
+                  child: const Text("Scout This Match")),
+              const SizedBox(width: 12),
+              FilledButton.tonal(
+                  onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (builder) => AnalysisMatchPreview(
+                              red: match.red, blue: match.blue))),
+                  child: const Text("Match Preview")),
+              const SizedBox(width: 12),
+              TextButton(
             child: match.results == null
                 ? const Text("Add Results")
                 : const Text("Edit Results"),
@@ -62,39 +97,6 @@ class _MatchPageState extends State<MatchPage> {
               }
             },
           ),
-        ],
-      ),
-      body: ListView(
-        children: [
-          const SizedBox(height: 8),
-          Wrap(
-            children: [
-              const SizedBox(width: 12),
-              FilledButton(
-                  onPressed: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (builder) => MatchRecorderAssistantPage(
-                              matchid: widget.matchid))),
-                  child: const Text("Scout This Match")),
-              const SizedBox(width: 12),
-              FilledButton.tonal(
-                  onPressed: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (builder) => AnalysisMatchPreview(
-                              red: match.red, blue: match.blue))),
-                  child: const Text("Match Preview")),
-              const SizedBox(width: 12),
-              //If there is a TBA event ID we will add a button to view the match id
-              //since we will assume that all of the matches (or at least most)
-              //have been imported to match the tba id format
-              if (snoutData.db.config.tbaEventId != null)
-                FilledButton.tonal(
-                  child: const Text("TBA"),
-                  onPressed: () => launchUrlString(
-                      "https://www.thebluealliance.com/match/${widget.matchid}"),
-                ),
             ],
           ),
           const SizedBox(height: 8),
