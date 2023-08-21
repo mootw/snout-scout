@@ -1,7 +1,7 @@
 //Allow for edit locking using a unique key.
 
 import 'package:app/api.dart';
-import 'package:app/eventdb_state.dart';
+import 'package:app/providers/server_connection_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
@@ -11,7 +11,7 @@ import 'package:provider/provider.dart';
 //This function will not throw an exception and always fail safe by navigating to the other page.
 Future<dynamic> navigateWithEditLock(
     BuildContext context, String key, Function navigteFunction) async {
-    final serverURL = context.read<EventDB>().serverURL;
+    final serverURL = context.read<ServerConnectionProvider>().serverURL;
     Uri editLockUri = Uri.parse(
       "${Uri.parse(serverURL).origin}/edit_lock");
   //Check if this key is being edited

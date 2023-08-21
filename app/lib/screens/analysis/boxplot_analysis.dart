@@ -1,7 +1,7 @@
 import 'dart:collection';
 
 import 'package:app/screens/analysis/boxplot.dart';
-import 'package:app/eventdb_state.dart';
+import 'package:app/providers/eventdb_state.dart';
 import 'package:app/screens/view_team_page.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
@@ -25,7 +25,7 @@ class _BoxPlotAnalysisState extends State<BoxPlotAnalysis> {
 
   @override
   Widget build(BuildContext context) {
-    final data = context.watch<EventDB>();
+    final data = context.watch<DataProvider>();
 
     Map<int, List<num>>? teamValues;
     if (_selectedProcess != null) {
@@ -40,7 +40,7 @@ class _BoxPlotAnalysisState extends State<BoxPlotAnalysis> {
       ]);
     }
 
-    //Sort hte numbers
+    //Sort the numbers
     if (teamValues != null) {
       for (final value in teamValues.values) {
         value.sort();

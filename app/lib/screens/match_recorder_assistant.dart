@@ -4,8 +4,9 @@ import 'dart:typed_data';
 
 import 'package:app/api.dart';
 import 'package:app/edit_lock.dart';
-import 'package:app/eventdb_state.dart';
+import 'package:app/providers/eventdb_state.dart';
 import 'package:app/helpers.dart';
+import 'package:app/providers/server_connection_provider.dart';
 import 'package:app/screens/match_recorder.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
@@ -39,7 +40,7 @@ class _MatchRecorderAssistantPageState
   @override
   void initState() {
     super.initState();
-    final snoutData = context.read<EventDB>();
+    final snoutData = context.read<DataProvider>();
     FRCMatch match = snoutData.db.matches[widget.matchid]!;
 
     //Pick a recommended team that is not already being scouted
@@ -71,7 +72,7 @@ class _MatchRecorderAssistantPageState
     for (final team in teams) {
       futures.add(apiClient
           .get(Uri.parse(
-      "${Uri.parse(context.read<EventDB>().serverURL).origin}/edit_lock"),
+      "${Uri.parse(context.read<ServerConnectionProvider>().serverURL).origin}/edit_lock"),
               headers: {"key": "match:${widget.matchid}:$team:timeline"})
           .timeout(const Duration(seconds: 1))
           .then((isLocked) {
@@ -90,7 +91,7 @@ class _MatchRecorderAssistantPageState
 
   @override
   Widget build(BuildContext context) {
-    final snoutData = context.watch<EventDB>();
+    final snoutData = context.watch<DataProvider>();
     FRCMatch match = snoutData.db.matches[widget.matchid]!;
     return Scaffold(
       appBar: AppBar(title: Text("Recording ${match.description}")),
@@ -183,7 +184,7 @@ class _MatchRecorderAssistantPageState
       required String subtitle,
       required GestureTapCallback onTap,
       required Color subtitleColor}) {
-    final snoutData = context.watch<EventDB>();
+    final snoutData = context.watch<DataProvider>();
     Widget? image;
     final data = snoutData.db.pitscouting[team.toString()]?['robot_picture'];
     if (data != null) {
@@ -225,7 +226,7 @@ class _MatchRecorderAssistantPageState
   }
 
   void _recordTeam(String matchid, int team, Alliance alliance) async {
-    final snoutData = context.read<EventDB>();
+    final snoutData = context.read<DataProvider>();
     RobotMatchResults? result = await navigateWithEditLock(
         context,
         "match:$matchid:$team:timeline",

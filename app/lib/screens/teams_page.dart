@@ -1,11 +1,13 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:app/eventdb_state.dart';
+import 'package:app/providers/eventdb_state.dart';
+import 'package:app/screens/edit_json.dart';
 import 'package:app/screens/view_team_page.dart';
+import 'package:app/services/tba_autofill.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
+import 'package:snout_db/patch.dart';
 
 /// Displays a wrapped grid of teams
 class TeamGridList extends StatefulWidget {
@@ -28,9 +30,100 @@ class _TeamGridListState extends State<TeamGridList> {
           runSpacing: 12,
           alignment: WrapAlignment.spaceEvenly,
           children: [
-            for (final team in context.watch<EventDB>().db.teams)
-              if(widget.teamFiler == null || widget.teamFiler!.contains(team))
+            for (final team in context.watch<DataProvider>().db.teams)
+              if (widget.teamFiler == null || widget.teamFiler!.contains(team))
                 TeamListTile(teamNumber: team),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Center(
+                child: FilledButton.tonal(
+                    onPressed: () => showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                              title: const Text("Edit Teams"),
+                              actions: [
+                                TextButton(
+                                    onPressed: () async {
+                                      final result = await Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => JSONEditor(
+                                              validate: (item) {},
+                                              source: context
+                                                  .read<DataProvider>()
+                                                  .db
+                                                  .teams,
+                                            ),
+                                          ));
+
+                                      if (result != null && mounted) {
+                                        Patch patch = Patch(
+                                            time: DateTime.now(),
+                                            path: ['teams'],
+                                            data: result);
+                                        //Save the scouting results to the server!!
+                                        await context
+                                            .read<DataProvider>()
+                                            .addPatch(patch);
+                                      }
+                                    },
+                                    child: const Text("Manual")),
+                                TextButton(
+                                    onPressed: () async {
+                                      List<int> teams;
+                                      try {
+                                        teams = await getTeamListForEventTBA(
+                                            context.read<DataProvider>().db);
+                                        //Some reason the teams do not come sorted...
+                                        teams.sort();
+                                      } catch (e) {
+                                        if (mounted) {
+                                          showDialog(
+                                              context: context,
+                                              builder: (context) => AlertDialog(
+                                                    title: Text(e.toString()),
+                                                    actions: [
+                                                      TextButton(
+                                                          onPressed: () =>
+                                                              Navigator.pop(
+                                                                  context),
+                                                          child:
+                                                              const Text("Ok"))
+                                                    ],
+                                                  ));
+                                        }
+                                        return;
+                                      }
+                                      if (!mounted) {
+                                        return;
+                                      }
+
+                                      final result = await Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => JSONEditor(
+                                              validate: (item) {},
+                                              source: teams,
+                                            ),
+                                          ));
+
+                                      if (result != null && mounted) {
+                                        Patch patch = Patch(
+                                            time: DateTime.now(),
+                                            path: ['teams'],
+                                            data: result);
+                                        //Save the scouting results to the server!!
+                                        await context
+                                            .read<DataProvider>()
+                                            .addPatch(patch);
+                                      }
+                                    },
+                                    child: const Text("TBA AutoFill")),
+                              ],
+                            )),
+                    child: const Text("Edit Teams")),
+              ),
+            ),
           ],
         ),
       ),
@@ -45,7 +138,7 @@ class TeamListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final snoutData = context.watch<EventDB>();
+    final snoutData = context.watch<DataProvider>();
     Widget? image;
     final data =
         snoutData.db.pitscouting[teamNumber.toString()]?['robot_picture'];

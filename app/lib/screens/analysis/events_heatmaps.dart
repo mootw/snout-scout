@@ -1,4 +1,4 @@
-import 'package:app/eventdb_state.dart';
+import 'package:app/providers/eventdb_state.dart';
 import 'package:app/fieldwidget.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -8,7 +8,7 @@ class AnalysisEventsHeatmap extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final data = context.watch<EventDB>();
+    final data = context.watch<DataProvider>();
     return Scaffold(
       appBar: AppBar(
         title: const Text("Events Heatmap Analysis"),

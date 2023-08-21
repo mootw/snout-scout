@@ -3,7 +3,7 @@ import 'dart:typed_data';
 
 import 'package:app/datasheet.dart';
 import 'package:app/edit_lock.dart';
-import 'package:app/eventdb_state.dart';
+import 'package:app/providers/eventdb_state.dart';
 import 'package:app/fieldwidget.dart';
 import 'package:app/helpers.dart';
 import 'package:app/match_card.dart';
@@ -29,7 +29,7 @@ class TeamViewPage extends StatefulWidget {
 class _TeamViewPageState extends State<TeamViewPage> {
   @override
   Widget build(BuildContext context) {
-    final data = context.watch<EventDB>();
+    final data = context.watch<DataProvider>();
     return Scaffold(
         appBar: AppBar(
           actions: [
@@ -237,7 +237,7 @@ class _TeamViewPageState extends State<TeamViewPage> {
 
 class ScoutingResultsViewer extends StatelessWidget {
   final int teamNumber;
-  final EventDB snoutData;
+  final DataProvider snoutData;
 
   const ScoutingResultsViewer(
       {super.key, required this.teamNumber, required this.snoutData});

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
-import 'package:app/eventdb_state.dart';
+import 'package:app/providers/eventdb_state.dart';
+import 'package:app/providers/server_connection_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -16,7 +17,8 @@ class LocalPatchStorage extends StatefulWidget {
 class _LocalPatchStorageState extends State<LocalPatchStorage> {
   @override
   Widget build(BuildContext context) {
-    final snoutData = context.watch<EventDB>();
+    final snoutData = context.watch<DataProvider>();
+    final serverConnection = context.watch<ServerConnectionProvider>();
     return Scaffold(
       appBar: AppBar(
         title: const Text("Local Patch Storage"),
@@ -38,7 +40,7 @@ class _LocalPatchStorageState extends State<LocalPatchStorage> {
                                       .colorScheme
                                       .errorContainer),
                               onPressed: () async {
-                                await snoutData.clearFailedPatches();
+                                await serverConnection.clearFailedPatches();
                                 if (mounted) {
                                   Navigator.pop(context);
                                 }
@@ -64,7 +66,7 @@ class _LocalPatchStorageState extends State<LocalPatchStorage> {
                                       .colorScheme
                                       .errorContainer),
                               onPressed: () async {
-                                await snoutData.clearSuccessfulPatches();
+                                await serverConnection.clearSuccessfulPatches();
                                 if (mounted) {
                                   Navigator.pop(context);
                                 }
@@ -78,7 +80,7 @@ class _LocalPatchStorageState extends State<LocalPatchStorage> {
       body: ListView(
         children: [
           const Center(child: Text("Failed Patches")),
-          for (final patch in snoutData.failedPatches.reversed)
+          for (final patch in serverConnection.failedPatches.reversed)
             ListTile(
               onTap: () => showDialog(
                   context: context,
@@ -105,7 +107,7 @@ class _LocalPatchStorageState extends State<LocalPatchStorage> {
               ),
             ),
           const Center(child: Text("Successful Patches")),
-          for (final patch in snoutData.successfulPatches.reversed)
+          for (final patch in serverConnection.successfulPatches.reversed)
             ListTile(
               onTap: () => showDialog(
                   context: context,

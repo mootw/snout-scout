@@ -7,14 +7,9 @@ import 'package:snout_db/event/frcevent.dart';
 import 'package:server/edit_lock.dart';
 import 'dart:io';
 
-import 'package:http/http.dart' as http;
-import 'package:snout_db/event/match.dart';
-
 import 'package:snout_db/patch.dart';
 
-
 //TODO implement https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/ETag
-
 
 final env = DotEnv(includePlatformEnvironment: true)..load();
 int serverPort = 6749;
@@ -101,36 +96,6 @@ void main(List<String> args) async {
         loadedEvents[event]?.listeners.add(websocket);
       });
       return;
-    }
-
-    //Load schedule stuff.
-    if (request.uri.pathSegments.length > 1 &&
-        request.uri.pathSegments[0] == 'load_schedule') {
-      final eventID = request.uri.pathSegments[1];
-
-      File? f = loadedEvents[eventID]?.file;
-      if (f == null || await f.exists() == false) {
-        print("event not found");
-        request.response.statusCode = 404;
-        request.response.write('Event not found');
-        request.response.close();
-        return;
-      }
-      //Attempt to laod the schedule from the API
-      try {
-        final eventData = FRCEvent.fromJson(jsonDecode(await f.readAsString()));
-
-        await loadScheduleFromTBA(eventData, eventID);
-
-        request.response.write("Done adding matches");
-        request.response.close();
-        return;
-      } catch (e, s) {
-        print(e);
-        print(s);
-        request.response.write(e);
-        request.response.close();
-      }
     }
 
     if (request.uri.toString() == "/edit_lock") {
@@ -249,96 +214,5 @@ void handleEditLockRequest(HttpRequest request) {
     editLock.clear(key);
     request.response.close();
     return;
-  }
-}
-
-//https://www.thebluealliance.com/apidocs/v3
-Future loadScheduleFromTBA(FRCEvent eventData, String eventID) async {
-  if (eventData.config.tbaEventId == null) {
-    throw Exception("TBA event ID cannot be null in the config!");
-  }
-
-  //Get playoff level matches
-  final apiData = await http.get(
-      Uri.parse(
-          "https://www.thebluealliance.com/api/v3/event/${eventData.config.tbaEventId}/matches"),
-      headers: {
-        'X-TBA-Auth-Key': env['X-TBA-Auth-Key']!,
-      });
-
-  //Alright I THINK the timezone for the iso string is the one local to the event, but this would be chaotic
-  //(and not to the ISO8601 standard since it should show timezone offset meaning the actual time is WRONG)
-  //Basically just place your server in the same timezone as the event and hope for the best lmao
-
-  final matches = jsonDecode(apiData.body);
-
-  for (final match in matches) {
-    String key = match['key'];
-    DateTime startTime =
-        DateTime.fromMillisecondsSinceEpoch(match['time'] * 1000, isUtc: true);
-
-    //"red": {
-    //   "dq_team_keys": [],
-    //   "score": 86,
-    //   "surrogate_team_keys": [],
-    //   "team_keys": [
-    //     "frc2883",
-    //     "frc2239",
-    //     "frc2129"
-    //   ]
-    // }
-    List<int> red = [
-      for (String team in match['alliances']['red']['team_keys'])
-        int.parse(team.substring(3)),
-    ];
-    List<int> blue = [
-      for (String team in match['alliances']['blue']['team_keys'])
-        int.parse(team.substring(3)),
-    ];
-
-    int matchNumber = match['match_number'];
-    int setNumber = match['set_number'];
-    String compLevel = match['comp_level'];
-    //Generate a human readable description for each match
-    String description;
-    //qm, ef, qf, sf, f
-    if (compLevel == "qm") {
-      description = "Quals $matchNumber";
-    } else if (compLevel == "ef") {
-      description = "Eighths $matchNumber Match $setNumber";
-    } else if (compLevel == "qf") {
-      description = "Quarters $matchNumber Match $setNumber";
-    } else if (compLevel == "sf") {
-      description = "Semis $matchNumber Match $setNumber";
-    } else if (compLevel == "f") {
-      description = "Finals $matchNumber";
-    } else {
-      description = "Unknown $matchNumber";
-    }
-
-    //ONLY modify matches that do not exist yet to prevent damage
-    if (eventData.matches.keys.toList().contains(key) == false) {
-      print("match ${key} does not exist; adding...");
-      FRCMatch newMatch = FRCMatch(
-          description: description,
-          scheduledTime: startTime,
-          blue: blue,
-          red: red,
-          results: null,
-          robot: {});
-
-      Patch patch = Patch(
-          time: DateTime.now(),
-          path: [
-            'matches',
-            key,
-          ],
-          data: jsonEncode(newMatch));
-
-      print(jsonEncode(patch));
-
-      await http.put(Uri.parse("http://localhost:$serverPort/events/$eventID"),
-          body: jsonEncode(patch));
-    }
   }
 }

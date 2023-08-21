@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:app/confirm_exit_dialog.dart';
-import 'package:app/eventdb_state.dart';
+import 'package:app/providers/eventdb_state.dart';
 import 'package:app/scouting_tools/scouting_tool.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -48,7 +48,7 @@ class _PitScoutTeamPageState extends State<PitScoutTeamPage> {
                     return;
                   }
 
-                  final snoutData = context.read<EventDB>();
+                  final snoutData = context.read<DataProvider>();
 
                   Patch patch = Patch(
                       time: DateTime.now(),

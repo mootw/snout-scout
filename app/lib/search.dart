@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:app/eventdb_state.dart';
+import 'package:app/providers/eventdb_state.dart';
 import 'package:app/screens/match_page.dart';
 import 'package:app/screens/view_team_page.dart';
 import 'package:collection/collection.dart';
@@ -48,7 +48,7 @@ class SnoutScoutSearch extends SearchDelegate {
   Widget search(BuildContext context) {
     List<Widget> results = [];
 
-    EventDB db = context.watch<EventDB>();
+    DataProvider db = context.watch<DataProvider>();
 
     for (final team in db.db.teams) {
       if (query.isEmpty) {

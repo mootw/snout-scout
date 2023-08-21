@@ -3,7 +3,7 @@ import 'dart:convert';
 
 import 'package:app/confirm_exit_dialog.dart';
 import 'package:app/datasheet.dart';
-import 'package:app/eventdb_state.dart';
+import 'package:app/providers/eventdb_state.dart';
 import 'package:app/fieldwidget.dart';
 import 'package:app/helpers.dart';
 import 'package:app/scouting_tools/scouting_tool.dart';
@@ -49,7 +49,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
 
   //Only use in buildcontext
   List<MatchEventConfig> get scoutingEvents =>
-      context.watch<EventDB>().db.config.matchscouting.events;
+      context.watch<DataProvider>().db.config.matchscouting.events;
 
   @override
   void dispose() {
@@ -104,17 +104,17 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                           _events.remove(item);
                         }),
                     child: Text(
-                        '${item.time.round()}  ${item.getLabelFromConfig(context.watch<EventDB>().db.config)}',
+                        '${item.time.round()}  ${item.getLabelFromConfig(context.watch<DataProvider>().db.config)}',
                         style: TextStyle(
                             color: item.isPositionEvent
                                 ? Theme.of(context).colorScheme.onBackground
                                 : item.getColorFromConfig(context
-                                            .watch<EventDB>()
+                                            .watch<DataProvider>()
                                             .db
                                             .config) !=
                                         null
                                     ? colorFromHex(item.getColorFromConfig(
-                                        context.watch<EventDB>().db.config)!)
+                                        context.watch<DataProvider>().db.config)!)
                                     : null))),
 
               // Text(
@@ -164,7 +164,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
               shrinkWrap: true,
               children: [
                 for (final item
-                    in context.watch<EventDB>().db.config.matchscouting.survey)
+                    in context.watch<DataProvider>().db.config.matchscouting.survey)
                   Container(
                       padding: const EdgeInsets.all(12),
                       child: ScoutingToolWidget(
@@ -334,7 +334,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
   Widget _statusAndToolBar() {
     Widget? robotPicture;
     final pictureData = context
-        .watch<EventDB>()
+        .watch<DataProvider>()
         .db
         .pitscouting[widget.team.toString()]?['robot_picture'];
     if (pictureData != null) {

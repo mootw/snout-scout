@@ -2,7 +2,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:app/eventdb_state.dart';
+import 'package:app/providers/eventdb_state.dart';
 import 'package:app/helpers.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
@@ -238,7 +238,7 @@ class RobotMapEventView extends StatelessWidget {
                 alignment: Alignment(event.position.x, -event.position.y),
                 child: Text(
                     event
-                        .getLabelFromConfig(context.watch<EventDB>().db.config),
+                        .getLabelFromConfig(context.watch<DataProvider>().db.config),
                     style: const TextStyle(backgroundColor: Colors.black)),
               ),
           ]);
@@ -303,7 +303,7 @@ class FieldPaths extends StatelessWidget {
                     in match.where((event) => !event.isPositionEvent))
                   Text(
                       event.getLabelFromConfig(
-                          context.watch<EventDB>().db.config),
+                          context.watch<DataProvider>().db.config),
                       style: TextStyle(
                           color: getColorFromIndex(paths.indexOf(match)),
                           fontSize: 10,
@@ -432,7 +432,7 @@ class FieldMapWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Image.asset(
-        "assets/field_map/${context.watch<EventDB>().db.config.season}.png");
+        "assets/field_map/${context.watch<DataProvider>().db.config.season}.png");
   }
 }
 
@@ -449,7 +449,7 @@ class FieldMap extends StatelessWidget {
       child: Stack(
         children: [
           Image.asset(
-              "assets/field_map/${context.watch<EventDB>().db.config.season}.png"),
+              "assets/field_map/${context.watch<DataProvider>().db.config.season}.png"),
           ...children,
         ],
       ),

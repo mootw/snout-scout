@@ -1,5 +1,5 @@
 import 'package:app/datasheet.dart';
-import 'package:app/eventdb_state.dart';
+import 'package:app/providers/eventdb_state.dart';
 import 'package:app/helpers.dart';
 import 'package:app/screens/match_page.dart';
 import 'package:app/screens/view_team_page.dart';
@@ -17,7 +17,7 @@ class DataTablePage extends StatefulWidget {
 class _DataTablePageState extends State<DataTablePage> {
   @override
   Widget build(BuildContext context) {
-    final data = context.watch<EventDB>();
+    final data = context.watch<DataProvider>();
     return ListView(
       cacheExtent: 5000,
       children: [

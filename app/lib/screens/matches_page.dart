@@ -1,7 +1,8 @@
 import 'package:app/durationformat.dart';
-import 'package:app/eventdb_state.dart';
+import 'package:app/providers/eventdb_state.dart';
 import 'package:app/helpers.dart';
 import 'package:app/match_card.dart';
+import 'package:app/screens/edit_schedule.dart';
 import 'package:app/screens/match_page.dart';
 import 'package:app/timeduration.dart';
 import 'package:flutter/material.dart';
@@ -23,7 +24,7 @@ class _AllMatchesPageState extends State<AllMatchesPage> {
     super.initState();
 
     //Scroll to the next match automatically if it is not null.
-    EventDB data = context.read<EventDB>();
+    DataProvider data = context.read<DataProvider>();
     final nextMatch = data.db.nextMatch;
     if (nextMatch != null) {
       WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
@@ -37,7 +38,7 @@ class _AllMatchesPageState extends State<AllMatchesPage> {
 
   @override
   Widget build(BuildContext context) {
-    final snoutData = context.watch<EventDB>();
+    final snoutData = context.watch<DataProvider>();
     FRCMatch? teamNextMatch =
         snoutData.db.nextMatchForTeam(snoutData.db.config.team);
     Duration? scheduleDelay = snoutData.db.scheduleDelay;
@@ -78,6 +79,22 @@ class _AllMatchesPageState extends State<AllMatchesPage> {
                             : null),
                     child: MatchCard(
                         match: match, focusTeam: snoutData.db.config.team)),
+
+                    Padding(
+            padding: const EdgeInsets.all(16),
+            child: Center(
+              child: FilledButton.tonal(
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              EditSchedulePage(matches: snoutData.db.matches),
+                        ));
+                  },
+                  child: const Text("Edit Schedule")),
+            ),
+          ),
             ],
           ),
         ),

@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:app/datasheet.dart';
 import 'package:app/edit_lock.dart';
-import 'package:app/eventdb_state.dart';
+import 'package:app/providers/eventdb_state.dart';
 import 'package:app/fieldwidget.dart';
 import 'package:app/helpers.dart';
 import 'package:app/screens/analysis/match_preview.dart';
@@ -30,7 +30,7 @@ class MatchPage extends StatefulWidget {
 class _MatchPageState extends State<MatchPage> {
   @override
   Widget build(BuildContext context) {
-    final snoutData = context.watch<EventDB>();
+    final snoutData = context.watch<DataProvider>();
     FRCMatch match = snoutData.db.matches[widget.matchid]!;
     return Scaffold(
       appBar: AppBar(

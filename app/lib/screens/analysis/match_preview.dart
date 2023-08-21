@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:app/datasheet.dart';
-import 'package:app/eventdb_state.dart';
+import 'package:app/providers/eventdb_state.dart';
 import 'package:app/fieldwidget.dart';
 import 'package:app/helpers.dart';
 import 'package:app/screens/view_team_page.dart';
@@ -34,7 +34,7 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
 
   @override
   Widget build(BuildContext context) {
-    final data = context.watch<EventDB>();
+    final data = context.watch<DataProvider>();
     return Scaffold(
       appBar: AppBar(title: const Text("Match Preview"), actions: [
         TextButton(

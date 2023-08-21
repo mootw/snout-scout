@@ -11,6 +11,7 @@ EventConfig _$EventConfigFromJson(Map<String, dynamic> json) => EventConfig(
       team: json['team'] as int,
       season: json['season'] as int,
       tbaEventId: json['tbaEventId'] as String?,
+      tbaSecretKey: json['tbaSecretKey'] as String?,
       fieldStyle:
           $enumDecodeNullable(_$FieldStyleEnumMap, json['fieldStyle']) ??
               FieldStyle.rotated,
@@ -29,6 +30,7 @@ Map<String, dynamic> _$EventConfigToJson(EventConfig instance) =>
       'name': instance.name,
       'season': instance.season,
       'tbaEventId': instance.tbaEventId,
+      'tbaSecretKey': instance.tbaSecretKey,
       'fieldStyle': _$FieldStyleEnumMap[instance.fieldStyle]!,
       'team': instance.team,
       'pitscouting': instance.pitscouting,

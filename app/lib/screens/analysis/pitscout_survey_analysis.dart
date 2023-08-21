@@ -1,4 +1,4 @@
-import 'package:app/eventdb_state.dart';
+import 'package:app/providers/eventdb_state.dart';
 import 'package:app/helpers.dart';
 import 'package:app/screens/teams_page.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -11,7 +11,7 @@ class AnalysisPitScouting extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final data = context.watch<EventDB>();
+    final data = context.watch<DataProvider>();
     return Scaffold(
       appBar: AppBar(title: const Text("Scouting Survey Analysis")),
       body: ListView(
@@ -46,7 +46,7 @@ class _SurveyItemRatioChartState extends State<SurveyItemRatioChart> {
 
   @override
   Widget build(BuildContext context) {
-    final data = context.watch<EventDB>();
+    final data = context.watch<DataProvider>();
 
     //Map of all of the values, to their respective teams
     Map<String, List<String>> valueKeys = {};

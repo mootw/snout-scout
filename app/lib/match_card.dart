@@ -1,4 +1,4 @@
-import 'package:app/eventdb_state.dart';
+import 'package:app/providers/eventdb_state.dart';
 import 'package:app/timeduration.dart';
 import 'package:provider/provider.dart';
 import 'package:app/screens/match_page.dart';
@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:snout_db/event/match.dart';
 import 'package:snout_db/snout_db.dart';
 
-const double matchCardHeight = 48;
+const double matchCardHeight = 50;
 
 const TextStyle whiteText = TextStyle(color: Colors.white, fontSize: 12);
 const TextStyle whiteTextBold =
@@ -20,7 +20,7 @@ class MatchCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final snoutData = context.watch<EventDB>();
+    final snoutData = context.watch<DataProvider>();
     return SizedBox(
       height: matchCardHeight,
       child: InkWell(
@@ -33,25 +33,26 @@ class MatchCard extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            SizedBox(
-                width: 120,
+            Expanded(
+                // width: 120,
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(match.description, textAlign: TextAlign.center),
-                    TimeDuration(
-                        time: match.results != null
-                            ? match.results!.time
-                            : match.scheduledTime),
-                  ],
-                )),
-            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(match.description, textAlign: TextAlign.center),
+                TimeDuration(
+                    time: match.results != null
+                        ? match.results!.time
+                        : match.scheduledTime),
+              ],
+            )),
+            // const SizedBox(width: 8),
+            Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                  height: 25,
-                  width: 150,
-                  color: Colors.redAccent,
+                  height: 22,
+                  width: 169,
+                  color: Colors.red,
                   child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
@@ -60,13 +61,12 @@ class MatchCard extends StatelessWidget {
                               style: focusTeam == team
                                   ? whiteTextBold
                                   : whiteText),
-                        Container(
-                          color: Colors.red,
-                          width: 32,
+                        SizedBox(
+                          width: 25,
                           child: Text(
                             match.results?.redScore != null
                                 ? match.results!.redScore.toString()
-                                : "?",
+                                : "???",
                             style: match.results?.winner == Alliance.red ||
                                     match.results?.winner == Alliance.tie
                                 ? whiteTextBold
@@ -77,8 +77,8 @@ class MatchCard extends StatelessWidget {
                       ]),
                 ),
                 Container(
-                  height: 25,
-                  width: 150,
+                  height: 22,
+                  width: 169,
                   color: Colors.blueAccent,
                   child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -88,13 +88,12 @@ class MatchCard extends StatelessWidget {
                               style: focusTeam == team
                                   ? whiteTextBold
                                   : whiteText),
-                        Container(
-                          color: Colors.blue,
-                          width: 32,
+                        SizedBox(
+                          width: 25,
                           child: Text(
                             match.results?.blueScore != null
                                 ? match.results!.blueScore.toString()
-                                : "?",
+                                : "???",
                             style: match.results?.winner == Alliance.blue ||
                                     match.results?.winner == Alliance.tie
                                 ? whiteTextBold
@@ -106,6 +105,7 @@ class MatchCard extends StatelessWidget {
                 ),
               ],
             ),
+            const SizedBox(width: 24),
           ],
         ),
       ),

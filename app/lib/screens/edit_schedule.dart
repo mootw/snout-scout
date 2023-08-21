@@ -1,8 +1,8 @@
 import 'dart:convert';
 
-import 'package:app/api.dart';
-import 'package:app/eventdb_state.dart';
+import 'package:app/providers/eventdb_state.dart';
 import 'package:app/screens/edit_json.dart';
+import 'package:app/services/tba_autofill.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:snout_db/event/match.dart';
@@ -20,35 +20,77 @@ class EditSchedulePage extends StatefulWidget {
 class _EditSchedulePageState extends State<EditSchedulePage> {
   @override
   Widget build(BuildContext context) {
-    final snoutData = context.watch<EventDB>();
+    final snoutData = context.watch<DataProvider>();
     return Scaffold(
       appBar: AppBar(
         title: const Text("Edit Schedule"),
         actions: [
           TextButton(
-            child: const Text("LOAD MATCHES FROM TBA"),
+            child: const Text("AutoFill TBA"),
             onPressed: () async {
-              final result = await apiClient.get(
-                  Uri.parse(context.read<EventDB>().serverURL.replaceFirst("events", "load_schedule")));
+              List<Patch> patch;
+              try {
+                patch = await loadScheduleFromTBA(snoutData.db);
+              } catch (e) {
+                if (mounted) {
+                  showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          title: const Text("Error Getting From TBA"),
+                          content: Text(e.toString()),
+                        );
+                      });
+                }
+                return;
+              }
 
               if (mounted) {
                 showDialog(
                     context: context,
                     builder: (context) {
                       return AlertDialog(
-                        title: Text(result.statusCode.toString()),
-                        content: Text(result.body),
+                        title: const Text("data"),
+                        content: SingleChildScrollView(
+                            child: Text(jsonEncode(patch))),
+                        actions: [
+                          TextButton(
+                              onPressed: () async {
+                                for(var p in patch) {
+                                  await snoutData.addPatch(p);
+                                }
+                                if (mounted) {
+                                  Navigator.pop(context);
+                                }
+                              },
+                              child: const Text("Apply"))
+                        ],
                       );
                     });
               }
             },
-          )
+          ),
         ],
       ),
       body: ListView(children: [
         Text(
-          "Warning: Editing the schedule is potentially destructive! Data could be lost if the edit removes matches or a match was edited in-between some sub-edit",
+          "Warning: Editing the schedule is potentially incredibly destructive! Data could be lost if the edit removes matches or a match was edited in-between some sub-edit",
           style: TextStyle(color: Theme.of(context).colorScheme.error),
+        ),
+        Center(
+          child: FilledButton(
+              onPressed: () async {
+                FRCMatch match = FRCMatch(
+                    description: "description",
+                    scheduledTime: DateTime.now(),
+                    blue: [],
+                    red: [],
+                    results: null,
+                    robot: {});
+
+                await editMatch(match, snoutData, null);
+              },
+              child: const Text("Add Match")),
         ),
         for (final match in snoutData.db.matches.entries)
           ListTile(
@@ -61,8 +103,8 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
                 final result = await showDialog(
                     context: context,
                     builder: (context) => AlertDialog(
-                          title: const Text(
-                              "Are you sure you want to remove this match?"),
+                          title: Text(
+                              "Are you sure you want to delete ${match.value.description}?"),
                           actions: [
                             TextButton(
                                 child: const Text("No"),
@@ -89,30 +131,14 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
               },
             ),
           ),
-        Center(
-          child: FilledButton(
-              onPressed: () async {
-                FRCMatch match = FRCMatch(
-                    description: "Some name",
-                    scheduledTime: DateTime.now(),
-                    blue: [],
-                    red: [],
-                    results: null,
-                    robot: {});
-
-                await editMatch(match, snoutData, null);
-              },
-              child: const Text("Add Match")),
-        ),
       ]),
     );
   }
 
-  Future editMatch(FRCMatch match, EventDB data, String? matchID) async {
+  Future editMatch(FRCMatch match, DataProvider data, String? matchID) async {
     String? result = await Navigator.of(context).push(MaterialPageRoute(
-        builder: (context) => JSONEditor(
-            source: match,
-            validate: FRCMatch.fromJson)));
+        builder: (context) =>
+            JSONEditor(source: match, validate: FRCMatch.fromJson)));
 
     if (result != null) {
       FRCMatch resultMatch = FRCMatch.fromJson(jsonDecode(result));

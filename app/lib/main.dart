@@ -1,13 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:app/eventdb_state.dart';
+import 'package:app/providers/eventdb_state.dart';
 import 'package:app/helpers.dart';
+import 'package:app/providers/server_connection_provider.dart';
 import 'package:app/screens/analysis.dart';
 import 'package:app/screens/datapage.dart';
 import 'package:app/screens/debug_field_position.dart';
 import 'package:app/screens/edit_json.dart';
-import 'package:app/screens/edit_schedule.dart';
 import 'package:app/screens/local_patch_storage.dart';
 import 'package:app/screens/matches_page.dart';
 import 'package:app/screens/teams_page.dart';
@@ -40,11 +40,13 @@ void main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-        create: (context) => EventDB(),
+    return MultiProvider(
+        providers: [
+          ChangeNotifierProvider<DataProvider>(create: (_) => DataProvider()),
+          ChangeNotifierProvider<ServerConnectionProvider>(create: (_) => ServerConnectionProvider()),
+        ],
         child: MaterialApp(
           title: 'Snout Scout',
           theme: defaultTheme,
@@ -52,6 +54,8 @@ class MyApp extends StatelessWidget {
         ));
   }
 }
+
+
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
@@ -64,7 +68,7 @@ class _MyHomePageState extends State<MyHomePage> {
   int _currentPageIndex = 0;
 
   PreferredSize? getErrorBar() {
-    final data = context.read<EventDB>();
+    final data = context.read<ServerConnectionProvider>();
 
     if (data.failedPatches.isNotEmpty) {
       return PreferredSize(
@@ -102,8 +106,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final data = context.watch<EventDB>();
-    String? tbaKey = context.watch<EventDB>().db.config.tbaEventId;
+    final data = context.watch<DataProvider>();
+    final serverConnection = context.watch<ServerConnectionProvider>();
+    String? tbaKey = context.watch<DataProvider>().db.config.tbaEventId;
 
     return Scaffold(
       appBar: AppBar(
@@ -135,25 +140,25 @@ class _MyHomePageState extends State<MyHomePage> {
         child: ListView(children: [
           ListTile(
             title: const Text("Server"),
-            subtitle: Text(context.watch<EventDB>().serverURL),
+            subtitle: Text(serverConnection.serverURL),
             trailing: IconButton(
               icon: const Icon(Icons.edit),
               onPressed: () async {
                 final result = await showStringInputDialog(
-                    context, "Server", context.read<EventDB>().serverURL);
+                    context, "Server", serverConnection.serverURL);
                 if (result != null && context.mounted) {
-                  await context.read<EventDB>().setServer(result);
+                  await serverConnection.setServer(result);
                 }
               },
             ),
           ),
           ListTile(
             title: const Text("Last Origin Sync"),
-            subtitle: data.lastOriginSync == null
+            subtitle: serverConnection.lastOriginSync == null
                 ? const Text("Never")
                 : Text(DateFormat.yMMMMEEEEd()
                     .add_Hms()
-                    .format(data.lastOriginSync!)),
+                    .format(serverConnection.lastOriginSync!)),
           ),
           ListTile(
             title: const Text("Local Patch Storage"),
@@ -171,7 +176,7 @@ class _MyHomePageState extends State<MyHomePage> {
               padding: const EdgeInsets.all(8.0),
               child: FilledButton(
                   onPressed: () {
-                    final data = context.read<EventDB>().db;
+                    final data = context.read<DataProvider>().db;
                     final stream =
                         Stream.fromIterable(utf8.encode(jsonEncode(data)));
                     download(stream, '${data.config.name}.json');
@@ -190,7 +195,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       MaterialPageRoute(
                         builder: (context) => JSONEditor(
                           validate: EventConfig.fromJson,
-                          source: context.read<EventDB>().db.config,
+                          source: context.read<DataProvider>().db.config,
                         ),
                       ));
 
@@ -202,45 +207,6 @@ class _MyHomePageState extends State<MyHomePage> {
                   }
                 },
                 icon: const Icon(Icons.edit)),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Center(
-              child: FilledButton.tonal(
-                  onPressed: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              EditSchedulePage(matches: data.db.matches),
-                        ));
-                  },
-                  child: const Text("Edit Schedule")),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Center(
-              child: FilledButton.tonal(
-                  onPressed: () async {
-                    final result = await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => JSONEditor(
-                            validate: (item) {},
-                            source: context.watch<EventDB>().db.teams,
-                          ),
-                        ));
-
-                    if (result != null) {
-                      Patch patch = Patch(
-                          time: DateTime.now(), path: ['teams'], data: result);
-                      //Save the scouting results to the server!!
-                      await data.addPatch(patch);
-                    }
-                  },
-                  child: const Text("Edit Teams")),
-            ),
           ),
           const Divider(),
           ListTile(
