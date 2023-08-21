@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:app/datasheet.dart';
 import 'package:app/edit_lock.dart';
-import 'package:app/providers/eventdb_state.dart';
+import 'package:app/providers/data_provider.dart';
 import 'package:app/fieldwidget.dart';
 import 'package:app/helpers.dart';
 import 'package:app/screens/analysis/match_preview.dart';

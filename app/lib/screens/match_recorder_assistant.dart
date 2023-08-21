@@ -4,7 +4,7 @@ import 'dart:typed_data';
 
 import 'package:app/api.dart';
 import 'package:app/edit_lock.dart';
-import 'package:app/providers/eventdb_state.dart';
+import 'package:app/providers/data_provider.dart';
 import 'package:app/helpers.dart';
 import 'package:app/providers/server_connection_provider.dart';
 import 'package:app/screens/match_recorder.dart';

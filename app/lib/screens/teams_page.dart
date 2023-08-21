@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:app/providers/eventdb_state.dart';
+import 'package:app/providers/data_provider.dart';
 import 'package:app/screens/edit_json.dart';
 import 'package:app/screens/view_team_page.dart';
 import 'package:app/services/tba_autofill.dart';

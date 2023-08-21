@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:app/providers/eventdb_state.dart';
+import 'package:app/providers/data_provider.dart';
 import 'package:app/screens/edit_json.dart';
 import 'package:app/services/tba_autofill.dart';
 import 'package:flutter/material.dart';

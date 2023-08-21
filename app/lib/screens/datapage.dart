@@ -1,5 +1,5 @@
 import 'package:app/datasheet.dart';
-import 'package:app/providers/eventdb_state.dart';
+import 'package:app/providers/data_provider.dart';
 import 'package:app/helpers.dart';
 import 'package:app/screens/match_page.dart';
 import 'package:app/screens/view_team_page.dart';

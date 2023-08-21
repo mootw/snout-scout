@@ -1,4 +1,4 @@
-import 'package:app/providers/eventdb_state.dart';
+import 'package:app/providers/data_provider.dart';
 import 'package:app/fieldwidget.dart';
 import 'package:app/screens/view_team_page.dart';
 import 'package:flutter/material.dart';

@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:app/providers/eventdb_state.dart';
+import 'package:app/providers/data_provider.dart';
 import 'package:app/providers/server_connection_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';

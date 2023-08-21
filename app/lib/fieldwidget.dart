@@ -2,7 +2,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:app/providers/eventdb_state.dart';
+import 'package:app/providers/data_provider.dart';
 import 'package:app/helpers.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';

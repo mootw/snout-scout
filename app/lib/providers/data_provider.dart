@@ -7,11 +7,13 @@ import 'package:snout_db/patch.dart';
 
 class DataProvider extends ChangeNotifier {
 
-  FRCEvent db = emptyEvent;
 
-  DataProvider() {
-    
-  }
+
+  FRCEvent db = emptyNewEvent;
+
+
+
+  DataProvider();
 
   //Writes a patch to local disk and submits it to the server.
   Future addPatch(Patch patch) async {

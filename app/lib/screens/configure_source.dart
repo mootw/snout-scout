@@ -24,10 +24,9 @@ class _ConfigureSourceScreenState extends State<ConfigureSourceScreen> {
             const SizedBox(width: 8),
             OutlinedButton(
                 onPressed: () async {
-
                   String? value = await createNewEvent(context);
-
-                }, child: const Text("Create New Event")),
+                },
+                child: const Text("Create New Event")),
             const SizedBox(width: 16),
             OutlinedButton(onPressed: () {}, child: const Text("Open File")),
           ]),
@@ -50,12 +49,16 @@ class _ConfigureSourceScreenState extends State<ConfigureSourceScreen> {
           ListTile(
             title: const Text("2023 Regionals"),
             subtitle: const Text("2023mnmi2.json"),
-            leading: IconButton(icon: const Icon(Icons.delete, color: Colors.red), onPressed: () {}),
+            leading: IconButton(
+                icon: const Icon(Icons.delete, color: Colors.red),
+                onPressed: () {}),
           ),
           ListTile(
             title: const Text("2023 State"),
             subtitle: const Text("mnstate.json"),
-            leading: IconButton(icon: const Icon(Icons.delete, color: Colors.red), onPressed: () {}),
+            leading: IconButton(
+                icon: const Icon(Icons.delete, color: Colors.red),
+                onPressed: () {}),
           ),
           const ListTile(
             title: Text("Upload Event To Origin"),
@@ -67,15 +70,15 @@ class _ConfigureSourceScreenState extends State<ConfigureSourceScreen> {
   }
 }
 
-get emptyEvent => FRCEvent(config: EventConfig(
-    name: "My event",
-    team: 6749,
-    season: DateTime.now().year,
-  ));
+get emptyNewEvent => FRCEvent(
+        config: EventConfig(
+      name: "New event",
+      team: 6749,
+      season: DateTime.now().year,
+    ));
 
-Future<String?> createNewEvent (BuildContext context) async {
+Future<String?> createNewEvent(BuildContext context) async {
   return await Navigator.of(context).push(MaterialPageRoute(
-        builder: (context) => JSONEditor(
-            source: emptyEvent,
-            validate: FRCEvent.fromJson)));
+      builder: (context) =>
+          JSONEditor(source: emptyNewEvent, validate: FRCEvent.fromJson)));
 }
