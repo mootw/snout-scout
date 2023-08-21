@@ -37,7 +37,7 @@ class _BoxPlotAnalysisState extends State<BoxPlotAnalysis> {
           MapEntry(team, [
             for (final match in data.db.teamRecordedMatches(team))
               data.db.runMatchResultsProcess(_selectedProcess!,
-                      match.value.robot[team.toString()], team) ??
+                      match.value.robot[team.toString()], team)?.value ??
                   0
           ])
       ]);

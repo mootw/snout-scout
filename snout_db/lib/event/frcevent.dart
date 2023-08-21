@@ -122,7 +122,10 @@ class FRCEvent {
     return toReturn;
   }
 
-  double? runMatchResultsProcess(
+  //TODO the match results process returns a record with a value and optional string error.
+  //this might not be the best way to implement it, as the behavior/typing is slightly ambiguous
+  //
+  ({double? value, String? error})? runMatchResultsProcess(
       MatchResultsProcess process, RobotMatchResults? matchResults, int team) {
     if (matchResults == null) {
       return null;
@@ -260,15 +263,14 @@ class FRCEvent {
       final result = runMatchResultsProcess(otherProcess, matchResults, team);
       return LazyNumberImpl(
           eval: () =>
-              Decimal.parse(result.toString()),
-          getString: () => result.toString());
+              Decimal.parse(result!.value.toString()),
+          getString: () => result!.value.toString());
     }));
 
     try {
-      return exp.eval()?.toDouble();
+      return (value: exp.eval()?.toDouble(), error: null);
     } catch (e) {
-      print(e);
-      return null;
+      return (value: null, error: '${e.toString()} ${process.expression}');
     }
   }
 
@@ -288,7 +290,7 @@ class FRCEvent {
             (previousValue, match) =>
                 previousValue +
                 (runMatchResultsProcess(
-                        process, match.value.robot[team.toString()], team) ??
+                        process, match.value.robot[team.toString()], team)?.value ??
                     0)) /
         recordedMatches.length;
   }

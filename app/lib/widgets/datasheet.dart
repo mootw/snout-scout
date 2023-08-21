@@ -18,6 +18,24 @@ class DataItem {
         sortingValue =
             number == null || number.isNaN ? double.negativeInfinity : number;
 
+  DataItem.fromErrorNumber(({double? value, String? error}) number)
+      : displayValue = number.error != null
+            ? Text(number.error!,
+                style: const TextStyle(color: Colors.yellow))
+            : (Text(number.value == null || number.value!.isNaN
+                ? noDataText
+                : numDisplay(number.value))),
+                //TODO If the error is not passed into the export value the table will not
+                //know if the value is long enough to wrap. This is problematic and is
+                //a sign of poorly written code.
+        exportValue = number.error != null ? number.error! : (number.value == null || number.value!.isNaN
+            ? noDataText
+            : number.value.toString()),
+        //negative infinity will sort no data to the bottom by default
+        sortingValue = number.value == null || number.value!.isNaN
+            ? double.negativeInfinity
+            : number.value!;
+
   DataItem.fromText(String? text)
       : displayValue = Text(text ?? noDataText),
         exportValue = text ?? noDataText,
@@ -148,7 +166,7 @@ class _DataSheetState extends State<DataSheet> {
                                   style:
                                       Theme.of(context).textTheme.bodyMedium!,
                                   child: cell.displayValue)),
-                          onTap: cell.exportValue.length < 42
+                          onTap: cell.exportValue.length < 40
                               ? null
                               : () {
                                   //If the cell's export value length (basically the text of whatever the display value is)

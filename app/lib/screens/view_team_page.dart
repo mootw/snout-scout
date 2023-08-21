@@ -132,10 +132,12 @@ class _TeamViewPageState extends State<TeamViewPage> {
                         exportValue: match.description,
                         sortingValue: match),
                     for (final item in data.db.config.matchscouting.processes)
-                      DataItem.fromNumber(data.db.runMatchResultsProcess(
-                          item,
-                          match.robot[widget.teamNumber.toString()],
-                          widget.teamNumber)),
+                      DataItem.fromErrorNumber(data.db.runMatchResultsProcess(
+                              item,
+                              match.robot[widget.teamNumber.toString()],
+                              widget.teamNumber) ??
+                              //Missing results, this is not an error
+                          (value: null, error: null)),
                     for (final pitSurvey in data.db.config.matchscouting.survey
                         .where((element) =>
                             element.type != SurveyItemType.picture))

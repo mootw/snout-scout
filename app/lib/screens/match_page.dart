@@ -37,14 +37,14 @@ class _MatchPageState extends State<MatchPage> {
         title: Text(match.description),
         actions: [
           //If there is a TBA event ID we will add a button to view the match id
-              //since we will assume that all of the matches (or at least most)
-              //have been imported to match the tba id format
-              if (snoutData.db.config.tbaEventId != null)
-                FilledButton.tonal(
-                  child: const Text("TBA"),
-                  onPressed: () => launchUrlString(
-                      "https://www.thebluealliance.com/match/${widget.matchid}"),
-                ),
+          //since we will assume that all of the matches (or at least most)
+          //have been imported to match the tba id format
+          if (snoutData.db.config.tbaEventId != null)
+            FilledButton.tonal(
+              child: const Text("TBA"),
+              onPressed: () => launchUrlString(
+                  "https://www.thebluealliance.com/match/${widget.matchid}"),
+            ),
 
           const SizedBox(width: 12),
         ],
@@ -69,34 +69,34 @@ class _MatchPageState extends State<MatchPage> {
                       MaterialPageRoute(
                           builder: (builder) => AnalysisMatchPreview(
                               red: match.red, blue: match.blue))),
-                  child: const Text("Match Preview")),
+                  child: const Text("Preview")),
               const SizedBox(width: 12),
               TextButton(
-            child: match.results == null
-                ? const Text("Add Results")
-                : const Text("Edit Results"),
-            onPressed: () async {
-              final result = await navigateWithEditLock(
-                  context,
-                  "match:${match.description}:results",
-                  () => Navigator.push(
+                child: match.results == null
+                    ? const Text("Add Results")
+                    : const Text("Edit Results"),
+                onPressed: () async {
+                  final result = await navigateWithEditLock(
                       context,
-                      MaterialPageRoute(
-                        builder: (context) => EditMatchResults(
-                            results: match.results,
-                            config: snoutData.db.config),
-                      )));
+                      "match:${match.description}:results",
+                      () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => EditMatchResults(
+                                results: match.results,
+                                config: snoutData.db.config),
+                          )));
 
-              if (result != null) {
-                Patch patch = Patch(
-                    time: DateTime.now(),
-                    path: ['matches', widget.matchid, 'results'],
-                    data: jsonEncode(result));
+                  if (result != null) {
+                    Patch patch = Patch(
+                        time: DateTime.now(),
+                        path: ['matches', widget.matchid, 'results'],
+                        data: jsonEncode(result));
 
-                await snoutData.addPatch(patch);
-              }
-            },
-          ),
+                    await snoutData.addPatch(patch);
+                  }
+                },
+              ),
             ],
           ),
           const SizedBox(height: 8),
@@ -141,8 +141,11 @@ class _MatchPageState extends State<MatchPage> {
                       sortingValue: team),
                   for (final item
                       in snoutData.db.config.matchscouting.processes)
-                    DataItem.fromNumber(snoutData.db.runMatchResultsProcess(
-                        item, match.robot[team.toString()], team)),
+                    DataItem.fromErrorNumber(snoutData.db
+                            .runMatchResultsProcess(
+                                item, match.robot[team.toString()], team) ??
+                                //Missing results, this is not an error
+                        (value: null, error: null)),
                   for (final item in snoutData.db.config.matchscouting.survey
                       .where(
                           (element) => element.type != SurveyItemType.picture))
@@ -238,10 +241,10 @@ class _MatchPageState extends State<MatchPage> {
                 ],
                 rows: [
                   DataRow(cells: [
-                      const DataCell(Text("Score")),
-                      DataCell(Text(match.results!.redScore.toString())),
-                      DataCell(Text(match.results!.blueScore.toString())),
-                    ]),
+                    const DataCell(Text("Score")),
+                    DataCell(Text(match.results!.redScore.toString())),
+                    DataCell(Text(match.results!.blueScore.toString())),
+                  ]),
                 ],
               ),
             ),

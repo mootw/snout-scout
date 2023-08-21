@@ -57,10 +57,11 @@ class TableMatchRecordingsPage extends StatelessWidget {
                       exportValue: robot.key,
                       sortingValue: robot.key),
                   for (final item in data.db.config.matchscouting.processes)
-                    DataItem.fromNumber(data.db.runMatchResultsProcess(
-                        item,
-                        match.value.robot[robot.key],
-                        int.tryParse(robot.key) ?? 0)),
+                    DataItem.fromErrorNumber(data.db.runMatchResultsProcess(
+                            item,
+                            match.value.robot[robot.key],
+                            int.tryParse(robot.key) ?? 0) ??
+                        (value: null, error: "Missing Results")),
                   for (final item in data.db.config.matchscouting.survey.where(
                       (element) => element.type != SurveyItemType.picture))
                     DataItem.fromText(match
