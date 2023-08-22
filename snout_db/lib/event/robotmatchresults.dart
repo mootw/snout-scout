@@ -69,6 +69,8 @@ List<MatchEvent> _interpolateTimeline(List<MatchEvent> timeline) {
 
     if (width > 8) {
       //Teleport the robot if there is a large gap; too much missing data.
+      // POTENTIALLY, it makes sense to add positions for the time stamps that are "SKIPPED"
+      // though this implies that there is 'information' which there really is not.
       continue;
     }
 

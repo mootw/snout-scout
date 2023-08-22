@@ -10,6 +10,19 @@ support handling web socket upgrade requests or real time updates will not work.
 The server also handles api requests to the FRC API to populate match data. This is an optional feature, and your api key can be set in .env in the executable directory.
 
 
+# Docker
+
+
+in the main root directory of the repo build the docker file 
+`docker build -t snout-scout .`
+
+run the container like this to expose the port, and also
+bind the events directory to the container so that it can read
+your event files.
+
+`docker run -p 6749:6749 -v "$(pwd)"/events:/events snout-scout`
+
+
 # Setup
 
 Either compile or use a pre-compiled binary for the server.

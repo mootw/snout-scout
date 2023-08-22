@@ -12,7 +12,6 @@ dependencies:
   rfc_6901: ^0.1.1
   dotenv: ^4.1.0
   http: ^1.1.0
-  package_info_plus: ^4.1.0
   
   eval_ex: ^1.1.8
 
