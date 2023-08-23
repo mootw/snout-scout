@@ -12,22 +12,23 @@
 - device agnostic; PWA first with native apps for all platforms via Flutter
 - all data processing is done on client for offline support
 - export data into multiple formats like csv and json
-- function in low bandwidth scenarios and provide reliable low latency sync to origin
+- data is stored heavily normalized with minimal duplication or referencing
+- responsive in low bandwidth scenarios and provide reliable low latency sync to origin
 - origin handles authentication/autorizaton (TBD) and as the source of truth
-- data server read/write API
 - Connect to the TBA API to autofill data like event schedules and match results (including support for year specific data mapping).
-- client saves all data locally until it can sync with origin
 - Single compact (mostly) readable data JSON file to allow for durable data. The structure is also fully typed and null safe
 - strong separation between live stats (like ranking position) and facts (like scouting match data)
-- no data loss (store a chronological changeset of all changes tied to the scout).
-- data anywhere. a client device can load and edit scouting data from an origin server, local disk, or even ram for the highest possible flexibility.
+- no data loss
+    - client saves all data locally until it can sync
+    - database stores a changeset of all changes
+- data anywhere. A client device can load and edit scouting data from a server or local disk for the highest possible flexibility.
 
 ## Snout-scout is NOT designed to:
 - track standings or scores directly (official scores are linked if TBA event key is provided)
 - analyse multiple events at once (multiple events can be queried at the server level)
-- retain compatibility with previous year data
+- retain compatibility with previous year data (there is no obligation for backwards compatibility)
 - sync data between multiple clients peer-to-peer due to requiring human interaction to sync on modern smartphones without dedicated hardware and software and thus have high latency for changes to propagate (>1hr).
-- have **extensive** security controls. an authenticated user is assumed to be non-malicious and trusted, there is not validation of timestamps, or IDs, or other information sent from clients (This is out of scope for now).
+- have **extensive** security controls. an authenticated user is assumed to be non-malicious and trusted, there is not validation of timestamps, IDs, or other information sent from clients (This is out of scope for now).
 
 
 # Network/sync methodologies
@@ -45,10 +46,25 @@
 
 
 # Data Size Estimate
-Snout Scout stores all data in a single JSON file. Here is an approximate breakdown of the rough **DISK** size of the a database including some of the parts. This is an estimate and real world results will vary.
-- Database for a 40 team 80 match event ~5MB (pit scouting with 1 image; 2.5MB pit scouting data; 2.5MB match data)
+Snout Scout stores all data in a single JSON file. Here is an approximate breakdown of the rough **DISK** size of the a database file including some of the parts. This is an estimate and real world results will vary.
+
+for a 40 team 80 match event:
+- Latest event state: ~10MB (pit scouting with 1 image; 8MB pit scouting data; 2MB match data)
+- Changeset: ~15MB, a patch has minimal overhead but depends on how much data is modified
+- **Disk size: 25MB**; latest state: **10MB**. to get a range of patches varies on the patch data and quantity, is porportional to how up to date the client is
+
 - A match recording for 1 team could be as large as 4-8KB (~1KB compressed)
-- Image (As compressed and sized in the app): ~50KB
+- Image (As compressed and sized in the app): ~150KB
+
+
+# technical philosophy
+- devices will get faster
+- internet connection is assumed; and at >= 50KB/s and will only get faster in the future
+- use gzip and other web compression technology
+- dont complicate the schema by simplifying key names to "save bandwidth", or reduce normalization for a "micro-optimization".
+- the schema should be as humanly readable as possible (and easy work with)
+- connection speed will increase over time and there is minimal need to optimize data loading other than chunking each change (splitting assets away to load optimistically; this creates a more ambiguous state)
+
 
 # how TBA is used
 the tba api is used to automate parts of scouting; functioning as an 'autofill service'.
