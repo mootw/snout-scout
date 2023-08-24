@@ -9,7 +9,7 @@ import 'package:provider/provider.dart';
 
 //Route should return when editing is complete. This is the signal to clear the edit lock.
 //This function will not throw an exception and always fail safe by navigating to the other page.
-Future<dynamic> navigateWithEditLock(
+Future<T?> navigateWithEditLock<T>(
     BuildContext context, String key, Function navigteFunction) async {
     final serverURL = context.read<ServerConnectionProvider>().serverURL;
     Uri editLockUri = Uri.parse(
@@ -73,4 +73,5 @@ Future<dynamic> navigateWithEditLock(
     //Fail save and navigate anyways
     return await navigteFunction();
   }
+  return null;
 }

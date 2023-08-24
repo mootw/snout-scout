@@ -3,6 +3,7 @@ import 'package:app/screens/edit_json.dart';
 import 'package:flutter/material.dart';
 import 'package:snout_db/config/eventconfig.dart';
 import 'package:snout_db/event/frcevent.dart';
+import 'package:snout_db/snout_db.dart';
 
 class ConfigureSourceScreen extends StatefulWidget {
   const ConfigureSourceScreen({super.key});
@@ -69,13 +70,6 @@ class _ConfigureSourceScreenState extends State<ConfigureSourceScreen> {
     );
   }
 }
-
-get emptyNewEvent => FRCEvent(
-        config: EventConfig(
-      name: "New event",
-      team: 6749,
-      season: DateTime.now().year,
-    ));
 
 Future<String?> createNewEvent(BuildContext context) async {
   return await Navigator.of(context).push(MaterialPageRoute(

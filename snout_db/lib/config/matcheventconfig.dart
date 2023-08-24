@@ -6,7 +6,12 @@ part 'matcheventconfig.g.dart';
 @JsonSerializable()
 class MatchEventConfig {
 
+  /// documentation about this item
+  final String? docs;
+
+  /// unique
   final String id;
+
   final String label;
 
   /// #HEX color that identifies this event
@@ -17,6 +22,7 @@ class MatchEventConfig {
     required this.id,
     required this.label,
     this.color,
+    this.docs,
   });
 
   factory MatchEventConfig.fromJson(Map<String, dynamic> json) =>

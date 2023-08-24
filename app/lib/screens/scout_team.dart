@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:app/providers/identity_provider.dart';
 import 'package:app/widgets/confirm_exit_dialog.dart';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/scouting_tools/scouting_tool.dart';
@@ -51,9 +52,10 @@ class _PitScoutTeamPageState extends State<PitScoutTeamPage> {
                   final snoutData = context.read<DataProvider>();
 
                   Patch patch = Patch(
+                      identity: context.read<IdentityProvider>().identity,
                       time: DateTime.now(),
-                      path: ['pitscouting', widget.team.toString()],
-                      data: jsonEncode(_results));
+                      pointer: ['pitscouting', widget.team.toString()],
+                      data: _results);
 
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                     content: Text('Saving Scouting Data'),

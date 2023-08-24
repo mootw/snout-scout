@@ -6,6 +6,7 @@ import 'package:app/api.dart';
 import 'package:app/edit_lock.dart';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/helpers.dart';
+import 'package:app/providers/identity_provider.dart';
 import 'package:app/providers/server_connection_provider.dart';
 import 'package:app/screens/match_recorder.dart';
 import 'package:flutter/material.dart';
@@ -71,8 +72,9 @@ class _MatchRecorderAssistantPageState
     List<Future> futures = [];
     for (final team in teams) {
       futures.add(apiClient
-          .get(Uri.parse(
-      "${Uri.parse(context.read<ServerConnectionProvider>().serverURL).origin}/edit_lock"),
+          .get(
+              Uri.parse(
+                  "${Uri.parse(context.read<ServerConnectionProvider>().serverURL).origin}/edit_lock"),
               headers: {"key": "match:${widget.matchid}:$team:timeline"})
           .timeout(const Duration(seconds: 1))
           .then((isLocked) {
@@ -227,6 +229,7 @@ class _MatchRecorderAssistantPageState
 
   void _recordTeam(String matchid, int team, Alliance alliance) async {
     final snoutData = context.read<DataProvider>();
+    final identity = context.read<IdentityProvider>().identity;
     RobotMatchResults? result = await navigateWithEditLock(
         context,
         "match:$matchid:$team:timeline",
@@ -239,9 +242,10 @@ class _MatchRecorderAssistantPageState
 
     if (result != null) {
       Patch patch = Patch(
+          identity: identity,
           time: DateTime.now(),
-          path: ['matches', matchid, 'robot', team.toString()],
-          data: jsonEncode(result));
+          pointer: ['matches', matchid, 'robot', team.toString()],
+          data: result);
 
       await snoutData.addPatch(patch);
     }

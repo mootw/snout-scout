@@ -3,9 +3,11 @@ import 'dart:convert';
 
 import 'package:app/providers/data_provider.dart';
 import 'package:app/helpers.dart';
+import 'package:app/providers/identity_provider.dart';
 import 'package:app/providers/server_connection_provider.dart';
 import 'package:app/screens/analysis.dart';
 import 'package:app/screens/debug_field_position.dart';
+import 'package:app/screens/documentation.dart';
 import 'package:app/screens/edit_json.dart';
 import 'package:app/screens/local_patch_storage.dart';
 import 'package:app/screens/schedule_page.dart';
@@ -43,8 +45,11 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
         providers: [
+          ChangeNotifierProvider<IdentityProvider>(
+              create: (_) => IdentityProvider()),
           ChangeNotifierProvider<DataProvider>(create: (_) => DataProvider()),
-          ChangeNotifierProvider<ServerConnectionProvider>(create: (_) => ServerConnectionProvider()),
+          ChangeNotifierProvider<ServerConnectionProvider>(
+              create: (_) => ServerConnectionProvider()),
         ],
         child: MaterialApp(
           title: 'Snout Scout',
@@ -53,8 +58,6 @@ class MyApp extends StatelessWidget {
         ));
   }
 }
-
-
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
@@ -107,6 +110,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     final data = context.watch<DataProvider>();
     final serverConnection = context.watch<ServerConnectionProvider>();
+    final identityProvider = context.watch<IdentityProvider>();
     String? tbaKey = context.watch<DataProvider>().db.config.tbaEventId;
 
     return Scaffold(
@@ -133,9 +137,24 @@ class _MyHomePageState extends State<MyHomePage> {
         const AllMatchesPage(),
         const TeamGridList(),
         const AnalysisPage(),
+        const DocumentationScreen(),
       ][_currentPageIndex],
       drawer: Drawer(
         child: ListView(children: [
+          ListTile(
+            title: const Text("Identity"),
+            subtitle: Text(identityProvider.identity),
+            trailing: IconButton(
+              icon: const Icon(Icons.edit),
+              onPressed: () async {
+                final result = await showStringInputDialog(
+                    context, "Identity", identityProvider.identity);
+                if (result != null) {
+                  await identityProvider.setIdentity(result);
+                }
+              },
+            ),
+          ),
           ListTile(
             title: const Text("Server"),
             subtitle: Text(serverConnection.serverURL),
@@ -144,7 +163,7 @@ class _MyHomePageState extends State<MyHomePage> {
               onPressed: () async {
                 final result = await showStringInputDialog(
                     context, "Server", serverConnection.serverURL);
-                if (result != null && context.mounted) {
+                if (result != null) {
                   await serverConnection.setServer(result);
                 }
               },
@@ -199,7 +218,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
                   if (result != null) {
                     Patch patch = Patch(
-                        time: DateTime.now(), path: ['config'], data: result);
+                        identity: context.read<IdentityProvider>().identity,
+                        time: DateTime.now(),
+                        pointer: ['config'],
+                        data: jsonDecode(result));
                     //Save the scouting results to the server!!
                     await data.addPatch(patch);
                   }
@@ -248,6 +270,11 @@ class _MyHomePageState extends State<MyHomePage> {
             selectedIcon: Icon(Icons.analytics),
             icon: Icon(Icons.analytics_outlined),
             label: 'Analysis',
+          ),
+          NavigationDestination(
+            selectedIcon: Icon(Icons.book),
+            icon: Icon(Icons.book),
+            label: 'Docs',
           ),
         ],
       ),

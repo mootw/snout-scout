@@ -12,10 +12,12 @@ SurveyItem _$SurveyItemFromJson(Map<String, dynamic> json) => SurveyItem(
       label: json['label'] as String,
       options:
           (json['options'] as List<dynamic>?)?.map((e) => e as String).toList(),
+      docs: json['docs'] as String?,
     );
 
 Map<String, dynamic> _$SurveyItemToJson(SurveyItem instance) =>
     <String, dynamic>{
+      'docs': instance.docs,
       'id': instance.id,
       'label': instance.label,
       'type': _$SurveyItemTypeEnumMap[instance.type]!,
