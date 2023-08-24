@@ -43,6 +43,7 @@ dependencies:
   download: ^1.0.0
   csv: ^5.0.1
   fl_chart: ^0.63.0
+  flutter_markdown: ^0.6.17+1
   # Potential alternate charting package: https://pub.dev/packages/community_charts_flutter
 
   eval_ex: ^1.1.8

@@ -31,7 +31,7 @@ class EventConfig {
   /// Determines how the app will normalize event positions
   final FieldStyle fieldStyle;
 
-  /// Your team number
+  /// team number
   final int team;
 
   final List<SurveyItem> pitscouting;

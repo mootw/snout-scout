@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:app/providers/identity_provider.dart';
 import 'package:app/widgets/datasheet.dart';
 import 'package:app/edit_lock.dart';
 import 'package:app/providers/data_provider.dart';
@@ -15,6 +16,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:snout_db/config/surveyitem.dart';
 import 'package:snout_db/event/match.dart';
+import 'package:snout_db/event/matchresults.dart';
 import 'package:snout_db/patch.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
@@ -76,7 +78,7 @@ class _MatchPageState extends State<MatchPage> {
                     ? const Text("Add Results")
                     : const Text("Edit Results"),
                 onPressed: () async {
-                  final result = await navigateWithEditLock(
+                  final result = await navigateWithEditLock<MatchResultValues>(
                       context,
                       "match:${match.description}:results",
                       () => Navigator.push(
@@ -89,9 +91,10 @@ class _MatchPageState extends State<MatchPage> {
 
                   if (result != null) {
                     Patch patch = Patch(
+                        identity: context.read<IdentityProvider>().identity,
                         time: DateTime.now(),
-                        path: ['matches', widget.matchid, 'results'],
-                        data: jsonEncode(result));
+                        pointer: ['matches', widget.matchid, 'results'],
+                        data: result);
 
                     await snoutData.addPatch(patch);
                   }
@@ -144,7 +147,7 @@ class _MatchPageState extends State<MatchPage> {
                     DataItem.fromErrorNumber(snoutData.db
                             .runMatchResultsProcess(
                                 item, match.robot[team.toString()], team) ??
-                                //Missing results, this is not an error
+                        //Missing results, this is not an error
                         (value: null, error: null)),
                   for (final item in snoutData.db.config.matchscouting.survey
                       .where(

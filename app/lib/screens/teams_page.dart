@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:app/providers/data_provider.dart';
+import 'package:app/providers/identity_provider.dart';
 import 'package:app/screens/edit_json.dart';
 import 'package:app/screens/view_team_page.dart';
 import 'package:app/services/tba_autofill.dart';
@@ -58,9 +59,12 @@ class _TeamGridListState extends State<TeamGridList> {
 
                                       if (result != null && mounted) {
                                         Patch patch = Patch(
+                                            identity: context
+                                                .read<IdentityProvider>()
+                                                .identity,
                                             time: DateTime.now(),
-                                            path: ['teams'],
-                                            data: result);
+                                            pointer: ['teams'],
+                                            data: jsonDecode(result));
                                         //Save the scouting results to the server!!
                                         await context
                                             .read<DataProvider>()
@@ -109,9 +113,12 @@ class _TeamGridListState extends State<TeamGridList> {
 
                                       if (result != null && mounted) {
                                         Patch patch = Patch(
+                                            identity: context
+                                                .read<IdentityProvider>()
+                                                .identity,
                                             time: DateTime.now(),
-                                            path: ['teams'],
-                                            data: result);
+                                            pointer: ['teams'],
+                                            data: jsonDecode(result));
                                         //Save the scouting results to the server!!
                                         await context
                                             .read<DataProvider>()

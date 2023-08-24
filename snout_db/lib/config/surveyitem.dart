@@ -4,6 +4,11 @@ part 'surveyitem.g.dart';
 
 @JsonSerializable()
 class SurveyItem {
+
+  /// documentation about this item
+  final String? docs;
+
+  /// unique
   final String id;
   final String label;
   final SurveyItemType type;
@@ -17,7 +22,7 @@ class SurveyItem {
       required this.type,
       required this.label,
       this.options,
-      //this.options_values
+      this.docs
       });
 
   factory SurveyItem.fromJson(Map<String, dynamic> json) =>

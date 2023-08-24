@@ -92,7 +92,7 @@ class _LocalPatchStorageState extends State<LocalPatchStorage> {
               title: Text(DateFormat.yMMMMEEEEd()
                   .add_Hms()
                   .format(Patch.fromJson(jsonDecode(patch)).time)),
-              subtitle: Text(Patch.fromJson(jsonDecode(patch)).path.toString()),
+              subtitle: Text(Patch.fromJson(jsonDecode(patch)).pointer.toString()),
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -119,7 +119,7 @@ class _LocalPatchStorageState extends State<LocalPatchStorage> {
               title: Text(DateFormat.yMMMMEEEEd()
                   .add_Hms()
                   .format(Patch.fromJson(jsonDecode(patch)).time)),
-              subtitle: Text(Patch.fromJson(jsonDecode(patch)).path.toString()),
+              subtitle: Text(Patch.fromJson(jsonDecode(patch)).pointer.toString()),
             ),
         ],
       ),

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:app/providers/data_provider.dart';
+import 'package:app/providers/identity_provider.dart';
 import 'package:app/screens/edit_json.dart';
 import 'package:app/services/tba_autofill.dart';
 import 'package:flutter/material.dart';
@@ -30,7 +31,7 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
             onPressed: () async {
               List<Patch> patch;
               try {
-                patch = await loadScheduleFromTBA(snoutData.db);
+                patch = await loadScheduleFromTBA(snoutData.db, context);
               } catch (e) {
                 if (mounted) {
                   showDialog(
@@ -56,7 +57,7 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
                         actions: [
                           TextButton(
                               onPressed: () async {
-                                for(var p in patch) {
+                                for (var p in patch) {
                                   await snoutData.addPatch(p);
                                 }
                                 if (mounted) {
@@ -117,15 +118,16 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
                           ],
                         ));
                 if (result == true) {
-                  final matchesWithRemoved = Map.from(snoutData.db.matches);
+                  final matchesWithRemoved = Map<String, dynamic>.from(snoutData.db.matches);
                   matchesWithRemoved.remove(match.key);
 
                   Patch patch = Patch(
+                      identity: context.read<IdentityProvider>().identity,
                       time: DateTime.now(),
-                      path: [
+                      pointer: [
                         'matches',
                       ],
-                      data: jsonEncode(matchesWithRemoved));
+                      data: matchesWithRemoved);
                   await snoutData.addPatch(patch);
                 }
               },
@@ -143,12 +145,13 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
     if (result != null) {
       FRCMatch resultMatch = FRCMatch.fromJson(jsonDecode(result));
       Patch patch = Patch(
+          identity: context.read<IdentityProvider>().identity,
           time: DateTime.now(),
-          path: [
+          pointer: [
             'matches',
             matchID ?? resultMatch.description,
           ],
-          data: result);
+          data: resultMatch);
       await data.addPatch(patch);
     }
   }

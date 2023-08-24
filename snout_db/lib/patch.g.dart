@@ -7,13 +7,16 @@ part of 'patch.dart';
 // **************************************************************************
 
 Patch _$PatchFromJson(Map<String, dynamic> json) => Patch(
+      identity: json['identity'] as String,
       time: DateTime.parse(json['time'] as String),
-      path: (json['path'] as List<dynamic>).map((e) => e as String).toList(),
-      data: json['data'] as String,
+      pointer:
+          (json['pointer'] as List<dynamic>).map((e) => e as String).toList(),
+      data: json['data'] as Object,
     );
 
 Map<String, dynamic> _$PatchToJson(Patch instance) => <String, dynamic>{
+      'identity': instance.identity,
       'time': instance.time.toIso8601String(),
-      'path': instance.path,
+      'pointer': instance.pointer,
       'data': instance.data,
     };

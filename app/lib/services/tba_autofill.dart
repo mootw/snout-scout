@@ -1,7 +1,10 @@
 //https://www.thebluealliance.com/apidocs/v3
 import 'dart:convert';
 
+import 'package:app/providers/identity_provider.dart';
+import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
+import 'package:provider/provider.dart';
 import 'package:snout_db/event/frcevent.dart';
 import 'package:snout_db/event/match.dart';
 import 'package:snout_db/patch.dart';
@@ -35,7 +38,7 @@ Future<List<int>> getTeamListForEventTBA(FRCEvent eventData) async {
 }
 
 
-Future<List<Patch>> loadScheduleFromTBA(FRCEvent eventData) async {
+Future<List<Patch>> loadScheduleFromTBA(FRCEvent eventData, BuildContext context) async {
   if (eventData.config.tbaEventId == null) {
     throw Exception("TBA event ID cannot be null in the config!");
   }
@@ -115,12 +118,13 @@ Future<List<Patch>> loadScheduleFromTBA(FRCEvent eventData) async {
           robot: {});
 
       Patch patch = Patch(
+          identity: context.read<IdentityProvider>().identity,
           time: DateTime.now(),
-          path: [
+          pointer: [
             'matches',
             key,
           ],
-          data: jsonEncode(newMatch));
+          data: newMatch);
 
       patches.add(patch);
     }
