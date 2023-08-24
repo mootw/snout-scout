@@ -13,6 +13,32 @@ import 'package:http/http.dart' as http;
 
 final tbaApiClient = http.Client();
 
+Future<({DateTime startTime, int blueScore, int redScore})> getMatchResultsDataFromTBA(FRCEvent eventData, String matchID) async {
+  if (eventData.config.tbaEventId == null) {
+    throw Exception("TBA event ID cannot be null in the config!");
+  }
+  if (eventData.config.tbaSecretKey == null) {
+    throw Exception("tbaSecretKey cannot be null in the config!");
+  }
+
+  //Get playoff level matches
+  final apiData = await tbaApiClient.get(
+      Uri.parse(
+          "https://www.thebluealliance.com/api/v3/match/$matchID"),
+      headers: {
+        'X-TBA-Auth-Key': eventData.config.tbaSecretKey!,
+      });
+  
+  final data = jsonDecode(apiData.body);
+
+  return (
+    startTime: DateTime.fromMillisecondsSinceEpoch(data['actual_time'] * 1000),
+    blueScore: data['alliances']['blue']['score'] as int,
+    redScore: data['alliances']['red']['score'] as int,
+);
+}
+
+
 Future<List<int>> getTeamListForEventTBA(FRCEvent eventData) async {
   if (eventData.config.tbaEventId == null) {
     throw Exception("TBA event ID cannot be null in the config!");
@@ -131,3 +157,5 @@ Future<List<Patch>> loadScheduleFromTBA(FRCEvent eventData, BuildContext context
   }
   return patches;
 }
+
+
