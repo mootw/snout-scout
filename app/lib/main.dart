@@ -31,7 +31,8 @@ void main() async {
     // at some point it might make sense to actually write
     // these logs to a file so they can be pulled later!
     // ignore: avoid_print
-    print('${record.level.name}: ${record.time}: ${record.message}');
+    print(
+        '${record.level.name}: ${record.time}: ${record.message}\n${record.error}\n${record.stackTrace}');
   });
 
   runApp(const MyApp());
@@ -67,6 +68,29 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _currentPageIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    Logger.root.onRecord.listen((record) {
+      if (record.level >= Level.SEVERE) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(record.message),
+          duration: const Duration(seconds: 8),
+          action: SnackBarAction(
+              label: "Details",
+              onPressed: () => showDialog(
+                  context: context,
+                  builder: (dialogContext) => AlertDialog(
+                        content: SingleChildScrollView(
+                          child: Text(
+                              "${record.message}\n${record.error}\n${record.object}\n${record.stackTrace}"),
+                        ),
+                      ))),
+        ));
+      }
+    });
+  }
 
   PreferredSize? getErrorBar() {
     final data = context.read<ServerConnectionProvider>();

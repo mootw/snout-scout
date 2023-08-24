@@ -86,7 +86,7 @@ class _MatchPageState extends State<MatchPage> {
                           MaterialPageRoute(
                             builder: (context) => EditMatchResults(
                                 results: match.results,
-                                config: snoutData.db.config),
+                                config: snoutData.db.config, matchID: widget.matchid),
                           )));
 
                   if (result != null) {
