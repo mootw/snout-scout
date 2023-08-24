@@ -159,10 +159,9 @@ class _ScoutingToolWidgetState extends State<ScoutingToolWidget> {
         title: Text(widget.tool.label),
         subtitle: _value == null
             ? const Text("No Image")
-            : SizedBox(
-                height: scoutImageSize,
-                child: Image.memory(
-                    Uint8List.fromList(base64Decode(_value).cast<int>()))),
+            : Image.memory(
+          fit: BoxFit.contain,
+                Uint8List.fromList(base64Decode(_value).cast<int>())),
       );
     }
 
