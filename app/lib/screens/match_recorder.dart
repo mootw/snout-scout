@@ -338,11 +338,8 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
         .db
         .pitscouting[widget.team.toString()]?['robot_picture'];
     if (pictureData != null) {
-      robotPicture = SizedBox(
-        height: scoutImageSize,
-        child: Image.memory(
-            Uint8List.fromList(base64Decode(pictureData).cast<int>())),
-      );
+      robotPicture = Image.memory(
+          Uint8List.fromList(base64Decode(pictureData).cast<int>()));
     }
 
     return Padding(

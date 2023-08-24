@@ -276,11 +276,10 @@ class ScoutingResult extends StatelessWidget {
     if (item.type == SurveyItemType.picture) {
       return ListTile(
         title: Text(item.label),
-        subtitle: SizedBox(
-            height: scoutImageSize,
-            child: Image.memory(
-              Uint8List.fromList(base64Decode(value).cast<int>()),
-            )),
+        subtitle: Image.memory(
+          fit: BoxFit.contain,
+          Uint8List.fromList(base64Decode(value).cast<int>()),
+        ),
       );
     }
 
