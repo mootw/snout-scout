@@ -42,15 +42,19 @@ class FRCMatch implements Comparable<FRCMatch> {
 
   //Default sorting should be based on match time
   @override
-  int compareTo(other) => scheduledTime.difference(other.scheduledTime).inMilliseconds;
+  int compareTo(other) => scheduledTime.difference(other.scheduledTime).inMicroseconds;
 
-  //Helpers
+
   bool hasTeam(int team) => red.contains(team) || blue.contains(team);
 
-  // Returns the alliance the team is on, otherwise null if the team is not part of the schedule.
   Alliance getAllianceOf(int team) => red.contains(team) ? Alliance.red : Alliance.blue;
   
-  Duration? get scheduleDelay => results?.time.difference(scheduledTime);
+  /// difference between the time that the match was scheduled and the actual time
+  /// the match started
+  Duration? get delayFromScheduledTime => results?.time.difference(scheduledTime);
 
+  /// returns if we have 'any' data for the match to help with
+  /// if match results are not submitted but a recording was to calculate
+  /// scheduling delays
   bool get isComplete => results != null || robot.entries.isNotEmpty;
 }

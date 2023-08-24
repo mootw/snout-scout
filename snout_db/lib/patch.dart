@@ -1,5 +1,6 @@
 //Handles applying and the schema for diffs
 
+import 'dart:collection';
 import 'dart:convert';
 
 import 'package:json_annotation/json_annotation.dart';
@@ -24,6 +25,8 @@ class Patch {
   /// to avoid conflicts
   final List<String> pointer;
 
+  /// TODO add rfc_6901 remove functionality (add, write, remove)
+
   /// data this path should be patched with.
   /// it is not encoded in a String because it will 
   /// get decoded anyways and json is json no need to "wrap it"
@@ -46,4 +49,8 @@ class Patch {
     dbJson = ptr.write(dbJson, data);
     return FRCEvent.fromJson(jsonDecode(jsonEncode(dbJson)));
   }
+
+  @override
+  String toString() => toJson().toString();
+
 }
