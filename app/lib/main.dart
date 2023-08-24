@@ -6,7 +6,6 @@ import 'package:app/helpers.dart';
 import 'package:app/providers/identity_provider.dart';
 import 'package:app/providers/server_connection_provider.dart';
 import 'package:app/screens/analysis.dart';
-import 'package:app/screens/debug_field_position.dart';
 import 'package:app/screens/documentation_page.dart';
 import 'package:app/screens/edit_json.dart';
 import 'package:app/screens/local_patch_storage.dart';

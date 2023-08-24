@@ -2,7 +2,6 @@ import 'package:app/providers/data_provider.dart';
 import 'package:app/screens/debug_field_position.dart';
 import 'package:app/widgets/markdown_wrapper.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 

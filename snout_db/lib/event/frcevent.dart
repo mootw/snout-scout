@@ -1,13 +1,16 @@
 import 'dart:collection';
+import 'dart:convert';
 
 import 'package:decimal/decimal.dart';
 import 'package:eval_ex/built_ins.dart';
 import 'package:eval_ex/expression.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:rfc_6901/rfc_6901.dart';
 import 'package:snout_db/config/matchresults_process.dart';
 import 'package:snout_db/event/matchevent.dart';
 import 'package:snout_db/event/pitscoutresult.dart';
 import 'package:snout_db/event/robotmatchresults.dart';
+import 'package:snout_db/patch.dart';
 import 'match.dart';
 import 'package:collection/collection.dart';
 import 'package:snout_db/config/eventconfig.dart';
@@ -42,6 +45,24 @@ class FRCEvent {
       _$FRCEventFromJson(json);
   Map<String, dynamic> toJson() => _$FRCEventToJson(this);
 
+  /// "performant" way to load a database state from a list patches
+  /// note, this will fail if the resulting structure does not match
+  /// a valid FRCEvent
+  static FRCEvent fromPatches (List<Patch> patches) {
+    //Start with empty!
+    var dbJson;
+    for(final patch in patches) {
+      if(dbJson == null) {
+        //Initialize the db with the first patch's data.
+        dbJson = jsonDecode(jsonEncode(FRCEvent.fromJson(patch.data as Map<String, dynamic>)));
+        continue;
+      }
+      final ptr = JsonPointer.build(patch.pointer);
+      dbJson = ptr.write(dbJson, patch.data);
+    }
+    return FRCEvent.fromJson(jsonDecode(jsonEncode(dbJson)));
+  }
+
   //Returns the id for a given match
   String matchIDFromMatch(FRCMatch match) =>
       matches.keys.toList()[matches.values.toList().indexOf(match)];
@@ -63,7 +84,7 @@ class FRCEvent {
   //Calculates the schedule delay by using the delay of the last match with results actual time versus the scheduled time.
   Duration? get scheduleDelay => matches.values
       .lastWhereOrNull((match) => match.isComplete)
-      ?.scheduleDelay;
+      ?.delayFromScheduledTime;
 
   /// Returns all matches that include a recording for a specific team
   Iterable<MapEntry<String, FRCMatch>> teamRecordedMatches(int team) => matches

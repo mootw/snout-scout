@@ -1,8 +1,12 @@
+import 'dart:convert';
+
 import 'package:app/helpers.dart';
+import 'package:app/providers/identity_provider.dart';
 import 'package:app/screens/edit_json.dart';
 import 'package:flutter/material.dart';
-import 'package:snout_db/config/eventconfig.dart';
+import 'package:provider/provider.dart';
 import 'package:snout_db/event/frcevent.dart';
+import 'package:snout_db/patch.dart';
 import 'package:snout_db/snout_db.dart';
 
 class ConfigureSourceScreen extends StatefulWidget {
@@ -26,6 +30,17 @@ class _ConfigureSourceScreenState extends State<ConfigureSourceScreen> {
             OutlinedButton(
                 onPressed: () async {
                   String? value = await createNewEvent(context);
+                  if (value == null) {
+                    return;
+                  }
+                  FRCEvent event = FRCEvent.fromJson(jsonDecode(value));
+                  Patch p = Patch(
+                      identity: context.read<IdentityProvider>().identity,
+                      time: DateTime.now(),
+                      pointer: [""],
+                      data: event);
+
+                  SnoutDB newDb = SnoutDB(patches: [p]);
                 },
                 child: const Text("Create New Event")),
             const SizedBox(width: 16),
@@ -76,3 +91,7 @@ Future<String?> createNewEvent(BuildContext context) async {
       builder: (context) =>
           JSONEditor(source: emptyNewEvent, validate: FRCEvent.fromJson)));
 }
+
+FRCEvent get emptyNewEvent => FRCEvent(
+    config:
+        EventConfig(name: 'My Event', team: 6749, season: DateTime.now().year));
