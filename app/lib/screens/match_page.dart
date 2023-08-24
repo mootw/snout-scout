@@ -81,7 +81,7 @@ class _MatchPageState extends State<MatchPage> {
                   final result = await navigateWithEditLock<MatchResultValues>(
                       context,
                       "match:${match.description}:results",
-                      () => Navigator.push(
+                      (context) => Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (context) => EditMatchResults(

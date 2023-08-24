@@ -126,64 +126,64 @@ class ServerConnectionProvider extends ChangeNotifier {
     }
   }
 
-  void resetConnectionTimer() {
-    _connectionTimer?.cancel();
-    _connectionTimer = Timer(const Duration(seconds: 61), () {
-      //No message has been recieved in 60 seconds, close down the connection.
-      _channel?.sink.close();
-      connected = false;
-    });
-  }
+  // void resetConnectionTimer() {
+  //   _connectionTimer?.cancel();
+  //   _connectionTimer = Timer(const Duration(seconds: 61), () {
+  //     //No message has been recieved in 60 seconds, close down the connection.
+  //     _channel?.sink.close();
+  //     connected = false;
+  //   });
+  // }
 
-  void reconnect() async {
-    //Do not close the stream if it already exists idk how that behaves
-    //it might reuslt in the onDone being called unexpetedly.
-    Uri serverUri = Uri.parse(serverURL);
-    _channel = WebSocketChannel.connect(Uri.parse(
-        '${serverURL.startsWith("https") ? "wss" : "ws"}://${serverUri.host}:${serverUri.port}/listen/${serverUri.pathSegments[1]}'));
+  // void reconnect() async {
+  //   //Do not close the stream if it already exists idk how that behaves
+  //   //it might reuslt in the onDone being called unexpetedly.
+  //   Uri serverUri = Uri.parse(serverURL);
+  //   _channel = WebSocketChannel.connect(Uri.parse(
+  //       '${serverURL.startsWith("https") ? "wss" : "ws"}://${serverUri.host}:${serverUri.port}/listen/${serverUri.pathSegments[1]}'));
 
-    _channel!.ready.then((_) {
-      if (connected == false) {
-        //Only do an origin sync if we were previouosly not connected
-        //Since the db is syncronized before creating this object
-        //we can assume that connection exists for the first reconnect
-        //thus connected = true by default
-        tryOriginSync();
-      }
-      connected = true;
-      notifyListeners();
-      resetConnectionTimer();
-    });
+  //   _channel!.ready.then((_) {
+  //     if (connected == false) {
+  //       //Only do an origin sync if we were previouosly not connected
+  //       //Since the db is syncronized before creating this object
+  //       //we can assume that connection exists for the first reconnect
+  //       //thus connected = true by default
+  //       tryOriginSync();
+  //     }
+  //     connected = true;
+  //     notifyListeners();
+  //     resetConnectionTimer();
+  //   });
 
-    _channel!.stream.listen((event) async {
-      resetConnectionTimer();
-      //REALLY JANK PING PONG SYSTEM THIS SHOULD BE FIXED!!!!
-      if (event == "PING") {
-        _channel!.sink.add("PONG");
-        return;
-      }
+  //   _channel!.stream.listen((event) async {
+  //     resetConnectionTimer();
+  //     //REALLY JANK PING PONG SYSTEM THIS SHOULD BE FIXED!!!!
+  //     if (event == "PING") {
+  //       _channel!.sink.add("PONG");
+  //       return;
+  //     }
 
-      //TODO apply patch to local state
-      // db = Patch.fromJson(jsonDecode(event)).patch(db);
-      // final prefs = await SharedPreferences.getInstance();
-      // //Save the database to disk
-      // prefs.setString("db", jsonEncode(db));
-      notifyListeners();
-    }, onDone: () {
-      connected = false;
-      notifyListeners();
-      //Re-attempt a connection after some time
-      Timer(const Duration(seconds: 4), () {
-        if (connected == false) {
-          reconnect();
-        }
-      });
-    }, onError: (e) {
-      //Dont try and reconnect on an error
-      Logger.root.warning("DB Listener Error; not attempting to reconnect", e);
-      notifyListeners();
-    });
-  }
+  //     //TODO apply patch to local state
+  //     // db = Patch.fromJson(jsonDecode(event)).patch(db);
+  //     // final prefs = await SharedPreferences.getInstance();
+  //     // //Save the database to disk
+  //     // prefs.setString("db", jsonEncode(db));
+  //     notifyListeners();
+  //   }, onDone: () {
+  //     connected = false;
+  //     notifyListeners();
+  //     //Re-attempt a connection after some time
+  //     Timer(const Duration(seconds: 4), () {
+  //       if (connected == false) {
+  //         reconnect();
+  //       }
+  //     });
+  //   }, onError: (e) {
+  //     //Dont try and reconnect on an error
+  //     Logger.root.warning("DB Listener Error; not attempting to reconnect", e);
+  //     notifyListeners();
+  //   });
+  // }
 
   //Clears all of the failed patches.
   Future clearFailedPatches() async {
