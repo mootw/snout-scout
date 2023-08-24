@@ -7,7 +7,7 @@ import 'package:app/providers/identity_provider.dart';
 import 'package:app/providers/server_connection_provider.dart';
 import 'package:app/screens/analysis.dart';
 import 'package:app/screens/debug_field_position.dart';
-import 'package:app/screens/documentation.dart';
+import 'package:app/screens/documentation_page.dart';
 import 'package:app/screens/edit_json.dart';
 import 'package:app/screens/local_patch_storage.dart';
 import 'package:app/screens/schedule_page.dart';
@@ -228,24 +228,6 @@ class _MyHomePageState extends State<MyHomePage> {
                 },
                 icon: const Icon(Icons.edit)),
           ),
-          const Divider(),
-          ListTile(
-            title: const Text("Read DOCS"),
-            trailing: const Icon(Icons.menu_book),
-            onTap: () => launchUrlString(
-                "https://github.com/mootw/snout-scout/blob/main/readme.md"),
-          ),
-          ListTile(
-            title: const Text("DEBUG Field position"),
-            trailing: const Icon(Icons.crop_square_sharp),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => const DebugFieldPosition()),
-              );
-            },
-          ),
         ]),
       ),
       bottomNavigationBar: NavigationBar(
@@ -273,7 +255,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           NavigationDestination(
             selectedIcon: Icon(Icons.book),
-            icon: Icon(Icons.book),
+            icon: Icon(Icons.book_outlined),
             label: 'Docs',
           ),
         ],

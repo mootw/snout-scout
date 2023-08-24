@@ -233,7 +233,7 @@ class _MatchRecorderAssistantPageState
     RobotMatchResults? result = await navigateWithEditLock(
         context,
         "match:$matchid:$team:timeline",
-        () => Navigator.pushReplacement(
+        (context) => Navigator.pushReplacement(
               context,
               MaterialPageRoute(
                   builder: (context) =>

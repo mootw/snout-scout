@@ -10,6 +10,7 @@ EventConfig _$EventConfigFromJson(Map<String, dynamic> json) => EventConfig(
       name: json['name'] as String,
       team: json['team'] as int,
       season: json['season'] as int,
+      docs: json['docs'] as String?,
       tbaEventId: json['tbaEventId'] as String?,
       tbaSecretKey: json['tbaSecretKey'] as String?,
       fieldStyle:
@@ -27,6 +28,7 @@ EventConfig _$EventConfigFromJson(Map<String, dynamic> json) => EventConfig(
 
 Map<String, dynamic> _$EventConfigToJson(EventConfig instance) =>
     <String, dynamic>{
+      'docs': instance.docs,
       'name': instance.name,
       'season': instance.season,
       'tbaEventId': instance.tbaEventId,

@@ -39,10 +39,10 @@ class _TeamViewPageState extends State<TeamViewPage> {
                   final result = await navigateWithEditLock(
                       context,
                       "scoutteam:${widget.teamNumber}",
-                      () => Navigator.push(
+                      (context) => Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => PitScoutTeamPage(
+                                builder: (_) => PitScoutTeamPage(
                                     team: widget.teamNumber,
                                     config: data.db.config,
                                     oldData: data.db.pitscouting[

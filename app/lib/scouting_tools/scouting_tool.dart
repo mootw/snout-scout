@@ -49,7 +49,7 @@ class _ScoutingToolWidgetState extends State<ScoutingToolWidget> {
           }
         },
         minLines: 1,
-        maxLines: 4,
+        maxLines: 8,
         decoration: InputDecoration(
           label: Text(widget.tool.label),
           border: const OutlineInputBorder(),

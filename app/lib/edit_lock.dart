@@ -6,11 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 
-
 //Route should return when editing is complete. This is the signal to clear the edit lock.
 //This function will not throw an exception and always fail safe by navigating to the other page.
 Future<T?> navigateWithEditLock<T>(
-    BuildContext context, String key, Function navigteFunction) async {
+    BuildContext context, String key, Function(BuildContext context) navigteFunction) async {
     final serverURL = context.read<ServerConnectionProvider>().serverURL;
     Uri editLockUri = Uri.parse(
       "${Uri.parse(serverURL).origin}/edit_lock");
@@ -24,28 +23,28 @@ Future<T?> navigateWithEditLock<T>(
         //Check if we are still mounted before showing the dialog
         final result = await showDialog(
             context: context,
-            builder: (context) {
+            builder: (dialogContext) {
               return AlertDialog(
                 title: const Text("This item is already being edited"),
                 actions: <Widget>[
                   TextButton(
                     child: const Text('Edit Anyways'),
                     onPressed: () {
-                      Navigator.pop(context, true);
+                      Navigator.of(dialogContext).pop(true);
                     },
                   ),
                   TextButton(
                     child: const Text('Cancel'),
                     onPressed: () {
-                      Navigator.pop(context, false);
+                      Navigator.of(dialogContext).pop(false);
                     },
                   ),
                 ],
               );
             });
-        if (result == true) {
+        if (result == true && context.mounted) {
           //User wants to edit item anways, don't write a new edit lock in this case.
-          return await navigteFunction();
+          return await navigteFunction(context);
         }
       }
     } else {
@@ -57,7 +56,10 @@ Future<T?> navigateWithEditLock<T>(
         Logger.root.warning("Error applying edit lock", e);
       }
       //Navigate
-      final result = await navigteFunction();
+      T? result;
+      if(context.mounted) {
+        result = await navigteFunction(context);
+      }
       //Clear lock
       try {
         await apiClient.delete(editLockUri,
@@ -71,7 +73,9 @@ Future<T?> navigateWithEditLock<T>(
   } catch (e) {
         Logger.root.warning("edit lock error", e);
     //Fail save and navigate anyways
-    return await navigteFunction();
+    if(context.mounted) {
+      return await navigteFunction(context);
+    }
   }
   return null;
 }

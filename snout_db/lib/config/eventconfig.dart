@@ -6,6 +6,10 @@ part 'eventconfig.g.dart';
 
 @JsonSerializable()
 class EventConfig {
+
+  /// documentation about this years scouting (generic)
+  final String? docs;
+
   /// Human readable name for this event (the one displayed on the status bar)
   final String name;
 
@@ -42,6 +46,7 @@ class EventConfig {
       {required this.name,
       required this.team,
       required this.season,
+      this.docs,
       this.tbaEventId,
       this.tbaSecretKey,
       this.fieldStyle = FieldStyle.rotated,

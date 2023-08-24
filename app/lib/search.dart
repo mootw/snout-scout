@@ -73,7 +73,7 @@ class SnoutScoutSearch extends SearchDelegate {
             Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (context) => TeamViewPage(teamNumber: team)),
+                  builder: (_) => TeamViewPage(teamNumber: team)),
             );
           },
         ));
@@ -92,7 +92,7 @@ class SnoutScoutSearch extends SearchDelegate {
             Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (context) =>
+                  builder: (_) =>
                       MatchPage(matchid: db.db.matchIDFromMatch(match))),
             );
           },
@@ -143,7 +143,7 @@ class SnoutScoutSearch extends SearchDelegate {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => TeamViewPage(teamNumber: team)),
+                    builder: (_) => TeamViewPage(teamNumber: team)),
               );
             },
           ));
