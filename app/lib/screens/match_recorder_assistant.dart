@@ -9,6 +9,7 @@ import 'package:app/helpers.dart';
 import 'package:app/providers/identity_provider.dart';
 import 'package:app/providers/server_connection_provider.dart';
 import 'package:app/screens/match_recorder.dart';
+import 'package:app/screens/view_team_page.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
@@ -188,7 +189,7 @@ class _MatchRecorderAssistantPageState
       required Color subtitleColor}) {
     final snoutData = context.watch<DataProvider>();
     Widget? image;
-    final data = snoutData.event.pitscouting[team.toString()]?['robot_picture'];
+    final data = snoutData.event.pitscouting[team.toString()]?[robotPictureReserved];
     if (data != null) {
       image = AspectRatio(
           aspectRatio: 1,

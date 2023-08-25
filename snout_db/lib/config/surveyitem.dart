@@ -4,9 +4,8 @@ part 'surveyitem.g.dart';
 
 @JsonSerializable()
 class SurveyItem {
-
   /// documentation about this item
-  final String? docs;
+  final String docs;
 
   /// unique
   final String id;
@@ -22,8 +21,7 @@ class SurveyItem {
       required this.type,
       required this.label,
       this.options,
-      this.docs
-      });
+      this.docs = ''});
 
   factory SurveyItem.fromJson(Map<String, dynamic> json) =>
       _$SurveyItemFromJson(json);

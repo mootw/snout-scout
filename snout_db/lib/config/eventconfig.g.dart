@@ -10,7 +10,6 @@ EventConfig _$EventConfigFromJson(Map json) => EventConfig(
       name: json['name'] as String,
       team: json['team'] as int,
       season: json['season'] as int,
-      docs: json['docs'] as String?,
       tbaEventId: json['tbaEventId'] as String?,
       tbaSecretKey: json['tbaSecretKey'] as String?,
       fieldStyle:
@@ -25,11 +24,11 @@ EventConfig _$EventConfigFromJson(Map json) => EventConfig(
           ? const MatchScouting()
           : MatchScouting.fromJson(
               Map<String, dynamic>.from(json['matchscouting'] as Map)),
+      docs: json['docs'] as String? ?? '',
     );
 
 Map<String, dynamic> _$EventConfigToJson(EventConfig instance) =>
     <String, dynamic>{
-      'docs': instance.docs,
       'name': instance.name,
       'season': instance.season,
       'tbaEventId': instance.tbaEventId,
@@ -38,6 +37,7 @@ Map<String, dynamic> _$EventConfigToJson(EventConfig instance) =>
       'team': instance.team,
       'pitscouting': instance.pitscouting.map((e) => e.toJson()).toList(),
       'matchscouting': instance.matchscouting.toJson(),
+      'docs': instance.docs,
     };
 
 const _$FieldStyleEnumMap = {

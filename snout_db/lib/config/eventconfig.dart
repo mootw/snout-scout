@@ -6,10 +6,6 @@ part 'eventconfig.g.dart';
 
 @JsonSerializable()
 class EventConfig {
-
-  /// documentation about this years scouting (generic)
-  final String? docs;
-
   /// Human readable name for this event (the one displayed on the status bar)
   final String name;
 
@@ -42,16 +38,20 @@ class EventConfig {
 
   final MatchScouting matchscouting;
 
-  const EventConfig(
-      {required this.name,
-      required this.team,
-      required this.season,
-      this.docs,
-      this.tbaEventId,
-      this.tbaSecretKey,
-      this.fieldStyle = FieldStyle.rotated,
-      this.pitscouting = const [],
-      this.matchscouting = const MatchScouting()});
+  /// documentation about this years scouting (generic)
+  final String docs;
+
+  const EventConfig({
+    required this.name,
+    required this.team,
+    required this.season,
+    this.tbaEventId,
+    this.tbaSecretKey,
+    this.fieldStyle = FieldStyle.rotated,
+    this.pitscouting = const [],
+    this.matchscouting = const MatchScouting(),
+    this.docs = '',
+  });
 
   factory EventConfig.fromJson(Map<String, dynamic> json) =>
       _$EventConfigFromJson(json);

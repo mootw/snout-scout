@@ -11,7 +11,7 @@ MatchResultsProcess _$MatchResultsProcessFromJson(Map json) =>
       id: json['id'] as String,
       label: json['label'] as String,
       expression: json['expression'] as String,
-      docs: json['docs'] as String?,
+      docs: json['docs'] as String? ?? '',
     );
 
 Map<String, dynamic> _$MatchResultsProcessToJson(

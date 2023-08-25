@@ -20,6 +20,7 @@ FRCEvent _$FRCEventFromJson(Map json) => FRCEvent(
                 MapEntry(k as String, Map<String, dynamic>.from(e as Map)),
           ) ??
           const {},
+      pitmap: json['pitmap'] as String?,
     );
 
 Map<String, dynamic> _$FRCEventToJson(FRCEvent instance) => <String, dynamic>{
@@ -27,4 +28,5 @@ Map<String, dynamic> _$FRCEventToJson(FRCEvent instance) => <String, dynamic>{
       'teams': instance.teams,
       'matches': instance.matches.map((k, e) => MapEntry(k, e.toJson())),
       'pitscouting': instance.pitscouting,
+      'pitmap': instance.pitmap,
     };

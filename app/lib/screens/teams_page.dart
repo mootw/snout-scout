@@ -12,9 +12,10 @@ import 'package:snout_db/patch.dart';
 
 /// Displays a wrapped grid of teams
 class TeamGridList extends StatefulWidget {
-  const TeamGridList({super.key, this.teamFiler});
+  const TeamGridList({super.key, this.teamFiler, this.showEditButton = false});
 
   final List<int>? teamFiler;
+  final bool showEditButton;
 
   @override
   State<TeamGridList> createState() => _TeamGridListState();
@@ -34,6 +35,7 @@ class _TeamGridListState extends State<TeamGridList> {
             for (final team in context.watch<DataProvider>().event.teams)
               if (widget.teamFiler == null || widget.teamFiler!.contains(team))
                 TeamListTile(teamNumber: team),
+            if(widget.showEditButton)
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Center(
@@ -148,7 +150,7 @@ class TeamListTile extends StatelessWidget {
     final snoutData = context.watch<DataProvider>();
     Widget? image;
     final data =
-        snoutData.event.pitscouting[teamNumber.toString()]?['robot_picture'];
+        snoutData.event.pitscouting[teamNumber.toString()]?[robotPictureReserved];
     if (data != null) {
       image = AspectRatio(
           aspectRatio: 1,

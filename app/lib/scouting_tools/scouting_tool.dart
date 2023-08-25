@@ -12,6 +12,7 @@ import 'package:snout_db/config/surveyitem.dart';
 double scoutImageSize = 800;
 
 class ScoutingToolWidget extends StatefulWidget {
+  
   final SurveyItem tool;
   final PitScoutResult survey;
 

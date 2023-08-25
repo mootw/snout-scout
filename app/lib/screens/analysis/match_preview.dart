@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:app/widgets/datasheet.dart';
 import 'package:app/providers/data_provider.dart';
@@ -131,7 +132,8 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                     exportValue: team.toString(),
                     sortingValue: team),
                 for (final item in data.event.config.matchscouting.processes)
-                  DataItem.fromNumber(data.event.teamAverageProcess(team, item)),
+                  DataItem.fromNumber(
+                      data.event.teamAverageProcess(team, item)),
                 for (final item in data.event.config.matchscouting.survey)
                   DataItem.fromText(data.event
                       .teamPostGameSurveyByFrequency(team, item.id)
@@ -154,6 +156,27 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                       Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
+                          SizedBox(
+                            width: 250,
+                            height: 250,
+                            child: context
+                                      .read<DataProvider>()
+                                      .event
+                                      .pitscouting[team.toString()]
+                                  ?[robotPictureReserved] !=
+                              null ? AspectRatio(
+                              aspectRatio: 1,
+                              child: Image.memory(
+                                fit: BoxFit.cover,
+                                Uint8List.fromList(base64Decode(context
+                                            .read<DataProvider>()
+                                            .event
+                                            .pitscouting[team.toString()]![
+                                        robotPictureReserved]!)
+                                    .cast<int>()),
+                              ),
+                            ) : const Text("No image"),
+                          ),
                           TextButton(
                               onPressed: () => Navigator.push(
                                   context,
@@ -204,8 +227,9 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                                         .titleMedium),
                                 FieldHeatMap(
                                     key: UniqueKey(),
-                                    events:
-                                        data.event.teamRecordedMatches(team).fold(
+                                    events: data.event
+                                        .teamRecordedMatches(team)
+                                        .fold(
                                             [],
                                             (previousValue, element) => [
                                                   ...previousValue,

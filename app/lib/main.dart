@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:app/providers/data_provider.dart';
 import 'package:app/helpers.dart';
 import 'package:app/providers/identity_provider.dart';
 import 'package:app/providers/server_connection_provider.dart';
+import 'package:app/scouting_tools/scouting_tool.dart';
 import 'package:app/screens/analysis.dart';
 import 'package:app/screens/documentation_page.dart';
 import 'package:app/screens/edit_json.dart';
@@ -15,6 +17,7 @@ import 'package:app/screens/teams_page.dart';
 import 'package:app/search.dart';
 import 'package:download/download.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
@@ -159,7 +162,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: [
         const AllMatchesPage(),
-        const TeamGridList(),
+        const TeamGridList(showEditButton: true),
         const AnalysisPage(),
         const DocumentationScreen(),
       ][_currentPageIndex],
@@ -242,6 +245,7 @@ class _MyHomePageState extends State<MyHomePage> {
             subtitle: Text(data.event.config.name),
             trailing: IconButton(
                 onPressed: () async {
+                  final identity = context.read<IdentityProvider>().identity;
                   final result = await Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -253,7 +257,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
                   if (result != null) {
                     Patch patch = Patch(
-                        identity: context.read<IdentityProvider>().identity,
+                        identity: identity,
                         time: DateTime.now(),
                         path: ['config'],
                         value: jsonDecode(result));
@@ -262,6 +266,38 @@ class _MyHomePageState extends State<MyHomePage> {
                   }
                 },
                 icon: const Icon(Icons.edit)),
+          ),
+          ListTile(
+            title: const Text("Set Pit Map Image"),
+            trailing: IconButton(
+                onPressed: () async {
+                  final identity = context.read<IdentityProvider>().identity;
+
+                  String result;
+                  //TAKE PHOTO
+                  try {
+                    final ImagePicker picker = ImagePicker();
+                    final XFile? photo = await picker.pickImage(
+                        source: ImageSource.camera,
+                        maxWidth: scoutImageSize,
+                        maxHeight: scoutImageSize,
+                        imageQuality: 50);
+                    if (photo != null) {
+                      Uint8List bytes = await photo.readAsBytes();
+                      result = base64Encode(bytes);
+                      Patch patch = Patch(
+                          identity: identity,
+                          time: DateTime.now(),
+                          path: ['pitmap'],
+                          value: result);
+                      //Save the scouting results to the server!!
+                      await data.addPatch(patch);
+                    }
+                  } catch (e, s) {
+                    Logger.root.severe("Error taking image from device", e, s);
+                  }
+                },
+                icon: const Icon(Icons.camera_alt)),
           ),
         ]),
       ),

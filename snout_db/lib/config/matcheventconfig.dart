@@ -5,9 +5,8 @@ part 'matcheventconfig.g.dart';
 /// Template for a match event that could be recorded
 @JsonSerializable()
 class MatchEventConfig {
-
   /// documentation about this item
-  final String? docs;
+  final String docs;
 
   /// unique
   final String id;
@@ -22,7 +21,7 @@ class MatchEventConfig {
     required this.id,
     required this.label,
     this.color,
-    this.docs,
+    this.docs = '',
   });
 
   factory MatchEventConfig.fromJson(Map<String, dynamic> json) =>

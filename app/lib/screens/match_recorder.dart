@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:app/screens/view_team_page.dart';
 import 'package:app/widgets/confirm_exit_dialog.dart';
 import 'package:app/widgets/datasheet.dart';
 import 'package:app/providers/data_provider.dart';
@@ -336,7 +337,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
     final pictureData = context
         .watch<DataProvider>()
         .event
-        .pitscouting[widget.team.toString()]?['robot_picture'];
+        .pitscouting[widget.team.toString()]?[robotPictureReserved];
     if (pictureData != null) {
       robotPicture = Image.memory(
           Uint8List.fromList(base64Decode(pictureData).cast<int>()));

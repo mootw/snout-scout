@@ -9,6 +9,7 @@ final darkScheme =
 ThemeData defaultTheme =
     ThemeData.from(colorScheme: darkScheme, useMaterial3: true);
 
+const warningColor = Colors.yellow;
 
 /// Returns a UI color for a given alliance.
 Color getAllianceColor (Alliance alliance) => alliance == Alliance.red ? Colors.red : Colors.blue;

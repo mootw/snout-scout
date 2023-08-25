@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:app/providers/data_provider.dart';
 import 'package:app/screens/debug_field_position.dart';
 import 'package:app/widgets/markdown_wrapper.dart';
@@ -18,6 +21,8 @@ class _DocumentationScreenState extends State<DocumentationScreen> {
   @override
   Widget build(BuildContext context) {
     final data = context.watch<DataProvider>().event.config;
+
+    final pitMap = context.watch<DataProvider>().event.pitmap;
 
     return ListView(
       //helps keep the scrollbar consistent at the cost of performance
@@ -41,9 +46,39 @@ class _DocumentationScreenState extends State<DocumentationScreen> {
           },
         ),
         const Divider(),
+        if (pitMap != null)
+          ListTile(
+            title: const Text("VIEW PIT MAP"),
+            leading: const Icon(Icons.map),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => Scaffold(
+                          appBar: AppBar(
+                            title: const Text("Pit Map"),
+                          ),
+                          body: SingleChildScrollView(
+                            child: Image.memory(
+                              fit: BoxFit.fitWidth,
+                              scale: 0.5,
+                              Uint8List.fromList(
+                                  base64Decode(pitMap).cast<int>()),
+                            ),
+                          ),
+                        )),
+              );
+            },
+          ),
+        if (pitMap == null)
+          const ListTile(title: Text("No pit map has been added yet :(")),
+        const Divider(),
         Padding(
           padding: const EdgeInsets.only(left: 16, right: 16),
-          child: MarkdownText(data: data.docs ?? "# Welcome to the docs\n**this is a temporary message that will be replaced once you set the docs property in the event config**\n\neverything that you collect should be defined in here, all 'docs' properties in the configuration support markdown"),
+          child: MarkdownText(
+              data: data.docs.isNotEmpty
+                  ? data.docs
+                  : "# Welcome to the docs for ${data.name}\n**this is a temporary message that will be replaced once you set the docs property in the event config**\n\neverything that you collect should be defined in here, all 'docs' properties in the configuration support markdown"),
         ),
         const Divider(),
         ListTile(
@@ -86,7 +121,7 @@ class _DocumentationScreenState extends State<DocumentationScreen> {
             ),
           Padding(
             padding: const EdgeInsets.only(left: 32, top: 4, right: 16),
-            child: MarkdownText(data: item.docs ?? "no docs"),
+            child: MarkdownText(data: item.docs),
           )
         ],
         const Divider(),
@@ -115,7 +150,7 @@ class _DocumentationScreenState extends State<DocumentationScreen> {
             ),
           Padding(
             padding: const EdgeInsets.only(left: 32, top: 4, right: 16),
-            child: MarkdownText(data: item.docs ?? "no docs"),
+            child: MarkdownText(data: item.docs),
           )
         ],
         const Divider(),
@@ -150,7 +185,7 @@ class _DocumentationScreenState extends State<DocumentationScreen> {
             ),
           Padding(
             padding: const EdgeInsets.only(left: 32, top: 4, right: 16),
-            child: MarkdownText(data: item.docs ?? "no docs"),
+            child: MarkdownText(data: item.docs),
           )
         ],
         const Divider(),
@@ -179,7 +214,7 @@ class _DocumentationScreenState extends State<DocumentationScreen> {
             ),
           Padding(
             padding: const EdgeInsets.only(left: 32, top: 4, right: 16),
-            child: MarkdownText(data: item.docs ?? "no docs"),
+            child: MarkdownText(data: item.docs),
           )
         ],
       ],

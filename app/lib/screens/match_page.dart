@@ -51,6 +51,7 @@ class _MatchPageState extends State<MatchPage> {
         ],
       ),
       body: ListView(
+        cacheExtent: 5000,
         children: [
           const SizedBox(height: 8),
           Wrap(
@@ -260,6 +261,10 @@ class _MatchPageState extends State<MatchPage> {
                 ],
               ),
             ),
+          Container(
+              padding: const EdgeInsets.only(right: 16),
+              alignment: Alignment.centerRight,
+              child: EditAudit(path: ['matches', widget.matchid, 'results'])),
         ],
       ),
     );

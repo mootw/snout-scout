@@ -307,7 +307,7 @@ class FieldPaths extends StatelessWidget {
                       style: TextStyle(
                           color: getColorFromIndex(paths.indexOf(match)),
                           fontSize: 10,
-                          backgroundColor: Colors.black45)),
+                          backgroundColor: Colors.black87)),
           ],
         ),
       ),

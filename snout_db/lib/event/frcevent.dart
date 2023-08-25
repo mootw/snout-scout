@@ -18,6 +18,7 @@ part 'frcevent.g.dart';
 
 @JsonSerializable()
 class FRCEvent {
+
   /// how should this event be tracked?
   final EventConfig config;
 
@@ -30,28 +31,31 @@ class FRCEvent {
   //Pit scouting results
   final Map<String, PitScoutResult> pitscouting;
 
+  /// image of the pit map
+  final String? pitmap;
+
   //Enforce that all matches are sorted
   FRCEvent(
       {required this.config,
       this.teams = const [],
       Map<String, FRCMatch> matches = const {},
-      this.pitscouting = const {}})
+      this.pitscouting = const {},
+      this.pitmap})
       //Enforce that the matches are sorted correctly
       : matches = SplayTreeMap.from(matches,
             (key1, key2) => Comparable.compare(matches[key1]!, matches[key2]!));
 
-  factory FRCEvent.fromJson(Map json) =>
-      _$FRCEventFromJson(json);
+  factory FRCEvent.fromJson(Map json) => _$FRCEventFromJson(json);
   Map toJson() => _$FRCEventToJson(this);
 
   /// "performant" way to load a database state from a list patches
   /// note, this will fail if the resulting structure does not match
   /// a valid FRCEvent
-  static FRCEvent fromPatches (List<Patch> patches) {
+  static FRCEvent fromPatches(List<Patch> patches) {
     //Start with empty!
     var dbJson;
-    for(final patch in patches) {
-      if(dbJson == null) {
+    for (final patch in patches) {
+      if (dbJson == null) {
         //Initialize the db with the first patch's data.
         dbJson = FRCEvent.fromJson(patch.value as Map).toJson();
         continue;
@@ -155,7 +159,8 @@ class FRCEvent {
 
     //Returns 1 if the team's pit scouting data matches 0 otherwise.
     exp.addLazyFunction(LazyFunctionImpl("PITSCOUTINGIS", 2, fEval: (params) {
-      if (pitscouting[team.toString()]?[params[0].getString()].toString() == params[1].getString()) {
+      if (pitscouting[team.toString()]?[params[0].getString()].toString() ==
+          params[1].getString()) {
         return LazyNumberImpl(
             eval: () => Decimal.fromInt(1), getString: () => "1");
       } else {
@@ -166,7 +171,8 @@ class FRCEvent {
 
     //Returns 1 if a post game survey item matches the value 0 otherwise
     exp.addLazyFunction(LazyFunctionImpl("POSTGAMEIS", 2, fEval: (params) {
-      if (matchResults.survey[params[0].getString()].toString() == params[1].getString()) {
+      if (matchResults.survey[params[0].getString()].toString() ==
+          params[1].getString()) {
         return LazyNumberImpl(
             eval: () => Decimal.fromInt(1), getString: () => "1");
       } else {
@@ -222,7 +228,8 @@ class FRCEvent {
     // |    |
     // o --
     // min x, min y, max X, max Y
-    exp.addLazyFunction(LazyFunctionImpl("TELEOPEVENTINBBOX", 5, fEval: (params) {
+    exp.addLazyFunction(
+        LazyFunctionImpl("TELEOPEVENTINBBOX", 5, fEval: (params) {
       int value = matchResults.timelineInterpolated
           .where((element) =>
               element.isInAuto == false &&
@@ -272,18 +279,17 @@ class FRCEvent {
     //returns the result of another process for this data.
     exp.addLazyFunction(LazyFunctionImpl("PROCESS", 1, fEval: (params) {
       String processID = params[0].getString();
-      if(process.id == processID) {
+      if (process.id == processID) {
         throw Exception("cannot recursively call a process");
       }
       MatchResultsProcess? otherProcess = config.matchscouting.processes
           .firstWhereOrNull((element) => element.id == processID);
-      if(otherProcess == null) {
+      if (otherProcess == null) {
         throw Exception("process ${processID} does not exist");
       }
       final result = runMatchResultsProcess(otherProcess, matchResults, team);
       return LazyNumberImpl(
-          eval: () =>
-              Decimal.parse(result!.value.toString()),
+          eval: () => Decimal.parse(result!.value.toString()),
           getString: () => result!.value.toString());
     }));
 
@@ -310,7 +316,8 @@ class FRCEvent {
             (previousValue, match) =>
                 previousValue +
                 (runMatchResultsProcess(
-                        process, match.value.robot[team.toString()], team)?.value ??
+                            process, match.value.robot[team.toString()], team)
+                        ?.value ??
                     0)) /
         recordedMatches.length;
   }
