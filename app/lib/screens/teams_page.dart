@@ -31,7 +31,7 @@ class _TeamGridListState extends State<TeamGridList> {
           runSpacing: 12,
           alignment: WrapAlignment.spaceEvenly,
           children: [
-            for (final team in context.watch<DataProvider>().db.teams)
+            for (final team in context.watch<DataProvider>().event.teams)
               if (widget.teamFiler == null || widget.teamFiler!.contains(team))
                 TeamListTile(teamNumber: team),
             Padding(
@@ -52,7 +52,7 @@ class _TeamGridListState extends State<TeamGridList> {
                                               validate: (item) {},
                                               source: context
                                                   .read<DataProvider>()
-                                                  .db
+                                                  .event
                                                   .teams,
                                             ),
                                           ));
@@ -63,8 +63,8 @@ class _TeamGridListState extends State<TeamGridList> {
                                                 .read<IdentityProvider>()
                                                 .identity,
                                             time: DateTime.now(),
-                                            pointer: ['teams'],
-                                            data: jsonDecode(result));
+                                            path: ['teams'],
+                                            value: jsonDecode(result));
                                         //Save the scouting results to the server!!
                                         await context
                                             .read<DataProvider>()
@@ -77,7 +77,7 @@ class _TeamGridListState extends State<TeamGridList> {
                                       List<int> teams;
                                       try {
                                         teams = await getTeamListForEventTBA(
-                                            context.read<DataProvider>().db);
+                                            context.read<DataProvider>().event);
                                         //Some reason the teams do not come sorted...
                                         teams.sort();
                                       } catch (e) {
@@ -117,8 +117,8 @@ class _TeamGridListState extends State<TeamGridList> {
                                                 .read<IdentityProvider>()
                                                 .identity,
                                             time: DateTime.now(),
-                                            pointer: ['teams'],
-                                            data: jsonDecode(result));
+                                            path: ['teams'],
+                                            value: jsonDecode(result));
                                         //Save the scouting results to the server!!
                                         await context
                                             .read<DataProvider>()
@@ -148,7 +148,7 @@ class TeamListTile extends StatelessWidget {
     final snoutData = context.watch<DataProvider>();
     Widget? image;
     final data =
-        snoutData.db.pitscouting[teamNumber.toString()]?['robot_picture'];
+        snoutData.event.pitscouting[teamNumber.toString()]?['robot_picture'];
     if (data != null) {
       image = AspectRatio(
           aspectRatio: 1,

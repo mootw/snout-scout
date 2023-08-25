@@ -92,12 +92,13 @@ class _LocalPatchStorageState extends State<LocalPatchStorage> {
               title: Text(DateFormat.yMMMMEEEEd()
                   .add_Hms()
                   .format(Patch.fromJson(jsonDecode(patch)).time)),
-              subtitle: Text(Patch.fromJson(jsonDecode(patch)).pointer.toString()),
+              subtitle: Text(Patch.fromJson(jsonDecode(patch)).path.toString()),
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   IconButton(
                       onPressed: () async {
+                        //wtf is this
                         await snoutData
                             .addPatch(Patch.fromJson(jsonDecode(patch)));
                         setState(() {});
@@ -119,7 +120,7 @@ class _LocalPatchStorageState extends State<LocalPatchStorage> {
               title: Text(DateFormat.yMMMMEEEEd()
                   .add_Hms()
                   .format(Patch.fromJson(jsonDecode(patch)).time)),
-              subtitle: Text(Patch.fromJson(jsonDecode(patch)).pointer.toString()),
+              subtitle: Text(Patch.fromJson(jsonDecode(patch)).path.toString()),
             ),
         ],
       ),

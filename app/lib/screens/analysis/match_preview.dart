@@ -75,7 +75,7 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
         children: [
           DataSheet(title: "Alliance Sum of Avg", columns: [
             DataItem.fromText("Alliance"),
-            for (final item in data.db.config.matchscouting.processes)
+            for (final item in data.event.config.matchscouting.processes)
               DataItem.fromText(item.label),
           ], rows: [
             [
@@ -84,12 +84,12 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                       Text("RED", style: TextStyle(color: Colors.red)),
                   exportValue: "RED",
                   sortingValue: "RED"),
-              for (final item in data.db.config.matchscouting.processes)
+              for (final item in data.event.config.matchscouting.processes)
                 DataItem.fromNumber(_red.fold<double>(
                     0,
                     (previousValue, team) =>
                         previousValue +
-                        (data.db.teamAverageProcess(team, item) ?? 0))),
+                        (data.event.teamAverageProcess(team, item) ?? 0))),
             ],
             [
               const DataItem(
@@ -97,20 +97,20 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                       Text("BLUE", style: TextStyle(color: Colors.blue)),
                   exportValue: "BLUE",
                   sortingValue: "BLUE"),
-              for (final item in data.db.config.matchscouting.processes)
+              for (final item in data.event.config.matchscouting.processes)
                 DataItem.fromNumber(_blue.fold<double>(
                     0,
                     (previousValue, team) =>
                         previousValue +
-                        (data.db.teamAverageProcess(team, item) ?? 0))),
+                        (data.event.teamAverageProcess(team, item) ?? 0))),
             ]
           ]),
           const Divider(height: 42),
           DataSheet(title: "Team Averages", columns: [
             DataItem.fromText("Team"),
-            for (final item in data.db.config.matchscouting.processes)
+            for (final item in data.event.config.matchscouting.processes)
               DataItem.fromText(item.label),
-            for (final item in data.db.config.matchscouting.survey)
+            for (final item in data.event.config.matchscouting.survey)
               DataItem.fromText(item.label),
           ], rows: [
             for (final team in [..._red, ..._blue])
@@ -130,10 +130,10 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                     ),
                     exportValue: team.toString(),
                     sortingValue: team),
-                for (final item in data.db.config.matchscouting.processes)
-                  DataItem.fromNumber(data.db.teamAverageProcess(team, item)),
-                for (final item in data.db.config.matchscouting.survey)
-                  DataItem.fromText(data.db
+                for (final item in data.event.config.matchscouting.processes)
+                  DataItem.fromNumber(data.event.teamAverageProcess(team, item)),
+                for (final item in data.event.config.matchscouting.survey)
+                  DataItem.fromText(data.event
                       .teamPostGameSurveyByFrequency(team, item.id)
                       .entries
                       .sorted((a, b) => Comparable.compare(a.value, b.value))
@@ -181,10 +181,10 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                                   key: UniqueKey(),
                                   paths: [
                                     for (final match
-                                        in data.db.teamRecordedMatches(team))
+                                        in data.event.teamRecordedMatches(team))
                                       match.value.robot[team.toString()]!
                                           .timelineInterpolatedRedNormalized(
-                                              data.db.config.fieldStyle)
+                                              data.event.config.fieldStyle)
                                           .where((element) => element.isInAuto)
                                           .toList()
                                   ],
@@ -193,7 +193,7 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                             ),
                           ),
                           for (final eventType
-                              in data.db.config.matchscouting.events)
+                              in data.event.config.matchscouting.events)
                             SizedBox(
                               width: smallFieldSize,
                               child: Column(children: [
@@ -205,14 +205,14 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                                 FieldHeatMap(
                                     key: UniqueKey(),
                                     events:
-                                        data.db.teamRecordedMatches(team).fold(
+                                        data.event.teamRecordedMatches(team).fold(
                                             [],
                                             (previousValue, element) => [
                                                   ...previousValue,
                                                   ...?element.value
                                                       .robot[team.toString()]
                                                       ?.timelineRedNormalized(
-                                                          data.db.config
+                                                          data.event.config
                                                               .fieldStyle)
                                                       .where((event) =>
                                                           event.id ==
@@ -230,7 +230,7 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                                           .textTheme
                                           .titleMedium),
                                   FieldHeatMap(
-                                      events: data.db
+                                      events: data.event
                                           .teamRecordedMatches(team)
                                           .fold(
                                               [],
@@ -239,7 +239,7 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                                                     ...?element.value
                                                         .robot[team.toString()]
                                                         ?.timelineInterpolatedRedNormalized(
-                                                            data.db.config
+                                                            data.event.config
                                                                 .fieldStyle)
                                                         .where((event) => event
                                                             .isPositionEvent)

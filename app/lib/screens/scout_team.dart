@@ -54,8 +54,8 @@ class _PitScoutTeamPageState extends State<PitScoutTeamPage> {
                   Patch patch = Patch(
                       identity: context.read<IdentityProvider>().identity,
                       time: DateTime.now(),
-                      pointer: ['pitscouting', widget.team.toString()],
-                      data: _results);
+                      path: ['pitscouting', widget.team.toString()],
+                      value: _results);
 
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                     content: Text('Saving Scouting Data'),

@@ -6,12 +6,13 @@ part of 'db.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-SnoutDB _$SnoutDBFromJson(Map<String, dynamic> json) => SnoutDB(
+SnoutDB _$SnoutDBFromJson(Map json) => SnoutDB(
       patches: (json['patches'] as List<dynamic>)
-          .map((e) => Patch.fromJson(e as Map<String, dynamic>))
+          .map((e) => Patch.fromJson(e as Map))
           .toList(),
     );
 
 Map<String, dynamic> _$SnoutDBToJson(SnoutDB instance) => <String, dynamic>{
-      'patches': instance.patches,
+      'event': instance.event.toJson(),
+      'patches': instance.patches.map((e) => e.toJson()).toList(),
     };

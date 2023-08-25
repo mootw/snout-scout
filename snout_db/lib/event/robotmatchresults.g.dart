@@ -6,12 +6,11 @@ part of 'robotmatchresults.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-RobotMatchResults _$RobotMatchResultsFromJson(Map<String, dynamic> json) =>
-    RobotMatchResults(
+RobotMatchResults _$RobotMatchResultsFromJson(Map json) => RobotMatchResults(
       alliance: $enumDecode(_$AllianceEnumMap, json['alliance']),
-      survey: json['survey'] as Map<String, dynamic>,
+      survey: Map<String, dynamic>.from(json['survey'] as Map),
       timeline: (json['timeline'] as List<dynamic>)
-          .map((e) => MatchEvent.fromJson(e as Map<String, dynamic>))
+          .map((e) => MatchEvent.fromJson(e as Map))
           .toList(),
     );
 
@@ -19,7 +18,7 @@ Map<String, dynamic> _$RobotMatchResultsToJson(RobotMatchResults instance) =>
     <String, dynamic>{
       'alliance': _$AllianceEnumMap[instance.alliance]!,
       'survey': instance.survey,
-      'timeline': instance.timeline,
+      'timeline': instance.timeline.map((e) => e.toJson()).toList(),
     };
 
 const _$AllianceEnumMap = {

@@ -6,7 +6,7 @@ part of 'matchevent.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-MatchEvent _$MatchEventFromJson(Map<String, dynamic> json) => MatchEvent(
+MatchEvent _$MatchEventFromJson(Map json) => MatchEvent(
       time: json['time'] as int,
       id: json['id'] as String,
       x: (json['x'] as num).toDouble(),

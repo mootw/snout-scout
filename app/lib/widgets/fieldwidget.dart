@@ -238,7 +238,7 @@ class RobotMapEventView extends StatelessWidget {
                 alignment: Alignment(event.position.x, -event.position.y),
                 child: Text(
                     event
-                        .getLabelFromConfig(context.watch<DataProvider>().db.config),
+                        .getLabelFromConfig(context.watch<DataProvider>().event.config),
                     style: const TextStyle(backgroundColor: Colors.black)),
               ),
           ]);
@@ -303,7 +303,7 @@ class FieldPaths extends StatelessWidget {
                     in match.where((event) => !event.isPositionEvent))
                   Text(
                       event.getLabelFromConfig(
-                          context.watch<DataProvider>().db.config),
+                          context.watch<DataProvider>().event.config),
                       style: TextStyle(
                           color: getColorFromIndex(paths.indexOf(match)),
                           fontSize: 10,
@@ -432,7 +432,7 @@ class FieldMapWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Image.asset(
-        "assets/field_map/${context.watch<DataProvider>().db.config.season}.png");
+        "assets/field_map/${context.watch<DataProvider>().event.config.season}.png");
   }
 }
 
@@ -449,7 +449,7 @@ class FieldMap extends StatelessWidget {
       child: Stack(
         children: [
           Image.asset(
-              "assets/field_map/${context.watch<DataProvider>().db.config.season}.png"),
+              "assets/field_map/${context.watch<DataProvider>().event.config.season}.png"),
           ...children,
         ],
       ),

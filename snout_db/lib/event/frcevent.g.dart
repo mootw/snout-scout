@@ -6,23 +6,25 @@ part of 'frcevent.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-FRCEvent _$FRCEventFromJson(Map<String, dynamic> json) => FRCEvent(
-      config: EventConfig.fromJson(json['config'] as Map<String, dynamic>),
+FRCEvent _$FRCEventFromJson(Map json) => FRCEvent(
+      config: EventConfig.fromJson(
+          Map<String, dynamic>.from(json['config'] as Map)),
       teams: (json['teams'] as List<dynamic>?)?.map((e) => e as int).toList() ??
           const [],
-      matches: (json['matches'] as Map<String, dynamic>?)?.map(
-            (k, e) => MapEntry(k, FRCMatch.fromJson(e as Map<String, dynamic>)),
+      matches: (json['matches'] as Map?)?.map(
+            (k, e) => MapEntry(k as String, FRCMatch.fromJson(e as Map)),
           ) ??
           const {},
-      pitscouting: (json['pitscouting'] as Map<String, dynamic>?)?.map(
-            (k, e) => MapEntry(k, e as Map<String, dynamic>),
+      pitscouting: (json['pitscouting'] as Map?)?.map(
+            (k, e) =>
+                MapEntry(k as String, Map<String, dynamic>.from(e as Map)),
           ) ??
           const {},
     );
 
 Map<String, dynamic> _$FRCEventToJson(FRCEvent instance) => <String, dynamic>{
-      'config': instance.config,
+      'config': instance.config.toJson(),
       'teams': instance.teams,
-      'matches': instance.matches,
+      'matches': instance.matches.map((k, e) => MapEntry(k, e.toJson())),
       'pitscouting': instance.pitscouting,
     };

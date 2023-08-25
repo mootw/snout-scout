@@ -21,7 +21,7 @@ class AnalysisPitScouting extends StatelessWidget {
             runSpacing: 42,
             alignment: WrapAlignment.center,
             children: [
-              for (final surveyItem in data.db.config.pitscouting
+              for (final surveyItem in data.event.config.pitscouting
                   .where((element) => element.type != SurveyItemType.picture))
                 SurveyItemRatioChart(surveyItem: surveyItem),
             ],
@@ -51,8 +51,8 @@ class _SurveyItemRatioChartState extends State<SurveyItemRatioChart> {
     //Map of all of the values, to their respective teams
     Map<String, List<String>> valueKeys = {};
 
-    for (final team in data.db.pitscouting.keys) {
-      final item = data.db.pitscouting[team]![widget.surveyItem.id]?.toString();
+    for (final team in data.event.pitscouting.keys) {
+      final item = data.event.pitscouting[team]![widget.surveyItem.id]?.toString();
       if (item == null) {
         //TODO handle NULL items in their own category??
         //Basically this is just missing data in the chart.

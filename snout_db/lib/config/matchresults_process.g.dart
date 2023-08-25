@@ -6,7 +6,7 @@ part of 'matchresults_process.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-MatchResultsProcess _$MatchResultsProcessFromJson(Map<String, dynamic> json) =>
+MatchResultsProcess _$MatchResultsProcessFromJson(Map json) =>
     MatchResultsProcess(
       id: json['id'] as String,
       label: json['label'] as String,

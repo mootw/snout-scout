@@ -39,9 +39,9 @@ class MatchEvent {
         x = position.x,
         y = position.y;
 
-  factory MatchEvent.fromJson(Map<String, dynamic> json) =>
+  factory MatchEvent.fromJson(Map json) =>
       _$MatchEventFromJson(json);
-  Map<String, dynamic> toJson() => _$MatchEventToJson(this);
+  Map toJson() => _$MatchEventToJson(this);
 
   FieldPosition get position => FieldPosition(x, y);
 

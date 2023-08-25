@@ -6,7 +6,7 @@ part of 'surveyitem.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-SurveyItem _$SurveyItemFromJson(Map<String, dynamic> json) => SurveyItem(
+SurveyItem _$SurveyItemFromJson(Map json) => SurveyItem(
       id: json['id'] as String,
       type: $enumDecode(_$SurveyItemTypeEnumMap, json['type']),
       label: json['label'] as String,

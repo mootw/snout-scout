@@ -21,7 +21,7 @@ class AnalysisPostMatchSurvey extends StatelessWidget {
             runSpacing: 42,
             alignment: WrapAlignment.center,
             children: [
-              for (final surveyItem in data.db.config.matchscouting.survey
+              for (final surveyItem in data.event.config.matchscouting.survey
                   .where((element) => element.type != SurveyItemType.picture))
                 PostGameRatioChart(surveyItem: surveyItem),
             ],
@@ -51,7 +51,7 @@ class _PostGameRatioChartState extends State<PostGameRatioChart> {
     //Map of all of the values, to their respective teams
     Map<String, Map<String, dynamic>> valueKeys = {};
 
-    for (final match in data.db.matches.values) {
+    for (final match in data.event.matches.values) {
       for (final robot in match.robot.entries) {
         final item = robot.value.survey[widget.surveyItem.id]?.toString();
         if (item == null) {

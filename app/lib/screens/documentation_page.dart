@@ -17,7 +17,7 @@ class _DocumentationScreenState extends State<DocumentationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final data = context.watch<DataProvider>().db.config;
+    final data = context.watch<DataProvider>().event.config;
 
     return ListView(
       //helps keep the scrollbar consistent at the cost of performance
