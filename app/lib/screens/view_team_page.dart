@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:app/widgets/datasheet.dart';
 import 'package:app/edit_lock.dart';
 import 'package:app/providers/data_provider.dart';
+import 'package:app/widgets/edit_audit.dart';
 import 'package:app/widgets/fieldwidget.dart';
 import 'package:app/helpers.dart';
 import 'package:app/widgets/match_card.dart';
@@ -76,12 +77,13 @@ class _TeamViewPageState extends State<TeamViewPage> {
                 [
                   DataItem.fromText("All"),
                   for (final event in data.event.config.matchscouting.events)
-                    DataItem.fromNumber(
-                        data.event.teamAverageMetric(widget.teamNumber, event.id)),
+                    DataItem.fromNumber(data.event
+                        .teamAverageMetric(widget.teamNumber, event.id)),
                 ],
                 [
                   DataItem.fromText("Auto"),
-                  for (final eventType in data.event.config.matchscouting.events)
+                  for (final eventType
+                      in data.event.config.matchscouting.events)
                     DataItem.fromNumber(data.event.teamAverageMetric(
                         widget.teamNumber,
                         eventType.id,
@@ -101,6 +103,7 @@ class _TeamViewPageState extends State<TeamViewPage> {
                 for (final pitSurvey in data.event.config.matchscouting.survey
                     .where((element) => element.type != SurveyItemType.picture))
                   DataItem.fromText(pitSurvey.label),
+                DataItem.fromText("Scout"),
               ],
               rows: [
                 //Show ALL matches the team is scheduled for ALONG with all matches they played regardless of it it is scheduled sorted
@@ -118,8 +121,8 @@ class _TeamViewPageState extends State<TeamViewPage> {
                                 context,
                                 MaterialPageRoute(
                                     builder: (context) => MatchPage(
-                                        matchid:
-                                            data.event.matchIDFromMatch(match))),
+                                        matchid: data.event
+                                            .matchIDFromMatch(match))),
                               );
                             },
                             child: Text(
@@ -130,20 +133,32 @@ class _TeamViewPageState extends State<TeamViewPage> {
                             )),
                         exportValue: match.description,
                         sortingValue: match),
-                    for (final item in data.event.config.matchscouting.processes)
-                      DataItem.fromErrorNumber(data.event.runMatchResultsProcess(
-                              item,
-                              match.robot[widget.teamNumber.toString()],
-                              widget.teamNumber) ??
-                              //Missing results, this is not an error
+                    for (final item
+                        in data.event.config.matchscouting.processes)
+                      DataItem.fromErrorNumber(data.event
+                              .runMatchResultsProcess(
+                                  item,
+                                  match.robot[widget.teamNumber.toString()],
+                                  widget.teamNumber) ??
+                          //Missing results, this is not an error
                           (value: null, error: null)),
-                    for (final pitSurvey in data.event.config.matchscouting.survey
+                    for (final pitSurvey in data
+                        .event.config.matchscouting.survey
                         .where((element) =>
                             element.type != SurveyItemType.picture))
                       DataItem.fromText(match
                           .robot[widget.teamNumber.toString()]
                           ?.survey[pitSurvey.id]
                           ?.toString()),
+                    DataItem.fromText(getAuditString(context
+                        .watch<DataProvider>()
+                        .database
+                        .getLastPatchFor([
+                      'matches',
+                      data.event.matchIDFromMatch(match),
+                      'robot',
+                      '${widget.teamNumber}'
+                    ]))),
                   ],
               ],
             ),
@@ -163,8 +178,8 @@ class _TeamViewPageState extends State<TeamViewPage> {
                           style: Theme.of(context).textTheme.titleMedium),
                       FieldPaths(
                         paths: [
-                          for (final match
-                              in data.event.teamRecordedMatches(widget.teamNumber))
+                          for (final match in data.event
+                              .teamRecordedMatches(widget.teamNumber))
                             match.value.robot[widget.teamNumber.toString()]!
                                 .timelineInterpolatedRedNormalized(
                                     data.event.config.fieldStyle)
@@ -227,7 +242,8 @@ class _TeamViewPageState extends State<TeamViewPage> {
                 Center(
                     child: Text("Schedule",
                         style: Theme.of(context).textTheme.titleLarge)),
-                for (final match in data.event.matchesWithTeam(widget.teamNumber))
+                for (final match
+                    in data.event.matchesWithTeam(widget.teamNumber))
                   MatchCard(match: match, focusTeam: widget.teamNumber),
               ],
             ),
@@ -251,8 +267,12 @@ class ScoutingResultsViewer extends StatelessWidget {
     }
     return Column(
       children: [
-        for (final item in snoutData.event.config.pitscouting)
-          ScoutingResult(item: item, survey: data)
+        for (final item in snoutData.event.config.pitscouting) ...[
+          ScoutingResult(item: item, survey: data),
+          Align(
+              alignment: Alignment.centerRight,
+              child: EditAudit(path: ['pitscouting', '$teamNumber', item.id])),
+        ]
       ],
     );
   }

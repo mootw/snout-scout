@@ -10,6 +10,7 @@ import 'package:app/screens/documentation_page.dart';
 import 'package:app/screens/edit_json.dart';
 import 'package:app/screens/local_patch_storage.dart';
 import 'package:app/screens/schedule_page.dart';
+import 'package:app/screens/scout_leaderboard.dart';
 import 'package:app/screens/teams_page.dart';
 import 'package:app/search.dart';
 import 'package:download/download.dart';
@@ -208,6 +209,17 @@ class _MyHomePageState extends State<MyHomePage> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => const LocalPatchStorage(),
+                  ));
+            },
+          ),
+          ListTile(
+            title: const Text("Scouting Leaderboard"),
+            trailing: const Icon(Icons.leaderboard),
+            onTap: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ScoutLeaderboardPage(),
                   ));
             },
           ),

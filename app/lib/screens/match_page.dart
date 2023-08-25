@@ -1,9 +1,8 @@
-import 'dart:convert';
-
 import 'package:app/providers/identity_provider.dart';
 import 'package:app/widgets/datasheet.dart';
 import 'package:app/edit_lock.dart';
 import 'package:app/providers/data_provider.dart';
+import 'package:app/widgets/edit_audit.dart';
 import 'package:app/widgets/fieldwidget.dart';
 import 'package:app/helpers.dart';
 import 'package:app/screens/analysis/match_preview.dart';
@@ -112,6 +111,7 @@ class _MatchPageState extends State<MatchPage> {
                 DataItem.fromText(item.label),
               for (final item in snoutData.event.config.matchscouting.survey)
                 DataItem.fromText(item.label),
+              DataItem.fromText("Scout")
             ],
             rows: [
               for (final team in <int>{
@@ -155,6 +155,15 @@ class _MatchPageState extends State<MatchPage> {
                     DataItem.fromText(match
                         .robot[team.toString()]?.survey[item.id]
                         ?.toString()),
+                  DataItem.fromText(getAuditString(context
+                        .watch<DataProvider>()
+                        .database
+                        .getLastPatchFor([
+                      'matches',
+                      widget.matchid,
+                      'robot',
+                      '$team'
+                    ]))),
                 ],
             ],
           ),
