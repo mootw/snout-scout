@@ -62,7 +62,7 @@ class _EditMatchResultsState extends State<EditMatchResults> {
                   });
                   try {
                     final result = await getMatchResultsDataFromTBA(
-                        context.read<DataProvider>().db, widget.matchID);
+                        context.read<DataProvider>().event, widget.matchID);
                     _redScore.text = result.redScore.toString();
                     _blueScore.text = result.blueScore.toString();
                     _matchEndTime = result.startTime.add(matchLength);

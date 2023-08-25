@@ -6,7 +6,7 @@ part of 'eventconfig.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-EventConfig _$EventConfigFromJson(Map<String, dynamic> json) => EventConfig(
+EventConfig _$EventConfigFromJson(Map json) => EventConfig(
       name: json['name'] as String,
       team: json['team'] as int,
       season: json['season'] as int,
@@ -17,13 +17,14 @@ EventConfig _$EventConfigFromJson(Map<String, dynamic> json) => EventConfig(
           $enumDecodeNullable(_$FieldStyleEnumMap, json['fieldStyle']) ??
               FieldStyle.rotated,
       pitscouting: (json['pitscouting'] as List<dynamic>?)
-              ?.map((e) => SurveyItem.fromJson(e as Map<String, dynamic>))
+              ?.map((e) =>
+                  SurveyItem.fromJson(Map<String, dynamic>.from(e as Map)))
               .toList() ??
           const [],
       matchscouting: json['matchscouting'] == null
           ? const MatchScouting()
           : MatchScouting.fromJson(
-              json['matchscouting'] as Map<String, dynamic>),
+              Map<String, dynamic>.from(json['matchscouting'] as Map)),
     );
 
 Map<String, dynamic> _$EventConfigToJson(EventConfig instance) =>
@@ -35,8 +36,8 @@ Map<String, dynamic> _$EventConfigToJson(EventConfig instance) =>
       'tbaSecretKey': instance.tbaSecretKey,
       'fieldStyle': _$FieldStyleEnumMap[instance.fieldStyle]!,
       'team': instance.team,
-      'pitscouting': instance.pitscouting,
-      'matchscouting': instance.matchscouting,
+      'pitscouting': instance.pitscouting.map((e) => e.toJson()).toList(),
+      'matchscouting': instance.matchscouting.toJson(),
     };
 
 const _$FieldStyleEnumMap = {

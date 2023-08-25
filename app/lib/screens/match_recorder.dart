@@ -49,7 +49,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
 
   //Only use in buildcontext
   List<MatchEventConfig> get scoutingEvents =>
-      context.watch<DataProvider>().db.config.matchscouting.events;
+      context.watch<DataProvider>().event.config.matchscouting.events;
 
   @override
   void dispose() {
@@ -104,17 +104,17 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                           _events.remove(item);
                         }),
                     child: Text(
-                        '${item.time.round()}  ${item.getLabelFromConfig(context.watch<DataProvider>().db.config)}',
+                        '${item.time.round()}  ${item.getLabelFromConfig(context.watch<DataProvider>().event.config)}',
                         style: TextStyle(
                             color: item.isPositionEvent
                                 ? Theme.of(context).colorScheme.onBackground
                                 : item.getColorFromConfig(context
                                             .watch<DataProvider>()
-                                            .db
+                                            .event
                                             .config) !=
                                         null
                                     ? colorFromHex(item.getColorFromConfig(
-                                        context.watch<DataProvider>().db.config)!)
+                                        context.watch<DataProvider>().event.config)!)
                                     : null))),
 
               // Text(
@@ -164,7 +164,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
               shrinkWrap: true,
               children: [
                 for (final item
-                    in context.watch<DataProvider>().db.config.matchscouting.survey)
+                    in context.watch<DataProvider>().event.config.matchscouting.survey)
                   Container(
                       padding: const EdgeInsets.all(12),
                       child: ScoutingToolWidget(
@@ -335,7 +335,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
     Widget? robotPicture;
     final pictureData = context
         .watch<DataProvider>()
-        .db
+        .event
         .pitscouting[widget.team.toString()]?['robot_picture'];
     if (pictureData != null) {
       robotPicture = Image.memory(

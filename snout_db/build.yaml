@@ -1,0 +1,8 @@
+targets:
+  $default:
+    builders:
+      json_serializable:
+        options:
+          # required to make the json pointer stuff work
+          explicit_to_json: true
+          any_map: true

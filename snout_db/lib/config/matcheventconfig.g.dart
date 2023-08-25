@@ -6,8 +6,7 @@ part of 'matcheventconfig.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-MatchEventConfig _$MatchEventConfigFromJson(Map<String, dynamic> json) =>
-    MatchEventConfig(
+MatchEventConfig _$MatchEventConfigFromJson(Map json) => MatchEventConfig(
       id: json['id'] as String,
       label: json['label'] as String,
       color: json['color'] as String?,

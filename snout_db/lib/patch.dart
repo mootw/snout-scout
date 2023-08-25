@@ -1,8 +1,5 @@
 //Handles applying and the schema for diffs
 
-import 'dart:collection';
-import 'dart:convert';
-
 import 'package:json_annotation/json_annotation.dart';
 import 'package:rfc_6901/rfc_6901.dart';
 import 'package:snout_db/event/frcevent.dart';
@@ -23,31 +20,31 @@ class Patch {
   /// rfc_6901 JSON pointer in the scouting data
   /// when possible this should point as deeply as possible
   /// to avoid conflicts
-  final List<String> pointer;
-
-  /// TODO add rfc_6901 remove functionality (add, write, remove)
+  final List<String> path;
 
   /// data this path should be patched with.
   /// it is not encoded in a String because it will 
   /// get decoded anyways and json is json no need to "wrap it"
-  final Object data;
+  final Object value;
 
+  /// this loosely follows RFC 6902
+  /// TODO add op function
   Patch(
       {required this.identity,
       required this.time,
-      required this.pointer,
-      required this.data});
+      required this.path,
+      required this.value});
 
-  factory Patch.fromJson(Map<String, dynamic> json) => _$PatchFromJson(json);
-  Map<String, dynamic> toJson() => _$PatchToJson(this);
+  factory Patch.fromJson(Map json) => _$PatchFromJson(json);
+  Map toJson() => _$PatchToJson(this);
 
   /// Patches a given database, throws an error if there is an issue.
   /// Returns a NEW instance of FRCEvent, it does not mutate the original
   FRCEvent patch(FRCEvent database) {
-    var dbJson = jsonDecode(jsonEncode(database));
-    final ptr = JsonPointer.build(pointer);
-    dbJson = ptr.write(dbJson, data);
-    return FRCEvent.fromJson(jsonDecode(jsonEncode(dbJson)));
+    final ptr = JsonPointer.build(path);
+    var dbJson = database.toJson();
+    dbJson = ptr.write(dbJson, value) as Map<dynamic, dynamic>;
+    return FRCEvent.fromJson(dbJson);
   }
 
   @override

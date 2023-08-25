@@ -23,7 +23,7 @@ class _BoxPlotAnalysisState extends State<BoxPlotAnalysis> {
   void initState() {
     super.initState();
     //Automatically select the first process by default if it exists (it might be null!)
-    _selectedProcess = context.read<DataProvider>().db.config.matchscouting.processes.firstOrNull;
+    _selectedProcess = context.read<DataProvider>().event.config.matchscouting.processes.firstOrNull;
   }
 
   @override
@@ -33,10 +33,10 @@ class _BoxPlotAnalysisState extends State<BoxPlotAnalysis> {
     Map<int, List<num>>? teamValues;
     if (_selectedProcess != null) {
       teamValues = Map.fromEntries([
-        for (final team in data.db.teams)
+        for (final team in data.event.teams)
           MapEntry(team, [
-            for (final match in data.db.teamRecordedMatches(team))
-              data.db.runMatchResultsProcess(_selectedProcess!,
+            for (final match in data.event.teamRecordedMatches(team))
+              data.event.runMatchResultsProcess(_selectedProcess!,
                       match.value.robot[team.toString()], team)?.value ??
                   0
           ])
@@ -94,7 +94,7 @@ class _BoxPlotAnalysisState extends State<BoxPlotAnalysis> {
                 _selectedProcess = value!;
               });
             },
-            items: data.db.config.matchscouting.processes
+            items: data.event.config.matchscouting.processes
                 .map<DropdownMenuItem<MatchResultsProcess>>(
                     (MatchResultsProcess value) {
               return DropdownMenuItem<MatchResultsProcess>(

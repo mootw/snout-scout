@@ -22,13 +22,13 @@ class TableMatchRecordingsPage extends StatelessWidget {
           columns: [
             DataItem.fromText("Match"),
             DataItem.fromText("Team"),
-            for (final item in data.db.config.matchscouting.processes)
+            for (final item in data.event.config.matchscouting.processes)
               DataItem.fromText(item.label),
-            for (final item in data.db.config.matchscouting.survey)
+            for (final item in data.event.config.matchscouting.survey)
               DataItem.fromText(item.label),
           ],
           rows: [
-            for (final match in data.db.matches.entries.toList().reversed)
+            for (final match in data.event.matches.entries.toList().reversed)
               for (final robot in match.value.robot.entries)
                 [
                   DataItem(
@@ -56,13 +56,13 @@ class TableMatchRecordingsPage extends StatelessWidget {
                               )),
                       exportValue: robot.key,
                       sortingValue: robot.key),
-                  for (final item in data.db.config.matchscouting.processes)
-                    DataItem.fromErrorNumber(data.db.runMatchResultsProcess(
+                  for (final item in data.event.config.matchscouting.processes)
+                    DataItem.fromErrorNumber(data.event.runMatchResultsProcess(
                             item,
                             match.value.robot[robot.key],
                             int.tryParse(robot.key) ?? 0) ??
                         (value: null, error: "Missing Results")),
-                  for (final item in data.db.config.matchscouting.survey.where(
+                  for (final item in data.event.config.matchscouting.survey.where(
                       (element) => element.type != SurveyItemType.picture))
                     DataItem.fromText(match
                         .value.robot[robot.key]?.survey[item.id]

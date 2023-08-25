@@ -83,7 +83,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   context: context,
                   builder: (dialogContext) => AlertDialog(
                         content: SingleChildScrollView(
-                          child: Text(
+                          child: SelectableText(
                               "${record.message}\n${record.error}\n${record.object}\n${record.stackTrace}"),
                         ),
                       ))),
@@ -134,13 +134,13 @@ class _MyHomePageState extends State<MyHomePage> {
     final data = context.watch<DataProvider>();
     final serverConnection = context.watch<ServerConnectionProvider>();
     final identityProvider = context.watch<IdentityProvider>();
-    String? tbaKey = context.watch<DataProvider>().db.config.tbaEventId;
+    String? tbaKey = context.watch<DataProvider>().event.config.tbaEventId;
 
     return Scaffold(
       appBar: AppBar(
         bottom: getErrorBar(),
         titleSpacing: 0,
-        title: Text(data.db.config.name),
+        title: Text(data.event.config.name),
         actions: [
           if (tbaKey != null)
             Padding(
@@ -216,10 +216,10 @@ class _MyHomePageState extends State<MyHomePage> {
               padding: const EdgeInsets.all(8.0),
               child: FilledButton(
                   onPressed: () {
-                    final data = context.read<DataProvider>().db;
+                    final data = context.read<DataProvider>().database;
                     final stream =
                         Stream.fromIterable(utf8.encode(jsonEncode(data)));
-                    download(stream, '${data.config.name}.json');
+                    download(stream, '${data.event.config.name}.json');
                   },
                   child: const Text("Download Event Data to File")),
             ),
@@ -227,7 +227,7 @@ class _MyHomePageState extends State<MyHomePage> {
           const Divider(),
           ListTile(
             title: const Text("Event Config"),
-            subtitle: Text(data.db.config.name),
+            subtitle: Text(data.event.config.name),
             trailing: IconButton(
                 onPressed: () async {
                   final result = await Navigator.push(
@@ -235,7 +235,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       MaterialPageRoute(
                         builder: (context) => JSONEditor(
                           validate: EventConfig.fromJson,
-                          source: context.read<DataProvider>().db.config,
+                          source: context.read<DataProvider>().event.config,
                         ),
                       ));
 
@@ -243,8 +243,8 @@ class _MyHomePageState extends State<MyHomePage> {
                     Patch patch = Patch(
                         identity: context.read<IdentityProvider>().identity,
                         time: DateTime.now(),
-                        pointer: ['config'],
-                        data: jsonDecode(result));
+                        path: ['config'],
+                        value: jsonDecode(result));
                     //Save the scouting results to the server!!
                     await data.addPatch(patch);
                   }

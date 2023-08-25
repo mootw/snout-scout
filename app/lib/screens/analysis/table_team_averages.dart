@@ -19,13 +19,13 @@ class TableTeamAveragesPage extends StatelessWidget {
       body: SingleChildScrollView(
         child: DataSheet(title: 'Team Averages', columns: [
               DataItem.fromText("Team"),
-              for (final item in data.db.config.matchscouting.processes)
+              for (final item in data.event.config.matchscouting.processes)
                 DataItem.fromText(item.label),
-              for (final pitSurvey in data.db.config.pitscouting
+              for (final pitSurvey in data.event.config.pitscouting
                   .where((element) => element.type != SurveyItemType.picture))
                 DataItem.fromText(pitSurvey.label),
             ], rows: [
-              for (final team in data.db.teams)
+              for (final team in data.event.teams)
                 [
                   DataItem(
                       displayValue: TextButton(
@@ -38,12 +38,12 @@ class TableTeamAveragesPage extends StatelessWidget {
                               )),
                       exportValue: team.toString(),
                       sortingValue: team),
-                  for (final item in data.db.config.matchscouting.processes)
-                    DataItem.fromNumber(data.db.teamAverageProcess(team, item)),
-                  for (final pitSurvey in data.db.config.pitscouting
+                  for (final item in data.event.config.matchscouting.processes)
+                    DataItem.fromNumber(data.event.teamAverageProcess(team, item)),
+                  for (final pitSurvey in data.event.config.pitscouting
                       .where((element) => element.type != SurveyItemType.picture))
                     DataItem.fromText(data
-                        .db.pitscouting[team.toString()]?[pitSurvey.id]
+                        .event.pitscouting[team.toString()]?[pitSurvey.id]
                         ?.toString())
                 ]
             ]),

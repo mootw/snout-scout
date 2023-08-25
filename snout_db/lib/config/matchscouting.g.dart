@@ -6,26 +6,27 @@ part of 'matchscouting.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-MatchScouting _$MatchScoutingFromJson(Map<String, dynamic> json) =>
-    MatchScouting(
+MatchScouting _$MatchScoutingFromJson(Map json) => MatchScouting(
       events: (json['events'] as List<dynamic>?)
-              ?.map((e) => MatchEventConfig.fromJson(e as Map<String, dynamic>))
+              ?.map((e) => MatchEventConfig.fromJson(
+                  Map<String, dynamic>.from(e as Map)))
               .toList() ??
           const [],
       processes: (json['processes'] as List<dynamic>?)
-              ?.map((e) =>
-                  MatchResultsProcess.fromJson(e as Map<String, dynamic>))
+              ?.map((e) => MatchResultsProcess.fromJson(
+                  Map<String, dynamic>.from(e as Map)))
               .toList() ??
           const [],
       survey: (json['survey'] as List<dynamic>?)
-              ?.map((e) => SurveyItem.fromJson(e as Map<String, dynamic>))
+              ?.map((e) =>
+                  SurveyItem.fromJson(Map<String, dynamic>.from(e as Map)))
               .toList() ??
           const [],
     );
 
 Map<String, dynamic> _$MatchScoutingToJson(MatchScouting instance) =>
     <String, dynamic>{
-      'events': instance.events,
-      'processes': instance.processes,
-      'survey': instance.survey,
+      'events': instance.events.map((e) => e.toJson()).toList(),
+      'processes': instance.processes.map((e) => e.toJson()).toList(),
+      'survey': instance.survey.map((e) => e.toJson()).toList(),
     };

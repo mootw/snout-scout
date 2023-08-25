@@ -28,7 +28,7 @@ class MatchCard extends StatelessWidget {
           context,
           MaterialPageRoute(
               builder: (context) =>
-                  MatchPage(matchid: snoutData.db.matchIDFromMatch(match))),
+                  MatchPage(matchid: snoutData.event.matchIDFromMatch(match))),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,

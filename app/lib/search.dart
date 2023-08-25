@@ -48,7 +48,7 @@ class SnoutScoutSearch extends SearchDelegate {
 
     DataProvider db = context.watch<DataProvider>();
 
-    for (final team in db.db.teams) {
+    for (final team in db.event.teams) {
       if (query.isEmpty) {
         continue;
       }
@@ -56,7 +56,7 @@ class SnoutScoutSearch extends SearchDelegate {
         //Load the robot picture to show in the search if it is available
         Widget? robotPicture;
         final pictureData =
-            db.db.pitscouting[team.toString()]?['robot_picture'];
+            db.event.pitscouting[team.toString()]?['robot_picture'];
         if (pictureData != null) {
           robotPicture = AspectRatio(
               aspectRatio: 1,
@@ -80,7 +80,7 @@ class SnoutScoutSearch extends SearchDelegate {
       }
     }
 
-    for (final match in db.db.matches.values) {
+    for (final match in db.event.matches.values) {
       if (query.isEmpty) {
         continue;
       }
@@ -93,7 +93,7 @@ class SnoutScoutSearch extends SearchDelegate {
               context,
               MaterialPageRoute(
                   builder: (_) =>
-                      MatchPage(matchid: db.db.matchIDFromMatch(match))),
+                      MatchPage(matchid: db.event.matchIDFromMatch(match))),
             );
           },
         ));
@@ -101,18 +101,18 @@ class SnoutScoutSearch extends SearchDelegate {
     }
 
     //Search in pit scouting
-    for (final team in db.db.teams) {
+    for (final team in db.event.teams) {
       if (query.isEmpty) {
         continue;
       }
-      final pitScouting = db.db.pitscouting[team.toString()];
+      final pitScouting = db.event.pitscouting[team.toString()];
       if (pitScouting == null) {
         continue;
       }
 
       for (final item in pitScouting.entries) {
         
-        final surveyItem = db.db.config.pitscouting
+        final surveyItem = db.event.config.pitscouting
             .firstWhereOrNull((element) => element.id == item.key);
         if(surveyItem == null) {
           continue;
@@ -125,7 +125,7 @@ class SnoutScoutSearch extends SearchDelegate {
           //Load the robot picture to show in the search if it is available
           Widget? robotPicture;
           final pictureData =
-              db.db.pitscouting[team.toString()]?['robot_picture'];
+              db.event.pitscouting[team.toString()]?['robot_picture'];
           if (pictureData != null) {
             robotPicture = AspectRatio(
                 aspectRatio: 1,
@@ -152,7 +152,7 @@ class SnoutScoutSearch extends SearchDelegate {
     }
 
     //Search in post match survey
-    for (final match in db.db.matches.values) {
+    for (final match in db.event.matches.values) {
       if (query.isEmpty) {
         continue;
       }
@@ -167,7 +167,7 @@ class SnoutScoutSearch extends SearchDelegate {
                   context,
                   MaterialPageRoute(
                       builder: (context) =>
-                          MatchPage(matchid: db.db.matchIDFromMatch(match))),
+                          MatchPage(matchid: db.event.matchIDFromMatch(match))),
                 );
               },
             ));

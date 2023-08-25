@@ -9,7 +9,6 @@ import 'package:app/helpers.dart';
 import 'package:app/widgets/match_card.dart';
 import 'package:app/screens/match_page.dart';
 import 'package:app/screens/scout_team.dart';
-import 'package:app/scouting_tools/scouting_tool.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -44,8 +43,8 @@ class _TeamViewPageState extends State<TeamViewPage> {
                             MaterialPageRoute(
                                 builder: (_) => PitScoutTeamPage(
                                     team: widget.teamNumber,
-                                    config: data.db.config,
-                                    oldData: data.db.pitscouting[
+                                    config: data.event.config,
+                                    oldData: data.event.pitscouting[
                                         widget.teamNumber.toString()])),
                           ));
                   if (result != null) {
@@ -70,20 +69,20 @@ class _TeamViewPageState extends State<TeamViewPage> {
               //Data is a list of rows and columns
               columns: [
                 DataItem.fromText("Metric"),
-                for (final event in data.db.config.matchscouting.events)
+                for (final event in data.event.config.matchscouting.events)
                   DataItem.fromText(event.label),
               ],
               rows: [
                 [
                   DataItem.fromText("All"),
-                  for (final event in data.db.config.matchscouting.events)
+                  for (final event in data.event.config.matchscouting.events)
                     DataItem.fromNumber(
-                        data.db.teamAverageMetric(widget.teamNumber, event.id)),
+                        data.event.teamAverageMetric(widget.teamNumber, event.id)),
                 ],
                 [
                   DataItem.fromText("Auto"),
-                  for (final eventType in data.db.config.matchscouting.events)
-                    DataItem.fromNumber(data.db.teamAverageMetric(
+                  for (final eventType in data.event.config.matchscouting.events)
+                    DataItem.fromNumber(data.event.teamAverageMetric(
                         widget.teamNumber,
                         eventType.id,
                         (event) => event.isInAuto)),
@@ -97,17 +96,17 @@ class _TeamViewPageState extends State<TeamViewPage> {
               //Data is a list of rows and columns
               columns: [
                 DataItem.fromText("Match"),
-                for (final item in data.db.config.matchscouting.processes)
+                for (final item in data.event.config.matchscouting.processes)
                   DataItem.fromText(item.label),
-                for (final pitSurvey in data.db.config.matchscouting.survey
+                for (final pitSurvey in data.event.config.matchscouting.survey
                     .where((element) => element.type != SurveyItemType.picture))
                   DataItem.fromText(pitSurvey.label),
               ],
               rows: [
                 //Show ALL matches the team is scheduled for ALONG with all matches they played regardless of it it is scheduled sorted
                 for (final match in <FRCMatch>{
-                  ...data.db.matchesWithTeam(widget.teamNumber),
-                  ...data.db
+                  ...data.event.matchesWithTeam(widget.teamNumber),
+                  ...data.event
                       .teamRecordedMatches(widget.teamNumber)
                       .map((e) => e.value)
                 }.sorted((a, b) => Comparable.compare(a, b)))
@@ -120,7 +119,7 @@ class _TeamViewPageState extends State<TeamViewPage> {
                                 MaterialPageRoute(
                                     builder: (context) => MatchPage(
                                         matchid:
-                                            data.db.matchIDFromMatch(match))),
+                                            data.event.matchIDFromMatch(match))),
                               );
                             },
                             child: Text(
@@ -131,14 +130,14 @@ class _TeamViewPageState extends State<TeamViewPage> {
                             )),
                         exportValue: match.description,
                         sortingValue: match),
-                    for (final item in data.db.config.matchscouting.processes)
-                      DataItem.fromErrorNumber(data.db.runMatchResultsProcess(
+                    for (final item in data.event.config.matchscouting.processes)
+                      DataItem.fromErrorNumber(data.event.runMatchResultsProcess(
                               item,
                               match.robot[widget.teamNumber.toString()],
                               widget.teamNumber) ??
                               //Missing results, this is not an error
                           (value: null, error: null)),
-                    for (final pitSurvey in data.db.config.matchscouting.survey
+                    for (final pitSurvey in data.event.config.matchscouting.survey
                         .where((element) =>
                             element.type != SurveyItemType.picture))
                       DataItem.fromText(match
@@ -165,10 +164,10 @@ class _TeamViewPageState extends State<TeamViewPage> {
                       FieldPaths(
                         paths: [
                           for (final match
-                              in data.db.teamRecordedMatches(widget.teamNumber))
+                              in data.event.teamRecordedMatches(widget.teamNumber))
                             match.value.robot[widget.teamNumber.toString()]!
                                 .timelineInterpolatedRedNormalized(
-                                    data.db.config.fieldStyle)
+                                    data.event.config.fieldStyle)
                                 .where((element) => element.isInAuto)
                                 .toList()
                         ],
@@ -176,7 +175,7 @@ class _TeamViewPageState extends State<TeamViewPage> {
                     ],
                   ),
                 ),
-                for (final eventType in data.db.config.matchscouting.events)
+                for (final eventType in data.event.config.matchscouting.events)
                   SizedBox(
                     width: smallFieldSize,
                     child: Column(children: [
@@ -184,7 +183,7 @@ class _TeamViewPageState extends State<TeamViewPage> {
                       Text(eventType.label,
                           style: Theme.of(context).textTheme.titleMedium),
                       FieldHeatMap(
-                          events: data.db
+                          events: data.event
                               .teamRecordedMatches(widget.teamNumber)
                               .fold(
                                   [],
@@ -193,7 +192,7 @@ class _TeamViewPageState extends State<TeamViewPage> {
                                         ...?element.value
                                             .robot[widget.teamNumber.toString()]
                                             ?.timelineRedNormalized(
-                                                data.db.config.fieldStyle)
+                                                data.event.config.fieldStyle)
                                             .where((event) =>
                                                 event.id == eventType.id)
                                       ])),
@@ -207,7 +206,7 @@ class _TeamViewPageState extends State<TeamViewPage> {
                         Text("Driving Tendencies",
                             style: Theme.of(context).textTheme.titleMedium),
                         FieldHeatMap(
-                            events: data.db
+                            events: data.event
                                 .teamRecordedMatches(widget.teamNumber)
                                 .fold(
                                     [],
@@ -218,7 +217,7 @@ class _TeamViewPageState extends State<TeamViewPage> {
                                               .robot[
                                                   widget.teamNumber.toString()]
                                               ?.timelineInterpolatedRedNormalized(
-                                                  data.db.config.fieldStyle)
+                                                  data.event.config.fieldStyle)
                                               .where((event) =>
                                                   event.isPositionEvent)
                                         ])),
@@ -228,7 +227,7 @@ class _TeamViewPageState extends State<TeamViewPage> {
                 Center(
                     child: Text("Schedule",
                         style: Theme.of(context).textTheme.titleLarge)),
-                for (final match in data.db.matchesWithTeam(widget.teamNumber))
+                for (final match in data.event.matchesWithTeam(widget.teamNumber))
                   MatchCard(match: match, focusTeam: widget.teamNumber),
               ],
             ),
@@ -246,13 +245,13 @@ class ScoutingResultsViewer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final data = snoutData.db.pitscouting[teamNumber.toString()];
+    final data = snoutData.event.pitscouting[teamNumber.toString()];
     if (data == null) {
       return const ListTile(title: Text("Team has no pit scouting data"));
     }
     return Column(
       children: [
-        for (final item in snoutData.db.config.pitscouting)
+        for (final item in snoutData.event.config.pitscouting)
           ScoutingResult(item: item, survey: data)
       ],
     );

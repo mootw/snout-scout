@@ -31,7 +31,7 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
             onPressed: () async {
               List<Patch> patch;
               try {
-                patch = await loadScheduleFromTBA(snoutData.db, context);
+                patch = await loadScheduleFromTBA(snoutData.event, context);
               } catch (e) {
                 if (mounted) {
                   showDialog(
@@ -93,7 +93,7 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
               },
               child: const Text("Add Match")),
         ),
-        for (final match in snoutData.db.matches.entries)
+        for (final match in snoutData.event.matches.entries)
           ListTile(
             title: Text(match.value.description),
             subtitle: Text(match.key),
@@ -118,16 +118,17 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
                           ],
                         ));
                 if (result == true) {
-                  final matchesWithRemoved = Map<String, dynamic>.from(snoutData.db.matches);
+                  final matchesWithRemoved = Map<String, dynamic>.from(snoutData.event.matches);
                   matchesWithRemoved.remove(match.key);
 
+                  //TODO this might not be deeply modified to raw types before being applied to the patch
                   Patch patch = Patch(
                       identity: context.read<IdentityProvider>().identity,
                       time: DateTime.now(),
-                      pointer: [
+                      path: [
                         'matches',
                       ],
-                      data: matchesWithRemoved);
+                      value: matchesWithRemoved);
                   await snoutData.addPatch(patch);
                 }
               },
@@ -147,11 +148,11 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
       Patch patch = Patch(
           identity: context.read<IdentityProvider>().identity,
           time: DateTime.now(),
-          pointer: [
+          path: [
             'matches',
             matchID ?? resultMatch.description,
           ],
-          data: resultMatch);
+          value: resultMatch.toJson());
       await data.addPatch(patch);
     }
   }

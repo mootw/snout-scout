@@ -36,9 +36,9 @@ class FRCMatch implements Comparable<FRCMatch> {
       required this.results,
       required this.robot});
 
-  factory FRCMatch.fromJson(Map<String, dynamic> json) =>
+  factory FRCMatch.fromJson(Map json) =>
       _$FRCMatchFromJson(json);
-  Map<String, dynamic> toJson() => _$FRCMatchToJson(this);
+  Map toJson() => _$FRCMatchToJson(this);
 
   //Default sorting should be based on match time
   @override

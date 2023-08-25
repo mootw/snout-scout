@@ -25,11 +25,11 @@ class _AllMatchesPageState extends State<AllMatchesPage> {
 
     //Scroll to the next match with an offset automatically if it is not null.
     DataProvider data = context.read<DataProvider>();
-    final nextMatch = data.db.nextMatch;
+    final nextMatch = data.event.nextMatch;
     if (nextMatch != null) {
       WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
         _controller.positions.first.moveTo(
-            (data.db.matches.values.toList().indexOf(nextMatch) *
+            (data.event.matches.values.toList().indexOf(nextMatch) *
                 matchCardHeight) - (matchCardHeight * 2),
             clamp: true);
       });
@@ -40,8 +40,8 @@ class _AllMatchesPageState extends State<AllMatchesPage> {
   Widget build(BuildContext context) {
     final snoutData = context.watch<DataProvider>();
     FRCMatch? teamNextMatch =
-        snoutData.db.nextMatchForTeam(snoutData.db.config.team);
-    Duration? scheduleDelay = snoutData.db.scheduleDelay;
+        snoutData.event.nextMatchForTeam(snoutData.event.config.team);
+    Duration? scheduleDelay = snoutData.event.scheduleDelay;
     return Column(
       children: [
         Expanded(
@@ -70,15 +70,15 @@ class _AllMatchesPageState extends State<AllMatchesPage> {
             children: [
               //Iterate through all of the matches and add them to the list
               //if a match is equal to the next match; highlight it!
-              for (final match in snoutData.db.matches.values)
+              for (final match in snoutData.event.matches.values)
                 Container(
-                    color: match == snoutData.db.nextMatch
+                    color: match == snoutData.event.nextMatch
                         ? Theme.of(context).colorScheme.onPrimary
-                        : (match.hasTeam(snoutData.db.config.team)
+                        : (match.hasTeam(snoutData.event.config.team)
                             ? Theme.of(context).colorScheme.onSecondary
                             : null),
                     child: MatchCard(
-                        match: match, focusTeam: snoutData.db.config.team)),
+                        match: match, focusTeam: snoutData.event.config.team)),
 
                     Padding(
             padding: const EdgeInsets.all(16),
@@ -89,7 +89,7 @@ class _AllMatchesPageState extends State<AllMatchesPage> {
                         context,
                         MaterialPageRoute(
                           builder: (context) =>
-                              EditSchedulePage(matches: snoutData.db.matches),
+                              EditSchedulePage(matches: snoutData.event.matches),
                         ));
                   },
                   child: const Text("Edit Schedule")),
@@ -112,14 +112,14 @@ class _AllMatchesPageState extends State<AllMatchesPage> {
                         context,
                         MaterialPageRoute(
                             builder: (context) => MatchPage(
-                                matchid: snoutData.db
+                                matchid: snoutData.event
                                     .matchIDFromMatch(teamNextMatch))),
                       ),
                       child: Text(
                         teamNextMatch.description,
                         style: TextStyle(
                             color: getAllianceColor(teamNextMatch
-                                .getAllianceOf(snoutData.db.config.team))),
+                                .getAllianceOf(snoutData.event.config.team))),
                       ),
                     ),
                     TimeDuration(

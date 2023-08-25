@@ -16,7 +16,7 @@ class MatchResultValues {
       required this.redScore,
       required this.blueScore});
 
-  factory MatchResultValues.fromJson(Map<String, dynamic> json) =>
+  factory MatchResultValues.fromJson(Map json) =>
       _$MatchResultValuesFromJson(json);
   Map<String, dynamic> toJson() => _$MatchResultValuesToJson(this);
 

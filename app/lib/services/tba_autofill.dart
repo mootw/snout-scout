@@ -146,11 +146,11 @@ Future<List<Patch>> loadScheduleFromTBA(FRCEvent eventData, BuildContext context
       Patch patch = Patch(
           identity: context.read<IdentityProvider>().identity,
           time: DateTime.now(),
-          pointer: [
+          path: [
             'matches',
             key,
           ],
-          data: newMatch);
+          value: newMatch.toJson());
 
       patches.add(patch);
     }

@@ -41,9 +41,9 @@ class FRCEvent {
       : matches = SplayTreeMap.from(matches,
             (key1, key2) => Comparable.compare(matches[key1]!, matches[key2]!));
 
-  factory FRCEvent.fromJson(Map<String, dynamic> json) =>
+  factory FRCEvent.fromJson(Map json) =>
       _$FRCEventFromJson(json);
-  Map<String, dynamic> toJson() => _$FRCEventToJson(this);
+  Map toJson() => _$FRCEventToJson(this);
 
   /// "performant" way to load a database state from a list patches
   /// note, this will fail if the resulting structure does not match
@@ -54,13 +54,13 @@ class FRCEvent {
     for(final patch in patches) {
       if(dbJson == null) {
         //Initialize the db with the first patch's data.
-        dbJson = jsonDecode(jsonEncode(FRCEvent.fromJson(patch.data as Map<String, dynamic>)));
+        dbJson = FRCEvent.fromJson(patch.value as Map).toJson();
         continue;
       }
-      final ptr = JsonPointer.build(patch.pointer);
-      dbJson = ptr.write(dbJson, patch.data);
+      final ptr = JsonPointer.build(patch.path);
+      dbJson = ptr.write(dbJson, patch.value);
     }
-    return FRCEvent.fromJson(jsonDecode(jsonEncode(dbJson)));
+    return FRCEvent.fromJson(dbJson);
   }
 
   //Returns the id for a given match

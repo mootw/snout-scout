@@ -18,19 +18,19 @@ class AnalysisEventsHeatmap extends StatelessWidget {
           Text("Autos", style: Theme.of(context).textTheme.titleMedium),
           FieldPaths(
             paths: [
-              for (final match in data.db.matches.values)
+              for (final match in data.event.matches.values)
                 for (final robot in match.robot.entries)
                   match.robot[robot.key]!.timelineInterpolated
                       .where((element) => element.isInAuto)
                       .toList()
             ],
           ),
-          for (final eventType in data.db.config.matchscouting.events) ...[
+          for (final eventType in data.event.config.matchscouting.events) ...[
             const SizedBox(height: 16),
             Text(eventType.label,
                 style: Theme.of(context).textTheme.titleMedium),
             FieldHeatMap(
-                events: data.db.matches.values.fold(
+                events: data.event.matches.values.fold(
                     [],
                     (previousValue, element) => [
                           ...previousValue,
@@ -40,7 +40,7 @@ class AnalysisEventsHeatmap extends StatelessWidget {
                                     ...previousValue,
                                     ...element
                                         .timelineRedNormalized(
-                                            data.db.config.fieldStyle)
+                                            data.event.config.fieldStyle)
                                         .where(
                                             (event) => event.id == eventType.id)
                                   ])

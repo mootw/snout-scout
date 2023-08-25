@@ -21,7 +21,7 @@ class _AnalysisHeatMapByEventTypeState
   void initState() {
     super.initState();
     //select the first event type if it is exists
-    _selectedEvent = context.read<DataProvider>().db.config.matchscouting.events.firstOrNull;
+    _selectedEvent = context.read<DataProvider>().event.config.matchscouting.events.firstOrNull;
   }
 
   @override
@@ -41,7 +41,7 @@ class _AnalysisHeatMapByEventTypeState
                 _selectedEvent = value!;
               });
             },
-            items: data.db.config.matchscouting.events
+            items: data.event.config.matchscouting.events
                 .map<DropdownMenuItem<MatchEventConfig>>(
                     (MatchEventConfig value) {
               return DropdownMenuItem<MatchEventConfig>(
@@ -54,7 +54,7 @@ class _AnalysisHeatMapByEventTypeState
             Expanded(
               child: ListView(
                 children: [
-                  for (final team in data.db.teams) ...[
+                  for (final team in data.event.teams) ...[
                     const SizedBox(height: 16),
                     TextButton(
                         onPressed: () => Navigator.push(
@@ -64,7 +64,7 @@ class _AnalysisHeatMapByEventTypeState
                                     TeamViewPage(teamNumber: team))),
                         child: Text(team.toString())),
                     FieldHeatMap(
-                        events: data.db.matchesWithTeam(team).fold(
+                        events: data.event.matchesWithTeam(team).fold(
                             [],
                             (previousValue, element) => [
                                   ...previousValue,
@@ -74,7 +74,7 @@ class _AnalysisHeatMapByEventTypeState
                                             ...previousValue,
                                             ...element
                                                 .timelineRedNormalized(
-                                                    data.db.config.fieldStyle)
+                                                    data.event.config.fieldStyle)
                                                 .where((event) =>
                                                     event.id ==
                                                     _selectedEvent!.id)

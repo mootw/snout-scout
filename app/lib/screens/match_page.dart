@@ -33,7 +33,7 @@ class _MatchPageState extends State<MatchPage> {
   @override
   Widget build(BuildContext context) {
     final snoutData = context.watch<DataProvider>();
-    FRCMatch match = snoutData.db.matches[widget.matchid]!;
+    FRCMatch match = snoutData.event.matches[widget.matchid]!;
     return Scaffold(
       appBar: AppBar(
         title: Text(match.description),
@@ -41,7 +41,7 @@ class _MatchPageState extends State<MatchPage> {
           //If there is a TBA event ID we will add a button to view the match id
           //since we will assume that all of the matches (or at least most)
           //have been imported to match the tba id format
-          if (snoutData.db.config.tbaEventId != null)
+          if (snoutData.event.config.tbaEventId != null)
             FilledButton.tonal(
               child: const Text("TBA"),
               onPressed: () => launchUrlString(
@@ -86,15 +86,15 @@ class _MatchPageState extends State<MatchPage> {
                           MaterialPageRoute(
                             builder: (context) => EditMatchResults(
                                 results: match.results,
-                                config: snoutData.db.config, matchID: widget.matchid),
+                                config: snoutData.event.config, matchID: widget.matchid),
                           )));
 
                   if (result != null) {
                     Patch patch = Patch(
                         identity: context.read<IdentityProvider>().identity,
                         time: DateTime.now(),
-                        pointer: ['matches', widget.matchid, 'results'],
-                        data: result);
+                        path: ['matches', widget.matchid, 'results'],
+                        value: result.toJson());
 
                     await snoutData.addPatch(patch);
                   }
@@ -108,9 +108,9 @@ class _MatchPageState extends State<MatchPage> {
             //Data is a list of rows and columns
             columns: [
               DataItem.fromText("Team"),
-              for (final item in snoutData.db.config.matchscouting.processes)
+              for (final item in snoutData.event.config.matchscouting.processes)
                 DataItem.fromText(item.label),
-              for (final item in snoutData.db.config.matchscouting.survey)
+              for (final item in snoutData.event.config.matchscouting.survey)
                 DataItem.fromText(item.label),
             ],
             rows: [
@@ -143,13 +143,13 @@ class _MatchPageState extends State<MatchPage> {
                       exportValue: team.toString(),
                       sortingValue: team),
                   for (final item
-                      in snoutData.db.config.matchscouting.processes)
-                    DataItem.fromErrorNumber(snoutData.db
+                      in snoutData.event.config.matchscouting.processes)
+                    DataItem.fromErrorNumber(snoutData.event
                             .runMatchResultsProcess(
                                 item, match.robot[team.toString()], team) ??
                         //Missing results, this is not an error
                         (value: null, error: null)),
-                  for (final item in snoutData.db.config.matchscouting.survey
+                  for (final item in snoutData.event.config.matchscouting.survey
                       .where(
                           (element) => element.type != SurveyItemType.picture))
                     DataItem.fromText(match
@@ -183,7 +183,7 @@ class _MatchPageState extends State<MatchPage> {
                   ],
                 ),
               ),
-              for (final eventType in snoutData.db.config.matchscouting.events)
+              for (final eventType in snoutData.event.config.matchscouting.events)
                 SizedBox(
                   width: smallFieldSize,
                   child: Column(children: [

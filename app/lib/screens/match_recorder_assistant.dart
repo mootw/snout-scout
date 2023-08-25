@@ -42,7 +42,7 @@ class _MatchRecorderAssistantPageState
   void initState() {
     super.initState();
     final snoutData = context.read<DataProvider>();
-    FRCMatch match = snoutData.db.matches[widget.matchid]!;
+    FRCMatch match = snoutData.event.matches[widget.matchid]!;
 
     //Pick a recommended team that is not already being scouted
     () async {
@@ -94,7 +94,7 @@ class _MatchRecorderAssistantPageState
   @override
   Widget build(BuildContext context) {
     final snoutData = context.watch<DataProvider>();
-    FRCMatch match = snoutData.db.matches[widget.matchid]!;
+    FRCMatch match = snoutData.event.matches[widget.matchid]!;
     return Scaffold(
       appBar: AppBar(title: Text("Recording ${match.description}")),
       body: ListView(
@@ -188,7 +188,7 @@ class _MatchRecorderAssistantPageState
       required Color subtitleColor}) {
     final snoutData = context.watch<DataProvider>();
     Widget? image;
-    final data = snoutData.db.pitscouting[team.toString()]?['robot_picture'];
+    final data = snoutData.event.pitscouting[team.toString()]?['robot_picture'];
     if (data != null) {
       image = AspectRatio(
           aspectRatio: 1,
@@ -244,8 +244,8 @@ class _MatchRecorderAssistantPageState
       Patch patch = Patch(
           identity: identity,
           time: DateTime.now(),
-          pointer: ['matches', matchid, 'robot', team.toString()],
-          data: result);
+          path: ['matches', matchid, 'robot', team.toString()],
+          value: result.toJson());
 
       await snoutData.addPatch(patch);
     }
