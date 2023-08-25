@@ -30,7 +30,8 @@ class _AllMatchesPageState extends State<AllMatchesPage> {
       WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
         _controller.positions.first.moveTo(
             (data.event.matches.values.toList().indexOf(nextMatch) *
-                matchCardHeight) - (matchCardHeight * 2),
+                    matchCardHeight) -
+                (matchCardHeight * 2),
             clamp: true);
       });
     }
@@ -45,27 +46,7 @@ class _AllMatchesPageState extends State<AllMatchesPage> {
     return Column(
       children: [
         Expanded(
-          child:
-              // TODO eventually figure out the best performant way to do this.
-              // i honeslty thing the lag on the web version might just be
-              // due to javascript being slow rather than building being such
-              // maybe see what changes after wasm runtime works???????????
-              // ListView.builder(
-              //     controller: _controller,
-              //     itemCount: snoutData.db.matches.values.toList().length,
-              //     itemBuilder: (context, index) {
-              //       final match = snoutData.db.matches.values.toList()[index];
-
-              //       return Container(
-              //           color: match == snoutData.db.nextMatch
-              //               ? Theme.of(context).colorScheme.onPrimary
-              //               : (match.hasTeam(snoutData.db.config.team)
-              //                   ? Theme.of(context).colorScheme.onSecondary
-              //                   : null),
-              //           child: MatchCard(
-              //               match: match, focusTeam: snoutData.db.config.team));
-              //     }),
-              ListView(
+          child: ListView(
             controller: _controller,
             children: [
               //Iterate through all of the matches and add them to the list
@@ -80,53 +61,49 @@ class _AllMatchesPageState extends State<AllMatchesPage> {
                     child: MatchCard(
                         match: match, focusTeam: snoutData.event.config.team)),
 
-                    Padding(
-            padding: const EdgeInsets.all(16),
-            child: Center(
-              child: FilledButton.tonal(
-                  onPressed: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              EditSchedulePage(matches: snoutData.event.matches),
-                        ));
-                  },
-                  child: const Text("Edit Schedule")),
-            ),
-          ),
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Center(
+                  child: FilledButton.tonal(
+                      onPressed: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => EditSchedulePage(
+                                  matches: snoutData.event.matches),
+                            ));
+                      },
+                      child: const Text("Edit Schedule")),
+                ),
+              ),
             ],
           ),
         ),
         if (teamNextMatch != null && scheduleDelay != null)
           Container(
             color: Theme.of(context).colorScheme.surfaceVariant,
-            child: Column(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text("delay ${offsetDurationInMins(scheduleDelay)}"),
-                    TextButton(
-                      onPressed: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => MatchPage(
-                                matchid: snoutData.event
-                                    .matchIDFromMatch(teamNextMatch))),
-                      ),
-                      child: Text(
-                        teamNextMatch.description,
-                        style: TextStyle(
-                            color: getAllianceColor(teamNextMatch
-                                .getAllianceOf(snoutData.event.config.team))),
-                      ),
-                    ),
-                    TimeDuration(
-                        time: teamNextMatch.scheduledTime.add(scheduleDelay),
-                        displayDurationDefault: true),
-                  ],
+                Text("delay ${offsetDurationInMins(scheduleDelay)}"),
+                TextButton(
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => MatchPage(
+                            matchid: snoutData.event
+                                .matchIDFromMatch(teamNextMatch))),
+                  ),
+                  child: Text(
+                    teamNextMatch.description,
+                    style: TextStyle(
+                        color: getAllianceColor(teamNextMatch
+                            .getAllianceOf(snoutData.event.config.team))),
+                  ),
                 ),
+                TimeDuration(
+                    time: teamNextMatch.scheduledTime.add(scheduleDelay),
+                    displayDurationDefault: true),
               ],
             ),
           )

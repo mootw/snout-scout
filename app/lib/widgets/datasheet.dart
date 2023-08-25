@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:ui';
 
+import 'package:app/helpers.dart';
 import 'package:csv/csv.dart';
 import 'package:flutter/material.dart';
 import 'package:download/download.dart';
@@ -21,7 +22,7 @@ class DataItem {
   DataItem.fromErrorNumber(({double? value, String? error}) number)
       : displayValue = number.error != null
             ? Text(number.error!,
-                style: const TextStyle(color: Colors.yellow))
+                style: const TextStyle(color: warningColor))
             : (Text(number.value == null || number.value!.isNaN
                 ? noDataText
                 : numDisplay(number.value))),

@@ -13,7 +13,7 @@ class EditAudit extends StatelessWidget {
   Widget build(BuildContext context) {
     final item = context.watch<DataProvider>().database.getLastPatchFor(path);
     return Text(getAuditString(item) ?? '',
-        style: Theme.of(context).textTheme.labelSmall);
+        style: Theme.of(context).textTheme.bodySmall!.copyWith(color: Theme.of(context).hintColor));
   }
 }
 

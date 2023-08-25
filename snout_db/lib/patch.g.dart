@@ -10,7 +10,7 @@ Patch _$PatchFromJson(Map json) => Patch(
       identity: json['identity'] as String,
       time: DateTime.parse(json['time'] as String),
       path: (json['path'] as List<dynamic>).map((e) => e as String).toList(),
-      value: json['value'] as Object,
+      value: json['value'],
     );
 
 Map<String, dynamic> _$PatchToJson(Patch instance) => <String, dynamic>{

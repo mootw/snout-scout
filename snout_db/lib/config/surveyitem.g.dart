@@ -12,7 +12,7 @@ SurveyItem _$SurveyItemFromJson(Map json) => SurveyItem(
       label: json['label'] as String,
       options:
           (json['options'] as List<dynamic>?)?.map((e) => e as String).toList(),
-      docs: json['docs'] as String?,
+      docs: json['docs'] as String? ?? '',
     );
 
 Map<String, dynamic> _$SurveyItemToJson(SurveyItem instance) =>

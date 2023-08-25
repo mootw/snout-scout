@@ -47,10 +47,16 @@ class _PitScoutTeamPageState extends State<PitScoutTeamPage> {
                     return;
                   }
 
+                  //New map instance to avoid messing up the UI
+                  final onlyChanges = Map.of(_results);
+
+
+                  onlyChanges.removeWhere((key, value) => widget.oldData?[key] == value);
+
                   final snoutData = context.read<DataProvider>();
 
                   //TODO only submit items that changed, but for now we submit a patch for each item
-                  for (final item in _results.entries) {
+                  for (final item in onlyChanges.entries) {
                     Patch patch = Patch(
                         identity: context.read<IdentityProvider>().identity,
                         time: DateTime.now(),

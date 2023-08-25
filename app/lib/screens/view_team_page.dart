@@ -7,15 +7,20 @@ import 'package:app/providers/data_provider.dart';
 import 'package:app/widgets/edit_audit.dart';
 import 'package:app/widgets/fieldwidget.dart';
 import 'package:app/helpers.dart';
-import 'package:app/widgets/match_card.dart';
 import 'package:app/screens/match_page.dart';
 import 'package:app/screens/scout_team.dart';
+import 'package:app/widgets/timeduration.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:snout_db/event/match.dart';
 import 'package:snout_db/event/pitscoutresult.dart';
 import 'package:snout_db/config/surveyitem.dart';
+
+// Reserved pit scouting IDs that are used within the app
+// TODO make widgets to get this data explicitly, rather than reimplementing it each time
+const String teamNameReserved = 'team_name';
+const String robotPictureReserved = 'robot_picture';
 
 class TeamViewPage extends StatefulWidget {
   final int teamNumber;
@@ -30,6 +35,15 @@ class _TeamViewPageState extends State<TeamViewPage> {
   @override
   Widget build(BuildContext context) {
     final data = context.watch<DataProvider>();
+
+    String? teamName =
+        data.event.pitscouting[widget.teamNumber.toString()]?[teamNameReserved];
+    String? robotPicture = data.event.pitscouting[widget.teamNumber.toString()]
+        ?[robotPictureReserved];
+
+    FRCMatch? teamNextMatch = data.event.nextMatchForTeam(widget.teamNumber);
+    Duration? scheduleDelay = data.event.scheduleDelay;
+
     return Scaffold(
         appBar: AppBar(
           actions: [
@@ -60,9 +74,67 @@ class _TeamViewPageState extends State<TeamViewPage> {
         body: ListView(
           cacheExtent: 5000,
           children: [
-            ScoutingResultsViewer(
-                teamNumber: widget.teamNumber, snoutData: data),
-            const Divider(height: 32),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Flexible(
+                  child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        children: [
+                          Text(
+                            teamName ?? teamNameReserved,
+                            style: Theme.of(context).textTheme.headlineLarge,
+                          ),
+                          const Text("TODO put some important fields here, maybe a specific notes box for important stuff: things that we need to check up on, things that are broken, if they need help and with what"),
+                        ],
+                      )),
+                ),
+                if (robotPicture != null)
+                  SizedBox(
+                    width: 250,
+                    height: 250,
+                    child: AspectRatio(
+                      aspectRatio: 1,
+                      child: Image.memory(
+                        fit: BoxFit.cover,
+                        Uint8List.fromList(
+                            base64Decode(robotPicture).cast<int>()),
+                      ),
+                    ),
+                  ),
+                if (robotPicture == null) const Text("No image :("),
+              ],
+            ),
+
+            if (teamNextMatch != null && scheduleDelay != null)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text("next match"),
+                  TextButton(
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => MatchPage(
+                              matchid:
+                                  data.event.matchIDFromMatch(teamNextMatch))),
+                    ),
+                    child: Text(
+                      teamNextMatch.description,
+                      style: TextStyle(
+                          color: getAllianceColor(
+                              teamNextMatch.getAllianceOf(widget.teamNumber))),
+                    ),
+                  ),
+                  TimeDuration(
+                      time: teamNextMatch.scheduledTime.add(scheduleDelay),
+                      displayDurationDefault: true),
+                ],
+              ),
+
+            const Divider(),
             //Display this teams matches
 
             DataSheet(
@@ -89,77 +161,6 @@ class _TeamViewPageState extends State<TeamViewPage> {
                         eventType.id,
                         (event) => event.isInAuto)),
                 ]
-              ],
-            ),
-
-            const Divider(height: 32),
-            DataSheet(
-              title: 'Matches',
-              //Data is a list of rows and columns
-              columns: [
-                DataItem.fromText("Match"),
-                for (final item in data.event.config.matchscouting.processes)
-                  DataItem.fromText(item.label),
-                for (final pitSurvey in data.event.config.matchscouting.survey
-                    .where((element) => element.type != SurveyItemType.picture))
-                  DataItem.fromText(pitSurvey.label),
-                DataItem.fromText("Scout"),
-              ],
-              rows: [
-                //Show ALL matches the team is scheduled for ALONG with all matches they played regardless of it it is scheduled sorted
-                for (final match in <FRCMatch>{
-                  ...data.event.matchesWithTeam(widget.teamNumber),
-                  ...data.event
-                      .teamRecordedMatches(widget.teamNumber)
-                      .map((e) => e.value)
-                }.sorted((a, b) => Comparable.compare(a, b)))
-                  [
-                    DataItem(
-                        displayValue: TextButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => MatchPage(
-                                        matchid: data.event
-                                            .matchIDFromMatch(match))),
-                              );
-                            },
-                            child: Text(
-                              match.description,
-                              style: TextStyle(
-                                  color: getAllianceColor(
-                                      match.getAllianceOf(widget.teamNumber))),
-                            )),
-                        exportValue: match.description,
-                        sortingValue: match),
-                    for (final item
-                        in data.event.config.matchscouting.processes)
-                      DataItem.fromErrorNumber(data.event
-                              .runMatchResultsProcess(
-                                  item,
-                                  match.robot[widget.teamNumber.toString()],
-                                  widget.teamNumber) ??
-                          //Missing results, this is not an error
-                          (value: null, error: null)),
-                    for (final pitSurvey in data
-                        .event.config.matchscouting.survey
-                        .where((element) =>
-                            element.type != SurveyItemType.picture))
-                      DataItem.fromText(match
-                          .robot[widget.teamNumber.toString()]
-                          ?.survey[pitSurvey.id]
-                          ?.toString()),
-                    DataItem.fromText(getAuditString(context
-                        .watch<DataProvider>()
-                        .database
-                        .getLastPatchFor([
-                      'matches',
-                      data.event.matchIDFromMatch(match),
-                      'robot',
-                      '${widget.teamNumber}'
-                    ]))),
-                  ],
               ],
             ),
 
@@ -190,6 +191,86 @@ class _TeamViewPageState extends State<TeamViewPage> {
                     ],
                   ),
                 ),
+                const Divider(height: 32),
+                Center(
+                    child: Text("Pit Scouting",
+                        style: Theme.of(context).textTheme.titleLarge)),
+                ScoutingResultsViewer(
+                    teamNumber: widget.teamNumber, snoutData: data),
+                const Divider(height: 32),
+                DataSheet(
+                  title: 'Matches',
+                  //Data is a list of rows and columns
+                  columns: [
+                    DataItem.fromText("Match"),
+                    for (final item
+                        in data.event.config.matchscouting.processes)
+                      DataItem.fromText(item.label),
+                    for (final pitSurvey in data
+                        .event.config.matchscouting.survey
+                        .where((element) =>
+                            element.type != SurveyItemType.picture))
+                      DataItem.fromText(pitSurvey.label),
+                    DataItem.fromText("Scout"),
+                  ],
+                  rows: [
+                    //Show ALL matches the team is scheduled for ALONG with all matches they played regardless of it it is scheduled sorted
+                    for (final match in <FRCMatch>{
+                      ...data.event.matchesWithTeam(widget.teamNumber),
+                      ...data.event
+                          .teamRecordedMatches(widget.teamNumber)
+                          .map((e) => e.value)
+                    }.sorted((a, b) => Comparable.compare(a, b)))
+                      [
+                        DataItem(
+                            displayValue: TextButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => MatchPage(
+                                            matchid: data.event
+                                                .matchIDFromMatch(match))),
+                                  );
+                                },
+                                child: Text(
+                                  match.description,
+                                  style: TextStyle(
+                                      color: getAllianceColor(match
+                                          .getAllianceOf(widget.teamNumber))),
+                                )),
+                            exportValue: match.description,
+                            sortingValue: match),
+                        for (final item
+                            in data.event.config.matchscouting.processes)
+                          DataItem.fromErrorNumber(data.event
+                                  .runMatchResultsProcess(
+                                      item,
+                                      match.robot[widget.teamNumber.toString()],
+                                      widget.teamNumber) ??
+                              //Missing results, this is not an error
+                              (value: null, error: null)),
+                        for (final pitSurvey in data
+                            .event.config.matchscouting.survey
+                            .where((element) =>
+                                element.type != SurveyItemType.picture))
+                          DataItem.fromText(match
+                              .robot[widget.teamNumber.toString()]
+                              ?.survey[pitSurvey.id]
+                              ?.toString()),
+                        DataItem.fromText(getAuditString(context
+                            .watch<DataProvider>()
+                            .database
+                            .getLastPatchFor([
+                          'matches',
+                          data.event.matchIDFromMatch(match),
+                          'robot',
+                          '${widget.teamNumber}'
+                        ]))),
+                      ],
+                  ],
+                ),
+                const Divider(),
                 for (final eventType in data.event.config.matchscouting.events)
                   SizedBox(
                     width: smallFieldSize,
@@ -238,13 +319,6 @@ class _TeamViewPageState extends State<TeamViewPage> {
                                         ])),
                       ],
                     )),
-                const Divider(height: 32),
-                Center(
-                    child: Text("Schedule",
-                        style: Theme.of(context).textTheme.titleLarge)),
-                for (final match
-                    in data.event.matchesWithTeam(widget.teamNumber))
-                  MatchCard(match: match, focusTeam: widget.teamNumber),
               ],
             ),
           ],
@@ -269,7 +343,8 @@ class ScoutingResultsViewer extends StatelessWidget {
       children: [
         for (final item in snoutData.event.config.pitscouting) ...[
           ScoutingResult(item: item, survey: data),
-          Align(
+          Container(
+              padding: const EdgeInsets.only(right: 16),
               alignment: Alignment.centerRight,
               child: EditAudit(path: ['pitscouting', '$teamNumber', item.id])),
         ]
@@ -289,7 +364,13 @@ class ScoutingResult extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (value == null) {
-      return Container();
+      return ListTile(
+        title: Text(item.label),
+        subtitle: const Text(
+          "NOT SET",
+          style: TextStyle(color: warningColor),
+        ),
+      );
     }
 
     if (item.type == SurveyItemType.picture) {

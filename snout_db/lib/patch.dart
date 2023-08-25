@@ -24,8 +24,10 @@ class Patch {
 
   /// data this path should be patched with.
   /// it is not encoded in a String because it will 
-  /// get decoded anyways and json is json no need to "wrap it"
-  final Object value;
+  /// get decoded anyways and json is json
+  /// IT IS POSSIBLE for the object to be explicitly null
+  /// this is typically how a value gets 'deleted' or 'reset'
+  final Object? value;
 
   /// this loosely follows RFC 6902
   /// TODO add op function

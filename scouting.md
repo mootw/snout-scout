@@ -28,8 +28,6 @@
 
 
 
-
-
 # Human Match Scouting
 - Collect events like intake, scoring, and maybe even scoring locations if relevant.
     - AVOID collecting more than 8 different events. The more data that you collect the more data entry errors there will be.
@@ -37,7 +35,7 @@
 Example: 2023
 - Cubes and cones. We could collect a separate event for ["Scored Cone", "Scored Cube", "Scored High", "Scored Middle", "Scored Low", "Inake", "Fumble"]
 - CONSIDER NOT collecting the type of game piece that has been intaked
-- Post match survey: climbing level, did play defense, apparent driving skill, note any issues or downtime, have an extra comments box, note fouls
+- Post match survey: preloaded game piece, climbing level, did play defense, apparent driving skill, note any issues, have an extra comments box, note fouls
 
 # Human PIT scouting
 - DO collect pictures

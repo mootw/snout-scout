@@ -56,7 +56,7 @@ class SnoutScoutSearch extends SearchDelegate {
         //Load the robot picture to show in the search if it is available
         Widget? robotPicture;
         final pictureData =
-            db.event.pitscouting[team.toString()]?['robot_picture'];
+            db.event.pitscouting[team.toString()]?[robotPictureReserved];
         if (pictureData != null) {
           robotPicture = AspectRatio(
               aspectRatio: 1,
@@ -125,7 +125,7 @@ class SnoutScoutSearch extends SearchDelegate {
           //Load the robot picture to show in the search if it is available
           Widget? robotPicture;
           final pictureData =
-              db.event.pitscouting[team.toString()]?['robot_picture'];
+              db.event.pitscouting[team.toString()]?[robotPictureReserved];
           if (pictureData != null) {
             robotPicture = AspectRatio(
                 aspectRatio: 1,
