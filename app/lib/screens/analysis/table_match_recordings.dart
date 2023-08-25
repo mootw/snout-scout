@@ -3,6 +3,7 @@ import 'package:app/helpers.dart';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/screens/match_page.dart';
 import 'package:app/screens/view_team_page.dart';
+import 'package:app/widgets/edit_audit.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:snout_db/config/surveyitem.dart';
@@ -26,6 +27,7 @@ class TableMatchRecordingsPage extends StatelessWidget {
               DataItem.fromText(item.label),
             for (final item in data.event.config.matchscouting.survey)
               DataItem.fromText(item.label),
+            DataItem.fromText("Scout")
           ],
           rows: [
             for (final match in data.event.matches.entries.toList().reversed)
@@ -64,9 +66,18 @@ class TableMatchRecordingsPage extends StatelessWidget {
                         (value: null, error: "Missing Results")),
                   for (final item in data.event.config.matchscouting.survey.where(
                       (element) => element.type != SurveyItemType.picture))
-                    DataItem.fromText(match
+                  DataItem.fromText(match
                         .value.robot[robot.key]?.survey[item.id]
                         ?.toString()),
+                        DataItem.fromText(getAuditString(context
+                        .watch<DataProvider>()
+                        .database
+                        .getLastPatchFor([
+                      'matches',
+                      match.key,
+                      'robot',
+                      robot.key
+                    ]))),
                 ],
           ],
         ),

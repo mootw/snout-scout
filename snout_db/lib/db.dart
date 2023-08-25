@@ -46,7 +46,14 @@ class SnoutDB {
   /// this is effectively the last edit time..
   /// HOWEVER this does not account for sub-edits
   /// we will ignore this for now...
-  Patch? getLastPatchFor(List<String> pointer) {
-    return patches.lastWhereOrNull((patch) => ListEquality().equals(pointer, patch.path));
+  /// ALSO this is NOT tightly coupled to the database
+  /// schema, so changes to where patches are applied
+  /// will break the link between the edit times, this is OK
+  /// and is best effort! This will be the cause of a lot of
+  /// issues, but it is a nice feature to have 
+  Patch? getLastPatchFor(List<String> path) {
+    return patches.lastWhereOrNull((patch) => ListEquality().equals(path, patch.path));
   }
+
+  
 }
