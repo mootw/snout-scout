@@ -47,15 +47,12 @@ class _PitScoutTeamPageState extends State<PitScoutTeamPage> {
                     return;
                   }
 
-                  //New map instance to avoid messing up the UI
-                  final onlyChanges = Map.of(_results);
-
-                  onlyChanges.removeWhere(
-                      (key, value) => widget.oldData?[key] == value);
-
                   final snoutData = context.read<DataProvider>();
 
-                  //TODO only submit items that changed, but for now we submit a patch for each item
+                  //New map instance to avoid messing up the UI
+                  final onlyChanges = Map.of(_results);
+                  onlyChanges.removeWhere(
+                      (key, value) => widget.oldData?[key] == value);
                   for (final item in onlyChanges.entries) {
                     Patch patch = Patch(
                         identity: context.read<IdentityProvider>().identity,
@@ -66,12 +63,11 @@ class _PitScoutTeamPageState extends State<PitScoutTeamPage> {
                     //Save the scouting results to the server!!
                     await snoutData.addPatch(patch);
                   }
-
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                    content: Text('Saving Scouting Data'),
-                    duration: Duration(seconds: 4),
-                  ));
                   if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                      content: Text('Saving Scouting Data'),
+                      duration: Duration(seconds: 4),
+                    ));
                     Navigator.of(context).pop(true);
                   }
                 },

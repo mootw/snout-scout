@@ -1,7 +1,5 @@
-import 'package:app/scouting_tools/scouting_tool.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:logging/logging.dart';
 import 'package:snout_db/snout_db.dart';
 import 'dart:math';
 
