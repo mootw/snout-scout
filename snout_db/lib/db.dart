@@ -36,7 +36,7 @@ class SnoutDB {
       _$SnoutDBFromJson(json);
   Map<String, dynamic> toJson() => _$SnoutDBToJson(this);
 
-
+  
   void addPatch (Patch p) {
     patches.add(p);
     _event = p.patch(_event);

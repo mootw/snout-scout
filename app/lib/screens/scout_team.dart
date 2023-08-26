@@ -61,7 +61,7 @@ class _PitScoutTeamPageState extends State<PitScoutTeamPage> {
                             ['pitscouting', widget.team.toString(), item.key]),
                         value: item.value);
                     //Save the scouting results to the server!!
-                    await snoutData.addPatch(patch);
+                    await snoutData.submitPatch(patch);
                   }
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(

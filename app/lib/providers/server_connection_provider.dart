@@ -41,7 +41,6 @@ class ServerConnectionProvider extends ChangeNotifier {
       //   final data = await apiClient.get(Uri.parse(serverURL));
       //   db = FRCEvent.fromJson(json.decode(data.body));
       //   prefs.setString(serverURL, data.body);
-      //   prefs.setString("lastoriginsync", DateTime.now().toIso8601String());
       // } catch (e) {
       //   try {
       //     //Load from cache
@@ -93,8 +92,6 @@ class ServerConnectionProvider extends ChangeNotifier {
     prefs.setString("server", newServer);
     serverURL = newServer;
 
-    //Reset the last origin sync value
-    prefs.remove("lastoriginsync");
     notifyListeners();
   }
 
@@ -107,7 +104,6 @@ class ServerConnectionProvider extends ChangeNotifier {
       //TODO apply patch to local state
       // db = FRCEvent.fromJson(json.decode(data.body));
       prefs.setString(serverURL, data.body);
-      prefs.setString("lastoriginsync", DateTime.now().toIso8601String());
       notifyListeners();
     } catch (e) {
       Logger.root.warning("origin sync error", e);
