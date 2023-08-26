@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:snout_db/patch.dart';
 
 class EditAudit extends StatelessWidget {
-  final List<String> path;
+  final String path;
 
   const EditAudit({super.key, required this.path});
 

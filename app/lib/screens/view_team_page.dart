@@ -16,6 +16,7 @@ import 'package:provider/provider.dart';
 import 'package:snout_db/event/match.dart';
 import 'package:snout_db/event/pitscoutresult.dart';
 import 'package:snout_db/config/surveyitem.dart';
+import 'package:snout_db/patch.dart';
 
 // Reserved pit scouting IDs that are used within the app
 // TODO make widgets to get this data explicitly, rather than reimplementing it each time
@@ -87,7 +88,8 @@ class _TeamViewPageState extends State<TeamViewPage> {
                             teamName ?? teamNameReserved,
                             style: Theme.of(context).textTheme.headlineLarge,
                           ),
-                          const Text("TODO put some important fields here, maybe a specific notes box for important stuff: things that we need to check up on, things that are broken, if they need help and with what"),
+                          const Text(
+                              "TODO put some important fields here, maybe a specific notes box for important stuff: things that we need to check up on, things that are broken, if they need help and with what"),
                         ],
                       )),
                 ),
@@ -261,12 +263,12 @@ class _TeamViewPageState extends State<TeamViewPage> {
                         DataItem.fromText(getAuditString(context
                             .watch<DataProvider>()
                             .database
-                            .getLastPatchFor([
-                          'matches',
-                          data.event.matchIDFromMatch(match),
-                          'robot',
-                          '${widget.teamNumber}'
-                        ]))),
+                            .getLastPatchFor(Patch.buildPath([
+                              'matches',
+                              data.event.matchIDFromMatch(match),
+                              'robot',
+                              '${widget.teamNumber}'
+                            ])))),
                       ],
                   ],
                 ),
@@ -346,7 +348,9 @@ class ScoutingResultsViewer extends StatelessWidget {
           Container(
               padding: const EdgeInsets.only(right: 16),
               alignment: Alignment.centerRight,
-              child: EditAudit(path: ['pitscouting', '$teamNumber', item.id])),
+              child: EditAudit(
+                  path: Patch.buildPath(
+                      ['pitscouting', '$teamNumber', item.id]))),
         ]
       ],
     );

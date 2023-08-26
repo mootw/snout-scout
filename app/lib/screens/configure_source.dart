@@ -37,7 +37,7 @@ class _ConfigureSourceScreenState extends State<ConfigureSourceScreen> {
                   Patch p = Patch(
                       identity: context.read<IdentityProvider>().identity,
                       time: DateTime.now(),
-                      path: [""],
+                      path: Patch.buildPath([""]),
                       value: event);
 
                   SnoutDB newDb = SnoutDB(patches: [p]);

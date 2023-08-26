@@ -51,9 +51,9 @@ class SnoutDB {
   /// will break the link between the edit times, this is OK
   /// and is best effort! This will be the cause of a lot of
   /// issues, but it is a nice feature to have 
-  Patch? getLastPatchFor(List<String> path) {
-    return patches.lastWhereOrNull((patch) => ListEquality().equals(path, patch.path));
+  Patch? getLastPatchFor(String path) {
+    return patches.lastWhereOrNull((patch) => path == patch.path);
   }
 
-  
+
 }

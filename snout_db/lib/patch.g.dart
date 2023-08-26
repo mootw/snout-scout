@@ -9,7 +9,7 @@ part of 'patch.dart';
 Patch _$PatchFromJson(Map json) => Patch(
       identity: json['identity'] as String,
       time: DateTime.parse(json['time'] as String),
-      path: (json['path'] as List<dynamic>).map((e) => e as String).toList(),
+      path: json['path'] as String,
       value: json['value'],
     );
 

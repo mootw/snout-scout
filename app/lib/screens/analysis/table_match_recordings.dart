@@ -7,6 +7,7 @@ import 'package:app/widgets/edit_audit.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:snout_db/config/surveyitem.dart';
+import 'package:snout_db/patch.dart';
 
 class TableMatchRecordingsPage extends StatelessWidget {
   const TableMatchRecordingsPage({super.key});
@@ -72,12 +73,12 @@ class TableMatchRecordingsPage extends StatelessWidget {
                         DataItem.fromText(getAuditString(context
                         .watch<DataProvider>()
                         .database
-                        .getLastPatchFor([
+                        .getLastPatchFor(Patch.buildPath([
                       'matches',
                       match.key,
                       'robot',
                       robot.key
-                    ]))),
+                    ])))),
                 ],
           ],
         ),

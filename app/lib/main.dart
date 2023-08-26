@@ -10,7 +10,8 @@ import 'package:app/scouting_tools/scouting_tool.dart';
 import 'package:app/screens/analysis.dart';
 import 'package:app/screens/documentation_page.dart';
 import 'package:app/screens/edit_json.dart';
-import 'package:app/screens/local_patch_storage.dart';
+import 'package:app/screens/failed_patches.dart';
+import 'package:app/screens/patch_history.dart';
 import 'package:app/screens/schedule_page.dart';
 import 'package:app/screens/scout_leaderboard.dart';
 import 'package:app/screens/teams_page.dart';
@@ -106,7 +107,7 @@ class _MyHomePageState extends State<MyHomePage> {
           onTap: () => Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => const LocalPatchStorage(),
+                builder: (context) => const FailedPatchStorage(),
               )),
           child: Container(
               alignment: Alignment.center,
@@ -205,13 +206,13 @@ class _MyHomePageState extends State<MyHomePage> {
                     .format(serverConnection.lastOriginSync!)),
           ),
           ListTile(
-            title: const Text("Local Patch Storage"),
-            trailing: const Icon(Icons.data_object),
+            title: const Text("Edit History"),
+            trailing: const Icon(Icons.receipt_long),
             onTap: () {
               Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const LocalPatchStorage(),
+                    builder: (context) => const PatchHistoryPage(),
                   ));
             },
           ),
@@ -259,7 +260,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     Patch patch = Patch(
                         identity: identity,
                         time: DateTime.now(),
-                        path: ['config'],
+                        path: Patch.buildPath(['config']),
                         value: jsonDecode(result));
                     //Save the scouting results to the server!!
                     await data.addPatch(patch);
@@ -288,7 +289,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       Patch patch = Patch(
                           identity: identity,
                           time: DateTime.now(),
-                          path: ['pitmap'],
+                          path: Patch.buildPath(['pitmap']),
                           value: result);
                       //Save the scouting results to the server!!
                       await data.addPatch(patch);

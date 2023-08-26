@@ -189,7 +189,8 @@ class _MatchRecorderAssistantPageState
       required Color subtitleColor}) {
     final snoutData = context.watch<DataProvider>();
     Widget? image;
-    final data = snoutData.event.pitscouting[team.toString()]?[robotPictureReserved];
+    final data =
+        snoutData.event.pitscouting[team.toString()]?[robotPictureReserved];
     if (data != null) {
       image = AspectRatio(
           aspectRatio: 1,
@@ -245,7 +246,7 @@ class _MatchRecorderAssistantPageState
       Patch patch = Patch(
           identity: identity,
           time: DateTime.now(),
-          path: ['matches', matchid, 'robot', team.toString()],
+          path: Patch.buildPath(['matches', matchid, 'robot', team.toString()]),
           value: result.toJson());
 
       await snoutData.addPatch(patch);

@@ -73,6 +73,7 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
             child: const Text("Edit Teams"))
       ]),
       body: ListView(
+        cacheExtent: 5000,
         children: [
           DataSheet(title: "Alliance Sum of Avg", columns: [
             DataItem.fromText("Alliance"),

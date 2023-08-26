@@ -8,7 +8,6 @@ part 'patch.g.dart';
 
 @JsonSerializable()
 class Patch {
-
   /// some unique string that identifies the patch creator
   /// in the future this could be cryptographically signed
   /// to prevent spoofing
@@ -20,10 +19,10 @@ class Patch {
   /// rfc_6901 JSON pointer in the scouting data
   /// when possible this should point as deeply as possible
   /// to avoid conflicts
-  final List<String> path;
+  final String path;
 
   /// data this path should be patched with.
-  /// it is not encoded in a String because it will 
+  /// it is not encoded in a String because it will
   /// get decoded anyways and json is json
   /// IT IS POSSIBLE for the object to be explicitly null
   /// this is typically how a value gets 'deleted' or 'reset'
@@ -43,13 +42,21 @@ class Patch {
   /// Patches a given database, throws an error if there is an issue.
   /// Returns a NEW instance of FRCEvent, it does not mutate the original
   FRCEvent patch(FRCEvent database) {
-    final ptr = JsonPointer.build(path);
     var dbJson = database.toJson();
-    dbJson = ptr.write(dbJson, value) as Map<dynamic, dynamic>;
+    dbJson = JsonPointer(path).write(dbJson, value) as Map<dynamic, dynamic>;
     return FRCEvent.fromJson(dbJson);
   }
 
+  /// This will ensure that the path is correctly escaped
+  static String buildPath(List<String> tokens) =>
+      JsonPointer.build(tokens).toString();
+
+  /// will unescape 6901 path and convert to a list of String
+  static Iterable<String> deconstructPath(String path) => path
+      .split("/")
+      .skip(1)
+      .map((element) => element.replaceAll("~1", "/").replaceAll("~0", "~"));
+
   @override
   String toString() => toJson().toString();
-
 }

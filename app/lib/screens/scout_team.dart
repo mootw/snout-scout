@@ -50,8 +50,8 @@ class _PitScoutTeamPageState extends State<PitScoutTeamPage> {
                   //New map instance to avoid messing up the UI
                   final onlyChanges = Map.of(_results);
 
-
-                  onlyChanges.removeWhere((key, value) => widget.oldData?[key] == value);
+                  onlyChanges.removeWhere(
+                      (key, value) => widget.oldData?[key] == value);
 
                   final snoutData = context.read<DataProvider>();
 
@@ -60,7 +60,8 @@ class _PitScoutTeamPageState extends State<PitScoutTeamPage> {
                     Patch patch = Patch(
                         identity: context.read<IdentityProvider>().identity,
                         time: DateTime.now(),
-                        path: ['pitscouting', widget.team.toString(), item.key],
+                        path: Patch.buildPath(
+                            ['pitscouting', widget.team.toString(), item.key]),
                         value: item.value);
                     //Save the scouting results to the server!!
                     await snoutData.addPatch(patch);
