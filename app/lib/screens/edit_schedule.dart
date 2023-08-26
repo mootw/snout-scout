@@ -53,7 +53,7 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
                       return AlertDialog(
                         title: const Text("data"),
                         content: SingleChildScrollView(
-                            child: Text(jsonEncode(patch))),
+                            child: Text(json.encode(patch))),
                         actions: [
                           TextButton(
                               onPressed: () async {
@@ -144,7 +144,7 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
             JSONEditor(source: match, validate: FRCMatch.fromJson)));
 
     if (result != null) {
-      FRCMatch resultMatch = FRCMatch.fromJson(jsonDecode(result));
+      FRCMatch resultMatch = FRCMatch.fromJson(json.decode(result));
       Patch patch = Patch(
           identity: context.read<IdentityProvider>().identity,
           time: DateTime.now(),

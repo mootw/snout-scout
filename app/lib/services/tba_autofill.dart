@@ -28,7 +28,7 @@ Future<({DateTime startTime, int blueScore, int redScore})>
         'X-TBA-Auth-Key': eventData.config.tbaSecretKey!,
       });
 
-  final data = jsonDecode(apiData.body);
+  final data = json.decode(apiData.body);
 
   return (
     startTime: DateTime.fromMillisecondsSinceEpoch(data['actual_time'] * 1000),
@@ -53,7 +53,7 @@ Future<List<int>> getTeamListForEventTBA(FRCEvent eventData) async {
         'X-TBA-Auth-Key': eventData.config.tbaSecretKey!,
       });
 
-  final teams = jsonDecode(apiData.body);
+  final teams = json.decode(apiData.body);
 
   return [
     for (final team in teams) team['team_number'],
@@ -81,7 +81,7 @@ Future<List<Patch>> loadScheduleFromTBA(
   //(and not to the ISO8601 standard since it should show timezone offset meaning the actual time is WRONG)
   //Basically just place your server in the same timezone as the event and hope for the best lmao
 
-  final matches = jsonDecode(apiData.body);
+  final matches = json.decode(apiData.body);
 
   List<Patch> patches = [];
 

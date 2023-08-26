@@ -66,7 +66,7 @@ class _TeamGridListState extends State<TeamGridList> {
                                                   .identity,
                                               time: DateTime.now(),
                                               path: Patch.buildPath(['teams']),
-                                              value: jsonDecode(result));
+                                              value: json.decode(result));
                                           //Save the scouting results to the server!!
                                           await context
                                               .read<DataProvider>()
@@ -123,7 +123,7 @@ class _TeamGridListState extends State<TeamGridList> {
                                                   .identity,
                                               time: DateTime.now(),
                                               path: Patch.buildPath(['teams']),
-                                              value: jsonDecode(result));
+                                              value: json.decode(result));
                                           //Save the scouting results to the server!!
                                           await context
                                               .read<DataProvider>()
