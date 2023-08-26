@@ -58,7 +58,7 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
                           TextButton(
                               onPressed: () async {
                                 for (var p in patch) {
-                                  await snoutData.addPatch(p);
+                                  await snoutData.submitPatch(p);
                                 }
                                 if (mounted) {
                                   Navigator.pop(context);
@@ -129,7 +129,7 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
                         'matches',
                       ]),
                       value: matchesWithRemoved);
-                  await snoutData.addPatch(patch);
+                  await snoutData.submitPatch(patch);
                 }
               },
             ),
@@ -153,7 +153,7 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
             matchID ?? resultMatch.description,
           ]),
           value: resultMatch.toJson());
-      await data.addPatch(patch);
+      await data.submitPatch(patch);
     }
   }
 }

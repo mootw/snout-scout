@@ -28,30 +28,8 @@ class _ConfigureSourceScreenState extends State<ConfigureSourceScreen> {
         children: [
           const ListTile(
             title: Text("RAM Only"),
-            subtitle: Text("changes are not persisted after closing"),
+            subtitle: Text("does not clear currently open db, changes are not persisted"),
           ),
-          Wrap(children: [
-            const SizedBox(width: 8),
-            OutlinedButton(
-                onPressed: () async {
-                  String? value = await createNewEvent(context);
-                  if (value == null) {
-                    return;
-                  }
-                  FRCEvent event = FRCEvent.fromJson(json.decode(value));
-                  Patch p = Patch(
-                      identity: context.read<IdentityProvider>().identity,
-                      time: DateTime.now(),
-                      path: Patch.buildPath([""]),
-                      value: event);
-
-                  SnoutDB newDb = SnoutDB(patches: [p]);
-                },
-                child: const Text("New Event")),
-            const SizedBox(width: 16),
-            OutlinedButton(onPressed: () {}, child: const Text("Open File")),
-          ]),
-          const SizedBox(height: 16),
           const Divider(),
           const ListTile(
             title: Text("Local Save"),
@@ -76,20 +54,16 @@ class _ConfigureSourceScreenState extends State<ConfigureSourceScreen> {
                 },
                 child: const Text("New Event")),
             const SizedBox(width: 16),
-            OutlinedButton(onPressed: () {}, child: const Text("Open File")),
+            // OutlinedButton(onPressed: () {
+                //TODO open file to overwrite local save
+
+            // }, child: const Text("Open File")),
           ]),
           const SizedBox(height: 16),
           const Divider(),
           ListTile(
             title: const Text("Server"),
             subtitle: Text(context.watch<ServerConnectionProvider>().serverURL),
-            trailing: IconButton(
-              icon: const Icon(Icons.miscellaneous_services_sharp),
-              onPressed: () async {
-                //TODO manage server page to upload, download, and delete event files.
-                //TODO only display this button if the server url is set and whatnot
-              },
-            ),
             onTap: () async {
               final provider = context.read<ServerConnectionProvider>();
               final result = await showStringInputDialog(
@@ -107,6 +81,14 @@ class _ConfigureSourceScreenState extends State<ConfigureSourceScreen> {
           const ListTile(
             title: Text("2023 State"),
             subtitle: Text("mnstate.json"),
+          ),
+          ListTile(
+            leading: const Icon(Icons.miscellaneous_services_sharp),
+            title: const Text("Manage Server"),
+            onTap: () async {
+              //TODO manage server page to upload, download, and delete event files.
+              //TODO only display this button if the server url is set and whatnot
+            },
           ),
         ],
       ),

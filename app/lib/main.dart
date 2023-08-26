@@ -247,7 +247,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         path: Patch.buildPath(['config']),
                         value: json.decode(result));
                     //Save the scouting results to the server!!
-                    await data.addPatch(patch);
+                    await data.submitPatch(patch);
                   }
                 },
                 icon: const Icon(Icons.edit)),
@@ -271,7 +271,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           path: Patch.buildPath(['pitmap']),
                           value: result);
                       //Save the scouting results to the server!!
-                      await data.addPatch(patch);
+                      await data.submitPatch(patch);
                     }
                   } catch (e, s) {
                     Logger.root.severe("Error taking image from device", e, s);

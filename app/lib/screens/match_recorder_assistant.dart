@@ -249,7 +249,7 @@ class _MatchRecorderAssistantPageState
           path: Patch.buildPath(['matches', matchid, 'robot', team.toString()]),
           value: result.toJson());
 
-      await snoutData.addPatch(patch);
+      await snoutData.submitPatch(patch);
     }
   }
 }
