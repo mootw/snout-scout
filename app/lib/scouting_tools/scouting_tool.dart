@@ -3,16 +3,15 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:app/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:logging/logging.dart';
 import 'package:snout_db/event/pitscoutresult.dart';
 import 'package:snout_db/config/surveyitem.dart';
 
-double scoutImageSize = 800;
-
 class ScoutingToolWidget extends StatefulWidget {
-  
+
   final SurveyItem tool;
   final PitScoutResult survey;
 
@@ -144,14 +143,8 @@ class _ScoutingToolWidgetState extends State<ScoutingToolWidget> {
         leading: IconButton(
             icon: const Icon(Icons.camera_alt),
             onPressed: () async {
-              //TAKE PHOTO
               try {
-                  final ImagePicker picker = ImagePicker();
-                final XFile? photo = await picker.pickImage(
-                    source: ImageSource.camera,
-                    maxWidth: scoutImageSize,
-                    maxHeight: scoutImageSize,
-                    imageQuality: 50);
+                final photo = await pickOrTakeImageDialog(context);
                 if (photo != null) {
                   Uint8List bytes = await photo.readAsBytes();
                   setState(() {
@@ -161,7 +154,6 @@ class _ScoutingToolWidgetState extends State<ScoutingToolWidget> {
               } catch (e, s) {
                 Logger.root.severe("Error taking image from device", e, s);
               }
-              
             }),
         title: Text(widget.tool.label),
         subtitle: _value == null

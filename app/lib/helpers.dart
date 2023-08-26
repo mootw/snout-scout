@@ -1,4 +1,7 @@
+import 'package:app/scouting_tools/scouting_tool.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:logging/logging.dart';
 import 'package:snout_db/snout_db.dart';
 import 'dart:math';
 
@@ -12,19 +15,18 @@ ThemeData defaultTheme =
 const warningColor = Colors.yellow;
 
 /// Returns a UI color for a given alliance.
-Color getAllianceColor (Alliance alliance) => alliance == Alliance.red ? Colors.red : Colors.blue;
+Color getAllianceColor(Alliance alliance) =>
+    alliance == Alliance.red ? Colors.red : Colors.blue;
 
 /// Generates a 'random' color from an index
 Color getColorFromIndex(int index) =>
     HSVColor.fromAHSV(1, (100 + (index * pi * 10000)) % 360, 0.8, 0.7)
         .toColor();
 
-
 Color colorFromHex(String hexString) {
   final hexCode = hexString.replaceAll('#', '');
   return Color(int.parse('FF$hexCode', radix: 16));
 }
-
 
 Future<String?> showStringInputDialog(
     BuildContext context, String label, String currentValue) async {
@@ -49,4 +51,53 @@ Future<String?> showStringInputDialog(
           ],
         );
       });
+}
+
+/// standard size for images stored in snout scout
+/// (we do not want to store hundreds of MB sized images)
+/// for transport efficiency reasons, client performance
+/// for image decoding or db file, and data/disk usage.
+double scoutImageSize = 800;
+
+/// convenient dialog that will prompt the user to take a new image
+/// or select it from their device storage
+Future<XFile?> pickOrTakeImageDialog(BuildContext context) async {
+  ImageSource? result = await showDialog(
+      context: context,
+      builder: (dialogContext) => SimpleDialog(
+            children: [
+              SimpleDialogOption(
+                  onPressed: () =>
+                      Navigator.of(dialogContext).pop(ImageSource.camera),
+                  child: const ListTile(
+                    leading: Icon(Icons.camera_alt),
+                    title: Text("Camera"),
+                  )),
+              SimpleDialogOption(
+                  onPressed: () =>
+                      Navigator.of(dialogContext).pop(ImageSource.gallery),
+                  child: const ListTile(
+                    leading: Icon(Icons.image),
+                    title: Text("Gallery"),
+                  )),
+                  SimpleDialogOption(
+                  onPressed: () =>
+                      Navigator.of(dialogContext).pop(null),
+                  child: const ListTile(
+                    leading: Icon(Icons.close),
+                    title: Text("Cancel"),
+                  )),
+            ],
+          ));
+
+  if (result == null) {
+    return null;
+  }
+
+  final XFile? photo = await ImagePicker().pickImage(
+      source: result,
+      maxWidth: scoutImageSize,
+      maxHeight: scoutImageSize,
+      imageQuality: 50);
+  return photo;
 }
