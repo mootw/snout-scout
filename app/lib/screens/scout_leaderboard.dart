@@ -20,7 +20,7 @@ class ScoutLeaderboardPage extends StatelessWidget {
       }
 
       int addValue = 1;
-      if(patch.path.first == "matches") {
+      if(patch.path.startsWith("/matches")) {
         //MATCH SCOUTS ARE WORTH DOUBLE POINTS!
         addValue = 2;
       }

@@ -10,10 +10,10 @@ import 'package:snout_db/event/match.dart';
 import 'package:snout_db/patch.dart';
 import 'package:http/http.dart' as http;
 
-
 final tbaApiClient = http.Client();
 
-Future<({DateTime startTime, int blueScore, int redScore})> getMatchResultsDataFromTBA(FRCEvent eventData, String matchID) async {
+Future<({DateTime startTime, int blueScore, int redScore})>
+    getMatchResultsDataFromTBA(FRCEvent eventData, String matchID) async {
   if (eventData.config.tbaEventId == null) {
     throw Exception("TBA event ID cannot be null in the config!");
   }
@@ -23,21 +23,19 @@ Future<({DateTime startTime, int blueScore, int redScore})> getMatchResultsDataF
 
   //Get playoff level matches
   final apiData = await tbaApiClient.get(
-      Uri.parse(
-          "https://www.thebluealliance.com/api/v3/match/$matchID"),
+      Uri.parse("https://www.thebluealliance.com/api/v3/match/$matchID"),
       headers: {
         'X-TBA-Auth-Key': eventData.config.tbaSecretKey!,
       });
-  
+
   final data = jsonDecode(apiData.body);
 
   return (
     startTime: DateTime.fromMillisecondsSinceEpoch(data['actual_time'] * 1000),
     blueScore: data['alliances']['blue']['score'] as int,
     redScore: data['alliances']['red']['score'] as int,
-);
+  );
 }
-
 
 Future<List<int>> getTeamListForEventTBA(FRCEvent eventData) async {
   if (eventData.config.tbaEventId == null) {
@@ -54,17 +52,16 @@ Future<List<int>> getTeamListForEventTBA(FRCEvent eventData) async {
       headers: {
         'X-TBA-Auth-Key': eventData.config.tbaSecretKey!,
       });
-  
+
   final teams = jsonDecode(apiData.body);
-  
+
   return [
-    for(final team in teams)
-      team['team_number'],
+    for (final team in teams) team['team_number'],
   ];
 }
 
-
-Future<List<Patch>> loadScheduleFromTBA(FRCEvent eventData, BuildContext context) async {
+Future<List<Patch>> loadScheduleFromTBA(
+    FRCEvent eventData, BuildContext context) async {
   if (eventData.config.tbaEventId == null) {
     throw Exception("TBA event ID cannot be null in the config!");
   }
@@ -146,10 +143,10 @@ Future<List<Patch>> loadScheduleFromTBA(FRCEvent eventData, BuildContext context
       Patch patch = Patch(
           identity: context.read<IdentityProvider>().identity,
           time: DateTime.now(),
-          path: [
+          path: Patch.buildPath([
             'matches',
             key,
-          ],
+          ]),
           value: newMatch.toJson());
 
       patches.add(patch);
@@ -157,5 +154,3 @@ Future<List<Patch>> loadScheduleFromTBA(FRCEvent eventData, BuildContext context
   }
   return patches;
 }
-
-

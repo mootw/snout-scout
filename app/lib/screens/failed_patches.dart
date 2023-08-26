@@ -7,21 +7,21 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:snout_db/patch.dart';
 
-class LocalPatchStorage extends StatefulWidget {
-  const LocalPatchStorage({super.key});
+class FailedPatchStorage extends StatefulWidget {
+  const FailedPatchStorage({super.key});
 
   @override
-  State<LocalPatchStorage> createState() => _LocalPatchStorageState();
+  State<FailedPatchStorage> createState() => _FailedPatchStorageState();
 }
 
-class _LocalPatchStorageState extends State<LocalPatchStorage> {
+class _FailedPatchStorageState extends State<FailedPatchStorage> {
   @override
   Widget build(BuildContext context) {
     final snoutData = context.watch<DataProvider>();
     final serverConnection = context.watch<ServerConnectionProvider>();
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Local Patch Storage"),
+        title: const Text("Failed Patches"),
         actions: [
           IconButton(
               color: Colors.red,
@@ -41,32 +41,6 @@ class _LocalPatchStorageState extends State<LocalPatchStorage> {
                                       .errorContainer),
                               onPressed: () async {
                                 await serverConnection.clearFailedPatches();
-                                if (mounted) {
-                                  Navigator.pop(context);
-                                }
-                              },
-                              child: const Text("Delete")),
-                        ],
-                      )),
-              icon: const Icon(Icons.delete)),
-          IconButton(
-              color: Colors.green,
-              onPressed: () => showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                        title: const Text(
-                            "Are you sure you want to delete ALL successful patches?"),
-                        actions: [
-                          TextButton(
-                              onPressed: () => Navigator.pop(context),
-                              child: const Text("Cancel")),
-                          FilledButton.tonal(
-                              style: FilledButton.styleFrom(
-                                  backgroundColor: Theme.of(context)
-                                      .colorScheme
-                                      .errorContainer),
-                              onPressed: () async {
-                                await serverConnection.clearSuccessfulPatches();
                                 if (mounted) {
                                   Navigator.pop(context);
                                 }
@@ -106,21 +80,6 @@ class _LocalPatchStorageState extends State<LocalPatchStorage> {
                       icon: const Icon(Icons.refresh)),
                 ],
               ),
-            ),
-          const Center(child: Text("Successful Patches")),
-          for (final patch in serverConnection.successfulPatches.reversed)
-            ListTile(
-              onTap: () => showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                        title: const Text("Patch Data"),
-                        content: SelectableText(patch),
-                      )),
-              tileColor: Colors.green,
-              title: Text(DateFormat.yMMMMEEEEd()
-                  .add_Hms()
-                  .format(Patch.fromJson(jsonDecode(patch)).time)),
-              subtitle: Text(Patch.fromJson(jsonDecode(patch)).path.toString()),
             ),
         ],
       ),

@@ -16,7 +16,6 @@ class ServerConnectionProvider extends ChangeNotifier {
   bool connected = true;
 
   //Used in the UI to see failed and successful patches
-  List<String> successfulPatches = <String>[];
   List<String> failedPatches = <String>[];
 
   //This timer is set and will trigger a re-connect if a ping is not recieved
@@ -33,7 +32,6 @@ class ServerConnectionProvider extends ChangeNotifier {
     //Initialize the patches array to be used in the UI.
     () async {
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      successfulPatches = prefs.getStringList("successful_patches") ?? [];
       failedPatches = prefs.getStringList("failed_patches") ?? [];
       lastOriginSync =
           DateTime.tryParse(prefs.getString("lastoriginsync") ?? "");
@@ -68,16 +66,11 @@ class ServerConnectionProvider extends ChangeNotifier {
       final res =
           await apiClient.put(Uri.parse(serverURL), body: jsonEncode(patch));
       if (res.statusCode == 200) {
-        //This was successful
-        successfulPatches = prefs.getStringList("successful_patches") ?? [];
-        successfulPatches.add(jsonEncode(patch));
-        prefs.setStringList("successful_patches", successfulPatches);
         //Remove it from the failed patches if it exists there
         if (failedPatches.contains(jsonEncode(patch))) {
           failedPatches.remove(jsonEncode(patch));
           prefs.setStringList("failed_patches", failedPatches);
         }
-        //TODO apply patch to local state
         return true;
       } else {
         failedPatches = prefs.getStringList("failed_patches") ?? [];
@@ -192,13 +185,4 @@ class ServerConnectionProvider extends ChangeNotifier {
     prefs.setStringList("failed_patches", []);
     notifyListeners();
   }
-
-  //Clears all of the successful patches.
-  Future clearSuccessfulPatches() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    successfulPatches.clear(); //For UI update
-    prefs.setStringList("successful_patches", []);
-    notifyListeners();
-  }
-
 }

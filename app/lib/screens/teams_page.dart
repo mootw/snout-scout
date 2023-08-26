@@ -35,104 +35,107 @@ class _TeamGridListState extends State<TeamGridList> {
             for (final team in context.watch<DataProvider>().event.teams)
               if (widget.teamFiler == null || widget.teamFiler!.contains(team))
                 TeamListTile(teamNumber: team),
-            if(widget.showEditButton)
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Center(
-                child: FilledButton.tonal(
-                    onPressed: () => showDialog(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                              title: const Text("Edit Teams"),
-                              actions: [
-                                TextButton(
-                                    onPressed: () async {
-                                      final result = await Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) => JSONEditor(
-                                              validate: (item) {},
-                                              source: context
-                                                  .read<DataProvider>()
-                                                  .event
-                                                  .teams,
-                                            ),
-                                          ));
+            if (widget.showEditButton)
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Center(
+                  child: FilledButton.tonal(
+                      onPressed: () => showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                                title: const Text("Edit Teams"),
+                                actions: [
+                                  TextButton(
+                                      onPressed: () async {
+                                        final result = await Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) => JSONEditor(
+                                                validate: (item) {},
+                                                source: context
+                                                    .read<DataProvider>()
+                                                    .event
+                                                    .teams,
+                                              ),
+                                            ));
 
-                                      if (result != null && mounted) {
-                                        Patch patch = Patch(
-                                            identity: context
-                                                .read<IdentityProvider>()
-                                                .identity,
-                                            time: DateTime.now(),
-                                            path: ['teams'],
-                                            value: jsonDecode(result));
-                                        //Save the scouting results to the server!!
-                                        await context
-                                            .read<DataProvider>()
-                                            .addPatch(patch);
-                                      }
-                                    },
-                                    child: const Text("Manual")),
-                                TextButton(
-                                    onPressed: () async {
-                                      List<int> teams;
-                                      try {
-                                        teams = await getTeamListForEventTBA(
-                                            context.read<DataProvider>().event);
-                                        //Some reason the teams do not come sorted...
-                                        teams.sort();
-                                      } catch (e) {
-                                        if (mounted) {
-                                          showDialog(
-                                              context: context,
-                                              builder: (context) => AlertDialog(
-                                                    title: Text(e.toString()),
-                                                    actions: [
-                                                      TextButton(
-                                                          onPressed: () =>
-                                                              Navigator.pop(
-                                                                  context),
-                                                          child:
-                                                              const Text("Ok"))
-                                                    ],
-                                                  ));
+                                        if (result != null && mounted) {
+                                          Patch patch = Patch(
+                                              identity: context
+                                                  .read<IdentityProvider>()
+                                                  .identity,
+                                              time: DateTime.now(),
+                                              path: Patch.buildPath(['teams']),
+                                              value: jsonDecode(result));
+                                          //Save the scouting results to the server!!
+                                          await context
+                                              .read<DataProvider>()
+                                              .addPatch(patch);
                                         }
-                                        return;
-                                      }
-                                      if (!mounted) {
-                                        return;
-                                      }
+                                      },
+                                      child: const Text("Manual")),
+                                  TextButton(
+                                      onPressed: () async {
+                                        List<int> teams;
+                                        try {
+                                          teams = await getTeamListForEventTBA(
+                                              context
+                                                  .read<DataProvider>()
+                                                  .event);
+                                          //Some reason the teams do not come sorted...
+                                          teams.sort();
+                                        } catch (e) {
+                                          if (mounted) {
+                                            showDialog(
+                                                context: context,
+                                                builder: (context) =>
+                                                    AlertDialog(
+                                                      title: Text(e.toString()),
+                                                      actions: [
+                                                        TextButton(
+                                                            onPressed: () =>
+                                                                Navigator.pop(
+                                                                    context),
+                                                            child: const Text(
+                                                                "Ok"))
+                                                      ],
+                                                    ));
+                                          }
+                                          return;
+                                        }
+                                        if (!mounted) {
+                                          return;
+                                        }
 
-                                      final result = await Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) => JSONEditor(
-                                              validate: (item) {},
-                                              source: teams,
-                                            ),
-                                          ));
+                                        final result = await Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) => JSONEditor(
+                                                validate: (item) {},
+                                                source: teams,
+                                              ),
+                                            ));
 
-                                      if (result != null && mounted) {
-                                        Patch patch = Patch(
-                                            identity: context
-                                                .read<IdentityProvider>()
-                                                .identity,
-                                            time: DateTime.now(),
-                                            path: ['teams'],
-                                            value: jsonDecode(result));
-                                        //Save the scouting results to the server!!
-                                        await context
-                                            .read<DataProvider>()
-                                            .addPatch(patch);
-                                      }
-                                    },
-                                    child: const Text("TBA AutoFill")),
-                              ],
-                            )),
-                    child: const Text("Edit Teams")),
+                                        if (result != null && mounted) {
+                                          Patch patch = Patch(
+                                              identity: context
+                                                  .read<IdentityProvider>()
+                                                  .identity,
+                                              time: DateTime.now(),
+                                              path: Patch.buildPath(['teams']),
+                                              value: jsonDecode(result));
+                                          //Save the scouting results to the server!!
+                                          await context
+                                              .read<DataProvider>()
+                                              .addPatch(patch);
+                                        }
+                                      },
+                                      child: const Text("TBA AutoFill")),
+                                ],
+                              )),
+                      child: const Text("Edit Teams")),
+                ),
               ),
-            ),
           ],
         ),
       ),
@@ -149,8 +152,8 @@ class TeamListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final snoutData = context.watch<DataProvider>();
     Widget? image;
-    final data =
-        snoutData.event.pitscouting[teamNumber.toString()]?[robotPictureReserved];
+    final data = snoutData.event.pitscouting[teamNumber.toString()]
+        ?[robotPictureReserved];
     if (data != null) {
       image = AspectRatio(
           aspectRatio: 1,

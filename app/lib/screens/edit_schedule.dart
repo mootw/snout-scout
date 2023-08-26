@@ -125,9 +125,9 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
                   Patch patch = Patch(
                       identity: context.read<IdentityProvider>().identity,
                       time: DateTime.now(),
-                      path: [
+                      path: Patch.buildPath([
                         'matches',
-                      ],
+                      ]),
                       value: matchesWithRemoved);
                   await snoutData.addPatch(patch);
                 }
@@ -148,10 +148,10 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
       Patch patch = Patch(
           identity: context.read<IdentityProvider>().identity,
           time: DateTime.now(),
-          path: [
+          path: Patch.buildPath([
             'matches',
             matchID ?? resultMatch.description,
-          ],
+          ]),
           value: resultMatch.toJson());
       await data.addPatch(patch);
     }

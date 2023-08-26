@@ -18,7 +18,6 @@ part 'frcevent.g.dart';
 
 @JsonSerializable()
 class FRCEvent {
-
   /// how should this event be tracked?
   final EventConfig config;
 
@@ -60,8 +59,7 @@ class FRCEvent {
         dbJson = FRCEvent.fromJson(patch.value as Map).toJson();
         continue;
       }
-      final ptr = JsonPointer.build(patch.path);
-      dbJson = ptr.write(dbJson, patch.value);
+      dbJson = JsonPointer(patch.path).write(dbJson, patch.value);
     }
     return FRCEvent.fromJson(dbJson);
   }

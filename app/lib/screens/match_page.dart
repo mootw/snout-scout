@@ -86,14 +86,16 @@ class _MatchPageState extends State<MatchPage> {
                           MaterialPageRoute(
                             builder: (context) => EditMatchResults(
                                 results: match.results,
-                                config: snoutData.event.config, matchID: widget.matchid),
+                                config: snoutData.event.config,
+                                matchID: widget.matchid),
                           )));
 
                   if (result != null) {
                     Patch patch = Patch(
                         identity: context.read<IdentityProvider>().identity,
                         time: DateTime.now(),
-                        path: ['matches', widget.matchid, 'results'],
+                        path: Patch.buildPath(
+                            ['matches', widget.matchid, 'results']),
                         value: result.toJson());
 
                     await snoutData.addPatch(patch);
@@ -157,14 +159,10 @@ class _MatchPageState extends State<MatchPage> {
                         .robot[team.toString()]?.survey[item.id]
                         ?.toString()),
                   DataItem.fromText(getAuditString(context
-                        .watch<DataProvider>()
-                        .database
-                        .getLastPatchFor([
-                      'matches',
-                      widget.matchid,
-                      'robot',
-                      '$team'
-                    ]))),
+                      .watch<DataProvider>()
+                      .database
+                      .getLastPatchFor(Patch.buildPath(
+                          ['matches', widget.matchid, 'robot', '$team'])))),
                 ],
             ],
           ),
@@ -193,7 +191,8 @@ class _MatchPageState extends State<MatchPage> {
                   ],
                 ),
               ),
-              for (final eventType in snoutData.event.config.matchscouting.events)
+              for (final eventType
+                  in snoutData.event.config.matchscouting.events)
                 SizedBox(
                   width: smallFieldSize,
                   child: Column(children: [
@@ -264,7 +263,9 @@ class _MatchPageState extends State<MatchPage> {
           Container(
               padding: const EdgeInsets.only(right: 16),
               alignment: Alignment.centerRight,
-              child: EditAudit(path: ['matches', widget.matchid, 'results'])),
+              child: EditAudit(
+                  path:
+                      Patch.buildPath(['matches', widget.matchid, 'results']))),
         ],
       ),
     );
