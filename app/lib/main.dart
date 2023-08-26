@@ -264,12 +264,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   String result;
                   //TAKE PHOTO
                   try {
-                    final ImagePicker picker = ImagePicker();
-                    final XFile? photo = await picker.pickImage(
-                        source: ImageSource.camera,
-                        maxWidth: scoutImageSize,
-                        maxHeight: scoutImageSize,
-                        imageQuality: 50);
+                    final photo = await pickOrTakeImageDialog(context);
                     if (photo != null) {
                       Uint8List bytes = await photo.readAsBytes();
                       result = base64Encode(bytes);
