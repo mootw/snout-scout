@@ -49,7 +49,7 @@ class _JSONEditorState extends State<JSONEditor> {
                 controller: _controller,
                 onChanged: (value) {
                   try {
-                    widget.validate(jsonDecode(value));
+                    widget.validate(json.decode(value));
                     setState(() {
                       _error = "";
                     });

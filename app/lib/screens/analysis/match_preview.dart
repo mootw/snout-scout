@@ -49,10 +49,10 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                           const Text("Red"),
                           TextField(
                             controller:
-                                TextEditingController(text: jsonEncode(_red)),
+                                TextEditingController(text: json.encode(_red)),
                             onSubmitted: (value) {
                               setState(() {
-                                _red = List<int>.from(jsonDecode(value));
+                                _red = List<int>.from(json.decode(value));
                               });
                             },
                           ),
@@ -60,10 +60,10 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                           const Text("Blue"),
                           TextField(
                             controller:
-                                TextEditingController(text: jsonEncode(_blue)),
+                                TextEditingController(text: json.encode(_blue)),
                             onSubmitted: (value) {
                               setState(() {
-                                _blue = List<int>.from(jsonDecode(value));
+                                _blue = List<int>.from(json.decode(value));
                               });
                             },
                           )

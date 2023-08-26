@@ -19,7 +19,6 @@ import 'package:app/search.dart';
 import 'package:download/download.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 import 'package:snout_db/config/eventconfig.dart';
@@ -184,49 +183,17 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           ),
           ListTile(
-            title: const Text("Server"),
+            title: const Text("Data Source"),
             subtitle: Text(serverConnection.serverURL),
-            trailing: IconButton(
-              icon: const Icon(Icons.edit),
-              onPressed: () async {
-                final result = await showStringInputDialog(
-                    context, "Server", serverConnection.serverURL);
-                if (result != null) {
-                  await serverConnection.setServer(result);
-                }
-              },
-            ),
-          ),
-          ListTile(
-            title: const Text("Last Origin Sync"),
-            subtitle: serverConnection.lastOriginSync == null
-                ? const Text("Never")
-                : Text(DateFormat.yMMMMEEEEd()
-                    .add_Hms()
-                    .format(serverConnection.lastOriginSync!)),
-          ),
-          ListTile(
-            title: const Text("Edit History"),
-            trailing: const Icon(Icons.receipt_long),
-            onTap: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const PatchHistoryPage(),
-                  ));
+            onTap: () async {
+              final result = await showStringInputDialog(
+                  context, "Server", serverConnection.serverURL);
+              if (result != null) {
+                await serverConnection.setServer(result);
+              }
             },
           ),
-          ListTile(
-            title: const Text("Scouting Leaderboard"),
-            trailing: const Icon(Icons.leaderboard),
-            onTap: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const ScoutLeaderboardPage(),
-                  ));
-            },
-          ),
+          const Divider(),
           Center(
             child: Padding(
               padding: const EdgeInsets.all(8.0),
@@ -234,11 +201,31 @@ class _MyHomePageState extends State<MyHomePage> {
                   onPressed: () {
                     final data = context.read<DataProvider>().database;
                     final stream =
-                        Stream.fromIterable(utf8.encode(jsonEncode(data)));
+                        Stream.fromIterable(utf8.encode(json.encode(data)));
                     download(stream, '${data.event.config.name}.json');
                   },
-                  child: const Text("Download Event Data to File")),
+                  child: const Text("Download DB as File")),
             ),
+          ),
+          ListTile(
+            title: const Text("Edit History"),
+            trailing: const Icon(Icons.receipt_long),
+            subtitle:
+                Text('${data.database.patches.length.toString()} entries'),
+            onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const PatchHistoryPage(),
+                )),
+          ),
+          ListTile(
+            title: const Text("Scouting Leaderboard"),
+            trailing: const Icon(Icons.leaderboard),
+            onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ScoutLeaderboardPage(),
+                )),
           ),
           const Divider(),
           ListTile(
@@ -261,7 +248,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         identity: identity,
                         time: DateTime.now(),
                         path: Patch.buildPath(['config']),
-                        value: jsonDecode(result));
+                        value: json.decode(result));
                     //Save the scouting results to the server!!
                     await data.addPatch(patch);
                   }

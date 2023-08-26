@@ -119,7 +119,7 @@ void main(List<String> args) async {
         request.response.close();
         return;
       }
-      var event = FRCEvent.fromJson(jsonDecode(await f.readAsString()));
+      var event = FRCEvent.fromJson(json.decode(await f.readAsString()));
 
       if (request.method == 'GET') {
         if (request.uri.pathSegments.length > 2 &&
@@ -127,13 +127,13 @@ void main(List<String> args) async {
           //query was for a specific sub-item. Path segments with a trailing zero need to be filtered
           //events/2022mnmi2 is not the same as event/2022mnmi2/
           try {
-            var dbJson = jsonDecode(jsonEncode(event));
+            var dbJson = json.decode(json.encode(event));
             final pointer = JsonPointer(
                 '/${request.uri.pathSegments.sublist(2).join("/")}');
             dbJson = pointer.read(dbJson);
             request.response.headers.contentType =
                 new ContentType('application', 'json', charset: 'utf-8');
-            request.response.write(jsonEncode(dbJson));
+            request.response.write(json.encode(dbJson));
             request.response.close();
             return;
           } catch (e) {
@@ -147,7 +147,7 @@ void main(List<String> args) async {
 
         request.response.headers.contentType =
             new ContentType('application', 'json', charset: 'utf-8');
-        request.response.write(jsonEncode(event));
+        request.response.write(json.encode(event));
         request.response.close();
         return;
       }
@@ -155,18 +155,18 @@ void main(List<String> args) async {
       if (request.method == "PUT") {
         try {
           String content = await utf8.decodeStream(request);
-          Patch patch = Patch.fromJson(jsonDecode(content));
+          Patch patch = Patch.fromJson(json.decode(content));
 
           event = patch.patch(event);
           //Write the new DB to disk
-          await f.writeAsString(jsonEncode(event));
+          await f.writeAsString(json.encode(event));
           request.response.close();
 
-          print(jsonEncode(patch));
+          print(json.encode(patch));
 
           //Successful patch, send this update to all listeners
           for (final listener in loadedEvents[eventID]?.listeners ?? []) {
-            listener.add(jsonEncode(patch));
+            listener.add(json.encode(patch));
           }
 
           return;

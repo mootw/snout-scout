@@ -31,7 +31,7 @@ class _PatchHistoryPageState extends State<PatchHistoryPage> {
         return ListTile(
           title: Text('${patches.length - index}: ${patch.identity}'),
           onTap: () => showDialog(context: context, builder: (_) => AlertDialog(
-            content: SingleChildScrollView(child: SelectableText(jsonEncode(patch))),
+            content: SingleChildScrollView(child: SelectableText(json.encode(patch))),
           )),
           subtitle: Text(patch.path),
           trailing: Text(DateFormat.jms().add_yMd().format(patch.time)),

@@ -65,8 +65,8 @@ class _FailedPatchStorageState extends State<FailedPatchStorage> {
               tileColor: Colors.red,
               title: Text(DateFormat.yMMMMEEEEd()
                   .add_Hms()
-                  .format(Patch.fromJson(jsonDecode(patch)).time)),
-              subtitle: Text(Patch.fromJson(jsonDecode(patch)).path.toString()),
+                  .format(Patch.fromJson(json.decode(patch)).time)),
+              subtitle: Text(Patch.fromJson(json.decode(patch)).path.toString()),
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -74,7 +74,7 @@ class _FailedPatchStorageState extends State<FailedPatchStorage> {
                       onPressed: () async {
                         //wtf is this
                         await snoutData
-                            .addPatch(Patch.fromJson(jsonDecode(patch)));
+                            .addPatch(Patch.fromJson(json.decode(patch)));
                         setState(() {});
                       },
                       icon: const Icon(Icons.refresh)),

@@ -12,7 +12,6 @@ class ServerConnectionProvider extends ChangeNotifier {
 
   String serverURL = "http://localhost:6749";
 
-  DateTime? lastOriginSync;
   bool connected = true;
 
   //Used in the UI to see failed and successful patches
@@ -33,8 +32,6 @@ class ServerConnectionProvider extends ChangeNotifier {
     () async {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       failedPatches = prefs.getStringList("failed_patches") ?? [];
-      lastOriginSync =
-          DateTime.tryParse(prefs.getString("lastoriginsync") ?? "");
 
       //Load data and initialize the app
       serverURL = prefs.getString("server") ?? "http://localhost:6749";
@@ -42,14 +39,14 @@ class ServerConnectionProvider extends ChangeNotifier {
       // try {
       //   //Load season config from server
       //   final data = await apiClient.get(Uri.parse(serverURL));
-      //   db = FRCEvent.fromJson(jsonDecode(data.body));
+      //   db = FRCEvent.fromJson(json.decode(data.body));
       //   prefs.setString(serverURL, data.body);
       //   prefs.setString("lastoriginsync", DateTime.now().toIso8601String());
       // } catch (e) {
       //   try {
       //     //Load from cache
       //     String? dbCache = prefs.getString(serverURL);
-      //     db = FRCEvent.fromJson(jsonDecode(dbCache!));
+      //     db = FRCEvent.fromJson(json.decode(dbCache!));
       //   } catch (e) {
       //     //Really bad we have no cache or server connection
       //     return;
@@ -64,27 +61,27 @@ class ServerConnectionProvider extends ChangeNotifier {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     try {
       final res =
-          await apiClient.put(Uri.parse(serverURL), body: jsonEncode(patch));
+          await apiClient.put(Uri.parse(serverURL), body: json.encode(patch));
       if (res.statusCode == 200) {
         //Remove it from the failed patches if it exists there
-        if (failedPatches.contains(jsonEncode(patch))) {
-          failedPatches.remove(jsonEncode(patch));
+        if (failedPatches.contains(json.encode(patch))) {
+          failedPatches.remove(json.encode(patch));
           prefs.setStringList("failed_patches", failedPatches);
         }
         return true;
       } else {
         failedPatches = prefs.getStringList("failed_patches") ?? [];
-        if (failedPatches.contains(jsonEncode(patch)) == false) {
+        if (failedPatches.contains(json.encode(patch)) == false) {
           //Do not add the same patch multiple times into the failed patches!
-          failedPatches.add(jsonEncode(patch));
+          failedPatches.add(json.encode(patch));
         }
         prefs.setStringList("failed_patches", failedPatches);
       }
     } catch (e) {
       failedPatches = prefs.getStringList("failed_patches") ?? [];
-      if (failedPatches.contains(jsonEncode(patch)) == false) {
+      if (failedPatches.contains(json.encode(patch)) == false) {
         //Do not add the same patch multiple times into the failed patches!
-        failedPatches.add(jsonEncode(patch));
+        failedPatches.add(json.encode(patch));
       }
       prefs.setStringList("failed_patches", failedPatches);
     }
@@ -108,11 +105,9 @@ class ServerConnectionProvider extends ChangeNotifier {
       //Load season config from server
       final data = await apiClient.get(Uri.parse(serverURL));
       //TODO apply patch to local state
-      // db = FRCEvent.fromJson(jsonDecode(data.body));
+      // db = FRCEvent.fromJson(json.decode(data.body));
       prefs.setString(serverURL, data.body);
       prefs.setString("lastoriginsync", DateTime.now().toIso8601String());
-      lastOriginSync = DateTime
-          .now(); //FOR easy UI update. This is slowly becoming spaghetti
       notifyListeners();
     } catch (e) {
       Logger.root.warning("origin sync error", e);
@@ -157,10 +152,10 @@ class ServerConnectionProvider extends ChangeNotifier {
   //     }
 
   //     //TODO apply patch to local state
-  //     // db = Patch.fromJson(jsonDecode(event)).patch(db);
+  //     // db = Patch.fromJson(json.decode(event)).patch(db);
   //     // final prefs = await SharedPreferences.getInstance();
   //     // //Save the database to disk
-  //     // prefs.setString("db", jsonEncode(db));
+  //     // prefs.setString("db", json.encode(db));
   //     notifyListeners();
   //   }, onDone: () {
   //     connected = false;

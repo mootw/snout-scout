@@ -33,7 +33,7 @@ class _ConfigureSourceScreenState extends State<ConfigureSourceScreen> {
                   if (value == null) {
                     return;
                   }
-                  FRCEvent event = FRCEvent.fromJson(jsonDecode(value));
+                  FRCEvent event = FRCEvent.fromJson(json.decode(value));
                   Patch p = Patch(
                       identity: context.read<IdentityProvider>().identity,
                       time: DateTime.now(),
