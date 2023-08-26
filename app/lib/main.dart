@@ -6,8 +6,8 @@ import 'package:app/providers/data_provider.dart';
 import 'package:app/helpers.dart';
 import 'package:app/providers/identity_provider.dart';
 import 'package:app/providers/server_connection_provider.dart';
-import 'package:app/scouting_tools/scouting_tool.dart';
 import 'package:app/screens/analysis.dart';
+import 'package:app/screens/configure_source.dart';
 import 'package:app/screens/documentation_page.dart';
 import 'package:app/screens/edit_json.dart';
 import 'package:app/screens/failed_patches.dart';
@@ -18,7 +18,6 @@ import 'package:app/screens/teams_page.dart';
 import 'package:app/search.dart';
 import 'package:download/download.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 import 'package:snout_db/config/eventconfig.dart';
@@ -185,13 +184,11 @@ class _MyHomePageState extends State<MyHomePage> {
           ListTile(
             title: const Text("Data Source"),
             subtitle: Text(serverConnection.serverURL),
-            onTap: () async {
-              final result = await showStringInputDialog(
-                  context, "Server", serverConnection.serverURL);
-              if (result != null) {
-                await serverConnection.setServer(result);
-              }
-            },
+            onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ConfigureSourceScreen(),
+                )),
           ),
           const Divider(),
           Center(

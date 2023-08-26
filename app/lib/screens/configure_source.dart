@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:app/helpers.dart';
 import 'package:app/providers/identity_provider.dart';
+import 'package:app/providers/server_connection_provider.dart';
 import 'package:app/screens/edit_json.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -25,6 +26,10 @@ class _ConfigureSourceScreenState extends State<ConfigureSourceScreen> {
       ),
       body: ListView(
         children: [
+          const ListTile(
+            title: Text("RAM Only"),
+            subtitle: Text("changes are not persisted after closing"),
+          ),
           Wrap(children: [
             const SizedBox(width: 8),
             OutlinedButton(
@@ -42,43 +47,66 @@ class _ConfigureSourceScreenState extends State<ConfigureSourceScreen> {
 
                   SnoutDB newDb = SnoutDB(patches: [p]);
                 },
-                child: const Text("Create New Event")),
+                child: const Text("New Event")),
             const SizedBox(width: 16),
             OutlinedButton(onPressed: () {}, child: const Text("Open File")),
           ]),
+          const SizedBox(height: 16),
+          const Divider(),
+          const ListTile(
+            title: Text("Local Save"),
+            subtitle: Text("changes are saved on device"),
+          ),
+          Wrap(children: [
+            const SizedBox(width: 8),
+            OutlinedButton(
+                onPressed: () async {
+                  String? value = await createNewEvent(context);
+                  if (value == null) {
+                    return;
+                  }
+                  FRCEvent event = FRCEvent.fromJson(json.decode(value));
+                  Patch p = Patch(
+                      identity: context.read<IdentityProvider>().identity,
+                      time: DateTime.now(),
+                      path: Patch.buildPath([""]),
+                      value: event);
+
+                  SnoutDB newDb = SnoutDB(patches: [p]);
+                },
+                child: const Text("New Event")),
+            const SizedBox(width: 16),
+            OutlinedButton(onPressed: () {}, child: const Text("Open File")),
+          ]),
+          const SizedBox(height: 16),
           const Divider(),
           ListTile(
-            title: const Text("Origin"),
-            subtitle: const Text("https://my.server.com/"),
-            leading: const Icon(Icons.check, color: Colors.green),
+            title: const Text("Server"),
+            subtitle: Text(context.watch<ServerConnectionProvider>().serverURL),
             trailing: IconButton(
-              icon: const Icon(Icons.edit),
+              icon: const Icon(Icons.miscellaneous_services_sharp),
               onPressed: () async {
-                final result = await showStringInputDialog(
-                    context, "Server", "SERVER URL");
-                if (result != null && context.mounted) {
-                  //TODO set server
-                }
+                //TODO manage server page to upload, download, and delete event files.
+                //TODO only display this button if the server url is set and whatnot
               },
             ),
-          ),
-          ListTile(
-            title: const Text("2023 Regionals"),
-            subtitle: const Text("2023mnmi2.json"),
-            leading: IconButton(
-                icon: const Icon(Icons.delete, color: Colors.red),
-                onPressed: () {}),
-          ),
-          ListTile(
-            title: const Text("2023 State"),
-            subtitle: const Text("mnstate.json"),
-            leading: IconButton(
-                icon: const Icon(Icons.delete, color: Colors.red),
-                onPressed: () {}),
+            onTap: () async {
+              final provider = context.read<ServerConnectionProvider>();
+              final result = await showStringInputDialog(
+                  context, "Server", provider.serverURL);
+              if (result != null) {
+                provider.setServer(result);
+              }
+            },
           ),
           const ListTile(
-            title: Text("Upload Event To Origin"),
-            leading: Icon(Icons.upload),
+            leading: Icon(Icons.check, color: Colors.green),
+            title: Text("2023 Regionals"),
+            subtitle: Text("2023mnmi2.json"),
+          ),
+          const ListTile(
+            title: Text("2023 State"),
+            subtitle: Text("mnstate.json"),
           ),
         ],
       ),
