@@ -233,7 +233,7 @@ class DataProvider extends ChangeNotifier {
           print(diffPatches.length);
 
     database = SnoutDB(patches: [...lastDiskDatabase.patches, ...diffPatches]);
-    await storeText(storageKey, json.encode(lastDiskDatabase));
+    await storeText(storageKey, json.encode(database));
 
 
     notifyListeners();
