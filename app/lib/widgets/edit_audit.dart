@@ -1,4 +1,5 @@
 import 'package:app/providers/data_provider.dart';
+import 'package:app/screens/patch_history.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -12,8 +13,15 @@ class EditAudit extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final item = context.watch<DataProvider>().database.getLastPatchFor(path);
-    return Text(getAuditString(item) ?? '',
-        style: Theme.of(context).textTheme.bodySmall!.copyWith(color: Theme.of(context).hintColor));
+    return InkWell(
+      onTap: () => Navigator.push(context,
+          MaterialPageRoute(builder: (_) => PatchHistoryPage(filter: path))),
+      child: Text(getAuditString(item) ?? '',
+          style: Theme.of(context)
+              .textTheme
+              .bodySmall!
+              .copyWith(color: Theme.of(context).hintColor)),
+    );
   }
 }
 

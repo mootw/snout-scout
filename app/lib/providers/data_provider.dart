@@ -53,8 +53,6 @@ class DataProvider extends ChangeNotifier {
   FRCEvent get event => database.event;
 
   DataProvider() {
-
-
     () async {
       final prefs = await SharedPreferences.getInstance();
 
@@ -96,7 +94,7 @@ class DataProvider extends ChangeNotifier {
         await loadLocalDBData();
         break;
       case DataSource.remoteServer:
-        //TODO make it load the server data
+        await getDatabaseFromServer();
         break;
     }
   }
@@ -113,6 +111,12 @@ class DataProvider extends ChangeNotifier {
         break;
       case DataSource.remoteServer:
         database.addPatch(patch);
+        await postPatchToServer(patch);
+        //importantly we DO NOT save this 
+        //to our local latest state, just
+        //like with incoming patches due to
+        //that potentially ruining the state
+        //of the local database....
         break;
     }
 
@@ -139,7 +143,6 @@ class DataProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-
   /// I AM TREATING THIS AS A THE SERVER HANDLING "PART"
   /// I REALLY WANTED THIS TO BE ANOTHER FILE BUT UNFORTUNATELY
   /// EVERYTHING I DID MADE IT SLIGHTLY ANNOTYING LIKE I WANTED
@@ -159,6 +162,9 @@ class DataProvider extends ChangeNotifier {
   String serverURL = "http://localhost:6749";
 
   String? selectedEvent;
+
+  String get selectedEventStorageKey =>
+      base64Encode(utf8.encode(getEventPath.toString()));
 
   Uri get serverURI => Uri.parse(serverURL);
 
@@ -182,12 +188,64 @@ class DataProvider extends ChangeNotifier {
     return List<String>.from(json.decode(result.body));
   }
 
+  //this will load the entire database if it has
+  //not been loaded yet, OR it will load only
+  //the changes that have been made since it's
+  //last download.
+  Future getDatabaseFromServer() async {
+    final storageKey = selectedEventStorageKey;
+    final diskData = await readText(storageKey);
+
+    Uri path = Uri.parse('${getEventPath.toString()}/patches');
+
+    if (diskData == null) {
+      print("DISK IS NULL $path");
+      //Load the changest only, since it is more bandwidth efficient
+      //and the database is ONLY based on patches.
+      final newData = await apiClient.get(path);
+
+      //TODO this is hardcoded
+      final decodedDatabase =
+          SnoutDB.fromJson({"patches": json.decode(newData.body)});
+      database = decodedDatabase;
+      await storeText(storageKey, json.encode(decodedDatabase));
+      notifyListeners();
+      return;
+    }
+
+    final lastDiskDatabase =
+          SnoutDB.fromJson(json.decode(diskData));
+
+    Uri diffPath = Uri.parse('${getEventPath.toString()}/patchDiff');
+    
+    print("diff path $diffPath");
+
+    final diffResult = await apiClient.get(diffPath, headers: {
+      "head": lastDiskDatabase.patches.length.toString(),
+    });
+
+    print(diffResult.body);
+    
+    List<Patch> diffPatches = (json.decode(diffResult.body) as List<dynamic>)
+          .map((e) => Patch.fromJson(e as Map))
+          .toList();
+
+          print(diffPatches.length);
+
+    database = SnoutDB(patches: [...lastDiskDatabase.patches, ...diffPatches]);
+    await storeText(storageKey, json.encode(lastDiskDatabase));
+
+
+    notifyListeners();
+  }
+
+
   //Writes a patch to local disk and submits it to the server.
-  Future postPatch(Patch patch) async {
+  Future postPatchToServer(Patch patch) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     try {
       final res =
-          await apiClient.put(Uri.parse(serverURL), body: json.encode(patch));
+          await apiClient.put(getEventPath, body: json.encode(patch));
       if (res.statusCode == 200) {
         //Remove it from the failed patches if it exists there
         if (failedPatches.contains(json.encode(patch))) {
@@ -224,14 +282,15 @@ class DataProvider extends ChangeNotifier {
 
   Future setSelectedEvent(String? newFile) async {
     final prefs = await SharedPreferences.getInstance();
+    await deleteText(selectedEventStorageKey);
     if (newFile == null) {
       prefs.remove("selectedServerFile");
     } else {
       prefs.setString("selectedServerFile", newFile);
     }
     selectedEvent = newFile;
+    await getDatabaseFromServer(); //Load in the new event data!
     notifyListeners();
-    //TODO clear out old save data and reload
   }
 
   // void resetConnectionTimer() {

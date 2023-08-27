@@ -111,7 +111,7 @@ class _ConfigureSourceScreenState extends State<ConfigureSourceScreen> {
                     Logger.root.severe("Failed to load new file", e, s);
                   }
                 },
-                child: const Text("Open DB File")),
+                child: const Text("Replace with DB File")),
           ]),
           const SizedBox(height: 16),
           const Divider(),

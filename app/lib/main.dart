@@ -180,7 +180,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           ListTile(
             title: const Text("Data Source"),
-            subtitle: Text(serverConnection.serverURL),
+            subtitle: Text(serverConnection.dataSource.toJson()),
             onTap: () => Navigator.push(
                 context,
                 MaterialPageRoute(

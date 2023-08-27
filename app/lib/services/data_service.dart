@@ -17,6 +17,19 @@ Future storeText (String key, String value) async {
   await file.writeAsString(value);
 }
 
+Future deleteText (String key) async {
+  final fs = kIsWeb ? fileSystemWeb : fileSystemDefault;
+
+  // Create a top level directory
+  final dir = fs.directory('/dir');
+
+  // and a file in it
+  final file = fs.file('${dir.path}/$key');
+
+  await file.create(recursive: true);
+  await file.delete();
+}
+
 Future<String?> readText (String key) async {
   final fs = kIsWeb ? fileSystemWeb : fileSystemDefault;
 

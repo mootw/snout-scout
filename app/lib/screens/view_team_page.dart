@@ -95,8 +95,8 @@ class _TeamViewPageState extends State<TeamViewPage> {
                 ),
                 if (robotPicture != null)
                   SizedBox(
-                    width: 250,
-                    height: 250,
+                    width: 200,
+                    height: 200,
                     child: AspectRatio(
                       aspectRatio: 1,
                       child: Image.memory(

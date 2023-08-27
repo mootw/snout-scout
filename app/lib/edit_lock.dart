@@ -10,7 +10,7 @@ import 'package:provider/provider.dart';
 //This function will not throw an exception and always fail safe by navigating to the other page.
 Future<T?> navigateWithEditLock<T>(
     BuildContext context, String key, Function(BuildContext context) navigteFunction) async {
-    final editLockUri = context.watch<DataProvider>().serverURI.resolve("/edit_lock");
+    final editLockUri = context.read<DataProvider>().serverURI.resolve("/edit_lock");
     
   //Check if this key is being edited
   try {

@@ -74,7 +74,7 @@ class _MatchRecorderAssistantPageState
       futures.add(apiClient
           .get(
               context
-                  .watch<DataProvider>()
+                  .read<DataProvider>()
                   
                   .serverURI
                   .resolve("/edit_lock"),
