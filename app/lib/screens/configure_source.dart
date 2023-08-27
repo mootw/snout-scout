@@ -1,10 +1,12 @@
 import 'dart:convert';
 
 import 'package:app/helpers.dart';
+import 'package:app/providers/data_provider.dart';
 import 'package:app/providers/identity_provider.dart';
-import 'package:app/providers/server_connection_provider.dart';
 import 'package:app/screens/edit_json.dart';
+import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 import 'package:snout_db/event/frcevent.dart';
 import 'package:snout_db/patch.dart';
@@ -18,22 +20,53 @@ class ConfigureSourceScreen extends StatefulWidget {
 }
 
 class _ConfigureSourceScreenState extends State<ConfigureSourceScreen> {
+  List<String>? _eventOptions;
+
+  @override
+  void initState() {
+    super.initState();
+
+    updateEvents();
+  }
+
+  void updateEvents() async {
+    try {
+      final result = await context.read<DataProvider>().getEventList();
+      setState(() {
+        _eventOptions = result;
+      });
+    } catch (e, s) {
+      Logger.root.severe("Failed to load event list", e, s);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final data = context.watch<DataProvider>();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Data Selection"),
       ),
       body: ListView(
         children: [
-          const ListTile(
-            title: Text("RAM Only"),
-            subtitle: Text("does not clear currently open db, changes are not persisted"),
+          ListTile(
+            leading: data.dataSource != DataSource.memory
+                ? null
+                : const Icon(Icons.check, color: Colors.green),
+            title: const Text("RAM Only"),
+            subtitle:
+                const Text("does not clear open db. changes are not persisted"),
+            onTap: () => data.setDataSource(DataSource.memory),
           ),
           const Divider(),
-          const ListTile(
-            title: Text("Local Save"),
-            subtitle: Text("changes are saved on device"),
+          ListTile(
+            leading: data.dataSource != DataSource.localDisk
+                ? null
+                : const Icon(Icons.check, color: Colors.green),
+            title: const Text("Local Save"),
+            subtitle: const Text("changes are saved on device"),
+            onTap: () => data.setDataSource(DataSource.localDisk),
           ),
           Wrap(children: [
             const SizedBox(width: 8),
@@ -48,24 +81,48 @@ class _ConfigureSourceScreenState extends State<ConfigureSourceScreen> {
                       identity: context.read<IdentityProvider>().identity,
                       time: DateTime.now(),
                       path: Patch.buildPath([""]),
-                      value: event);
+                      value: event.toJson());
 
-                  SnoutDB newDb = SnoutDB(patches: [p]);
+                  await data.writeLocalDiskDatabase(SnoutDB(patches: [p]));
+                  await data.setDataSource(DataSource.localDisk);
                 },
                 child: const Text("New Event")),
             const SizedBox(width: 16),
-            // OutlinedButton(onPressed: () {
-                //TODO open file to overwrite local save
+            OutlinedButton(
+                onPressed: () async {
+                  try {
+                    const XTypeGroup typeGroup = XTypeGroup(
+                      label: 'Snout DB JSON',
+                      extensions: <String>['json'],
+                    );
+                    final XFile? file = await openFile(
+                        acceptedTypeGroups: <XTypeGroup>[typeGroup]);
 
-            // }, child: const Text("Open File")),
+                    if (file == null) {
+                      return;
+                    }
+
+                    final fileString = await file.readAsString();
+
+                    await data.writeLocalDiskDatabase(
+                        SnoutDB.fromJson(json.decode(fileString)));
+                    await data.setDataSource(DataSource.localDisk);
+                  } catch (e, s) {
+                    Logger.root.severe("Failed to load new file", e, s);
+                  }
+                },
+                child: const Text("Open DB File")),
           ]),
           const SizedBox(height: 16),
           const Divider(),
           ListTile(
+            leading: data.dataSource != DataSource.remoteServer
+                ? null
+                : const Icon(Icons.check),
             title: const Text("Server"),
-            subtitle: Text(context.watch<ServerConnectionProvider>().serverURL),
+            subtitle: Text(context.watch<DataProvider>().serverURL),
             onTap: () async {
-              final provider = context.read<ServerConnectionProvider>();
+              final provider = context.read<DataProvider>();
               final result = await showStringInputDialog(
                   context, "Server", provider.serverURL);
               if (result != null) {
@@ -73,15 +130,20 @@ class _ConfigureSourceScreenState extends State<ConfigureSourceScreen> {
               }
             },
           ),
-          const ListTile(
-            leading: Icon(Icons.check, color: Colors.green),
-            title: Text("2023 Regionals"),
-            subtitle: Text("2023mnmi2.json"),
-          ),
-          const ListTile(
-            title: Text("2023 State"),
-            subtitle: Text("mnstate.json"),
-          ),
+          if (_eventOptions == null) const CircularProgressIndicator(),
+          if (_eventOptions != null)
+            for (var event in _eventOptions!)
+              ListTile(
+                leading: data.dataSource == DataSource.remoteServer &&
+                        context.watch<DataProvider>().selectedEvent == event
+                    ? const Icon(Icons.check, color: Colors.green)
+                    : null,
+                title: Text(event),
+                onTap: () async {
+                  await context.read<DataProvider>().setSelectedEvent(event);
+                  data.setDataSource(DataSource.remoteServer);
+                },
+              ),
           ListTile(
             leading: const Icon(Icons.miscellaneous_services_sharp),
             title: const Text("Manage Server"),

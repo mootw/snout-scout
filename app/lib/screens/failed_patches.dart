@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:app/providers/data_provider.dart';
-import 'package:app/providers/server_connection_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -18,7 +17,7 @@ class _FailedPatchStorageState extends State<FailedPatchStorage> {
   @override
   Widget build(BuildContext context) {
     final snoutData = context.watch<DataProvider>();
-    final serverConnection = context.watch<ServerConnectionProvider>();
+    final serverConnection = context.watch<DataProvider>();
     return Scaffold(
       appBar: AppBar(
         title: const Text("Failed Patches"),

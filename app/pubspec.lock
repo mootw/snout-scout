@@ -169,6 +169,30 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.1.4"
+  file_selector:
+    dependency: "direct main"
+    description:
+      name: file_selector
+      sha256: "59b35aa4af7988be7ec88f9ddaa6c71c5b54bf0f8b35009389d9343b10e9c3af"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0"
+  file_selector_android:
+    dependency: transitive
+    description:
+      name: file_selector_android
+      sha256: "43e5c719f671b9181bef1bf2851135c3ad993a9a6c804a4ccb07579cfee84e34"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.5.0+2"
+  file_selector_ios:
+    dependency: transitive
+    description:
+      name: file_selector_ios
+      sha256: "507af301b21b1dbb6fd0615ba21190b2b4574edb672929f32ce7f610c40a9bd9"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.5.1+5"
   file_selector_linux:
     dependency: transitive
     description:
@@ -193,6 +217,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.6.0"
+  file_selector_web:
+    dependency: transitive
+    description:
+      name: file_selector_web
+      sha256: e292740c469df0aeeaba0895bf622bea351a05e87d22864c826bf21c4780e1d7
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.9.2"
   file_selector_windows:
     dependency: transitive
     description:
@@ -256,6 +288,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  fs_shim:
+    dependency: "direct main"
+    description:
+      name: fs_shim
+      sha256: "5331b4492bf512dda05e5dac9752295f7cf2c03c694a5b414ee27f38c72c1aa9"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.2.1"
   http:
     dependency: "direct main"
     description:
@@ -272,6 +312,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.2"
+  idb_shim:
+    dependency: transitive
+    description:
+      name: idb_shim
+      sha256: e22cbec15c3732ce53ad79927f106e7be7d4a66f836eb6270b51450c15bd7b84
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.3.1"
   image:
     dependency: transitive
     description:
@@ -544,6 +592,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.1.1"
+  sembast:
+    dependency: transitive
+    description:
+      name: sembast
+      sha256: "85ff944434f7b566fdc388be4f85b23e954736b7d6e51f965f4f419d966c15b1"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.5.0+1"
   share_plus:
     dependency: "direct main"
     description:
@@ -668,6 +724,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.0"
+  synchronized:
+    dependency: transitive
+    description:
+      name: synchronized
+      sha256: "5fcbd27688af6082f5abd611af56ee575342c30e87541d0245f7ff99faa02c60"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.1.0"
   term_glyph:
     dependency: transitive
     description:
