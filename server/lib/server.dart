@@ -3,11 +3,11 @@ import 'dart:convert';
 
 import 'package:dotenv/dotenv.dart';
 import 'package:rfc_6901/rfc_6901.dart';
-import 'package:snout_db/event/frcevent.dart';
 import 'package:server/edit_lock.dart';
 import 'dart:io';
 
 import 'package:snout_db/patch.dart';
+import 'package:snout_db/snout_db.dart';
 
 //TODO implement https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/ETag
 
@@ -119,7 +119,40 @@ void main(List<String> args) async {
         request.response.close();
         return;
       }
-      var event = FRCEvent.fromJson(json.decode(await f.readAsString()));
+      var event = SnoutDB.fromJson(json.decode(await f.readAsString()));
+
+      //I KNOW THIS IS HARD CODED PATH OVERRIDE BUT I DONT CARE
+      if (request.uri.pathSegments.length == 3 &&
+          request.uri.pathSegments[2] == "patchDiff") {
+            print("WEEYEYYEEYWWYYWYWE");
+        // length of client patch database.
+        final clientHead = request.headers.value("head");
+
+        if (clientHead == null) {
+          request.response.statusCode = 406;
+          request.response.write('send head');
+          request.response.close();
+          return;
+        }
+
+        int clientHeadInt = int.parse(clientHead);
+
+        if (clientHeadInt < 1) {
+          request.response.statusCode = 406;
+          request.response.write('head cannot be less than 1');
+          request.response.close();
+          return;
+        }
+
+        final range =
+            event.patches.getRange(clientHeadInt, event.patches.length);
+
+        request.response.headers.contentType =
+            new ContentType('application', 'json', charset: 'utf-8');
+        request.response.write(json.encode(range.toList()));
+        request.response.close();
+        return;
+      }
 
       if (request.method == 'GET') {
         if (request.uri.pathSegments.length > 2 &&
@@ -157,7 +190,7 @@ void main(List<String> args) async {
           String content = await utf8.decodeStream(request);
           Patch patch = Patch.fromJson(json.decode(content));
 
-          event = patch.patch(event);
+          event.addPatch(patch);
           //Write the new DB to disk
           await f.writeAsString(json.encode(event));
           request.response.close();
