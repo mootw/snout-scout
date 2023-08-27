@@ -103,7 +103,7 @@ void main(List<String> args) async {
     }
 
     if (request.uri.toString() == "/events") {
-      request.response.write(loadedEvents.keys.toList());
+      request.response.write(json.encode(loadedEvents.keys.toList()));
       request.response.close();
       return;
     }

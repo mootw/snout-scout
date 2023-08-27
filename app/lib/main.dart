@@ -5,7 +5,6 @@ import 'dart:typed_data';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/helpers.dart';
 import 'package:app/providers/identity_provider.dart';
-import 'package:app/providers/server_connection_provider.dart';
 import 'package:app/screens/analysis.dart';
 import 'package:app/screens/configure_source.dart';
 import 'package:app/screens/documentation_page.dart';
@@ -51,8 +50,6 @@ class MyApp extends StatelessWidget {
           ChangeNotifierProvider<IdentityProvider>(
               create: (_) => IdentityProvider()),
           ChangeNotifierProvider<DataProvider>(create: (_) => DataProvider()),
-          ChangeNotifierProvider<ServerConnectionProvider>(
-              create: (_) => ServerConnectionProvider()),
         ],
         child: MaterialApp(
           title: 'Snout Scout',
@@ -96,7 +93,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   PreferredSize? getErrorBar() {
-    final data = context.read<ServerConnectionProvider>();
+    final data = context.watch<DataProvider>();
 
     if (data.failedPatches.isNotEmpty) {
       return PreferredSize(
@@ -135,9 +132,9 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     final data = context.watch<DataProvider>();
-    final serverConnection = context.watch<ServerConnectionProvider>();
     final identityProvider = context.watch<IdentityProvider>();
     String? tbaKey = context.watch<DataProvider>().event.config.tbaEventId;
+    final serverConnection = context.watch<DataProvider>();
 
     return Scaffold(
       appBar: AppBar(

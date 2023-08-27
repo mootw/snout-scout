@@ -7,7 +7,6 @@ import 'package:app/edit_lock.dart';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/helpers.dart';
 import 'package:app/providers/identity_provider.dart';
-import 'package:app/providers/server_connection_provider.dart';
 import 'package:app/screens/match_recorder.dart';
 import 'package:app/screens/view_team_page.dart';
 import 'package:flutter/material.dart';
@@ -74,8 +73,11 @@ class _MatchRecorderAssistantPageState
     for (final team in teams) {
       futures.add(apiClient
           .get(
-              Uri.parse(
-                  "${Uri.parse(context.read<ServerConnectionProvider>().serverURL).origin}/edit_lock"),
+              context
+                  .watch<DataProvider>()
+                  
+                  .serverURI
+                  .resolve("/edit_lock"),
               headers: {"key": "match:${widget.matchid}:$team:timeline"})
           .timeout(const Duration(seconds: 1))
           .then((isLocked) {

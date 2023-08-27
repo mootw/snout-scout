@@ -34,9 +34,16 @@ dependencies:
   provider: ^6.0.5
   collection: ^1.17.2
   intl: ^0.18.0
+
   shared_preferences: ^2.2.0
+  # store more than 10MB that localStorageAllows
+  fs_shim: ^2.2.1
+
   http: ^1.1.0
+
+  file_selector: ^1.0.0
   image_picker: ^1.0.2
+
   web_socket_channel: ^2.3.0
   simple_cluster: ^0.3.0
   url_launcher: ^6.1.7
