@@ -9,6 +9,7 @@ import 'package:app/screens/analysis/match_preview.dart';
 import 'package:app/screens/edit_match_results.dart';
 import 'package:app/screens/match_recorder_assistant.dart';
 import 'package:app/screens/view_team_page.dart';
+import 'package:app/widgets/load_status_or_error_bar.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -36,6 +37,7 @@ class _MatchPageState extends State<MatchPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(match.description),
+        bottom: const LoadOrErrorStatusBar(),
         actions: [
           //If there is a TBA event ID we will add a button to view the match id
           //since we will assume that all of the matches (or at least most)

@@ -4,6 +4,7 @@ import 'package:app/providers/data_provider.dart';
 import 'package:app/providers/identity_provider.dart';
 import 'package:app/screens/edit_json.dart';
 import 'package:app/services/tba_autofill.dart';
+import 'package:app/widgets/load_status_or_error_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:snout_db/event/match.dart';
@@ -25,6 +26,7 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Edit Schedule"),
+        bottom: const LoadOrErrorStatusBar(),
         actions: [
           TextButton(
             child: const Text("AutoFill TBA"),

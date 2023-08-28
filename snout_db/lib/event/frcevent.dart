@@ -50,7 +50,7 @@ class FRCEvent {
   /// "performant" way to load a database state from a list patches
   /// note, this will fail if the resulting structure does not match
   /// a valid FRCEvent
-  static FRCEvent fromPatches(List<Patch> patches) {
+  factory FRCEvent.fromPatches(List<Patch> patches) {
     //Start with empty!
     var dbJson;
     for (final patch in patches) {

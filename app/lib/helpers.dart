@@ -3,6 +3,10 @@ import 'package:image_picker/image_picker.dart';
 import 'package:snout_db/snout_db.dart';
 import 'dart:math';
 
+// DESIGN GUIDELINES MIN SCREEN WIDTH = 355
+// this means that the unfolded z fold could overflow slightly...
+// but the intention is to accomodate larger screens sooo
+
 //Theme data
 const primaryColor = Color.fromARGB(255, 49, 219, 43);
 final darkScheme =

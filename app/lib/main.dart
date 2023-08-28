@@ -9,12 +9,13 @@ import 'package:app/screens/analysis.dart';
 import 'package:app/screens/configure_source.dart';
 import 'package:app/screens/documentation_page.dart';
 import 'package:app/screens/edit_json.dart';
-import 'package:app/screens/failed_patches.dart';
 import 'package:app/screens/patch_history.dart';
 import 'package:app/screens/schedule_page.dart';
 import 'package:app/screens/scout_leaderboard.dart';
 import 'package:app/screens/teams_page.dart';
 import 'package:app/search.dart';
+import 'package:app/widgets/load_status_or_error_bar.dart';
+import 'package:app/widgets/match_card.dart';
 import 'package:download/download.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
@@ -67,6 +68,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+
   int _currentPageIndex = 0;
 
   @override
@@ -92,43 +94,6 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  PreferredSize? getErrorBar() {
-    final data = context.watch<DataProvider>();
-
-    if (data.failedPatches.isNotEmpty) {
-      return PreferredSize(
-        preferredSize: const Size.fromHeight(36),
-        child: InkWell(
-          onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const FailedPatchStorage(),
-              )),
-          child: Container(
-              alignment: Alignment.center,
-              width: double.infinity,
-              height: 36,
-              color: Colors.orange,
-              child: Text(
-                  "You have ${data.failedPatches.length} failed patches! Tap to see")),
-        ),
-      );
-    }
-
-    if (data.connected == false) {
-      return PreferredSize(
-        preferredSize: const Size.fromHeight(36),
-        child: Container(
-            alignment: Alignment.center,
-            width: double.infinity,
-            height: 36,
-            color: Theme.of(context).colorScheme.errorContainer,
-            child: const Text("No Live Connection to server!!!")),
-      );
-    }
-    return null;
-  }
-
   @override
   Widget build(BuildContext context) {
     final data = context.watch<DataProvider>();
@@ -136,9 +101,11 @@ class _MyHomePageState extends State<MyHomePage> {
     String? tbaKey = context.watch<DataProvider>().event.config.tbaEventId;
     final serverConnection = context.watch<DataProvider>();
 
+    final nextMatch = data.event.nextMatch;
+
     return Scaffold(
       appBar: AppBar(
-        bottom: getErrorBar(),
+        bottom: const LoadOrErrorStatusBar(),
         titleSpacing: 0,
         title: Text(data.event.config.name),
         actions: [
@@ -157,7 +124,17 @@ class _MyHomePageState extends State<MyHomePage> {
         ],
       ),
       body: [
-        const AllMatchesPage(),
+        AllMatchesPage(
+          // 10/10 hack to make the widget re-scroll to the correct spot on load
+          // this will force it to scroll whenever the matches length changes
+          // we could add another value here to make it scroll on other changes too
+          key: Key(data.event.matches.length.toString()),
+          scrollPosition: nextMatch == null
+              ? null
+              : (data.event.matches.values.toList().indexOf(nextMatch) *
+                      matchCardHeight) -
+                  (matchCardHeight * 2),
+        ),
         const TeamGridList(showEditButton: true),
         const AnalysisPage(),
         const DocumentationScreen(),

@@ -9,6 +9,7 @@ import 'package:app/helpers.dart';
 import 'package:app/providers/identity_provider.dart';
 import 'package:app/screens/match_recorder.dart';
 import 'package:app/screens/view_team_page.dart';
+import 'package:app/widgets/load_status_or_error_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
@@ -72,12 +73,7 @@ class _MatchRecorderAssistantPageState
     List<Future> futures = [];
     for (final team in teams) {
       futures.add(apiClient
-          .get(
-              context
-                  .read<DataProvider>()
-                  
-                  .serverURI
-                  .resolve("/edit_lock"),
+          .get(context.read<DataProvider>().serverURI.resolve("/edit_lock"),
               headers: {"key": "match:${widget.matchid}:$team:timeline"})
           .timeout(const Duration(seconds: 1))
           .then((isLocked) {
@@ -89,7 +85,7 @@ class _MatchRecorderAssistantPageState
     try {
       await Future.wait(futures);
     } catch (e) {
-      Logger.root.warning("error getting teams being scouted", e);
+      Logger.root.severe("error getting teams being scouted", e);
     }
     return alreadyScouted;
   }
@@ -99,7 +95,10 @@ class _MatchRecorderAssistantPageState
     final snoutData = context.watch<DataProvider>();
     FRCMatch match = snoutData.event.matches[widget.matchid]!;
     return Scaffold(
-      appBar: AppBar(title: Text("Recording ${match.description}")),
+      appBar: AppBar(
+        title: Text("Recording ${match.description}"),
+        bottom: const LoadOrErrorStatusBar(),
+      ),
       body: ListView(
         children: [
           Row(

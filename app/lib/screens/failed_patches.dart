@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:app/providers/data_provider.dart';
+import 'package:app/widgets/load_status_or_error_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -21,6 +22,7 @@ class _FailedPatchStorageState extends State<FailedPatchStorage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Failed Patches"),
+        bottom: const LoadOrErrorStatusBar(),
         actions: [
           IconButton(
               color: Colors.red,
@@ -52,7 +54,6 @@ class _FailedPatchStorageState extends State<FailedPatchStorage> {
       ),
       body: ListView(
         children: [
-          const Center(child: Text("Failed Patches")),
           for (final patch in serverConnection.failedPatches.reversed)
             ListTile(
               onTap: () => showDialog(

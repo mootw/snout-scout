@@ -3,7 +3,9 @@ import 'dart:convert';
 import 'package:app/helpers.dart';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/providers/identity_provider.dart';
+import 'package:app/providers/loading_status_service.dart';
 import 'package:app/screens/edit_json.dart';
+import 'package:app/widgets/load_status_or_error_bar.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
@@ -30,13 +32,17 @@ class _ConfigureSourceScreenState extends State<ConfigureSourceScreen> {
   }
 
   void updateEvents() async {
+    setState(() {
+      //Show the loading indicator (avoid stale data on server switch)
+      _eventOptions = null;
+    });
     try {
       final result = await context.read<DataProvider>().getEventList();
       setState(() {
         _eventOptions = result;
       });
     } catch (e, s) {
-      Logger.root.severe("Failed to load event list", e, s);
+      Logger.root.severe("Failed to load server event list", e, s);
     }
   }
 
@@ -47,6 +53,7 @@ class _ConfigureSourceScreenState extends State<ConfigureSourceScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Data Selection"),
+        bottom: const LoadOrErrorStatusBar(),
       ),
       body: ListView(
         children: [
@@ -90,26 +97,30 @@ class _ConfigureSourceScreenState extends State<ConfigureSourceScreen> {
             const SizedBox(width: 16),
             OutlinedButton(
                 onPressed: () async {
-                  try {
-                    const XTypeGroup typeGroup = XTypeGroup(
-                      label: 'Snout DB JSON',
-                      extensions: <String>['json'],
-                    );
-                    final XFile? file = await openFile(
-                        acceptedTypeGroups: <XTypeGroup>[typeGroup]);
+                  final future = () async {
+                    try {
+                      const XTypeGroup typeGroup = XTypeGroup(
+                        label: 'Snout DB JSON',
+                        extensions: <String>['json'],
+                      );
+                      final XFile? file = await openFile(
+                          acceptedTypeGroups: <XTypeGroup>[typeGroup]);
 
-                    if (file == null) {
-                      return;
+                      if (file == null) {
+                        return;
+                      }
+
+                      final fileString = await file.readAsString();
+
+                      await data.writeLocalDiskDatabase(
+                          SnoutDB.fromJson(json.decode(fileString)));
+                      await data.setDataSource(DataSource.localDisk);
+                    } catch (e, s) {
+                      Logger.root.severe("Failed to load new file", e, s);
                     }
-
-                    final fileString = await file.readAsString();
-
-                    await data.writeLocalDiskDatabase(
-                        SnoutDB.fromJson(json.decode(fileString)));
-                    await data.setDataSource(DataSource.localDisk);
-                  } catch (e, s) {
-                    Logger.root.severe("Failed to load new file", e, s);
-                  }
+                  }();
+                  loadingService.addFuture(future);
+                  return await future;
                 },
                 child: const Text("Replace with DB File")),
           ]),
@@ -126,11 +137,13 @@ class _ConfigureSourceScreenState extends State<ConfigureSourceScreen> {
               final result = await showStringInputDialog(
                   context, "Server", provider.serverURL);
               if (result != null) {
-                provider.setServer(result);
+                await provider.setServer(result);
               }
+              updateEvents();
             },
           ),
-          if (_eventOptions == null) const CircularProgressIndicator(),
+          if (_eventOptions == null)
+            const Center(child: CircularProgressIndicator()),
           if (_eventOptions != null)
             for (var event in _eventOptions!)
               ListTile(
@@ -144,14 +157,15 @@ class _ConfigureSourceScreenState extends State<ConfigureSourceScreen> {
                   data.setDataSource(DataSource.remoteServer);
                 },
               ),
-          ListTile(
-            leading: const Icon(Icons.miscellaneous_services_sharp),
-            title: const Text("Manage Server"),
-            onTap: () async {
-              //TODO manage server page to upload, download, and delete event files.
-              //TODO only display this button if the server url is set and whatnot
-            },
-          ),
+          if (_eventOptions != null)
+            ListTile(
+              leading: const Icon(Icons.miscellaneous_services_sharp),
+              title: const Text("Manage Server (TODO NOT IMPLEMENTED)"),
+              onTap: () async {
+                //TODO manage server page to upload, download, and delete event files.
+                //TODO only display this button if the server url is set and whatnot
+              },
+            ),
         ],
       ),
     );
@@ -165,5 +179,4 @@ Future<String?> createNewEvent(BuildContext context) async {
 }
 
 FRCEvent get emptyNewEvent => FRCEvent(
-    config:
-        EventConfig(name: 'My Event', team: 6749, season: DateTime.now().year));
+    config: EventConfig(name: '', team: 6749, season: DateTime.now().year));
