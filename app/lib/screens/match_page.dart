@@ -80,6 +80,7 @@ class _MatchPageState extends State<MatchPage> {
                     ? const Text("Add Results")
                     : const Text("Edit Results"),
                 onPressed: () async {
+                  final identiy = context.read<IdentityProvider>().identity;
                   final result = await navigateWithEditLock<MatchResultValues>(
                       context,
                       "match:${match.description}:results",
@@ -94,7 +95,7 @@ class _MatchPageState extends State<MatchPage> {
 
                   if (result != null) {
                     Patch patch = Patch(
-                        identity: context.read<IdentityProvider>().identity,
+                        identity: identiy,
                         time: DateTime.now(),
                         path: Patch.buildPath(
                             ['matches', widget.matchid, 'results']),

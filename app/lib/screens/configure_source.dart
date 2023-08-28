@@ -79,13 +79,14 @@ class _ConfigureSourceScreenState extends State<ConfigureSourceScreen> {
             const SizedBox(width: 8),
             OutlinedButton(
                 onPressed: () async {
-                  String? value = await createNewEvent(context);
+                  final identity = context.read<IdentityProvider>().identity;
+                  final value = await createNewEvent(context);
                   if (value == null) {
                     return;
                   }
                   FRCEvent event = FRCEvent.fromJson(json.decode(value));
                   Patch p = Patch(
-                      identity: context.read<IdentityProvider>().identity,
+                      identity: identity,
                       time: DateTime.now(),
                       path: Patch.buildPath([""]),
                       value: event.toJson());

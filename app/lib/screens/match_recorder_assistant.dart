@@ -233,7 +233,7 @@ class _MatchRecorderAssistantPageState
   void _recordTeam(String matchid, int team, Alliance alliance) async {
     final snoutData = context.read<DataProvider>();
     final identity = context.read<IdentityProvider>().identity;
-    RobotMatchResults? result = await navigateWithEditLock(
+    RobotMatchResults? result = await navigateWithEditLock<RobotMatchResults>(
         context,
         "match:$matchid:$team:timeline",
         (context) => Navigator.pushReplacement(

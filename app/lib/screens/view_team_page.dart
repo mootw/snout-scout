@@ -9,6 +9,7 @@ import 'package:app/widgets/fieldwidget.dart';
 import 'package:app/helpers.dart';
 import 'package:app/screens/match_page.dart';
 import 'package:app/screens/scout_team.dart';
+import 'package:app/widgets/image_view.dart';
 import 'package:app/widgets/timeduration.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
@@ -50,8 +51,7 @@ class _TeamViewPageState extends State<TeamViewPage> {
           actions: [
             TextButton(
                 onPressed: () async {
-                  //Get existing scouting data.
-                  final result = await navigateWithEditLock(
+                  await navigateWithEditLock(
                       context,
                       "scoutteam:${widget.teamNumber}",
                       (context) => Navigator.push(
@@ -63,10 +63,7 @@ class _TeamViewPageState extends State<TeamViewPage> {
                                     oldData: data.event.pitscouting[
                                         widget.teamNumber.toString()])),
                           ));
-                  if (result != null) {
-                    //Data has been saved
-                    setState(() {});
-                  }
+                  
                 },
                 child: const Text("Scout"))
           ],
@@ -99,10 +96,12 @@ class _TeamViewPageState extends State<TeamViewPage> {
                     height: 200,
                     child: AspectRatio(
                       aspectRatio: 1,
-                      child: Image.memory(
-                        fit: BoxFit.cover,
-                        Uint8List.fromList(
-                            base64Decode(robotPicture).cast<int>()),
+                      child: ImageViewer(
+                        child: Image.memory(
+                          fit: BoxFit.cover,
+                          Uint8List.fromList(
+                              base64Decode(robotPicture).cast<int>()),
+                        ),
                       ),
                     ),
                   ),
@@ -380,9 +379,11 @@ class ScoutingResult extends StatelessWidget {
     if (item.type == SurveyItemType.picture) {
       return ListTile(
         title: Text(item.label),
-        subtitle: Image.memory(
-          fit: BoxFit.contain,
-          Uint8List.fromList(base64Decode(value).cast<int>()),
+        subtitle: ImageViewer(
+          child: Image.memory(
+            fit: BoxFit.contain,
+            Uint8List.fromList(base64Decode(value).cast<int>()),
+          ),
         ),
       );
     }

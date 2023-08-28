@@ -103,6 +103,7 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
             trailing: IconButton(
               icon: const Icon(Icons.delete),
               onPressed: () async {
+                final identity = context.read<IdentityProvider>().identity;
                 final result = await showDialog(
                     context: context,
                     builder: (context) => AlertDialog(
@@ -125,7 +126,7 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
 
                   //TODO this might not be deeply modified to raw types before being applied to the patch
                   Patch patch = Patch(
-                      identity: context.read<IdentityProvider>().identity,
+                      identity: identity,
                       time: DateTime.now(),
                       path: Patch.buildPath([
                         'matches',
@@ -141,6 +142,7 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
   }
 
   Future editMatch(FRCMatch match, DataProvider data, String? matchID) async {
+    final identity = context.read<IdentityProvider>().identity;
     String? result = await Navigator.of(context).push(MaterialPageRoute(
         builder: (context) =>
             JSONEditor(source: match, validate: FRCMatch.fromJson)));
@@ -148,7 +150,7 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
     if (result != null) {
       FRCMatch resultMatch = FRCMatch.fromJson(json.decode(result));
       Patch patch = Patch(
-          identity: context.read<IdentityProvider>().identity,
+          identity: identity,
           time: DateTime.now(),
           path: Patch.buildPath([
             'matches',
