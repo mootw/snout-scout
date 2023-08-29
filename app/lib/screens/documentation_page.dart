@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:app/providers/data_provider.dart';
 import 'package:app/screens/debug_field_position.dart';
+import 'package:app/widgets/image_view.dart';
 import 'package:app/widgets/markdown_wrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -47,29 +48,15 @@ class _DocumentationScreenState extends State<DocumentationScreen> {
         ),
         const Divider(),
         if (pitMap != null)
-          ListTile(
-            title: const Text("VIEW PIT MAP"),
-            leading: const Icon(Icons.map),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => Scaffold(
-                          appBar: AppBar(
-                            title: const Text("Pit Map"),
-                          ),
-                          body: SingleChildScrollView(
-                            child: Image.memory(
-                              fit: BoxFit.fitWidth,
-                              scale: 0.5,
-                              Uint8List.fromList(
-                                  base64Decode(pitMap).cast<int>()),
-                            ),
-                          ),
-                        )),
-              );
-            },
-          ),
+          SizedBox(
+              height: 250,
+              child: ImageViewer(
+                child: Image.memory(
+                  fit: BoxFit.fitHeight,
+                  scale: 0.5,
+                  Uint8List.fromList(base64Decode(pitMap).cast<int>()),
+                ),
+              )),
         if (pitMap == null)
           const ListTile(title: Text("No pit map has been added yet :(")),
         const Divider(),

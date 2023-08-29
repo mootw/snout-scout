@@ -28,8 +28,8 @@ class _TeamGridListState extends State<TeamGridList> {
       scrollDirection: Axis.vertical,
       child: Center(
         child: Wrap(
-          spacing: 12,
-          runSpacing: 12,
+          spacing: 8,
+          runSpacing: 8,
           alignment: WrapAlignment.spaceEvenly,
           children: [
             for (final team in context.watch<DataProvider>().event.teams)
@@ -173,8 +173,8 @@ class TeamListTile extends StatelessWidget {
       child: Column(
         children: [
           Container(
-            width: 150,
-            height: 150,
+            width: 160,
+            height: 160,
             color: Colors.black38,
             child: image ?? const Center(child: Text("No Image")),
           ),

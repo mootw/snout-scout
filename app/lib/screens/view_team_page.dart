@@ -72,43 +72,12 @@ class _TeamViewPageState extends State<TeamViewPage> {
         body: ListView(
           cacheExtent: 5000,
           children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Flexible(
-                  child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        children: [
-                          Text(
-                            teamName ?? teamNameReserved,
-                            style: Theme.of(context).textTheme.headlineLarge,
-                          ),
-                          const Text(
-                              "TODO put some important fields here, maybe a specific notes box for important stuff: things that we need to check up on, things that are broken, if they need help and with what"),
-                        ],
-                      )),
-                ),
-                if (robotPicture != null)
-                  SizedBox(
-                    width: 200,
-                    height: 200,
-                    child: AspectRatio(
-                      aspectRatio: 1,
-                      child: ImageViewer(
-                        child: Image.memory(
-                          fit: BoxFit.cover,
-                          Uint8List.fromList(
-                              base64Decode(robotPicture).cast<int>()),
-                        ),
-                      ),
-                    ),
+            Center(
+              child: Text(
+                    teamName ?? teamNameReserved,
+                    style: Theme.of(context).textTheme.headlineLarge,
                   ),
-                if (robotPicture == null) const Text("No image :("),
-              ],
             ),
-
             if (teamNextMatch != null && scheduleDelay != null)
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -134,6 +103,39 @@ class _TeamViewPageState extends State<TeamViewPage> {
                       displayDurationDefault: true),
                 ],
               ),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                
+                Flexible(
+                  child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        children: [
+                          const Text(
+                              "TODO put some important fields here, maybe a specific notes box for important stuff: things that we need to check up on, things that are broken, if they need help and with what"),
+                        ],
+                      )),
+                ),
+                if (robotPicture != null)
+                  SizedBox(
+                    width: 200,
+                    height: 200,
+                    child: AspectRatio(
+                      aspectRatio: 1,
+                      child: ImageViewer(
+                        child: Image.memory(
+                          fit: BoxFit.cover,
+                          Uint8List.fromList(
+                              base64Decode(robotPicture).cast<int>()),
+                        ),
+                      ),
+                    ),
+                  ),
+                if (robotPicture == null) const Text("No image :("),
+              ],
+            ),
 
             const Divider(),
             //Display this teams matches
