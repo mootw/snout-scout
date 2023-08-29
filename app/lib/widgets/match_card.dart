@@ -34,16 +34,16 @@ class MatchCard extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             SizedBox(
-                  width: 69,
-                  child: TimeDuration(
-                      time: match.results != null
-                          ? match.results!.time
-                          : match.scheduledTime),
-                ),
-                SizedBox(
-                    width: 125,
-                    child:
-                        Text(match.description, textAlign: TextAlign.center)),
+              width: 69,
+              child: TimeDuration(
+                  time: match.results != null
+                      ? match.results!.time
+                      : match.scheduledTime
+                          .add(snoutData.event.scheduleDelay ?? Duration.zero)),
+            ),
+            SizedBox(
+                width: 125,
+                child: Text(match.description, textAlign: TextAlign.center)),
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
