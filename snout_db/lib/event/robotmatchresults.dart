@@ -1,6 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:snout_db/event/pitscoutresult.dart';
 import 'package:snout_db/event/matchevent.dart';
+import 'package:snout_db/event/pitscoutresult.dart';
 import 'package:snout_db/snout_db.dart';
 
 part 'robotmatchresults.g.dart';
@@ -21,8 +21,8 @@ class RobotMatchResults {
   /// of a single robot in a match.
   /// Initializing this object will also pre-calculate an interpolated timeline
   RobotMatchResults(
-      {required this.alliance, required this.survey, required this.timeline})
-      : this.timelineInterpolated = _interpolateTimeline(timeline);
+      {required this.alliance, required this.survey, required this.timeline,})
+      : timelineInterpolated = _interpolateTimeline(timeline);
 
   factory RobotMatchResults.fromJson(Map<String, dynamic> json) =>
       _$RobotMatchResultsFromJson(json);
@@ -34,15 +34,15 @@ class RobotMatchResults {
       _normalizeRed(timelineInterpolated, fieldStyle);
 
   //internal function to normalize the timeline as red.
-  _normalizeRed(List<MatchEvent> events, FieldStyle fieldStyle) {
+  List<MatchEvent> _normalizeRed(List<MatchEvent> events, FieldStyle fieldStyle) {
     if (alliance == Alliance.blue) {
       return List.generate(events.length, (index) {
-        MatchEvent event = events[index];
-        FieldPosition position = fieldStyle == FieldStyle.rotated
+        final MatchEvent event = events[index];
+        final FieldPosition position = fieldStyle == FieldStyle.rotated
             ? event.position.rotated
             : event.position.mirrored;
         return MatchEvent(
-            time: event.time, id: event.id, x: position.x, y: position.y);
+            time: event.time, id: event.id, x: position.x, y: position.y,);
       });
     } else {
       return events;
@@ -81,9 +81,9 @@ List<MatchEvent> _interpolateTimeline(List<MatchEvent> timeline) {
           time: newTime,
           position: FieldPosition(
               lerp(pos1.time.toDouble(), pos1.position.x, pos2.time.toDouble(),
-                  pos2.position.x, newTime.toDouble()),
+                  pos2.position.x, newTime.toDouble(),),
               lerp(pos1.time.toDouble(), pos1.position.y, pos2.time.toDouble(),
-                  pos2.position.y, newTime.toDouble()))));
+                  pos2.position.y, newTime.toDouble(),),),),);
     }
   }
   interpolated.sort((a, b) => a.time - b.time);

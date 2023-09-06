@@ -6,19 +6,20 @@ environment:
   sdk: '>=3.0.0 <4.0.0'
 
 dependencies:
+  dotenv: ^4.1.0
+  eval_ex: ^1.1.8
+  http: ^1.1.0
+  rfc_6901: ^0.1.1
+
+  shelf: ^1.4.1
+  shelf_gzip: ^4.0.1
+  shelf_router: ^1.1.4
+  shelf_web_socket: ^1.0.4
+
   snout_db:
     path: ../snout_db
 
-  rfc_6901: ^0.1.1
-  dotenv: ^4.1.0
-  http: ^1.1.0
-  
-  eval_ex: ^1.1.8
-
-  shelf: ^1.4.1
-  shelf_router: ^1.1.4
-  shelf_web_socket: ^1.0.4
   web_socket_channel: ^2.4.0
-  shelf_gzip: ^4.0.1
 
 dev_dependencies:
+  lint: 2.1.2

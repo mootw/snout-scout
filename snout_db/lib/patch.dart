@@ -34,7 +34,7 @@ class Patch {
       {required this.identity,
       required this.time,
       required this.path,
-      required this.value});
+      required this.value,});
 
   factory Patch.fromJson(Map json) => _$PatchFromJson(json);
   Map toJson() => _$PatchToJson(this);
@@ -43,7 +43,7 @@ class Patch {
   /// Returns a NEW instance of FRCEvent, it does not mutate the original
   FRCEvent patch(FRCEvent database) {
     var dbJson = database.toJson();
-    dbJson = JsonPointer(path).write(dbJson, value) as Map<dynamic, dynamic>;
+    dbJson = JsonPointer(path).write(dbJson, value)! as Map<dynamic, dynamic>;
     return FRCEvent.fromJson(dbJson);
   }
 

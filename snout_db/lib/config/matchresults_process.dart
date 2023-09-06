@@ -16,7 +16,7 @@ class MatchResultsProcess {
       {required this.id,
       required this.label,
       required this.expression,
-      this.docs = ''});
+      this.docs = '',});
 
   factory MatchResultsProcess.fromJson(Map<String, dynamic> json) =>
       _$MatchResultsProcessFromJson(json);

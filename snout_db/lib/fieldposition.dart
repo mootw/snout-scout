@@ -15,8 +15,8 @@ class FieldPosition {
   final double y;
 
   FieldPosition(double x, double y)
-      : this.x = (x * 200).roundToDouble() / 200,
-        this.y = (y * 100).roundToDouble() / 100;
+      : x = (x * 200).roundToDouble() / 200,
+        y = (y * 100).roundToDouble() / 100;
 
   /// Returns a new position rotated 180 degrees about the origin (center of field).
   /// This can be used to normalize recorded positions to always be as if it was

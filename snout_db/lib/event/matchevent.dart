@@ -26,7 +26,7 @@ class MatchEvent {
   MatchEvent.fromEventConfig(
       {required MatchEventConfig event,
       required FieldPosition position,
-      required this.time})
+      required this.time,})
       : id = event.id,
         x = position.x,
         y = position.y;
@@ -34,7 +34,7 @@ class MatchEvent {
   //Generates a new robot position event
   MatchEvent.robotPositionEvent(
       {required this.time,
-      required FieldPosition position})
+      required FieldPosition position,})
       : id = "robot_position",
         x = position.x,
         y = position.y;
@@ -63,5 +63,5 @@ class MatchEvent {
       ?.color;
 
   @override
-  String toString() => 't:${time} id:${id} pos:${position}';
+  String toString() => 't:$time id:$id pos:$position';
 }

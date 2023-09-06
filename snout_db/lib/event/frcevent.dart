@@ -1,18 +1,18 @@
 import 'dart:collection';
 
+import 'package:collection/collection.dart';
 import 'package:decimal/decimal.dart';
 import 'package:eval_ex/built_ins.dart';
 import 'package:eval_ex/expression.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:rfc_6901/rfc_6901.dart';
+import 'package:snout_db/config/eventconfig.dart';
 import 'package:snout_db/config/matchresults_process.dart';
+import 'package:snout_db/event/match.dart';
 import 'package:snout_db/event/matchevent.dart';
 import 'package:snout_db/event/pitscoutresult.dart';
 import 'package:snout_db/event/robotmatchresults.dart';
 import 'package:snout_db/patch.dart';
-import 'match.dart';
-import 'package:collection/collection.dart';
-import 'package:snout_db/config/eventconfig.dart';
 
 part 'frcevent.g.dart';
 
@@ -34,15 +34,18 @@ class FRCEvent {
   final String? pitmap;
 
   //Enforce that all matches are sorted
-  FRCEvent(
-      {required this.config,
-      this.teams = const [],
-      Map<String, FRCMatch> matches = const {},
-      this.pitscouting = const {},
-      this.pitmap})
-      //Enforce that the matches are sorted correctly
-      : matches = SplayTreeMap.from(matches,
-            (key1, key2) => Comparable.compare(matches[key1]!, matches[key2]!));
+  FRCEvent({
+    required this.config,
+    this.teams = const [],
+    Map<String, FRCMatch> matches = const {},
+    this.pitscouting = const {},
+    this.pitmap,
+  })
+  //Enforce that the matches are sorted correctly
+  : matches = SplayTreeMap.from(
+          matches,
+          (key1, key2) => Comparable.compare(matches[key1]!, matches[key2]!),
+        );
 
   factory FRCEvent.fromJson(Map json) => _$FRCEventFromJson(json);
   Map toJson() => _$FRCEventToJson(this);
@@ -52,16 +55,16 @@ class FRCEvent {
   /// a valid FRCEvent
   factory FRCEvent.fromPatches(List<Patch> patches) {
     //Start with empty!
-    var dbJson;
+    Object? dbJson;
     for (final patch in patches) {
       if (dbJson == null) {
         //Initialize the db with the first patch's data.
-        dbJson = FRCEvent.fromJson(patch.value as Map).toJson();
+        dbJson = FRCEvent.fromJson(patch.value! as Map).toJson();
         continue;
       }
       dbJson = JsonPointer(patch.path).write(dbJson, patch.value);
     }
-    return FRCEvent.fromJson(dbJson);
+    return FRCEvent.fromJson(dbJson! as Map);
   }
 
   //Returns the id for a given match
@@ -96,8 +99,11 @@ class FRCEvent {
   /// returns null if there is no data. Otherwise we get weird NaN stuff and
   /// if you add NaN to anything it completely destroys the whole calculation
   /// There is an optional where clause to filter the events out for a specific type
-  double? teamAverageMetric(int team, String eventId,
-      [Function(MatchEvent)? where]) {
+  double? teamAverageMetric(
+    int team,
+    String eventId, [
+    bool Function(MatchEvent)? where,
+  ]) {
     final recordedMatches = teamRecordedMatches(team);
 
     if (recordedMatches.isEmpty) {
@@ -106,14 +112,17 @@ class FRCEvent {
     }
 
     return recordedMatches.fold<double>(
-            0,
-            (previousValue, match) =>
-                previousValue +
-                (match.value.robot[team.toString()]?.timeline
-                        .where((event) =>
-                            event.id == eventId && (where?.call(event) ?? true))
-                        .length ??
-                    0)) /
+          0,
+          (previousValue, match) =>
+              previousValue +
+              (match.value.robot[team.toString()]?.timeline
+                      .where(
+                        (event) =>
+                            event.id == eventId && (where?.call(event) ?? true),
+                      )
+                      .length ??
+                  0),
+        ) /
         recordedMatches.length;
   }
 
@@ -122,7 +131,7 @@ class FRCEvent {
   /// The map will be empty if there are no recordings
   Map<String, double> teamPostGameSurveyByFrequency(int team, String eventId) {
     final recordedMatches = teamRecordedMatches(team);
-    Map<String, double> toReturn = {};
+    final Map<String, double> toReturn = {};
 
     for (final match in recordedMatches) {
       final surveyValue =
@@ -140,15 +149,17 @@ class FRCEvent {
     final totalValues = toReturn.values
         .fold<double>(0, (previousValue, element) => previousValue + element);
     //Convert the map to be a percentage rather than total sum
-    toReturn = toReturn.map((key, value) => MapEntry(key, value / totalValues));
-    return toReturn;
+    return toReturn.map((key, value) => MapEntry(key, value / totalValues));
   }
 
   //TODO the match results process returns a record with a value and optional string error.
   //this might not be the best way to implement it, as the behavior/typing is slightly ambiguous
   //
   ({double? value, String? error})? runMatchResultsProcess(
-      MatchResultsProcess process, RobotMatchResults? matchResults, int team) {
+    MatchResultsProcess process,
+    RobotMatchResults? matchResults,
+    int team,
+  ) {
     if (matchResults == null) {
       return null;
     }
@@ -156,69 +167,48 @@ class FRCEvent {
     final exp = Expression(process.expression);
 
     //Returns 1 if the team's pit scouting data matches 0 otherwise.
-    exp.addLazyFunction(LazyFunctionImpl("PITSCOUTINGIS", 2, fEval: (params) {
-      if (pitscouting[team.toString()]?[params[0].getString()].toString() ==
-          params[1].getString()) {
-        return LazyNumberImpl(
-            eval: () => Decimal.fromInt(1), getString: () => "1");
-      } else {
-        return LazyNumberImpl(
-            eval: () => Decimal.fromInt(0), getString: () => "0");
-      }
-    }));
+    exp.addLazyFunction(
+      LazyFunctionImpl(
+        "PITSCOUTINGIS",
+        2,
+        fEval: (params) {
+          if (pitscouting[team.toString()]?[params[0].getString()].toString() ==
+              params[1].getString()) {
+            return LazyNumberImpl(
+              eval: () => Decimal.fromInt(1),
+              getString: () => "1",
+            );
+          } else {
+            return LazyNumberImpl(
+              eval: () => Decimal.fromInt(0),
+              getString: () => "0",
+            );
+          }
+        },
+      ),
+    );
 
     //Returns 1 if a post game survey item matches the value 0 otherwise
-    exp.addLazyFunction(LazyFunctionImpl("POSTGAMEIS", 2, fEval: (params) {
-      if (matchResults.survey[params[0].getString()].toString() ==
-          params[1].getString()) {
-        return LazyNumberImpl(
-            eval: () => Decimal.fromInt(1), getString: () => "1");
-      } else {
-        return LazyNumberImpl(
-            eval: () => Decimal.fromInt(0), getString: () => "0");
-      }
-    }));
-
-    // Returns number of events with a specific name within a bbox
-    //   -- O
-    // |    |
-    // |    |
-    // o --
-    // min x, min y, max X, max Y
-    exp.addLazyFunction(LazyFunctionImpl("EVENTINBBOX", 5, fEval: (params) {
-      int value = matchResults.timelineInterpolated
-          .where((element) =>
-              element.id == params[0].getString() &&
-              element.position.x >= params[1].eval()!.toDouble() &&
-              element.position.y >= params[2].eval()!.toDouble() &&
-              element.position.x <= params[3].eval()!.toDouble() &&
-              element.position.y <= params[4].eval()!.toDouble())
-          .length;
-      return LazyNumberImpl(
-          eval: () => Decimal.fromInt(value),
-          getString: () => value.toString());
-    }));
-
-    // Returns number of events with a specific name within a bbox
-    //   -- O
-    // |    |
-    // |    |
-    // o --
-    // min x, min y, max X, max Y
-    exp.addLazyFunction(LazyFunctionImpl("AUTOEVENTINBBOX", 5, fEval: (params) {
-      int value = matchResults.timelineInterpolated
-          .where((element) =>
-              element.isInAuto &&
-              element.id == params[0].getString() &&
-              element.position.x >= params[1].eval()!.toDouble() &&
-              element.position.y >= params[2].eval()!.toDouble() &&
-              element.position.x <= params[3].eval()!.toDouble() &&
-              element.position.y <= params[4].eval()!.toDouble())
-          .length;
-      return LazyNumberImpl(
-          eval: () => Decimal.fromInt(value),
-          getString: () => value.toString());
-    }));
+    exp.addLazyFunction(
+      LazyFunctionImpl(
+        "POSTGAMEIS",
+        2,
+        fEval: (params) {
+          if (matchResults.survey[params[0].getString()].toString() ==
+              params[1].getString()) {
+            return LazyNumberImpl(
+              eval: () => Decimal.fromInt(1),
+              getString: () => "1",
+            );
+          } else {
+            return LazyNumberImpl(
+              eval: () => Decimal.fromInt(0),
+              getString: () => "0",
+            );
+          }
+        },
+      ),
+    );
 
     // Returns number of events with a specific name within a bbox
     //   -- O
@@ -227,74 +217,175 @@ class FRCEvent {
     // o --
     // min x, min y, max X, max Y
     exp.addLazyFunction(
-        LazyFunctionImpl("TELEOPEVENTINBBOX", 5, fEval: (params) {
-      int value = matchResults.timelineInterpolated
-          .where((element) =>
-              element.isInAuto == false &&
-              element.id == params[0].getString() &&
-              element.position.x >= params[1].eval()!.toDouble() &&
-              element.position.y >= params[2].eval()!.toDouble() &&
-              element.position.x <= params[3].eval()!.toDouble() &&
-              element.position.y <= params[4].eval()!.toDouble())
-          .length;
-      return LazyNumberImpl(
-          eval: () => Decimal.fromInt(value),
-          getString: () => value.toString());
-    }));
+      LazyFunctionImpl(
+        "EVENTINBBOX",
+        5,
+        fEval: (params) {
+          final int value = matchResults.timelineInterpolated
+              .where(
+                (element) =>
+                    element.id == params[0].getString() &&
+                    element.position.x >= params[1].eval()!.toDouble() &&
+                    element.position.y >= params[2].eval()!.toDouble() &&
+                    element.position.x <= params[3].eval()!.toDouble() &&
+                    element.position.y <= params[4].eval()!.toDouble(),
+              )
+              .length;
+          return LazyNumberImpl(
+            eval: () => Decimal.fromInt(value),
+            getString: () => value.toString(),
+          );
+        },
+      ),
+    );
+
+    // Returns number of events with a specific name within a bbox
+    //   -- O
+    // |    |
+    // |    |
+    // o --
+    // min x, min y, max X, max Y
+    exp.addLazyFunction(
+      LazyFunctionImpl(
+        "AUTOEVENTINBBOX",
+        5,
+        fEval: (params) {
+          final int value = matchResults.timelineInterpolated
+              .where(
+                (element) =>
+                    element.isInAuto &&
+                    element.id == params[0].getString() &&
+                    element.position.x >= params[1].eval()!.toDouble() &&
+                    element.position.y >= params[2].eval()!.toDouble() &&
+                    element.position.x <= params[3].eval()!.toDouble() &&
+                    element.position.y <= params[4].eval()!.toDouble(),
+              )
+              .length;
+          return LazyNumberImpl(
+            eval: () => Decimal.fromInt(value),
+            getString: () => value.toString(),
+          );
+        },
+      ),
+    );
+
+    // Returns number of events with a specific name within a bbox
+    //   -- O
+    // |    |
+    // |    |
+    // o --
+    // min x, min y, max X, max Y
+    exp.addLazyFunction(
+      LazyFunctionImpl(
+        "TELEOPEVENTINBBOX",
+        5,
+        fEval: (params) {
+          final int value = matchResults.timelineInterpolated
+              .where(
+                (element) =>
+                    element.isInAuto == false &&
+                    element.id == params[0].getString() &&
+                    element.position.x >= params[1].eval()!.toDouble() &&
+                    element.position.y >= params[2].eval()!.toDouble() &&
+                    element.position.x <= params[3].eval()!.toDouble() &&
+                    element.position.y <= params[4].eval()!.toDouble(),
+              )
+              .length;
+          return LazyNumberImpl(
+            eval: () => Decimal.fromInt(value),
+            getString: () => value.toString(),
+          );
+        },
+      ),
+    );
 
     //adder that counts the number of a specific event in the timeline
-    exp.addLazyFunction(LazyFunctionImpl("EVENT", 1, fEval: (params) {
-      int value = matchResults.timeline
-          .where((element) => element.id == params[0].getString())
-          .length;
-      return LazyNumberImpl(
-          eval: () => Decimal.fromInt(value),
-          getString: () => value.toString());
-    }));
+    exp.addLazyFunction(
+      LazyFunctionImpl(
+        "EVENT",
+        1,
+        fEval: (params) {
+          final int value = matchResults.timeline
+              .where((element) => element.id == params[0].getString())
+              .length;
+          return LazyNumberImpl(
+            eval: () => Decimal.fromInt(value),
+            getString: () => value.toString(),
+          );
+        },
+      ),
+    );
 
     //adder that counts the number of a specific event in the timeline
-    exp.addLazyFunction(LazyFunctionImpl("AUTOEVENT", 1, fEval: (params) {
-      int value = matchResults.timeline
-          .where((element) =>
-              element.isInAuto && element.id == params[0].getString())
-          .length;
-      return LazyNumberImpl(
-          eval: () => Decimal.fromInt(value),
-          getString: () => value.toString());
-    }));
+    exp.addLazyFunction(
+      LazyFunctionImpl(
+        "AUTOEVENT",
+        1,
+        fEval: (params) {
+          final int value = matchResults.timeline
+              .where(
+                (element) =>
+                    element.isInAuto && element.id == params[0].getString(),
+              )
+              .length;
+          return LazyNumberImpl(
+            eval: () => Decimal.fromInt(value),
+            getString: () => value.toString(),
+          );
+        },
+      ),
+    );
 
     //adder that counts the number of a specific event in the timeline
-    exp.addLazyFunction(LazyFunctionImpl("TELEOPEVENT", 1, fEval: (params) {
-      int value = matchResults.timeline
-          .where((element) =>
-              element.isInAuto == false && element.id == params[0].getString())
-          .length;
-      return LazyNumberImpl(
-          eval: () => Decimal.fromInt(value),
-          getString: () => value.toString());
-    }));
+    exp.addLazyFunction(
+      LazyFunctionImpl(
+        "TELEOPEVENT",
+        1,
+        fEval: (params) {
+          final int value = matchResults.timeline
+              .where(
+                (element) =>
+                    element.isInAuto == false &&
+                    element.id == params[0].getString(),
+              )
+              .length;
+          return LazyNumberImpl(
+            eval: () => Decimal.fromInt(value),
+            getString: () => value.toString(),
+          );
+        },
+      ),
+    );
 
     //returns the result of another process for this data.
-    exp.addLazyFunction(LazyFunctionImpl("PROCESS", 1, fEval: (params) {
-      String processID = params[0].getString();
-      if (process.id == processID) {
-        throw Exception("cannot recursively call a process");
-      }
-      MatchResultsProcess? otherProcess = config.matchscouting.processes
-          .firstWhereOrNull((element) => element.id == processID);
-      if (otherProcess == null) {
-        throw Exception("process ${processID} does not exist");
-      }
-      final result = runMatchResultsProcess(otherProcess, matchResults, team);
-      return LazyNumberImpl(
-          eval: () => Decimal.parse(result!.value.toString()),
-          getString: () => result!.value.toString());
-    }));
+    exp.addLazyFunction(
+      LazyFunctionImpl(
+        "PROCESS",
+        1,
+        fEval: (params) {
+          final String processID = params[0].getString();
+          if (process.id == processID) {
+            throw Exception("cannot recursively call a process");
+          }
+          final MatchResultsProcess? otherProcess = config.matchscouting.processes
+              .firstWhereOrNull((element) => element.id == processID);
+          if (otherProcess == null) {
+            throw Exception("process $processID does not exist");
+          }
+          final result =
+              runMatchResultsProcess(otherProcess, matchResults, team);
+          return LazyNumberImpl(
+            eval: () => Decimal.parse(result!.value.toString()),
+            getString: () => result!.value.toString(),
+          );
+        },
+      ),
+    );
 
     try {
       return (value: exp.eval()?.toDouble(), error: null);
     } catch (e) {
-      return (value: null, error: '${e.toString()} ${process.expression}');
+      return (value: null, error: '$e ${process.expression}');
     }
   }
 
@@ -310,13 +401,16 @@ class FRCEvent {
     }
 
     return recordedMatches.fold<double>(
-            0,
-            (previousValue, match) =>
-                previousValue +
-                (runMatchResultsProcess(
-                            process, match.value.robot[team.toString()], team)
-                        ?.value ??
-                    0)) /
+          0,
+          (previousValue, match) =>
+              previousValue +
+              (runMatchResultsProcess(
+                    process,
+                    match.value.robot[team.toString()],
+                    team,
+                  )?.value ??
+                  0),
+        ) /
         recordedMatches.length;
   }
 }

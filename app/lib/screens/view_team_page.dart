@@ -108,12 +108,12 @@ class _TeamViewPageState extends State<TeamViewPage> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 
-                Flexible(
+                const Flexible(
                   child: Padding(
-                      padding: const EdgeInsets.all(16),
+                      padding: EdgeInsets.all(16),
                       child: Column(
                         children: [
-                          const Text(
+                          Text(
                               "TODO put some important fields here, maybe a specific notes box for important stuff: things that we need to check up on, things that are broken, if they need help and with what"),
                         ],
                       )),

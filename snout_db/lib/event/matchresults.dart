@@ -11,10 +11,11 @@ class MatchResultValues {
   final int redScore;
   final int blueScore;
 
-  const MatchResultValues(
-      {required this.time,
-      required this.redScore,
-      required this.blueScore});
+  const MatchResultValues({
+    required this.time,
+    required this.redScore,
+    required this.blueScore,
+  });
 
   factory MatchResultValues.fromJson(Map json) =>
       _$MatchResultValuesFromJson(json);

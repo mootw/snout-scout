@@ -16,12 +16,13 @@ class SurveyItem {
   final List<String>? options;
   //List<dynamic>? options_values;
 
-  const SurveyItem(
-      {required this.id,
-      required this.type,
-      required this.label,
-      this.options,
-      this.docs = ''});
+  const SurveyItem({
+    required this.id,
+    required this.type,
+    required this.label,
+    this.options,
+    this.docs = '',
+  });
 
   factory SurveyItem.fromJson(Map<String, dynamic> json) =>
       _$SurveyItemFromJson(json);
