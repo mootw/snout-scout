@@ -189,10 +189,6 @@ class DataProvider extends ChangeNotifier {
 
   bool connected = true;
 
-  //This timer is set and will trigger a re-connect if a ping is not recieved
-  //It will also
-  //within a certain amount of time.
-  Timer? _connectionTimer;
   WebSocketChannel? _channel;
 
   Future<List<String>> getEventList() async {
@@ -323,15 +319,6 @@ class DataProvider extends ChangeNotifier {
   /// -------------------------------
   ///
 
-  void _resetConnectionTimer() {
-    _connectionTimer?.cancel();
-    _connectionTimer = Timer(const Duration(seconds: 61), () {
-      //No message has been recieved in 60 seconds, close down the connection.
-      _channel?.sink.close();
-      connected = false;
-    });
-  }
-
   //TODO make this elegantly handle when the server url switches during runtime
   //TODO have it correctly shut down an old channel
   void _initializeLiveServerPatches() async {
@@ -354,7 +341,6 @@ class DataProvider extends ChangeNotifier {
       }
       connected = true;
       notifyListeners();
-      _resetConnectionTimer();
     });
 
     _channel!.stream.listen((event) async {
@@ -362,23 +348,20 @@ class DataProvider extends ChangeNotifier {
         return;
       }
 
-      _resetConnectionTimer();
-      //REALLY JANK PING PONG SYSTEM THIS SHOULD BE FIXED!!!!
-      if (event == "PING") {
-        _channel!.sink.add("PONG");
-        return;
-      }
+      try {
+        //apply patch to local state BUT do not save it to
+        //disk because it is AMBIGUOUS what the local state is
+        final patch = Patch.fromJson(json.decode(event));
 
-      //apply patch to local state BUT do not save it to
-      //disk because it is AMBIGUOUS what the local state is
-      final patch = Patch.fromJson(json.decode(event));
-
-      //Do not add a patch that exists already
-      //TODO make the server not send the patch back to the client that sent it, duh
-      if (database.patches.any((item) =>
-              json.encode(item.toJson()) == json.encode(patch.toJson())) ==
-          false) {
-        database.addPatch(patch);
+        //Do not add a patch that exists already
+        //TODO make the server not send the patch back to the client that sent it, duh
+        if (database.patches.any((item) =>
+                json.encode(item.toJson()) == json.encode(patch.toJson())) ==
+            false) {
+          database.addPatch(patch);
+        }
+      } catch (e, s) {
+        Logger.root.severe("socket parse error", e, s);
       }
 
       // final prefs = await SharedPreferences.getInstance();

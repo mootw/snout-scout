@@ -4,10 +4,16 @@ import 'dart:convert';
 import 'package:dotenv/dotenv.dart';
 import 'package:rfc_6901/rfc_6901.dart';
 import 'package:server/edit_lock.dart';
+import 'package:shelf_gzip/shelf_gzip.dart';
+import 'package:shelf_router/shelf_router.dart';
+import 'package:shelf/shelf.dart';
+import 'package:shelf/shelf_io.dart' as shelf_io;
+import 'package:shelf_web_socket/shelf_web_socket.dart';
 import 'dart:io';
 
 import 'package:snout_db/patch.dart';
 import 'package:snout_db/snout_db.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
 
 //TODO implement https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/ETag
 
@@ -17,12 +23,14 @@ Map<String, EventData> loadedEvents = {};
 //To keep things simple we will just have 1 edit lock for all loaded events.
 EditLock editLock = EditLock();
 
+var app = Router();
+
 //Stuff that should be done for each event that is loaded.
 class EventData {
   EventData(this.file);
 
   File file;
-  List<WebSocket> listeners = [];
+  List<WebSocketChannel> listeners = [];
 }
 
 //Load all events from disk and instantiate an event data class for each one
@@ -38,214 +46,175 @@ Future loadEvents() async {
 }
 
 void main(List<String> args) async {
-  if (env.isDefined('X-TBA-Auth-Key') == false) {
-    print(
-        "NO X-TBA-Auth-Key detected. Create a .env or set env to X-TBA-Auth-Key=key");
-  }
+  await loadEvents();
 
-  //REALLY JANK PING PONG SYSTEM
-  //I SHOULD BE USING listener.pingInterval BUT THE CLIENT ISNT RESPONING
-  //TO THE PING MESSAGES FOR SOME REASON (RESULTING IN THE CONNECTION CLOSING AFTER 1.5 DURATIONS)
-  //BY THE SERVER. IF I LEAVE PING DURATION NULL THE CONNECTION CLOSES 1006 AFTER 60 seconds
-  //I think this is a client side or proxy side thing.
-  Timer.periodic(Duration(seconds: 30), (timer) {
-    for (final event in loadedEvents.values) {
-      for (final listener in event.listeners) {
-        listener.add("PING");
-      }
+  app.get("/listen/<event>", (Request request, String event) {
+    var handler = webSocketHandler((WebSocketChannel webSocket) {
+      print('new listener for $event');
+      webSocket.sink.done
+          .then((value) => loadedEvents[event]?.listeners.remove(webSocket));
+      loadedEvents[event]?.listeners.add(webSocket);
+      // webSocket.stream.listen((message) {
+      //   webSocket.sink.add("echo $message");
+      // });
+    }, pingInterval: Duration(hours: 8));
+
+    return handler(request);
+  });
+
+  app.get("/edit_lock", (Request request) {
+    final key = request.headers["key"];
+    if (key == null) {
+      return Response.badRequest(body: "invalid or missing key");
+    }
+    final lock = editLock.get(key);
+    return Response.ok(lock.toString());
+  });
+
+  app.post("/edit_lock", (Request request) {
+    final key = request.headers["key"];
+    if (key == null) {
+      return Response.badRequest(body: "invalid or missing key");
+    }
+    editLock.set(key);
+    return Response.ok("");
+  });
+
+  app.delete("/edit_lock", (Request request) {
+    final key = request.headers["key"];
+    if (key == null) {
+      return Response.badRequest(body: "invalid or missing key");
+    }
+    editLock.clear(key);
+    return Response.ok("");
+  });
+
+  app.get("/events", (Request request) {
+    return Response.ok(json.encode(loadedEvents.keys.toList()));
+  });
+
+  app.get("/events/<eventID>", (Request request, String eventID) async {
+    File? f = loadedEvents[eventID]?.file;
+    if (f == null || await f.exists() == false) {
+      return Response.notFound("Event not found");
+    }
+    final event = SnoutDB.fromJson(json.decode(await f.readAsString()));
+
+    return Response.ok(json.encode(event), headers: {
+      'Content-Type':
+          ContentType('application', 'json', charset: 'utf-8').toString(),
+    });
+  });
+
+  app.get("/events/<eventID>/patchDiff",
+      (Request request, String eventID) async {
+    File? f = loadedEvents[eventID]?.file;
+    if (f == null || await f.exists() == false) {
+      return Response.notFound("Event not found");
+    }
+    final event = SnoutDB.fromJson(json.decode(await f.readAsString()));
+
+    final clientHead = request.headers["head"];
+    if (clientHead == null) {
+      return Response(406, body: "send head");
+    }
+    int clientHeadInt = int.parse(clientHead);
+
+    if (clientHeadInt < 1) {
+      return Response(406, body: 'head cannot be less than 1');
+    }
+
+    final range = event.patches.getRange(clientHeadInt, event.patches.length);
+
+    return Response.ok(json.encode(range.toList()), headers: {
+      'Content-Type':
+          ContentType('application', 'json', charset: 'utf-8').toString(),
+    });
+  });
+
+  app.get("/events/<eventID>/<subPath|.*>",
+      (Request request, String eventID, String subPath) async {
+    File? f = loadedEvents[eventID]?.file;
+    if (f == null || await f.exists() == false) {
+      return Response.notFound("Event not found");
+    }
+    final event = SnoutDB.fromJson(json.decode(await f.readAsString()));
+
+    try {
+      var dbJson = json.decode(json.encode(event));
+      final pointer = JsonPointer('/$subPath');
+      dbJson = pointer.read(dbJson);
+      return Response.ok(json.encode(dbJson), headers: {
+        'Content-Type':
+            ContentType('application', 'json', charset: 'utf-8').toString(),
+      });
+    } catch (e) {
+      print(e);
+      return Response.internalServerError(body: e);
     }
   });
 
-  await loadEvents();
+  app.put("/events/<eventID>", (Request request, String eventID) async {
+    File? f = loadedEvents[eventID]?.file;
+    if (f == null || await f.exists() == false) {
+      return Response.notFound("Event not found");
+    }
+    final event = SnoutDB.fromJson(json.decode(await f.readAsString()));
+    try {
+      //Uses UTF-8 by default
+      String content = await request.readAsString();
+      Patch patch = Patch.fromJson(json.decode(content));
+
+      event.addPatch(patch);
+
+      print(json.encode(patch));
+
+      //Successful patch, send this update to all listeners
+      for (final WebSocketChannel listener
+          in loadedEvents[eventID]?.listeners ?? []) {
+        listener.sink.add(json.encode(patch));
+      }
+
+      //Write the new DB to disk
+      await f.writeAsString(json.encode(event));
+
+      return Response.ok("");
+    } catch (e) {
+      print(e);
+      return Response.internalServerError(body: e);
+    }
+  });
+
+  var handler = const Pipeline()
+      .addMiddleware(logRequests())
+      .addMiddleware(handleCORS())
+      .addMiddleware(gzipMiddleware)
+      .addHandler(app);
 
   HttpServer server =
-      await HttpServer.bind(InternetAddress.anyIPv4, serverPort);
+      await shelf_io.serve(handler, InternetAddress.anyIPv4, serverPort);
   //Enable GZIP compression since every byte counts and the performance hit is
   //negligable for the 30%+ compression depending on how much of the data is image
   server.autoCompress = true;
+  //TODO i think this will work if chunked transfer encoding is set..
 
   print('Server started: ${server.address} port ${server.port}');
-
-  //Listen for requests
-  server.listen((HttpRequest request) async {
-    print(request.uri);
-
-    //CORS stuff
-    request.response.headers.add('Access-Control-Allow-Origin', '*');
-    request.response.headers.add('Access-Control-Allow-Headers', '*');
-    request.response.headers.add('Access-Control-Allow-Methods', '*');
-    request.response.headers.add('Access-Control-Request-Method', '*');
-    if (request.method == "OPTIONS") {
-      request.response.close();
-      return;
-    }
-
-    //Handle listener requests
-    if (request.uri.pathSegments.length > 1 &&
-        request.uri.pathSegments[0] == 'listen') {
-      WebSocketTransformer.upgrade(request).then((WebSocket websocket) {
-        final event = request.uri.pathSegments[1];
-        //Set the ping interval to keep the connection alive for many browser's and proxy's default behavior.
-        //For some reason this doesnt work client side so the server will just close the connection after 16 hours
-        //the client will reconnect though so it "works". If pingInterval is fixed on the client side this can be reduced
-        //and used as the primary connection indicator. Maybe 30 seconds
-        websocket.pingInterval = Duration(hours: 12);
-        //Remove the websocket from the listeners when it is closed for any reason.
-        websocket.done
-            .then((value) => loadedEvents[event]?.listeners.remove(websocket));
-        loadedEvents[event]?.listeners.add(websocket);
-      });
-      return;
-    }
-
-    if (request.uri.toString() == "/edit_lock") {
-      return handleEditLockRequest(request);
-    }
-
-    if (request.uri.toString() == "/events") {
-      request.response.write(json.encode(loadedEvents.keys.toList()));
-      request.response.close();
-      return;
-    }
-
-    // event/some_name
-    if (request.uri.pathSegments.length > 1 &&
-        request.uri.pathSegments[0] == 'events') {
-      final eventID = request.uri.pathSegments[1];
-      File? f = loadedEvents[eventID]?.file;
-      if (f == null || await f.exists() == false) {
-        request.response.statusCode = 404;
-        request.response.write('Event not found');
-        request.response.close();
-        return;
-      }
-      var event = SnoutDB.fromJson(json.decode(await f.readAsString()));
-
-      //I KNOW THIS IS HARD CODED PATH OVERRIDE BUT I DONT CARE
-      if (request.uri.pathSegments.length == 3 &&
-          request.uri.pathSegments[2] == "patchDiff") {
-            print("WEEYEYYEEYWWYYWYWE");
-        // length of client patch database.
-        final clientHead = request.headers.value("head");
-
-        if (clientHead == null) {
-          request.response.statusCode = 406;
-          request.response.write('send head');
-          request.response.close();
-          return;
-        }
-
-        int clientHeadInt = int.parse(clientHead);
-
-        if (clientHeadInt < 1) {
-          request.response.statusCode = 406;
-          request.response.write('head cannot be less than 1');
-          request.response.close();
-          return;
-        }
-
-        final range =
-            event.patches.getRange(clientHeadInt, event.patches.length);
-
-        request.response.headers.contentType =
-            new ContentType('application', 'json', charset: 'utf-8');
-        request.response.write(json.encode(range.toList()));
-        request.response.close();
-        return;
-      }
-
-      if (request.method == 'GET') {
-        if (request.uri.pathSegments.length > 2 &&
-            request.uri.pathSegments[2] != "") {
-          //query was for a specific sub-item. Path segments with a trailing zero need to be filtered
-          //events/2022mnmi2 is not the same as event/2022mnmi2/
-          try {
-            var dbJson = json.decode(json.encode(event));
-            final pointer = JsonPointer(
-                '/${request.uri.pathSegments.sublist(2).join("/")}');
-            dbJson = pointer.read(dbJson);
-            request.response.headers.contentType =
-                new ContentType('application', 'json', charset: 'utf-8');
-            request.response.write(json.encode(dbJson));
-            request.response.close();
-            return;
-          } catch (e) {
-            print(e);
-            request.response.statusCode = 500;
-            request.response.write(e);
-            request.response.close();
-            return;
-          }
-        }
-
-        request.response.headers.contentType =
-            new ContentType('application', 'json', charset: 'utf-8');
-        request.response.write(json.encode(event));
-        request.response.close();
-        return;
-      }
-
-      if (request.method == "PUT") {
-        try {
-          String content = await utf8.decodeStream(request);
-          Patch patch = Patch.fromJson(json.decode(content));
-
-          event.addPatch(patch);
-          //Write the new DB to disk
-          await f.writeAsString(json.encode(event));
-          request.response.close();
-
-          print(json.encode(patch));
-
-          //Successful patch, send this update to all listeners
-          for (final listener in loadedEvents[eventID]?.listeners ?? []) {
-            listener.add(json.encode(patch));
-          }
-
-          return;
-        } catch (e) {
-          print(e);
-          request.response.statusCode = 500;
-          request.response.write(e);
-          request.response.close();
-          return;
-        }
-      }
-      return;
-    }
-
-    request.response.statusCode = 404;
-    request.response.write("Not Found");
-    request.response.close();
-  });
 }
 
-void handleEditLockRequest(HttpRequest request) {
-  final key = request.headers.value("key");
-  if (key == null) {
-    request.response.write("invalid key");
-    request.response.close();
-    return;
-  }
-  if (request.method == "GET") {
-    final lock = editLock.get(key);
-    if (lock) {
-      request.response.write(true);
-      request.response.close();
-      return;
-    }
-    request.response.write(false);
-    request.response.close();
-    return;
-  }
-  if (request.method == "POST") {
-    editLock.set(key);
-    request.response.close();
-    return;
-  }
-  if (request.method == "DELETE") {
-    editLock.clear(key);
-    request.response.close();
-    return;
-  }
-}
+Middleware handleCORS() => (innerHandler) {
+      return (request) async {
+        final Map<String, String> headers = {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Headers': '*',
+          'Access-Control-Allow-Methods': '*',
+          'Access-Control-Request-Method': '*',
+        };
+
+        if (request.method == "OPTIONS") {
+          return Response.ok("", headers: headers);
+        }
+
+        final res = await innerHandler(request);
+        return res.change(headers: headers);
+      };
+    };
