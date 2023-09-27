@@ -6,14 +6,13 @@
 /// in this situation -1, -1 is the bottom left corner where the field is between
 /// the viewer and the admin. -1, 0 is about where red 2 drivers station is.
 /// and 1,0 is where blue 2 is
-/// 
-/// values are rounded to 1/200 on the x and 1/100 on the y by
-/// assuming the field is 2x as long as it is tall.
+/// the values are rounded to a realistic accuracy
 class FieldPosition {
 
   final double x;
   final double y;
 
+  /// Rounded, yields a resolution of about 8cm
   FieldPosition(double x, double y)
       : x = (x * 200).roundToDouble() / 200,
         y = (y * 100).roundToDouble() / 100;
@@ -29,6 +28,6 @@ class FieldPosition {
   FieldPosition get mirrored => FieldPosition(-x, y); 
 
   @override
-  String toString () => "$x, $y";
+  String toString () => "($x, $y)";
 
 }

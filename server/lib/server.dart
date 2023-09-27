@@ -210,8 +210,9 @@ void main(List<String> args) async {
       .addMiddleware(gzipMiddleware)
       .addHandler(app.call);
 
-  final HttpServer server =
-      await shelf_io.serve(handler, InternetAddress.anyIPv4, serverPort);
+  final HttpServer server = await shelf_io.serve(
+      handler, InternetAddress.anyIPv4, serverPort,
+      poweredByHeader: 'frogs');
   //Enable GZIP compression since every byte counts and the performance hit is
   //negligable for the 30%+ compression depending on how much of the data is image
   server.autoCompress = true;
