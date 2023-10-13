@@ -46,24 +46,6 @@ class AnalysisEventsHeatmap extends StatelessWidget {
                                   ])
                         ])),
           ],
-          // const SizedBox(height: 16),
-          // Text("Driving Tendencies",
-          //     style: Theme.of(context).textTheme.titleMedium),
-          // FieldHeatMap(
-          //     events: data.db.matches.values.fold(
-          //         [],
-          //         (previousValue, element) => [
-          //               ...previousValue,
-          //               ...?element.robot.entries.fold(
-          //                   [],
-          //                   (previousValue, element) => [
-          //                         ...previousValue!,
-          //                         ...element.value
-          //                             .timelineInterpolatedRedNormalized(
-          //                                 data.db.config.fieldStyle)
-          //                             .where((event) => event.isPositionEvent)
-          //                       ])
-          //             ])),
         ],
       ),
     );

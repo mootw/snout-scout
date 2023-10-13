@@ -176,59 +176,51 @@ class _MatchPageState extends State<MatchPage> {
             spacing: 12,
             alignment: WrapAlignment.center,
             children: [
-              SizedBox(
-                width: largeFieldSize,
-                child: Column(
-                  children: [
-                    const SizedBox(height: 16),
-                    Text("Autos",
-                        style: Theme.of(context).textTheme.titleMedium),
-                    FieldPaths(
-                      paths: [
-                        for (final robot in match.robot.values)
-                          robot.timelineInterpolated
-                              .where((element) => element.isInAuto)
-                              .toList()
-                      ],
-                    ),
-                  ],
-                ),
+              Column(
+                children: [
+                  const SizedBox(height: 16),
+                  Text("Autos",
+                      style: Theme.of(context).textTheme.titleMedium),
+                  FieldPaths(
+                    paths: [
+                      for (final robot in match.robot.values)
+                        robot.timelineInterpolated
+                            .where((element) => element.isInAuto)
+                            .toList()
+                    ],
+                  ),
+                ],
               ),
               for (final eventType
                   in snoutData.event.config.matchscouting.events)
-                SizedBox(
-                  width: smallFieldSize,
-                  child: Column(children: [
-                    const SizedBox(height: 16),
-                    Text(eventType.label,
-                        style: Theme.of(context).textTheme.titleMedium),
-                    FieldHeatMap(
-                        events: match.robot.values.fold(
-                            [],
-                            (previousValue, element) => [
-                                  ...previousValue,
-                                  ...element.timeline.where(
-                                      (event) => event.id == eventType.id)
-                                ])),
-                  ]),
-                ),
-              SizedBox(
-                  width: smallFieldSize,
-                  child: Column(
-                    children: [
-                      const SizedBox(height: 16),
-                      Text("Driving Tendencies",
-                          style: Theme.of(context).textTheme.titleMedium),
-                      FieldHeatMap(
-                          events: match.robot.values.fold(
-                              [],
-                              (previousValue, element) => [
-                                    ...previousValue,
-                                    ...element.timelineInterpolated
-                                        .where((event) => event.isPositionEvent)
-                                  ])),
-                    ],
-                  )),
+                Column(children: [
+                  const SizedBox(height: 16),
+                  Text(eventType.label,
+                      style: Theme.of(context).textTheme.titleMedium),
+                  FieldHeatMap(
+                      events: match.robot.values.fold(
+                          [],
+                          (previousValue, element) => [
+                                ...previousValue,
+                                ...element.timeline.where(
+                                    (event) => event.id == eventType.id)
+                              ])),
+                ]),
+              Column(
+                children: [
+                  const SizedBox(height: 16),
+                  Text("Driving Tendencies",
+                      style: Theme.of(context).textTheme.titleMedium),
+                  FieldHeatMap(
+                      events: match.robot.values.fold(
+                          [],
+                          (previousValue, element) => [
+                                ...previousValue,
+                                ...element.timelineInterpolated
+                                    .where((event) => event.isPositionEvent)
+                              ])),
+                ],
+              ),
             ],
           ),
 

@@ -193,84 +193,75 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                                               _red.contains(team)
                                                   ? Alliance.red
                                                   : Alliance.blue)))),
-                          SizedBox(
-                            width: 300,
-                            child: Column(
-                              children: [
-                                Text("Autos",
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .titleMedium),
-                                FieldPaths(
-                                  key: UniqueKey(),
-                                  paths: [
-                                    for (final match
-                                        in data.event.teamRecordedMatches(team))
-                                      match.value.robot[team.toString()]!
-                                          .timelineInterpolatedRedNormalized(
-                                              data.event.config.fieldStyle)
-                                          .where((element) => element.isInAuto)
-                                          .toList()
-                                  ],
-                                ),
-                              ],
-                            ),
+                          Column(
+                            children: [
+                              Text("Autos",
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleMedium),
+                              FieldPaths(
+                                size: 300,
+                                paths: [
+                                  for (final match
+                                      in data.event.teamRecordedMatches(team))
+                                    match.value.robot[team.toString()]!
+                                        .timelineInterpolatedRedNormalized(
+                                            data.event.config.fieldStyle)
+                                        .where((element) => element.isInAuto)
+                                        .toList()
+                                ],
+                              ),
+                            ],
                           ),
                           for (final eventType
                               in data.event.config.matchscouting.events)
-                            SizedBox(
-                              width: smallFieldSize,
-                              child: Column(children: [
-                                const SizedBox(height: 8),
-                                Text(eventType.label,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .titleMedium),
-                                FieldHeatMap(
-                                    key: UniqueKey(),
-                                    events: data.event
-                                        .teamRecordedMatches(team)
-                                        .fold(
-                                            [],
-                                            (previousValue, element) => [
-                                                  ...previousValue,
-                                                  ...?element.value
-                                                      .robot[team.toString()]
-                                                      ?.timelineRedNormalized(
-                                                          data.event.config
-                                                              .fieldStyle)
-                                                      .where((event) =>
-                                                          event.id ==
-                                                          eventType.id)
-                                                ])),
-                              ]),
-                            ),
-                          SizedBox(
-                              width: smallFieldSize,
-                              child: Column(
-                                children: [
-                                  const SizedBox(height: 8),
-                                  Text("Driving Tendencies",
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .titleMedium),
-                                  FieldHeatMap(
-                                      events: data.event
-                                          .teamRecordedMatches(team)
-                                          .fold(
-                                              [],
-                                              (previousValue, element) => [
-                                                    ...previousValue,
-                                                    ...?element.value
-                                                        .robot[team.toString()]
-                                                        ?.timelineInterpolatedRedNormalized(
-                                                            data.event.config
-                                                                .fieldStyle)
-                                                        .where((event) => event
-                                                            .isPositionEvent)
-                                                  ])),
-                                ],
-                              )),
+                            Column(children: [
+                              const SizedBox(height: 8),
+                              Text(eventType.label,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleMedium),
+                              FieldHeatMap(
+                                  events: data.event
+                                      .teamRecordedMatches(team)
+                                      .fold(
+                                          [],
+                                          (previousValue, element) => [
+                                                ...previousValue,
+                                                ...?element.value
+                                                    .robot[team.toString()]
+                                                    ?.timelineRedNormalized(
+                                                        data.event.config
+                                                            .fieldStyle)
+                                                    .where((event) =>
+                                                        event.id ==
+                                                        eventType.id)
+                                              ])),
+                            ]),
+                          Column(
+                            children: [
+                              const SizedBox(height: 8),
+                              Text("Driving Tendencies",
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleMedium),
+                              FieldHeatMap(
+                                  events: data.event
+                                      .teamRecordedMatches(team)
+                                      .fold(
+                                          [],
+                                          (previousValue, element) => [
+                                                ...previousValue,
+                                                ...?element.value
+                                                    .robot[team.toString()]
+                                                    ?.timelineInterpolatedRedNormalized(
+                                                        data.event.config
+                                                            .fieldStyle)
+                                                    .where((event) => event
+                                                        .isPositionEvent)
+                                              ])),
+                            ],
+                          ),
                         ],
                       ),
                     ]

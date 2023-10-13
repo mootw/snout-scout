@@ -19,8 +19,8 @@ const double robotSizeMeters = 0.8;
 const double robotFieldProportion = robotSizeMeters / fieldWidthMeters;
 
 //For consistent UI sizing
-const double largeFieldSize = 350;
-const double smallFieldSize = 250;
+const double largeFieldSize = 355;
+const double smallFieldSize = 255;
 
 class FieldPositionSelector extends StatelessWidget {
   const FieldPositionSelector(
@@ -133,7 +133,8 @@ class _FieldTimelineViewerState extends State<FieldTimelineViewer> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        FieldMap(children: [
+        FieldMap(
+          children: [
           for (final robot in widget.match.robot.entries)
             RobotMapEventView(
                 time: _animationTime,
@@ -141,6 +142,7 @@ class _FieldTimelineViewerState extends State<FieldTimelineViewer> {
                 team: robot.key,
                 isAnimating: _isPlaying),
         ]),
+        Text("in depth event timeline here???? like robot: event"),
         Row(
           children: [
             IconButton(
@@ -171,7 +173,7 @@ class _FieldTimelineViewerState extends State<FieldTimelineViewer> {
                   textAlign: TextAlign.center,
                 )),
           ],
-        )
+        ),
       ],
     );
   }
@@ -237,8 +239,8 @@ class RobotMapEventView extends StatelessWidget {
               Align(
                 alignment: Alignment(event.position.x, -event.position.y),
                 child: Text(
-                    event
-                        .getLabelFromConfig(context.watch<DataProvider>().event.config),
+                    event.getLabelFromConfig(
+                        context.watch<DataProvider>().event.config),
                     style: const TextStyle(backgroundColor: Colors.black)),
               ),
           ]);
@@ -248,12 +250,14 @@ class RobotMapEventView extends StatelessWidget {
 
 class FieldHeatMap extends StatelessWidget {
   final List<MatchEvent> events;
+  final double size;
 
-  const FieldHeatMap({super.key, required this.events});
+  const FieldHeatMap({super.key, required this.events, this.size = smallFieldSize});
 
   @override
   Widget build(BuildContext context) {
     return FieldMap(
+      size: size,
       children: [
         Container(color: Colors.black26),
         CustomPaint(
@@ -270,17 +274,21 @@ class FieldPaths extends StatelessWidget {
   final bool emphasizeStartPoint;
   final bool eventLabels;
   final bool useRedNormalized;
+  final double? size;
 
   const FieldPaths(
       {super.key,
       required this.paths,
+      this.size = largeFieldSize,
       this.emphasizeStartPoint = true,
       this.useRedNormalized = true,
       this.eventLabels = true});
 
   @override
   Widget build(BuildContext context) {
-    return FieldMap(children: [
+    return FieldMap(
+      size: size,
+      children: [
       Container(color: Colors.black26),
       for (final match in paths) ...[
         CustomPaint(
@@ -422,7 +430,7 @@ class MapLine extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(HeatMap oldDelegate) =>
+  bool shouldRepaint(MapLine oldDelegate) =>
       Object.hashAll(oldDelegate.events) != Object.hashAll(events);
 }
 
@@ -438,20 +446,25 @@ class FieldMapWidget extends StatelessWidget {
 
 class FieldMap extends StatelessWidget {
   final List<Widget> children;
+  final double? size;
 
   //Displays a field map with overlays.
-  const FieldMap({super.key, required this.children});
+  const FieldMap(
+      {super.key, required this.children, this.size});
 
   @override
   Widget build(BuildContext context) {
-    return AspectRatio(
-      aspectRatio: 1 / mapRatio,
-      child: Stack(
-        children: [
-          Image.asset(
-              "assets/field_map/${context.watch<DataProvider>().event.config.season}.png"),
-          ...children,
-        ],
+    return SizedBox(
+      width: size,
+      child: AspectRatio(
+        aspectRatio: 1 / mapRatio,
+        child: Stack(
+          children: [
+            Image.asset(
+                "assets/field_map/${context.watch<DataProvider>().event.config.season}.png"),
+            ...children,
+          ],
+        ),
       ),
     );
   }

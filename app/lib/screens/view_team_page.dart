@@ -173,26 +173,23 @@ class _TeamViewPageState extends State<TeamViewPage> {
               spacing: 12,
               alignment: WrapAlignment.center,
               children: [
-                SizedBox(
-                  width: largeFieldSize,
-                  child: Column(
-                    children: [
-                      const SizedBox(height: 16),
-                      Text("Autos",
-                          style: Theme.of(context).textTheme.titleMedium),
-                      FieldPaths(
-                        paths: [
-                          for (final match in data.event
-                              .teamRecordedMatches(widget.teamNumber))
-                            match.value.robot[widget.teamNumber.toString()]!
-                                .timelineInterpolatedRedNormalized(
-                                    data.event.config.fieldStyle)
-                                .where((element) => element.isInAuto)
-                                .toList()
-                        ],
-                      ),
-                    ],
-                  ),
+                Column(
+                  children: [
+                    const SizedBox(height: 16),
+                    Text("Autos",
+                        style: Theme.of(context).textTheme.titleMedium),
+                    FieldPaths(
+                      paths: [
+                        for (final match in data.event
+                            .teamRecordedMatches(widget.teamNumber))
+                          match.value.robot[widget.teamNumber.toString()]!
+                              .timelineInterpolatedRedNormalized(
+                                  data.event.config.fieldStyle)
+                              .where((element) => element.isInAuto)
+                              .toList()
+                      ],
+                    ),
+                  ],
                 ),
                 const Divider(height: 32),
                 Center(
@@ -275,53 +272,48 @@ class _TeamViewPageState extends State<TeamViewPage> {
                 ),
                 const Divider(),
                 for (final eventType in data.event.config.matchscouting.events)
-                  SizedBox(
-                    width: smallFieldSize,
-                    child: Column(children: [
-                      const SizedBox(height: 16),
-                      Text(eventType.label,
-                          style: Theme.of(context).textTheme.titleMedium),
-                      FieldHeatMap(
-                          events: data.event
-                              .teamRecordedMatches(widget.teamNumber)
-                              .fold(
-                                  [],
-                                  (previousValue, element) => [
-                                        ...previousValue,
-                                        ...?element.value
-                                            .robot[widget.teamNumber.toString()]
-                                            ?.timelineRedNormalized(
-                                                data.event.config.fieldStyle)
-                                            .where((event) =>
-                                                event.id == eventType.id)
-                                      ])),
-                    ]),
-                  ),
-                SizedBox(
-                    width: smallFieldSize,
-                    child: Column(
-                      children: [
-                        const SizedBox(height: 16),
-                        Text("Driving Tendencies",
-                            style: Theme.of(context).textTheme.titleMedium),
-                        FieldHeatMap(
-                            events: data.event
-                                .teamRecordedMatches(widget.teamNumber)
-                                .fold(
-                                    [],
-                                    (previousValue, element) => [
-                                          ...previousValue,
-                                          ...?element
-                                              .value
-                                              .robot[
-                                                  widget.teamNumber.toString()]
-                                              ?.timelineInterpolatedRedNormalized(
-                                                  data.event.config.fieldStyle)
-                                              .where((event) =>
-                                                  event.isPositionEvent)
-                                        ])),
-                      ],
-                    )),
+                  Column(children: [
+                    const SizedBox(height: 16),
+                    Text(eventType.label,
+                        style: Theme.of(context).textTheme.titleMedium),
+                    FieldHeatMap(
+                        events: data.event
+                            .teamRecordedMatches(widget.teamNumber)
+                            .fold(
+                                [],
+                                (previousValue, element) => [
+                                      ...previousValue,
+                                      ...?element.value
+                                          .robot[widget.teamNumber.toString()]
+                                          ?.timelineRedNormalized(
+                                              data.event.config.fieldStyle)
+                                          .where((event) =>
+                                              event.id == eventType.id)
+                                    ])),
+                  ]),
+                Column(
+                  children: [
+                    const SizedBox(height: 16),
+                    Text("Driving Tendencies",
+                        style: Theme.of(context).textTheme.titleMedium),
+                    FieldHeatMap(
+                        events: data.event
+                            .teamRecordedMatches(widget.teamNumber)
+                            .fold(
+                                [],
+                                (previousValue, element) => [
+                                      ...previousValue,
+                                      ...?element
+                                          .value
+                                          .robot[
+                                              widget.teamNumber.toString()]
+                                          ?.timelineInterpolatedRedNormalized(
+                                              data.event.config.fieldStyle)
+                                          .where((event) =>
+                                              event.isPositionEvent)
+                                    ])),
+                  ],
+                ),
               ],
             ),
           ],
