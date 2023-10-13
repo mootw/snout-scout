@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:dotenv/dotenv.dart';
+import 'package:logging/logging.dart';
 import 'package:rfc_6901/rfc_6901.dart';
 import 'package:server/edit_lock.dart';
 import 'package:shelf/shelf.dart';
@@ -24,6 +25,8 @@ EditLock editLock = EditLock();
 
 final app = Router();
 
+final Logger logger = Logger("snout-scout-server");
+
 //Stuff that should be done for each event that is loaded.
 class EventData {
   EventData(this.file);
@@ -38,19 +41,24 @@ Future loadEvents() async {
   final List<FileSystemEntity> allEvents = await dir.list().toList();
   for (final event in allEvents) {
     if (event is File) {
-      print(event.uri.pathSegments.last);
+      logger.info(event.uri.pathSegments.last);
       loadedEvents[event.uri.pathSegments.last] = EventData(event);
     }
   }
 }
 
 void main(List<String> args) async {
+  logger.onRecord.listen((event) {
+    // ignore: avoid_print
+    print('${event.level}: ${event.message} ${event.error ?? ''} ${event.stackTrace ?? ''}');
+  });
+
   await loadEvents();
 
   app.get("/listen/<event>", (Request request, String event) {
     final handler = webSocketHandler(
       (WebSocketChannel webSocket) {
-        print('new listener for $event');
+        logger.info('new listener for $event');
         webSocket.sink.done
             .then((value) => loadedEvents[event]?.listeners.remove(webSocket));
         loadedEvents[event]?.listeners.add(webSocket);
@@ -165,8 +173,8 @@ void main(List<String> args) async {
               ContentType('application', 'json', charset: 'utf-8').toString(),
         },
       );
-    } catch (e) {
-      print(e);
+    } catch (e, s) {
+      logger.warning('failed to read sub-path', e, s);
       return Response.internalServerError(body: e);
     }
   });
@@ -179,14 +187,14 @@ void main(List<String> args) async {
     final event = SnoutDB.fromJson(
       json.decode(await f.readAsString()) as Map<String, dynamic>,
     );
-    try {
       //Uses UTF-8 by default
-      final String content = await request.readAsString();
+    final String content = await request.readAsString();
+    try {
       final Patch patch = Patch.fromJson(json.decode(content) as Map);
 
       event.addPatch(patch);
 
-      print(json.encode(patch));
+      logger.fine('added patch: ${json.encode(patch)}');
 
       //Successful patch, send this update to all listeners
       for (final WebSocketChannel listener
@@ -198,8 +206,8 @@ void main(List<String> args) async {
       await f.writeAsString(json.encode(event));
 
       return Response.ok("");
-    } catch (e) {
-      print(e);
+    } catch (e, s) {
+      logger.severe('failed to accept patch: $content', e, s);
       return Response.internalServerError(body: e);
     }
   });
@@ -218,7 +226,7 @@ void main(List<String> args) async {
   server.autoCompress = true;
   //TODO i think this will work if chunked transfer encoding is set..
 
-  print('Server started: ${server.address} port ${server.port}');
+  logger.info('Server started: ${server.address} port ${server.port}');
 }
 
 Middleware handleCORS() => (innerHandler) {

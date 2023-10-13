@@ -8,7 +8,6 @@ class EditLock {
 
     //Returns true if the lock is active.
     bool get (String key) {
-      print(locks);
       final value = locks[key];
       if(value != null) {
         if(value.add(const Duration(minutes: 15)).isAfter(DateTime.now())) {
@@ -20,11 +19,9 @@ class EditLock {
 
     void set (String key) {
       locks[key] = DateTime.now();
-      print(locks);
     }
 
     void clear (String key) {
       locks.remove(key);
-      print(locks);
     }
 }

@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:app/providers/data_provider.dart';
 import 'package:app/helpers.dart';
@@ -68,7 +67,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-
   int _currentPageIndex = 0;
 
   @override
@@ -103,6 +101,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
     final nextMatch = data.event.nextMatch;
 
+    final largeDevice = isLargeDevice(context);
+
     return Scaffold(
       appBar: AppBar(
         bottom: const LoadOrErrorStatusBar(),
@@ -123,22 +123,57 @@ class _MyHomePageState extends State<MyHomePage> {
               icon: const Icon(Icons.search))
         ],
       ),
-      body: [
-        AllMatchesPage(
-          // 10/10 hack to make the widget re-scroll to the correct spot on load
-          // this will force it to scroll whenever the matches length changes
-          // we could add another value here to make it scroll on other changes too
-          key: Key(data.event.matches.length.toString()),
-          scrollPosition: nextMatch == null
-              ? null
-              : (data.event.matches.values.toList().indexOf(nextMatch) *
-                      matchCardHeight) -
-                  (matchCardHeight * 2),
-        ),
-        const TeamGridList(showEditButton: true),
-        const AnalysisPage(),
-        const DocumentationScreen(),
-      ][_currentPageIndex],
+      body: Row(children: [
+        if (largeDevice)
+          NavigationRail(
+            backgroundColor: Theme.of(context).bottomNavigationBarTheme.backgroundColor,
+            labelType: NavigationRailLabelType.all,
+            onDestinationSelected: (int index) {
+                setState(() {
+                  _currentPageIndex = index;
+                });
+              },
+            destinations: const [
+              NavigationRailDestination(
+                  selectedIcon: Icon(Icons.calendar_today),
+                  icon: Icon(Icons.calendar_today_outlined),
+                  label: Text('Schedule'),
+                ),
+                NavigationRailDestination(
+                  selectedIcon: Icon(Icons.people),
+                  icon: Icon(Icons.people_alt_outlined),
+                  label: Text('Teams'),
+                ),
+                NavigationRailDestination(
+                  selectedIcon: Icon(Icons.analytics),
+                  icon: Icon(Icons.analytics_outlined),
+                  label: Text('Analysis'),
+                ),
+                NavigationRailDestination(
+                  selectedIcon: Icon(Icons.book),
+                  icon: Icon(Icons.book_outlined),
+                  label: Text('Docs'),
+                ),
+            ], selectedIndex: _currentPageIndex),
+          Expanded(
+            child: [
+              AllMatchesPage(
+                // 10/10 hack to make the widget re-scroll to the correct spot on load
+                // this will force it to scroll whenever the matches length changes
+                // we could add another value here to make it scroll on other changes too
+                key: Key(data.event.matches.length.toString()),
+                scrollPosition: nextMatch == null
+                    ? null
+                    : (data.event.matches.values.toList().indexOf(nextMatch) *
+                            matchCardHeight) -
+                        (matchCardHeight * 2),
+              ),
+              const TeamGridList(showEditButton: true),
+              const AnalysisPage(),
+              const DocumentationScreen(),
+            ][_currentPageIndex],
+          ),
+      ]),
       drawer: Drawer(
         child: ListView(children: [
           ListTile(
@@ -226,65 +261,40 @@ class _MyHomePageState extends State<MyHomePage> {
                 },
                 icon: const Icon(Icons.edit)),
           ),
-          ListTile(
-            title: const Text("Set Pit Map Image"),
-            trailing: IconButton(
-                onPressed: () async {
-                  final identity = context.read<IdentityProvider>().identity;
-
-                  String result;
-                  //TAKE PHOTO
-                  try {
-                    final photo = await pickOrTakeImageDialog(context);
-                    if (photo != null) {
-                      Uint8List bytes = await photo.readAsBytes();
-                      result = base64Encode(bytes);
-                      Patch patch = Patch(
-                          identity: identity,
-                          time: DateTime.now(),
-                          path: Patch.buildPath(['pitmap']),
-                          value: result);
-                      //Save the scouting results to the server!!
-                      await data.submitPatch(patch);
-                    }
-                  } catch (e, s) {
-                    Logger.root.severe("Error taking image from device", e, s);
-                  }
-                },
-                icon: const Icon(Icons.camera_alt)),
-          ),
         ]),
       ),
-      bottomNavigationBar: NavigationBar(
-        onDestinationSelected: (int index) {
-          setState(() {
-            _currentPageIndex = index;
-          });
-        },
-        selectedIndex: _currentPageIndex,
-        destinations: const [
-          NavigationDestination(
-            selectedIcon: Icon(Icons.table_rows),
-            icon: Icon(Icons.table_rows_outlined),
-            label: 'Schedule',
-          ),
-          NavigationDestination(
-            selectedIcon: Icon(Icons.people),
-            icon: Icon(Icons.people_alt_outlined),
-            label: 'Teams',
-          ),
-          NavigationDestination(
-            selectedIcon: Icon(Icons.analytics),
-            icon: Icon(Icons.analytics_outlined),
-            label: 'Analysis',
-          ),
-          NavigationDestination(
-            selectedIcon: Icon(Icons.book),
-            icon: Icon(Icons.book_outlined),
-            label: 'Docs',
-          ),
-        ],
-      ),
+      bottomNavigationBar: largeDevice
+          ? null
+          : NavigationBar(
+              onDestinationSelected: (int index) {
+                setState(() {
+                  _currentPageIndex = index;
+                });
+              },
+              selectedIndex: _currentPageIndex,
+              destinations: const [
+                NavigationDestination(
+                  selectedIcon: Icon(Icons.calendar_today),
+                  icon: Icon(Icons.calendar_today_outlined),
+                  label: 'Schedule',
+                ),
+                NavigationDestination(
+                  selectedIcon: Icon(Icons.people),
+                  icon: Icon(Icons.people_alt_outlined),
+                  label: 'Teams',
+                ),
+                NavigationDestination(
+                  selectedIcon: Icon(Icons.analytics),
+                  icon: Icon(Icons.analytics_outlined),
+                  label: 'Analysis',
+                ),
+                NavigationDestination(
+                  selectedIcon: Icon(Icons.book),
+                  icon: Icon(Icons.book_outlined),
+                  label: 'Docs',
+                ),
+              ],
+            ),
     );
   }
 }

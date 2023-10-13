@@ -9,6 +9,7 @@ dependencies:
   dotenv: ^4.1.0
   eval_ex: ^1.1.8
   http: ^1.1.0
+  logging: ^1.2.0
   rfc_6901: ^0.1.1
 
   shelf: ^1.4.1

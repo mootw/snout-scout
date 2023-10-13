@@ -1,12 +1,16 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:app/helpers.dart';
 import 'package:app/providers/data_provider.dart';
+import 'package:app/providers/identity_provider.dart';
 import 'package:app/screens/debug_field_position.dart';
 import 'package:app/widgets/image_view.dart';
 import 'package:app/widgets/markdown_wrapper.dart';
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
+import 'package:snout_db/patch.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class DocumentationScreen extends StatefulWidget {
@@ -21,7 +25,7 @@ class _DocumentationScreenState extends State<DocumentationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final data = context.watch<DataProvider>().event.config;
+    final config = context.watch<DataProvider>().event.config;
 
     final pitMap = context.watch<DataProvider>().event.pitmap;
 
@@ -59,13 +63,40 @@ class _DocumentationScreenState extends State<DocumentationScreen> {
               )),
         if (pitMap == null)
           const ListTile(title: Text("No pit map has been added yet :(")),
+        ListTile(
+            title: const Text("Set Pit Map Image"),
+            trailing: const Icon(Icons.camera_alt),
+            onTap: () async {
+              final identity = context.read<IdentityProvider>().identity;
+              final dataProvider = context.read<DataProvider>();
+
+              String result;
+              //TAKE PHOTO
+              try {
+                final photo = await pickOrTakeImageDialog(context);
+                if (photo != null) {
+                  Uint8List bytes = await photo.readAsBytes();
+                  result = base64Encode(bytes);
+                  Patch patch = Patch(
+                      identity: identity,
+                      time: DateTime.now(),
+                      path: Patch.buildPath(['pitmap']),
+                      value: result);
+                  //Save the scouting results to the server!!
+                  await dataProvider.submitPatch(patch);
+                }
+              } catch (e, s) {
+                Logger.root.severe("Error taking image from device", e, s);
+              }
+            },
+          ),
         const Divider(),
         Padding(
           padding: const EdgeInsets.only(left: 16, right: 16),
           child: MarkdownText(
-              data: data.docs.isNotEmpty
-                  ? data.docs
-                  : "# Welcome to the docs for ${data.name}\n**this is a temporary message that will be replaced once you set the docs property in the event config**\n\neverything that you collect should be defined in here, all 'docs' properties in the configuration support markdown"),
+              data: config.docs.isNotEmpty
+                  ? config.docs
+                  : "# Welcome to the docs for ${config.name}\n**this is a temporary message that will be replaced once you set the docs property in the event config**\n\neverything that you collect should be defined in here, all 'docs' properties in the configuration support markdown"),
         ),
         const Divider(),
         ListTile(
@@ -82,7 +113,7 @@ class _DocumentationScreenState extends State<DocumentationScreen> {
           child: Text("Pit Scouting",
               style: Theme.of(context).textTheme.titleLarge),
         ),
-        for (final item in data.pitscouting) ...[
+        for (final item in config.pitscouting) ...[
           Padding(
             padding: const EdgeInsets.only(left: 16, top: 16),
             child: Text(item.label,
@@ -117,7 +148,7 @@ class _DocumentationScreenState extends State<DocumentationScreen> {
           child: Text("Match Events",
               style: Theme.of(context).textTheme.titleLarge),
         ),
-        for (final item in data.matchscouting.events) ...[
+        for (final item in config.matchscouting.events) ...[
           Padding(
             padding: const EdgeInsets.only(left: 16, top: 16),
             child: Text(item.label,
@@ -146,7 +177,7 @@ class _DocumentationScreenState extends State<DocumentationScreen> {
           child: Text("Match Survey",
               style: Theme.of(context).textTheme.titleLarge),
         ),
-        for (final item in data.matchscouting.survey) ...[
+        for (final item in config.matchscouting.survey) ...[
           Padding(
             padding: const EdgeInsets.only(left: 16, top: 16),
             child: Text(item.label,
@@ -181,7 +212,7 @@ class _DocumentationScreenState extends State<DocumentationScreen> {
           child:
               Text("Processes", style: Theme.of(context).textTheme.titleLarge),
         ),
-        for (final item in data.matchscouting.processes) ...[
+        for (final item in config.matchscouting.processes) ...[
           Padding(
             padding: const EdgeInsets.only(left: 16, top: 16),
             child: Text(item.label,

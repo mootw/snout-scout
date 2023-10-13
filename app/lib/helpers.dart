@@ -7,6 +7,10 @@ import 'dart:math';
 // this means that the unfolded z fold could overflow slightly...
 // but the intention is to accomodate larger screens sooo
 
+// https://m3.material.io/foundations/layout/applying-layout/medium
+bool isLargeDevice(BuildContext context) => MediaQuery.of(context).size.width > 600;
+
+
 //Theme data
 const primaryColor = Color.fromARGB(255, 49, 219, 43);
 final darkScheme =
