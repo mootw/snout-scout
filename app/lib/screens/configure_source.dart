@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:app/helpers.dart';
+import 'package:app/style.dart';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/providers/identity_provider.dart';
 import 'package:app/providers/loading_status_service.dart';

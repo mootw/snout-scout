@@ -6,7 +6,7 @@ import 'package:app/edit_lock.dart';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/widgets/edit_audit.dart';
 import 'package:app/widgets/fieldwidget.dart';
-import 'package:app/helpers.dart';
+import 'package:app/style.dart';
 import 'package:app/screens/match_page.dart';
 import 'package:app/screens/scout_team.dart';
 import 'package:app/widgets/image_view.dart';

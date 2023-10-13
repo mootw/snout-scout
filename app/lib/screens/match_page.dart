@@ -4,7 +4,7 @@ import 'package:app/edit_lock.dart';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/widgets/edit_audit.dart';
 import 'package:app/widgets/fieldwidget.dart';
-import 'package:app/helpers.dart';
+import 'package:app/style.dart';
 import 'package:app/screens/analysis/match_preview.dart';
 import 'package:app/screens/edit_match_results.dart';
 import 'package:app/screens/match_recorder_assistant.dart';

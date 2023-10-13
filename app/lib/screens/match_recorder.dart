@@ -6,7 +6,7 @@ import 'package:app/widgets/confirm_exit_dialog.dart';
 import 'package:app/widgets/datasheet.dart';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/widgets/fieldwidget.dart';
-import 'package:app/helpers.dart';
+import 'package:app/style.dart';
 import 'package:app/scouting_tools/scouting_tool.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';

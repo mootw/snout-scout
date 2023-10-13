@@ -1,6 +1,6 @@
 import 'package:app/durationformat.dart';
 import 'package:app/providers/data_provider.dart';
-import 'package:app/helpers.dart';
+import 'package:app/style.dart';
 import 'package:app/widgets/match_card.dart';
 import 'package:app/screens/edit_schedule.dart';
 import 'package:app/screens/match_page.dart';

@@ -3,7 +3,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:app/helpers.dart';
+import 'package:app/style.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:snout_db/event/pitscoutresult.dart';

@@ -1,5 +1,5 @@
 import 'package:app/providers/data_provider.dart';
-import 'package:app/helpers.dart';
+import 'package:app/style.dart';
 import 'package:app/screens/teams_page.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';

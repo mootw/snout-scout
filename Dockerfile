@@ -8,8 +8,7 @@ COPY . .
 RUN cd snout_db && dart pub get
 RUN cd server && dart pub get
 
-
-RUN dart compile exe server/lib/server.dart -o server/server
+RUN dart compile exe server/bin/server.dart -o server/server
 
 # Build minimal serving image from AOT-compiled `/server`
 # and the pre-built AOT-runtime in the `/runtime/` directory of the base image.
