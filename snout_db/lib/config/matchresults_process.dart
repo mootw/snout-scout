@@ -1,7 +1,9 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:meta/meta.dart';
 part 'matchresults_process.g.dart';
 
 /// Schema that defines how data is displayed in the app for match events
+@immutable
 @JsonSerializable()
 class MatchResultsProcess {
   /// documentation about this item

@@ -1,10 +1,12 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:meta/meta.dart';
 import 'package:snout_db/event/matchresults.dart';
 import 'package:snout_db/event/robotmatchresults.dart';
 import 'package:snout_db/game.dart';
 
 part 'match.g.dart';
 
+@immutable
 @JsonSerializable()
 class FRCMatch implements Comparable<FRCMatch> {
   ///aka the match name (Qualitication 1, Quarters 3 Match 1, Semifinals 2)
@@ -26,7 +28,7 @@ class FRCMatch implements Comparable<FRCMatch> {
   /// this map might include surrogate robots (aka robots that are not in the union of the scheduled teams)
   final Map<String, RobotMatchResults> robot;
 
-  FRCMatch({
+  const FRCMatch({
     required this.description,
     required this.scheduledTime,
     required this.red,

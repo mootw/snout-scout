@@ -1,7 +1,9 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:meta/meta.dart';
 
 part 'surveyitem.g.dart';
 
+@immutable
 @JsonSerializable()
 class SurveyItem {
   /// documentation about this item

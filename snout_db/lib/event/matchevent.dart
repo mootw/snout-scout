@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:meta/meta.dart';
 import 'package:snout_db/config/matcheventconfig.dart';
 import 'package:snout_db/snout_db.dart';
 
@@ -8,6 +9,7 @@ part 'matchevent.g.dart';
 const String robotPositionTag = 'robot_position';
 
 /// Match event that is recorded to the database
+@immutable
 @JsonSerializable()
 class MatchEvent {
   final int time;

@@ -5,6 +5,7 @@ import 'package:decimal/decimal.dart';
 import 'package:eval_ex/built_ins.dart';
 import 'package:eval_ex/expression.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:meta/meta.dart';
 import 'package:rfc_6901/rfc_6901.dart';
 import 'package:snout_db/config/eventconfig.dart';
 import 'package:snout_db/config/matchresults_process.dart';
@@ -16,6 +17,7 @@ import 'package:snout_db/patch.dart';
 
 part 'frcevent.g.dart';
 
+@immutable
 @JsonSerializable()
 class FRCEvent {
   /// how should this event be tracked?

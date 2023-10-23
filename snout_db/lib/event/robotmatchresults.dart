@@ -1,10 +1,12 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:meta/meta.dart';
 import 'package:snout_db/event/matchevent.dart';
 import 'package:snout_db/event/pitscoutresult.dart';
 import 'package:snout_db/snout_db.dart';
 
 part 'robotmatchresults.g.dart';
 
+@immutable
 @JsonSerializable()
 class RobotMatchResults {
   /// The alliance that the robot was on

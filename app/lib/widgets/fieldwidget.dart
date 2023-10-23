@@ -142,7 +142,7 @@ class _FieldTimelineViewerState extends State<FieldTimelineViewer> {
                 team: robot.key,
                 isAnimating: _isPlaying),
         ]),
-        Text("in depth event timeline here???? like robot: event"),
+        const Text("in depth event timeline here???? like robot: event"),
         Row(
           children: [
             IconButton(

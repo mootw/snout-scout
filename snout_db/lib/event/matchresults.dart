@@ -1,8 +1,10 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:meta/meta.dart';
 import 'package:snout_db/game.dart';
 
 part 'matchresults.g.dart';
 
+@immutable
 @JsonSerializable()
 class MatchResultValues {
   ///the time when the match actually started

@@ -1,4 +1,11 @@
 
 
-GET http://localhost:6749/events/2023mnmi2backup.json
+GET http://localhost:6749/events/2023mnmi2.json/patchDiff
+head: 891
+Accept-Encoding: gzip
+
+###
+
+GET http://localhost:6749/events
+Accept-Encoding: gzip
 head: 884

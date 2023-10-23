@@ -60,7 +60,7 @@ class _TeamViewPageState extends State<TeamViewPage> {
                                 builder: (_) => PitScoutTeamPage(
                                     team: widget.teamNumber,
                                     config: data.event.config,
-                                    oldData: data.event.pitscouting[
+                                    initialData: data.event.pitscouting[
                                         widget.teamNumber.toString()])),
                           ));
                   

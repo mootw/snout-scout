@@ -48,7 +48,6 @@ class _MatchPageState extends State<MatchPage> {
               onPressed: () => launchUrlString(
                   "https://www.thebluealliance.com/match/${widget.matchid}"),
             ),
-
           const SizedBox(width: 12),
         ],
       ),

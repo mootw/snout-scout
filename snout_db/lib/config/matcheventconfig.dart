@@ -1,8 +1,10 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:meta/meta.dart';
 
 part 'matcheventconfig.g.dart';
 
 /// Template for a match event that could be recorded
+@immutable
 @JsonSerializable()
 class MatchEventConfig {
   /// documentation about this item

@@ -1,11 +1,13 @@
 //Handles applying and the schema for diffs
 
 import 'package:json_annotation/json_annotation.dart';
+import 'package:meta/meta.dart';
 import 'package:rfc_6901/rfc_6901.dart';
 import 'package:snout_db/event/frcevent.dart';
 
 part 'patch.g.dart';
 
+@immutable
 @JsonSerializable()
 class Patch {
   /// some unique string that identifies the patch creator
@@ -30,7 +32,7 @@ class Patch {
 
   /// this loosely follows RFC 6902
   /// TODO add op function
-  Patch(
+  const Patch(
       {required this.identity,
       required this.time,
       required this.path,

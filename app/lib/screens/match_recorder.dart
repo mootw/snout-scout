@@ -34,6 +34,7 @@ class MatchRecorderPage extends StatefulWidget {
 enum MatchMode { setup, playing, finished }
 
 class _MatchRecorderPageState extends State<MatchRecorderPage> {
+
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   MatchMode _mode = MatchMode.setup;
   List<MatchEvent> _events = [];

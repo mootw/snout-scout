@@ -1,9 +1,11 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:meta/meta.dart';
 import 'package:snout_db/config/matchscouting.dart';
 import 'package:snout_db/config/surveyitem.dart';
 
 part 'eventconfig.g.dart';
 
+@immutable
 @JsonSerializable()
 class EventConfig {
   /// Human readable name for this event (the one displayed on the status bar)

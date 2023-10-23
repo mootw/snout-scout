@@ -138,7 +138,7 @@ Future<List<Patch>> loadScheduleFromTBA(
           blue: blue,
           red: red,
           results: null,
-          robot: {});
+          robot: const {});
 
       Patch patch = Patch(
           identity: context.read<IdentityProvider>().identity,

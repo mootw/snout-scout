@@ -5,7 +5,6 @@ import 'dart:io';
 import 'package:dotenv/dotenv.dart';
 import 'package:logging/logging.dart';
 import 'package:rfc_6901/rfc_6901.dart';
-import 'package:server/edit_lock.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_gzip/shelf_gzip.dart';
@@ -14,6 +13,8 @@ import 'package:shelf_web_socket/shelf_web_socket.dart';
 import 'package:snout_db/patch.dart';
 import 'package:snout_db/snout_db.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
+
+import 'edit_lock.dart';
 
 //TODO implement https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/ETag
 
@@ -50,7 +51,9 @@ Future loadEvents() async {
 void main(List<String> args) async {
   logger.onRecord.listen((event) {
     // ignore: avoid_print
-    print('${event.level}: ${event.message} ${event.error ?? ''} ${event.stackTrace ?? ''}');
+    print(
+      '${event.level}: ${event.message} ${event.error ?? ''} ${event.stackTrace ?? ''}',
+    );
   });
 
   await loadEvents();
@@ -187,7 +190,7 @@ void main(List<String> args) async {
     final event = SnoutDB.fromJson(
       json.decode(await f.readAsString()) as Map<String, dynamic>,
     );
-      //Uses UTF-8 by default
+    //Uses UTF-8 by default
     final String content = await request.readAsString();
     try {
       final Patch patch = Patch.fromJson(json.decode(content) as Map);
@@ -219,8 +222,11 @@ void main(List<String> args) async {
       .addHandler(app.call);
 
   final HttpServer server = await shelf_io.serve(
-      handler, InternetAddress.anyIPv4, serverPort,
-      poweredByHeader: 'frogs');
+    handler,
+    InternetAddress.anyIPv4,
+    serverPort,
+    poweredByHeader: 'frogs',
+  );
   //Enable GZIP compression since every byte counts and the performance hit is
   //negligable for the 30%+ compression depending on how much of the data is image
   server.autoCompress = true;

@@ -5,9 +5,8 @@ import 'package:snout_db/patch.dart';
 
 part 'db.g.dart';
 
-@JsonSerializable(
-  
-)
+
+@JsonSerializable()
 class SnoutDB {
   
   /// read-only latest state of the event
@@ -46,7 +45,7 @@ class SnoutDB {
   /// this is effectively the last edit time..
   /// HOWEVER this does not account for sub-edits
   /// we will ignore this for now...
-  /// ALSO this is NOT tightly coupled to the database
+  /// TODO ALSO this is NOT tightly coupled to the database
   /// schema, so changes to where patches are applied
   /// will break the link between the edit times, this is OK
   /// and is best effort! This will be the cause of a lot of

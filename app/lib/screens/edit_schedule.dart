@@ -86,10 +86,10 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
                 FRCMatch match = FRCMatch(
                     description: "description",
                     scheduledTime: DateTime.now(),
-                    blue: [],
-                    red: [],
+                    blue: const [],
+                    red: const [],
                     results: null,
-                    robot: {});
+                    robot: const {});
 
                 await editMatch(match, snoutData, null);
               },

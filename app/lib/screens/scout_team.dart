@@ -12,17 +12,18 @@ import 'package:snout_db/patch.dart';
 class PitScoutTeamPage extends StatefulWidget {
   final int team;
   final EventConfig config;
-  final PitScoutResult? oldData;
+  final PitScoutResult? initialData;
 
   const PitScoutTeamPage(
-      {super.key, required this.team, required this.config, this.oldData});
+      {super.key, required this.team, required this.config, this.initialData});
 
   @override
   State<PitScoutTeamPage> createState() => _PitScoutTeamPageState();
 }
 
 class _PitScoutTeamPageState extends State<PitScoutTeamPage> {
-  final PitScoutResult _results = {};
+
+  final PitScoutResult _surveyItems = {};
   final _formKey = GlobalKey<FormState>();
 
   @override
@@ -30,8 +31,8 @@ class _PitScoutTeamPageState extends State<PitScoutTeamPage> {
     super.initState();
 
     //populate existing data to pre-fill.
-    if (widget.oldData != null) {
-      _results.addAll(widget.oldData!);
+    if (widget.initialData != null) {
+      _surveyItems.addAll(widget.initialData!);
     }
   }
 
@@ -53,9 +54,9 @@ class _PitScoutTeamPageState extends State<PitScoutTeamPage> {
                   final snoutData = context.read<DataProvider>();
 
                   //New map instance to avoid messing up the UI
-                  final onlyChanges = Map.of(_results);
+                  final onlyChanges = Map.of(_surveyItems);
                   onlyChanges.removeWhere(
-                      (key, value) => widget.oldData?[key] == value);
+                      (key, value) => widget.initialData?[key] == value);
                   for (final item in onlyChanges.entries) {
                     Patch patch = Patch(
                         identity: context.read<IdentityProvider>().identity,
@@ -83,7 +84,7 @@ class _PitScoutTeamPageState extends State<PitScoutTeamPage> {
                     padding: const EdgeInsets.all(12),
                     child: ScoutingToolWidget(
                       tool: item,
-                      survey: _results,
+                      survey: _surveyItems,
                     )),
             ],
           ),

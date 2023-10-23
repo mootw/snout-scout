@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:meta/meta.dart';
 import 'package:snout_db/config/matcheventconfig.dart';
 import 'package:snout_db/config/matchresults_process.dart';
 import 'package:snout_db/config/surveyitem.dart';
@@ -6,6 +7,7 @@ import 'package:snout_db/config/surveyitem.dart';
 part 'matchscouting.g.dart';
 
 @JsonSerializable()
+@immutable
 class MatchScouting {
   /// Buttons that show to scouts to record specific events
   final List<MatchEventConfig> events;
