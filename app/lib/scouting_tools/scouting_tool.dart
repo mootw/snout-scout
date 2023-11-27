@@ -10,7 +10,6 @@ import 'package:snout_db/event/pitscoutresult.dart';
 import 'package:snout_db/config/surveyitem.dart';
 
 class ScoutingToolWidget extends StatefulWidget {
-
   final SurveyItem tool;
   final PitScoutResult survey;
 
@@ -118,9 +117,9 @@ class _ScoutingToolWidgetState extends State<ScoutingToolWidget> {
                 // label: Text('false'),
                 icon: Icon(Icons.cancel, color: Colors.redAccent)),
             ButtonSegment<bool?>(
-                value: null,
-                // label: Text('unknown'),
-                icon: Icon(Icons.question_mark),
+              value: null,
+              // label: Text('unknown'),
+              icon: Icon(Icons.question_mark),
             ),
             ButtonSegment<bool?>(
                 value: true,
@@ -158,7 +157,7 @@ class _ScoutingToolWidgetState extends State<ScoutingToolWidget> {
         subtitle: _value == null
             ? const Text("No Image")
             : Image.memory(
-          fit: BoxFit.contain,
+                fit: BoxFit.contain,
                 Uint8List.fromList(base64Decode(_value).cast<int>())),
       );
     }

@@ -52,7 +52,8 @@ class _SurveyItemRatioChartState extends State<SurveyItemRatioChart> {
     Map<String, List<String>> valueKeys = {};
 
     for (final team in data.event.pitscouting.keys) {
-      final item = data.event.pitscouting[team]![widget.surveyItem.id]?.toString();
+      final item =
+          data.event.pitscouting[team]![widget.surveyItem.id]?.toString();
       if (item == null) {
         //TODO handle NULL items in their own category??
         //Basically this is just missing data in the chart.

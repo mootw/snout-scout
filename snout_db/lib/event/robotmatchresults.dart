@@ -22,9 +22,11 @@ class RobotMatchResults {
   /// Independent data structure that contains all data
   /// of a single robot in a match.
   /// Initializing this object will also pre-calculate an interpolated timeline
-  RobotMatchResults(
-      {required this.alliance, required this.survey, required this.timeline,})
-      : timelineInterpolated = _interpolateTimeline(timeline);
+  RobotMatchResults({
+    required this.alliance,
+    required this.survey,
+    required this.timeline,
+  }) : timelineInterpolated = _interpolateTimeline(timeline);
 
   factory RobotMatchResults.fromJson(Map<String, dynamic> json) =>
       _$RobotMatchResultsFromJson(json);
@@ -36,7 +38,10 @@ class RobotMatchResults {
       _normalizeRed(timelineInterpolated, fieldStyle);
 
   //internal function to normalize the timeline as red.
-  List<MatchEvent> _normalizeRed(List<MatchEvent> events, FieldStyle fieldStyle) {
+  List<MatchEvent> _normalizeRed(
+    List<MatchEvent> events,
+    FieldStyle fieldStyle,
+  ) {
     if (alliance == Alliance.blue) {
       return List.generate(events.length, (index) {
         final MatchEvent event = events[index];
@@ -44,7 +49,11 @@ class RobotMatchResults {
             ? event.position.rotated
             : event.position.mirrored;
         return MatchEvent(
-            time: event.time, id: event.id, x: position.x, y: position.y,);
+          time: event.time,
+          id: event.id,
+          x: position.x,
+          y: position.y,
+        );
       });
     } else {
       return events;
@@ -79,13 +88,27 @@ List<MatchEvent> _interpolateTimeline(List<MatchEvent> timeline) {
     //Do not double include the zero time so start at x=1.
     for (int x = 1; x < width; x++) {
       final newTime = pos1.time + x;
-      interpolated.add(MatchEvent.robotPositionEvent(
+      interpolated.add(
+        MatchEvent.robotPositionEvent(
           time: newTime,
           position: FieldPosition(
-              lerp(pos1.time.toDouble(), pos1.position.x, pos2.time.toDouble(),
-                  pos2.position.x, newTime.toDouble(),),
-              lerp(pos1.time.toDouble(), pos1.position.y, pos2.time.toDouble(),
-                  pos2.position.y, newTime.toDouble(),),),),);
+            lerp(
+              pos1.time.toDouble(),
+              pos1.position.x,
+              pos2.time.toDouble(),
+              pos2.position.x,
+              newTime.toDouble(),
+            ),
+            lerp(
+              pos1.time.toDouble(),
+              pos1.position.y,
+              pos2.time.toDouble(),
+              pos2.position.y,
+              newTime.toDouble(),
+            ),
+          ),
+        ),
+      );
     }
   }
   interpolated.sort((a, b) => a.time - b.time);

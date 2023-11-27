@@ -11,7 +11,6 @@ import 'package:meta/meta.dart';
 /// the values are rounded to a realistic accuracy
 @immutable
 class FieldPosition {
-
   final double x;
   final double y;
 
@@ -23,14 +22,13 @@ class FieldPosition {
   /// Returns a new position rotated 180 degrees about the origin (center of field).
   /// This can be used to normalize recorded positions to always be as if it was
   /// on one side of the field. Important for analysing things like starting positions.
-  FieldPosition get rotated => FieldPosition(-x, -y); 
+  FieldPosition get rotated => FieldPosition(-x, -y);
 
   /// Returns a new position mirrored across the center of the field dividing the alliances
   /// This can be used to normalize recorded positions to always be as if it was
   /// on one side of the field. Important for analysing things like starting positions.
-  FieldPosition get mirrored => FieldPosition(-x, y); 
+  FieldPosition get mirrored => FieldPosition(-x, y);
 
   @override
-  String toString () => "($x, $y)";
-
+  String toString() => "($x, $y)";
 }

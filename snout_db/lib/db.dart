@@ -5,12 +5,10 @@ import 'package:snout_db/patch.dart';
 
 part 'db.g.dart';
 
-
 @JsonSerializable()
 class SnoutDB {
-  
   /// read-only latest state of the event
-  /// 
+  ///
   /// **this value is exported toJson even though it is generated because of easier data export**
   @JsonKey(includeToJson: true)
   FRCEvent get event => _event;
@@ -35,8 +33,7 @@ class SnoutDB {
       _$SnoutDBFromJson(json);
   Map<String, dynamic> toJson() => _$SnoutDBToJson(this);
 
-  
-  void addPatch (Patch p) {
+  void addPatch(Patch p) {
     patches.add(p);
     _event = p.patch(_event);
   }
@@ -49,10 +46,8 @@ class SnoutDB {
   /// schema, so changes to where patches are applied
   /// will break the link between the edit times, this is OK
   /// and is best effort! This will be the cause of a lot of
-  /// issues, but it is a nice feature to have 
+  /// issues, but it is a nice feature to have
   Patch? getLastPatchFor(String path) {
     return patches.lastWhereOrNull((patch) => path == patch.path);
   }
-
-
 }

@@ -6,7 +6,6 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class PatchHistoryPage extends StatefulWidget {
-
   final String? filter;
 
   const PatchHistoryPage({super.key, this.filter});
@@ -16,13 +15,12 @@ class PatchHistoryPage extends StatefulWidget {
 }
 
 class _PatchHistoryPageState extends State<PatchHistoryPage> {
-
   final TextEditingController _controller = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    if(widget.filter != null) {
+    if (widget.filter != null) {
       _controller.text = widget.filter!;
     }
   }
@@ -31,25 +29,25 @@ class _PatchHistoryPageState extends State<PatchHistoryPage> {
   Widget build(BuildContext context) {
     final patches =
         context.watch<DataProvider>().database.patches.reversed.toList();
-    
+
     final search = _controller.text;
 
     final filteredPatches = patches.where((patch) {
-      if(search == "") {
+      if (search == "") {
         //empty search means all results
         //and im too lazy to create a separate code path
         return true;
       }
-      if(patch.identity.contains(search)) {
+      if (patch.identity.contains(search)) {
         return true;
       }
-      if(patch.path.contains(search)) {
+      if (patch.path.contains(search)) {
         return true;
       }
 
       return false;
     }).toList();
-    
+
     return Scaffold(
       appBar: AppBar(
         title: TextField(
@@ -68,7 +66,8 @@ class _PatchHistoryPageState extends State<PatchHistoryPage> {
           itemBuilder: (context, index) {
             final patch = filteredPatches[index];
             return ListTile(
-              title: Text('${filteredPatches.length - index}: ${patch.identity}'),
+              title:
+                  Text('${filteredPatches.length - index}: ${patch.identity}'),
               onTap: () => showDialog(
                   context: context,
                   builder: (_) => AlertDialog(

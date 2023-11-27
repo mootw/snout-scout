@@ -3,7 +3,6 @@ import 'dart:async';
 LoadingIndicatorService loadingService = LoadingIndicatorService();
 
 class LoadingIndicatorService {
-  
   final StreamController<int> _isLoadingStream = StreamController<int>();
   late Stream<int> loadingCount;
 

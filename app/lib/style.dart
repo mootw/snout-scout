@@ -9,8 +9,8 @@ import 'dart:math';
 const double minimumWidth = 355;
 
 // https://m3.material.io/foundations/layout/applying-layout/medium
-bool isLargeDevice(BuildContext context) => MediaQuery.of(context).size.width > 600;
-
+bool isLargeDevice(BuildContext context) =>
+    MediaQuery.of(context).size.width > 600;
 
 //Theme data
 const primaryColor = Color.fromARGB(255, 49, 219, 43);
@@ -87,9 +87,8 @@ Future<XFile?> pickOrTakeImageDialog(BuildContext context) async {
                     leading: Icon(Icons.image),
                     title: Text("Gallery"),
                   )),
-                  SimpleDialogOption(
-                  onPressed: () =>
-                      Navigator.of(dialogContext).pop(null),
+              SimpleDialogOption(
+                  onPressed: () => Navigator.of(dialogContext).pop(null),
                   child: const ListTile(
                     leading: Icon(Icons.close),
                     title: Text("Cancel"),

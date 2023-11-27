@@ -14,11 +14,12 @@ class MatchResultsProcess {
   final String label;
   final String expression;
 
-  const MatchResultsProcess(
-      {required this.id,
-      required this.label,
-      required this.expression,
-      this.docs = '',});
+  const MatchResultsProcess({
+    required this.id,
+    required this.label,
+    required this.expression,
+    this.docs = '',
+  });
 
   factory MatchResultsProcess.fromJson(Map<String, dynamic> json) =>
       _$MatchResultsProcessFromJson(json);

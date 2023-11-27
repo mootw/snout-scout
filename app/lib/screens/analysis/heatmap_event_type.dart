@@ -21,7 +21,13 @@ class _AnalysisHeatMapByEventTypeState
   void initState() {
     super.initState();
     //select the first event type if it is exists
-    _selectedEvent = context.read<DataProvider>().event.config.matchscouting.events.firstOrNull;
+    _selectedEvent = context
+        .read<DataProvider>()
+        .event
+        .config
+        .matchscouting
+        .events
+        .firstOrNull;
   }
 
   @override
@@ -73,8 +79,8 @@ class _AnalysisHeatMapByEventTypeState
                                       (previousValue, element) => [
                                             ...previousValue,
                                             ...element
-                                                .timelineRedNormalized(
-                                                    data.event.config.fieldStyle)
+                                                .timelineRedNormalized(data
+                                                    .event.config.fieldStyle)
                                                 .where((event) =>
                                                     event.id ==
                                                     _selectedEvent!.id)

@@ -22,7 +22,6 @@ class PitScoutTeamPage extends StatefulWidget {
 }
 
 class _PitScoutTeamPageState extends State<PitScoutTeamPage> {
-
   final PitScoutResult _surveyItems = {};
   final _formKey = GlobalKey<FormState>();
 

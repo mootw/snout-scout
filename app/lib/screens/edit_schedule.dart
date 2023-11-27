@@ -121,7 +121,8 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
                           ],
                         ));
                 if (result == true) {
-                  final matchesWithRemoved = Map<String, dynamic>.from(snoutData.event.matches);
+                  final matchesWithRemoved =
+                      Map<String, dynamic>.from(snoutData.event.matches);
                   matchesWithRemoved.remove(match.key);
 
                   //TODO this might not be deeply modified to raw types before being applied to the patch

@@ -126,15 +126,16 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Row(children: [
         if (largeDevice)
           NavigationRail(
-            backgroundColor: Theme.of(context).bottomNavigationBarTheme.backgroundColor,
-            labelType: NavigationRailLabelType.all,
-            onDestinationSelected: (int index) {
+              backgroundColor:
+                  Theme.of(context).bottomNavigationBarTheme.backgroundColor,
+              labelType: NavigationRailLabelType.all,
+              onDestinationSelected: (int index) {
                 setState(() {
                   _currentPageIndex = index;
                 });
               },
-            destinations: const [
-              NavigationRailDestination(
+              destinations: const [
+                NavigationRailDestination(
                   selectedIcon: Icon(Icons.calendar_today),
                   icon: Icon(Icons.calendar_today_outlined),
                   label: Text('Schedule'),
@@ -154,25 +155,26 @@ class _MyHomePageState extends State<MyHomePage> {
                   icon: Icon(Icons.book_outlined),
                   label: Text('Docs'),
                 ),
-            ], selectedIndex: _currentPageIndex),
-          Expanded(
-            child: [
-              AllMatchesPage(
-                // 10/10 hack to make the widget re-scroll to the correct spot on load
-                // this will force it to scroll whenever the matches length changes
-                // we could add another value here to make it scroll on other changes too
-                key: Key(data.event.matches.length.toString()),
-                scrollPosition: nextMatch == null
-                    ? null
-                    : (data.event.matches.values.toList().indexOf(nextMatch) *
-                            matchCardHeight) -
-                        (matchCardHeight * 2),
-              ),
-              const TeamGridList(showEditButton: true),
-              const AnalysisPage(),
-              const DocumentationScreen(),
-            ][_currentPageIndex],
-          ),
+              ],
+              selectedIndex: _currentPageIndex),
+        Expanded(
+          child: [
+            AllMatchesPage(
+              // 10/10 hack to make the widget re-scroll to the correct spot on load
+              // this will force it to scroll whenever the matches length changes
+              // we could add another value here to make it scroll on other changes too
+              key: Key(data.event.matches.length.toString()),
+              scrollPosition: nextMatch == null
+                  ? null
+                  : (data.event.matches.values.toList().indexOf(nextMatch) *
+                          matchCardHeight) -
+                      (matchCardHeight * 2),
+            ),
+            const TeamGridList(showEditButton: true),
+            const AnalysisPage(),
+            const DocumentationScreen(),
+          ][_currentPageIndex],
+        ),
       ]),
       drawer: Drawer(
         child: ListView(children: [

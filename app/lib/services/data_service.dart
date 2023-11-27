@@ -1,10 +1,7 @@
-
-
-
 import 'package:flutter/foundation.dart';
 import 'package:fs_shim/fs_shim.dart';
 
-Future storeText (String key, String value) async {
+Future storeText(String key, String value) async {
   final fs = kIsWeb ? fileSystemWeb : fileSystemDefault;
 
   // Create a top level directory
@@ -17,7 +14,7 @@ Future storeText (String key, String value) async {
   await file.writeAsString(value);
 }
 
-Future deleteText (String key) async {
+Future deleteText(String key) async {
   final fs = kIsWeb ? fileSystemWeb : fileSystemDefault;
 
   // Create a top level directory
@@ -30,7 +27,7 @@ Future deleteText (String key) async {
   await file.delete();
 }
 
-Future<String?> readText (String key) async {
+Future<String?> readText(String key) async {
   final fs = kIsWeb ? fileSystemWeb : fileSystemDefault;
 
   // Create a top level directory
@@ -39,7 +36,7 @@ Future<String?> readText (String key) async {
   // and a file in it
   final file = fs.file('${dir.path}/$key');
 
-  if(await file.exists()) {
+  if (await file.exists()) {
     return await file.readAsString();
   } else {
     return null;

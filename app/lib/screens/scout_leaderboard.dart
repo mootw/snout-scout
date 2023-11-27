@@ -14,13 +14,13 @@ class ScoutLeaderboardPage extends StatelessWidget {
 
     Map<String, int> scores = SplayTreeMap<String, int>();
 
-    for(final patch in data) {
-      if(scores[patch.identity] == null) {
+    for (final patch in data) {
+      if (scores[patch.identity] == null) {
         scores[patch.identity] = 0;
       }
 
       int addValue = 1;
-      if(patch.path.startsWith("/matches")) {
+      if (patch.path.startsWith("/matches")) {
         //MATCH SCOUTS ARE WORTH DOUBLE POINTS!
         addValue = 2;
       }
@@ -28,7 +28,8 @@ class ScoutLeaderboardPage extends StatelessWidget {
       scores[patch.identity] = scores[patch.identity]! + addValue;
     }
 
-    var sortedByKeyMap = SplayTreeMap<String, int>.from(scores, (k1, k2) => scores[k2]!.compareTo(scores[k1]!));
+    var sortedByKeyMap = SplayTreeMap<String, int>.from(
+        scores, (k1, k2) => scores[k2]!.compareTo(scores[k1]!));
 
     return Scaffold(
       appBar: AppBar(
@@ -36,7 +37,7 @@ class ScoutLeaderboardPage extends StatelessWidget {
       ),
       body: ListView(
         children: [
-          for(final item in sortedByKeyMap.entries)
+          for (final item in sortedByKeyMap.entries)
             ListTile(
               title: Text(item.key),
               subtitle: Text("${item.value}"),

@@ -161,22 +161,25 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                             width: 250,
                             height: 250,
                             child: context
-                                      .read<DataProvider>()
-                                      .event
-                                      .pitscouting[team.toString()]
-                                  ?[robotPictureReserved] !=
-                              null ? AspectRatio(
-                              aspectRatio: 1,
-                              child: Image.memory(
-                                fit: BoxFit.cover,
-                                Uint8List.fromList(base64Decode(context
                                             .read<DataProvider>()
                                             .event
-                                            .pitscouting[team.toString()]![
-                                        robotPictureReserved]!)
-                                    .cast<int>()),
-                              ),
-                            ) : const Text("No image"),
+                                            .pitscouting[team.toString()]
+                                        ?[robotPictureReserved] !=
+                                    null
+                                ? AspectRatio(
+                                    aspectRatio: 1,
+                                    child: Image.memory(
+                                      fit: BoxFit.cover,
+                                      Uint8List.fromList(base64Decode(context
+                                                      .read<DataProvider>()
+                                                      .event
+                                                      .pitscouting[
+                                                  team.toString()]![
+                                              robotPictureReserved]!)
+                                          .cast<int>()),
+                                    ),
+                                  )
+                                : const Text("No image"),
                           ),
                           TextButton(
                               onPressed: () => Navigator.push(
@@ -196,9 +199,8 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                           Column(
                             children: [
                               Text("Autos",
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleMedium),
+                                  style:
+                                      Theme.of(context).textTheme.titleMedium),
                               FieldPaths(
                                 size: 300,
                                 paths: [
@@ -218,21 +220,20 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                             Column(children: [
                               const SizedBox(height: 8),
                               Text(eventType.label,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleMedium),
+                                  style:
+                                      Theme.of(context).textTheme.titleMedium),
                               FieldHeatMap(
-                                  events: data.event
-                                      .teamRecordedMatches(team)
-                                      .fold(
+                                  events:
+                                      data.event.teamRecordedMatches(team).fold(
                                           [],
                                           (previousValue, element) => [
                                                 ...previousValue,
                                                 ...?element.value
                                                     .robot[team.toString()]
-                                                    ?.timelineRedNormalized(
-                                                        data.event.config
-                                                            .fieldStyle)
+                                                    ?.timelineRedNormalized(data
+                                                        .event
+                                                        .config
+                                                        .fieldStyle)
                                                     .where((event) =>
                                                         event.id ==
                                                         eventType.id)
@@ -242,13 +243,11 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                             children: [
                               const SizedBox(height: 8),
                               Text("Driving Tendencies",
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleMedium),
+                                  style:
+                                      Theme.of(context).textTheme.titleMedium),
                               FieldHeatMap(
-                                  events: data.event
-                                      .teamRecordedMatches(team)
-                                      .fold(
+                                  events:
+                                      data.event.teamRecordedMatches(team).fold(
                                           [],
                                           (previousValue, element) => [
                                                 ...previousValue,
@@ -257,8 +256,8 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                                                     ?.timelineInterpolatedRedNormalized(
                                                         data.event.config
                                                             .fieldStyle)
-                                                    .where((event) => event
-                                                        .isPositionEvent)
+                                                    .where((event) =>
+                                                        event.isPositionEvent)
                                               ])),
                             ],
                           ),

@@ -369,7 +369,8 @@ class FRCEvent {
           if (process.id == processID) {
             throw Exception("cannot recursively call a process");
           }
-          final MatchResultsProcess? otherProcess = config.matchscouting.processes
+          final MatchResultsProcess? otherProcess = config
+              .matchscouting.processes
               .firstWhereOrNull((element) => element.id == processID);
           if (otherProcess == null) {
             throw Exception("process $processID does not exist");

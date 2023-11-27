@@ -63,7 +63,6 @@ class _TeamViewPageState extends State<TeamViewPage> {
                                     initialData: data.event.pitscouting[
                                         widget.teamNumber.toString()])),
                           ));
-                  
                 },
                 child: const Text("Scout"))
           ],
@@ -74,9 +73,9 @@ class _TeamViewPageState extends State<TeamViewPage> {
           children: [
             Center(
               child: Text(
-                    teamName ?? teamNameReserved,
-                    style: Theme.of(context).textTheme.headlineLarge,
-                  ),
+                teamName ?? teamNameReserved,
+                style: Theme.of(context).textTheme.headlineLarge,
+              ),
             ),
             if (teamNextMatch != null && scheduleDelay != null)
               Row(
@@ -107,7 +106,6 @@ class _TeamViewPageState extends State<TeamViewPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                
                 const Flexible(
                   child: Padding(
                       padding: EdgeInsets.all(16),
@@ -303,14 +301,12 @@ class _TeamViewPageState extends State<TeamViewPage> {
                                 [],
                                 (previousValue, element) => [
                                       ...previousValue,
-                                      ...?element
-                                          .value
-                                          .robot[
-                                              widget.teamNumber.toString()]
+                                      ...?element.value
+                                          .robot[widget.teamNumber.toString()]
                                           ?.timelineInterpolatedRedNormalized(
                                               data.event.config.fieldStyle)
-                                          .where((event) =>
-                                              event.isPositionEvent)
+                                          .where(
+                                              (event) => event.isPositionEvent)
                                     ])),
                   ],
                 ),

@@ -16,13 +16,11 @@ class AnalysisPage extends StatefulWidget {
 }
 
 class _AnalysisPageState extends State<AnalysisPage> {
-
   @override
   Widget build(BuildContext context) {
     return ListView(children: [
       const Text(
           "Scoreboard (shows average value of all metrics for each team, like heatmaps) - Metrics Explorer - Maybe allow for more 'sql' like queries here?? - Scatter plot!!! AND PLOT FOR METRIC OVER TIME"),
-      
       ListTile(
         title: const Text("Team Averages"),
         leading: const Icon(Icons.table_chart),
@@ -33,7 +31,6 @@ class _AnalysisPageState extends State<AnalysisPage> {
                   builder: (builder) => const TableTeamAveragesPage()));
         },
       ),
-
       ListTile(
         title: const Text("Match Recordings"),
         leading: const Icon(Icons.table_chart),
@@ -44,18 +41,14 @@ class _AnalysisPageState extends State<AnalysisPage> {
                   builder: (builder) => const TableMatchRecordingsPage()));
         },
       ),
-
       ListTile(
         title: const Text("Consistency Analysis"),
         leading: const Icon(Icons.candlestick_chart_outlined),
         onTap: () {
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (builder) => const BoxPlotAnalysis()));
+          Navigator.push(context,
+              MaterialPageRoute(builder: (builder) => const BoxPlotAnalysis()));
         },
       ),
-
       ListTile(
         title: const Text("Match Preview"),
         leading: const Icon(Icons.preview),
@@ -63,10 +56,10 @@ class _AnalysisPageState extends State<AnalysisPage> {
           Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (builder) => const AnalysisMatchPreview(red: [], blue: [])));
+                  builder: (builder) =>
+                      const AnalysisMatchPreview(red: [], blue: [])));
         },
       ),
-
       ListTile(
         title: const Text("Heatmap by Event Type"),
         leading: const Icon(Icons.map),
@@ -77,7 +70,6 @@ class _AnalysisPageState extends State<AnalysisPage> {
                   builder: (builder) => const AnalysisHeatMapByEventType()));
         },
       ),
-      
       ListTile(
         title: const Text("Event Heatmap Analysis"),
         leading: const Icon(Icons.map),

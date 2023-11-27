@@ -34,7 +34,6 @@ class MatchRecorderPage extends StatefulWidget {
 enum MatchMode { setup, playing, finished }
 
 class _MatchRecorderPageState extends State<MatchRecorderPage> {
-
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   MatchMode _mode = MatchMode.setup;
   List<MatchEvent> _events = [];
@@ -116,7 +115,10 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                                             .config) !=
                                         null
                                     ? colorFromHex(item.getColorFromConfig(
-                                        context.watch<DataProvider>().event.config)!)
+                                        context
+                                            .watch<DataProvider>()
+                                            .event
+                                            .config)!)
                                     : null))),
 
               // Text(
@@ -165,8 +167,12 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
             child: ListView(
               shrinkWrap: true,
               children: [
-                for (final item
-                    in context.watch<DataProvider>().event.config.matchscouting.survey)
+                for (final item in context
+                    .watch<DataProvider>()
+                    .event
+                    .config
+                    .matchscouting
+                    .survey)
                   Container(
                       padding: const EdgeInsets.all(12),
                       child: ScoutingToolWidget(

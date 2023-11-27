@@ -1,6 +1,3 @@
-
-
-
 import 'package:app/widgets/datasheet.dart';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/screens/view_team_page.dart';
@@ -18,35 +15,35 @@ class TableTeamAveragesPage extends StatelessWidget {
       appBar: AppBar(),
       body: SingleChildScrollView(
         child: DataSheet(title: 'Team Averages', columns: [
-              DataItem.fromText("Team"),
+          DataItem.fromText("Team"),
+          for (final item in data.event.config.matchscouting.processes)
+            DataItem.fromText(item.label),
+          for (final pitSurvey in data.event.config.pitscouting
+              .where((element) => element.type != SurveyItemType.picture))
+            DataItem.fromText(pitSurvey.label),
+        ], rows: [
+          for (final team in data.event.teams)
+            [
+              DataItem(
+                  displayValue: TextButton(
+                      child: Text(team.toString()),
+                      onPressed: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    TeamViewPage(teamNumber: team)),
+                          )),
+                  exportValue: team.toString(),
+                  sortingValue: team),
               for (final item in data.event.config.matchscouting.processes)
-                DataItem.fromText(item.label),
+                DataItem.fromNumber(data.event.teamAverageProcess(team, item)),
               for (final pitSurvey in data.event.config.pitscouting
                   .where((element) => element.type != SurveyItemType.picture))
-                DataItem.fromText(pitSurvey.label),
-            ], rows: [
-              for (final team in data.event.teams)
-                [
-                  DataItem(
-                      displayValue: TextButton(
-                          child: Text(team.toString()),
-                          onPressed: () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        TeamViewPage(teamNumber: team)),
-                              )),
-                      exportValue: team.toString(),
-                      sortingValue: team),
-                  for (final item in data.event.config.matchscouting.processes)
-                    DataItem.fromNumber(data.event.teamAverageProcess(team, item)),
-                  for (final pitSurvey in data.event.config.pitscouting
-                      .where((element) => element.type != SurveyItemType.picture))
-                    DataItem.fromText(data
-                        .event.pitscouting[team.toString()]?[pitSurvey.id]
-                        ?.toString())
-                ]
-            ]),
+                DataItem.fromText(data
+                    .event.pitscouting[team.toString()]?[pitSurvey.id]
+                    ?.toString())
+            ]
+        ]),
       ),
     );
   }

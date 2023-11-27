@@ -8,10 +8,11 @@ import 'package:provider/provider.dart';
 
 //Route should return when editing is complete. This is the signal to clear the edit lock.
 //This function will not throw an exception and always fail safe by navigating to the other page.
-Future<T?> navigateWithEditLock<T>(
-    BuildContext context, String key, Function(BuildContext context) navigteFunction) async {
-    final editLockUri = context.read<DataProvider>().serverURI.resolve("/edit_lock");
-    
+Future<T?> navigateWithEditLock<T>(BuildContext context, String key,
+    Function(BuildContext context) navigteFunction) async {
+  final editLockUri =
+      context.read<DataProvider>().serverURI.resolve("/edit_lock");
+
   //Check if this key is being edited
   try {
     final isLocked = await apiClient.get(editLockUri,
@@ -56,7 +57,7 @@ Future<T?> navigateWithEditLock<T>(
       }
       //Navigate
       T? result;
-      if(context.mounted) {
+      if (context.mounted) {
         result = await navigteFunction(context);
       }
       //Clear lock
@@ -70,9 +71,9 @@ Future<T?> navigateWithEditLock<T>(
       return result;
     }
   } catch (e) {
-        Logger.root.warning("edit lock error", e);
+    Logger.root.warning("edit lock error", e);
     //Fail save and navigate anyways
-    if(context.mounted) {
+    if (context.mounted) {
       return await navigteFunction(context);
     }
   }

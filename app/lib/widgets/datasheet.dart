@@ -21,17 +21,18 @@ class DataItem {
 
   DataItem.fromErrorNumber(({double? value, String? error}) number)
       : displayValue = number.error != null
-            ? Text(number.error!,
-                style: const TextStyle(color: warningColor))
+            ? Text(number.error!, style: const TextStyle(color: warningColor))
             : (Text(number.value == null || number.value!.isNaN
                 ? noDataText
                 : numDisplay(number.value))),
-                //TODO If the error is not passed into the export value the table will not
-                //know if the value is long enough to wrap. This is problematic and is
-                //a sign of poorly written code.
-        exportValue = number.error != null ? number.error! : (number.value == null || number.value!.isNaN
-            ? noDataText
-            : number.value.toString()),
+        //TODO If the error is not passed into the export value the table will not
+        //know if the value is long enough to wrap. This is problematic and is
+        //a sign of poorly written code.
+        exportValue = number.error != null
+            ? number.error!
+            : (number.value == null || number.value!.isNaN
+                ? noDataText
+                : number.value.toString()),
         //negative infinity will sort no data to the bottom by default
         sortingValue = number.value == null || number.value!.isNaN
             ? double.negativeInfinity

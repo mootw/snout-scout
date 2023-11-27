@@ -133,8 +133,7 @@ class _FieldTimelineViewerState extends State<FieldTimelineViewer> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        FieldMap(
-          children: [
+        FieldMap(children: [
           for (final robot in widget.match.robot.entries)
             RobotMapEventView(
                 time: _animationTime,
@@ -252,7 +251,8 @@ class FieldHeatMap extends StatelessWidget {
   final List<MatchEvent> events;
   final double size;
 
-  const FieldHeatMap({super.key, required this.events, this.size = smallFieldSize});
+  const FieldHeatMap(
+      {super.key, required this.events, this.size = smallFieldSize});
 
   @override
   Widget build(BuildContext context) {
@@ -286,9 +286,7 @@ class FieldPaths extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FieldMap(
-      size: size,
-      children: [
+    return FieldMap(size: size, children: [
       Container(color: Colors.black26),
       for (final match in paths) ...[
         CustomPaint(
@@ -449,8 +447,7 @@ class FieldMap extends StatelessWidget {
   final double? size;
 
   //Displays a field map with overlays.
-  const FieldMap(
-      {super.key, required this.children, this.size});
+  const FieldMap({super.key, required this.children, this.size});
 
   @override
   Widget build(BuildContext context) {

@@ -4,7 +4,8 @@ import 'package:app/screens/failed_patches.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class LoadOrErrorStatusBar extends StatelessWidget implements PreferredSizeWidget {
+class LoadOrErrorStatusBar extends StatelessWidget
+    implements PreferredSizeWidget {
   const LoadOrErrorStatusBar({super.key});
 
   @override
@@ -30,12 +31,11 @@ class LoadOrErrorStatusBar extends StatelessWidget implements PreferredSizeWidge
 
     if (data.dataSource == DataSource.remoteServer && data.connected == false) {
       return Container(
-            alignment: Alignment.center,
-            width: double.infinity,
-            height: 20,
-            color: Theme.of(context).colorScheme.errorContainer,
-            child: const Text("No Connection")
-      );
+          alignment: Alignment.center,
+          width: double.infinity,
+          height: 20,
+          color: Theme.of(context).colorScheme.errorContainer,
+          child: const Text("No Connection"));
     }
 
     return StreamBuilder<int>(
@@ -58,5 +58,4 @@ class LoadOrErrorStatusBar extends StatelessWidget implements PreferredSizeWidge
   //so the larger widgets will just smoosh into the appbar :shrug:
   @override
   Size get preferredSize => const Size(double.infinity, 4);
-  
 }

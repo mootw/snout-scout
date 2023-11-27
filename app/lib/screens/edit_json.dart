@@ -21,7 +21,8 @@ class _JSONEditorState extends State<JSONEditor> {
   @override
   void initState() {
     super.initState();
-    _controller.text = const JsonEncoder.withIndent("    ").convert(widget.source);
+    _controller.text =
+        const JsonEncoder.withIndent("    ").convert(widget.source);
   }
 
   @override

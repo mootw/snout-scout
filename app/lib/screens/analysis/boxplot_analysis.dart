@@ -16,14 +16,19 @@ class BoxPlotAnalysis extends StatefulWidget {
 }
 
 class _BoxPlotAnalysisState extends State<BoxPlotAnalysis> {
-
   MatchResultsProcess? _selectedProcess;
 
   @override
   void initState() {
     super.initState();
     //Automatically select the first process by default if it exists (it might be null!)
-    _selectedProcess = context.read<DataProvider>().event.config.matchscouting.processes.firstOrNull;
+    _selectedProcess = context
+        .read<DataProvider>()
+        .event
+        .config
+        .matchscouting
+        .processes
+        .firstOrNull;
   }
 
   @override
@@ -36,8 +41,10 @@ class _BoxPlotAnalysisState extends State<BoxPlotAnalysis> {
         for (final team in data.event.teams)
           MapEntry(team, [
             for (final match in data.event.teamRecordedMatches(team))
-              data.event.runMatchResultsProcess(_selectedProcess!,
-                      match.value.robot[team.toString()], team)?.value ??
+              data.event
+                      .runMatchResultsProcess(_selectedProcess!,
+                          match.value.robot[team.toString()], team)
+                      ?.value ??
                   0
           ])
       ]);
@@ -67,7 +74,6 @@ class _BoxPlotAnalysisState extends State<BoxPlotAnalysis> {
                     ? previousValue
                     : element.max) ??
         0;
-
 
     //Sort them by the average
     SplayTreeMap<int, List<num>>? valuesSorted;

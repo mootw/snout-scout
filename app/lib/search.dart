@@ -72,8 +72,7 @@ class SnoutScoutSearch extends SearchDelegate {
           onTap: () {
             Navigator.push(
               context,
-              MaterialPageRoute(
-                  builder: (_) => TeamViewPage(teamNumber: team)),
+              MaterialPageRoute(builder: (_) => TeamViewPage(teamNumber: team)),
             );
           },
         ));
@@ -111,10 +110,9 @@ class SnoutScoutSearch extends SearchDelegate {
       }
 
       for (final item in pitScouting.entries) {
-        
         final surveyItem = db.event.config.pitscouting
             .firstWhereOrNull((element) => element.id == item.key);
-        if(surveyItem == null) {
+        if (surveyItem == null) {
           continue;
         }
         if (surveyItem.type == SurveyItemType.picture) {
@@ -137,8 +135,7 @@ class SnoutScoutSearch extends SearchDelegate {
           results.add(ListTile(
             leading: robotPicture,
             title: Text('${item.value}'),
-            subtitle:
-                Text("${team.toString()} scouting - ${surveyItem.label}"),
+            subtitle: Text("${team.toString()} scouting - ${surveyItem.label}"),
             onTap: () {
               Navigator.push(
                 context,
@@ -158,10 +155,14 @@ class SnoutScoutSearch extends SearchDelegate {
       }
       for (final robot in match.robot.entries) {
         for (final value in robot.value.survey.entries) {
-          if (value.value.toString().toLowerCase().contains(query.toLowerCase())) {
+          if (value.value
+              .toString()
+              .toLowerCase()
+              .contains(query.toLowerCase())) {
             results.add(ListTile(
               title: Text(value.value.toString()),
-              subtitle: Text("${match.description} - ${robot.key} - ${value.key}"),
+              subtitle:
+                  Text("${match.description} - ${robot.key} - ${value.key}"),
               onTap: () {
                 Navigator.push(
                   context,

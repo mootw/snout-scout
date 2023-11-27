@@ -64,32 +64,32 @@ class _DocumentationScreenState extends State<DocumentationScreen> {
         if (pitMap == null)
           const ListTile(title: Text("No pit map has been added yet :(")),
         ListTile(
-            title: const Text("Set Pit Map Image"),
-            trailing: const Icon(Icons.camera_alt),
-            onTap: () async {
-              final identity = context.read<IdentityProvider>().identity;
-              final dataProvider = context.read<DataProvider>();
+          title: const Text("Set Pit Map Image"),
+          trailing: const Icon(Icons.camera_alt),
+          onTap: () async {
+            final identity = context.read<IdentityProvider>().identity;
+            final dataProvider = context.read<DataProvider>();
 
-              String result;
-              //TAKE PHOTO
-              try {
-                final photo = await pickOrTakeImageDialog(context);
-                if (photo != null) {
-                  Uint8List bytes = await photo.readAsBytes();
-                  result = base64Encode(bytes);
-                  Patch patch = Patch(
-                      identity: identity,
-                      time: DateTime.now(),
-                      path: Patch.buildPath(['pitmap']),
-                      value: result);
-                  //Save the scouting results to the server!!
-                  await dataProvider.submitPatch(patch);
-                }
-              } catch (e, s) {
-                Logger.root.severe("Error taking image from device", e, s);
+            String result;
+            //TAKE PHOTO
+            try {
+              final photo = await pickOrTakeImageDialog(context);
+              if (photo != null) {
+                Uint8List bytes = await photo.readAsBytes();
+                result = base64Encode(bytes);
+                Patch patch = Patch(
+                    identity: identity,
+                    time: DateTime.now(),
+                    path: Patch.buildPath(['pitmap']),
+                    value: result);
+                //Save the scouting results to the server!!
+                await dataProvider.submitPatch(patch);
               }
-            },
-          ),
+            } catch (e, s) {
+              Logger.root.severe("Error taking image from device", e, s);
+            }
+          },
+        ),
         const Divider(),
         Padding(
           padding: const EdgeInsets.only(left: 16, right: 16),

@@ -10,7 +10,6 @@ import 'package:provider/provider.dart';
 import 'package:snout_db/event/match.dart';
 
 class AllMatchesPage extends StatefulWidget {
-
   final double? scrollPosition;
 
   const AllMatchesPage({super.key, this.scrollPosition});
@@ -25,15 +24,16 @@ class _AllMatchesPageState extends State<AllMatchesPage> {
   @override
   void initState() {
     super.initState();
-    _controller = ScrollController(initialScrollOffset: widget.scrollPosition ?? 0);
+    _controller =
+        ScrollController(initialScrollOffset: widget.scrollPosition ?? 0);
   }
 
   @override
   Widget build(BuildContext context) {
     final snoutData = context.watch<DataProvider>();
 
-      FRCMatch? teamNextMatch =
-          snoutData.event.nextMatchForTeam(snoutData.event.config.team);
+    FRCMatch? teamNextMatch =
+        snoutData.event.nextMatchForTeam(snoutData.event.config.team);
     Duration? scheduleDelay = snoutData.event.scheduleDelay;
     return Column(
       children: [

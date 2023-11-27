@@ -66,7 +66,8 @@ class _FailedPatchStorageState extends State<FailedPatchStorage> {
               title: Text(DateFormat.yMMMMEEEEd()
                   .add_Hms()
                   .format(Patch.fromJson(json.decode(patch)).time)),
-              subtitle: Text(Patch.fromJson(json.decode(patch)).path.toString()),
+              subtitle:
+                  Text(Patch.fromJson(json.decode(patch)).path.toString()),
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [

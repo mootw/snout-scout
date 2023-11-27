@@ -65,20 +65,17 @@ class TableMatchRecordingsPage extends StatelessWidget {
                             match.value.robot[robot.key],
                             int.tryParse(robot.key) ?? 0) ??
                         (value: null, error: "Missing Results")),
-                  for (final item in data.event.config.matchscouting.survey.where(
-                      (element) => element.type != SurveyItemType.picture))
-                  DataItem.fromText(match
+                  for (final item in data.event.config.matchscouting.survey
+                      .where(
+                          (element) => element.type != SurveyItemType.picture))
+                    DataItem.fromText(match
                         .value.robot[robot.key]?.survey[item.id]
                         ?.toString()),
-                        DataItem.fromText(getAuditString(context
-                        .watch<DataProvider>()
-                        .database
-                        .getLastPatchFor(Patch.buildPath([
-                      'matches',
-                      match.key,
-                      'robot',
-                      robot.key
-                    ])))),
+                  DataItem.fromText(getAuditString(context
+                      .watch<DataProvider>()
+                      .database
+                      .getLastPatchFor(Patch.buildPath(
+                          ['matches', match.key, 'robot', robot.key])))),
                 ],
           ],
         ),

@@ -32,11 +32,12 @@ class Patch {
 
   /// this loosely follows RFC 6902
   /// TODO add op function
-  const Patch(
-      {required this.identity,
-      required this.time,
-      required this.path,
-      required this.value,});
+  const Patch({
+    required this.identity,
+    required this.time,
+    required this.path,
+    required this.value,
+  });
 
   factory Patch.fromJson(Map json) => _$PatchFromJson(json);
   Map toJson() => _$PatchToJson(this);

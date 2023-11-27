@@ -178,8 +178,7 @@ class _MatchPageState extends State<MatchPage> {
               Column(
                 children: [
                   const SizedBox(height: 16),
-                  Text("Autos",
-                      style: Theme.of(context).textTheme.titleMedium),
+                  Text("Autos", style: Theme.of(context).textTheme.titleMedium),
                   FieldPaths(
                     paths: [
                       for (final robot in match.robot.values)
@@ -201,8 +200,8 @@ class _MatchPageState extends State<MatchPage> {
                           [],
                           (previousValue, element) => [
                                 ...previousValue,
-                                ...element.timeline.where(
-                                    (event) => event.id == eventType.id)
+                                ...element.timeline
+                                    .where((event) => event.id == eventType.id)
                               ])),
                 ]),
               Column(
