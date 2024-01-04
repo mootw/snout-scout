@@ -9,7 +9,7 @@ part of 'eventconfig.dart';
 EventConfig _$EventConfigFromJson(Map json) => EventConfig(
       name: json['name'] as String,
       team: json['team'] as int,
-      season: json['season'] as int,
+      fieldImage: json['fieldImage'] as String,
       tbaEventId: json['tbaEventId'] as String?,
       tbaSecretKey: json['tbaSecretKey'] as String?,
       fieldStyle:
@@ -30,7 +30,6 @@ EventConfig _$EventConfigFromJson(Map json) => EventConfig(
 Map<String, dynamic> _$EventConfigToJson(EventConfig instance) =>
     <String, dynamic>{
       'name': instance.name,
-      'season': instance.season,
       'tbaEventId': instance.tbaEventId,
       'tbaSecretKey': instance.tbaSecretKey,
       'fieldStyle': _$FieldStyleEnumMap[instance.fieldStyle]!,
@@ -38,6 +37,7 @@ Map<String, dynamic> _$EventConfigToJson(EventConfig instance) =>
       'pitscouting': instance.pitscouting.map((e) => e.toJson()).toList(),
       'matchscouting': instance.matchscouting.toJson(),
       'docs': instance.docs,
+      'fieldImage': instance.fieldImage,
     };
 
 const _$FieldStyleEnumMap = {

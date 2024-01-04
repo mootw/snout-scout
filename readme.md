@@ -8,9 +8,9 @@
 # About
 ## Design Goals:
 - make scouting have real time impact for match planning with automated digests.
-- game agnostic; the app is fully configurable using a json file. The only code that needs to change year over year is adding the latest field image
+- game agnostic; the app is fully configurable using a json file.
 - device agnostic; PWA first with native apps for all platforms via Flutter
-- all data processing is done on client for offline support
+- all data processing is done on client for FULL offline support
 - export data into multiple formats like csv and json
 - data is stored heavily normalized with minimal duplication or referencing
 - responsive in low bandwidth scenarios and provide reliable low latency sync to origin

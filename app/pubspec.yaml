@@ -42,7 +42,7 @@ dependencies:
   http: ^1.1.2
 
   file_selector: ^1.0.1
-  image_picker: ^1.0.4
+  image_picker: ^1.0.5
 
   web_socket_channel: ^2.3.0
   simple_cluster: ^0.3.0
@@ -87,8 +87,8 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  assets:
-    - assets/field_map/
+  # assets:
+  #   - assets/field_map/
 
 flutter_icons:
   android: "launcher_icon"

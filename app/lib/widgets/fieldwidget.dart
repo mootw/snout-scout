@@ -1,6 +1,8 @@
 //Ratio of width to height
 import 'dart:async';
+import 'dart:convert';
 import 'dart:math' as math;
+import 'dart:typed_data';
 
 import 'package:app/providers/data_provider.dart';
 import 'package:app/style.dart';
@@ -437,8 +439,11 @@ class FieldMapWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Image.asset(
-        "assets/field_map/${context.watch<DataProvider>().event.config.season}.png");
+    return Image.memory(
+        Uint8List.fromList(
+            base64Decode(context.watch<DataProvider>().event.config.fieldImage)
+                .cast<int>()),
+        fit: BoxFit.contain);
   }
 }
 
@@ -457,8 +462,7 @@ class FieldMap extends StatelessWidget {
         aspectRatio: 1 / mapRatio,
         child: Stack(
           children: [
-            Image.asset(
-                "assets/field_map/${context.watch<DataProvider>().event.config.season}.png"),
+            const FieldMapWidget(),
             ...children,
           ],
         ),

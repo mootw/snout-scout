@@ -64,7 +64,7 @@ Future<String?> showStringInputDialog(
 /// (we do not want to store hundreds of MB sized images)
 /// for transport efficiency reasons, client performance
 /// for image decoding or db file, and data/disk usage.
-double scoutImageSize = 800;
+const double scoutImageSize = 800;
 
 /// convenient dialog that will prompt the user to take a new image
 /// or select it from their device storage
