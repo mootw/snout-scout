@@ -20,9 +20,9 @@ import 'package:snout_db/config/surveyitem.dart';
 import 'package:snout_db/patch.dart';
 
 // Reserved pit scouting IDs that are used within the app
-// TODO make widgets to get this data explicitly, rather than reimplementing it each time
 const String teamNameReserved = 'team_name';
 const String robotPictureReserved = 'robot_picture';
+const String teamNotesReserved = 'team_notes';
 
 class TeamViewPage extends StatefulWidget {
   final int teamNumber;
@@ -42,6 +42,8 @@ class _TeamViewPageState extends State<TeamViewPage> {
         data.event.pitscouting[widget.teamNumber.toString()]?[teamNameReserved];
     String? robotPicture = data.event.pitscouting[widget.teamNumber.toString()]
         ?[robotPictureReserved];
+    String? teamNotes = data.event.pitscouting[widget.teamNumber.toString()]
+        ?[teamNotesReserved];
 
     FRCMatch? teamNextMatch = data.event.nextMatchForTeam(widget.teamNumber);
     Duration? scheduleDelay = data.event.scheduleDelay;
@@ -106,20 +108,19 @@ class _TeamViewPageState extends State<TeamViewPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Flexible(
+                Flexible(
                   child: Padding(
-                      padding: EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(16),
                       child: Column(
                         children: [
-                          Text(
-                              "TODO put some important fields here, maybe a specific notes box for important stuff: things that we need to check up on, things that are broken, if they need help and with what"),
+                          Text(teamNotes ?? "No $teamNotesReserved value"),
                         ],
                       )),
                 ),
                 if (robotPicture != null)
                   SizedBox(
-                    width: 200,
-                    height: 200,
+                    width: 240,
+                    height: 240,
                     child: AspectRatio(
                       aspectRatio: 1,
                       child: ImageViewer(
@@ -131,7 +132,8 @@ class _TeamViewPageState extends State<TeamViewPage> {
                       ),
                     ),
                   ),
-                if (robotPicture == null) const Text("No image :("),
+                if (robotPicture == null)
+                  const Text("No $robotPictureReserved :("),
               ],
             ),
 
@@ -176,7 +178,9 @@ class _TeamViewPageState extends State<TeamViewPage> {
                     const SizedBox(height: 16),
                     Text("Autos",
                         style: Theme.of(context).textTheme.titleMedium),
-                    FieldPaths(
+                    AutoPathsViewer(
+                      // Make it larger since its the team page so BIG
+                      size: 600,
                       paths: [
                         for (final match in data.event
                             .teamRecordedMatches(widget.teamNumber))
@@ -371,6 +375,7 @@ class ScoutingResult extends StatelessWidget {
         title: Text(item.label),
         subtitle: ImageViewer(
           child: Image.memory(
+            height: 500,
             fit: BoxFit.contain,
             Uint8List.fromList(base64Decode(value).cast<int>()),
           ),

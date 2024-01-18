@@ -24,6 +24,8 @@ const double robotFieldProportion = robotSizeMeters / fieldWidthMeters;
 const double largeFieldSize = 355;
 const double smallFieldSize = 255;
 
+
+/// used on the scouting pages
 class FieldPositionSelector extends StatelessWidget {
   const FieldPositionSelector(
       {super.key,
@@ -100,6 +102,7 @@ class FieldPositionSelector extends StatelessWidget {
   }
 }
 
+/// showed on the match page to see the recording of the match
 class FieldTimelineViewer extends StatefulWidget {
   const FieldTimelineViewer({super.key, required this.match});
 
@@ -258,27 +261,53 @@ class FieldHeatMap extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FieldMap(
-      size: size,
-      children: [
-        Container(color: Colors.black26),
-        CustomPaint(
-          size: Size.infinite,
-          painter: HeatMap(events: events),
-        )
-      ],
+    return ConstrainedBox(
+      constraints: BoxConstraints.loose(Size(size, size / 2)),
+      child: FullScreenFieldSelector(
+        child: FieldMap(
+          //size: size,
+          children: [
+            Container(color: Colors.black26),
+            CustomPaint(
+              size: Size.infinite,
+              painter: HeatMap(events: events),
+            )
+          ],
+        ),
+      ),
     );
   }
 }
 
-class FieldPaths extends StatelessWidget {
+class FullScreenFieldSelector extends StatelessWidget {
+
+  final Widget child;
+
+  const FullScreenFieldSelector({super.key, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      child: child,
+      onTap: () {
+        Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) => Scaffold(
+              appBar: AppBar(),
+              body: child,
+        )));
+      },
+    );
+  }
+}
+
+class AutoPathsViewer extends StatelessWidget {
   final List<List<MatchEvent>> paths;
   final bool emphasizeStartPoint;
   final bool eventLabels;
   final bool useRedNormalized;
-  final double? size;
+  final double size;
 
-  const FieldPaths(
+  const AutoPathsViewer(
       {super.key,
       required this.paths,
       this.size = largeFieldSize,
@@ -288,38 +317,43 @@ class FieldPaths extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FieldMap(size: size, children: [
-      Container(color: Colors.black26),
-      for (final match in paths) ...[
-        CustomPaint(
-          size: Size.infinite,
-          painter: MapLine(
-              emphasizeStartPoint: emphasizeStartPoint,
-              color: getColorFromIndex(paths.indexOf(match)),
-              events: match,
-              eventLabels: eventLabels),
-        ),
-      ],
-      Align(
-        alignment: Alignment.bottomRight,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            if (eventLabels)
-              for (final match in paths)
-                for (final event
-                    in match.where((event) => !event.isPositionEvent))
-                  Text(
-                      event.getLabelFromConfig(
-                          context.watch<DataProvider>().event.config),
-                      style: TextStyle(
-                          color: getColorFromIndex(paths.indexOf(match)),
-                          fontSize: 10,
-                          backgroundColor: Colors.black87)),
+    return ConstrainedBox(
+      constraints: BoxConstraints.loose(Size(size, size / 2)),
+      child: FullScreenFieldSelector(
+        child: FieldMap(children: [
+          Container(color: Colors.black26),
+          for (final match in paths) ...[
+            CustomPaint(
+              size: Size.infinite,
+              painter: MapLine(
+                  emphasizeStartPoint: emphasizeStartPoint,
+                  color: getColorFromIndex(paths.indexOf(match)),
+                  events: match,
+                  eventLabels: eventLabels),
+            ),
           ],
-        ),
+          Align(
+            alignment: Alignment.bottomRight,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                if (eventLabels)
+                  for (final match in paths)
+                    for (final event
+                        in match.where((event) => !event.isPositionEvent))
+                      Text(
+                          event.getLabelFromConfig(
+                              context.watch<DataProvider>().event.config),
+                          style: TextStyle(
+                              color: getColorFromIndex(paths.indexOf(match)),
+                              fontSize: 10,
+                              backgroundColor: Colors.black87)),
+              ],
+            ),
+          ),
+        ]),
       ),
-    ]);
+    );
   }
 }
 
@@ -434,8 +468,34 @@ class MapLine extends CustomPainter {
       Object.hashAll(oldDelegate.events) != Object.hashAll(events);
 }
 
-class FieldMapWidget extends StatelessWidget {
-  const FieldMapWidget({super.key});
+/// Widget that holds a field image and displays stuff on top of it
+class FieldMap extends StatelessWidget {
+  final List<Widget> children;
+  final double size;
+
+  //Displays a field map with overlays.
+  const FieldMap({super.key, required this.children, this.size = 1200});
+
+  @override
+  Widget build(BuildContext context) {
+    return ConstrainedBox(
+      constraints: BoxConstraints.loose(Size(size, size / 2)),
+      child: AspectRatio(
+        aspectRatio: 1 / mapRatio,
+        child: Stack(
+          children: [
+            const FieldImage(),
+            ...children,
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// to ensure that the image.memory is properly cached this is a separate widget
+class FieldImage extends StatelessWidget {
+  const FieldImage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -443,30 +503,7 @@ class FieldMapWidget extends StatelessWidget {
         Uint8List.fromList(
             base64Decode(context.watch<DataProvider>().event.config.fieldImage)
                 .cast<int>()),
+        scale: 0.25,
         fit: BoxFit.contain);
-  }
-}
-
-class FieldMap extends StatelessWidget {
-  final List<Widget> children;
-  final double? size;
-
-  //Displays a field map with overlays.
-  const FieldMap({super.key, required this.children, this.size});
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: size,
-      child: AspectRatio(
-        aspectRatio: 1 / mapRatio,
-        child: Stack(
-          children: [
-            const FieldMapWidget(),
-            ...children,
-          ],
-        ),
-      ),
-    );
   }
 }

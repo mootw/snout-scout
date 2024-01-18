@@ -201,7 +201,7 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                               Text("Autos",
                                   style:
                                       Theme.of(context).textTheme.titleMedium),
-                              FieldPaths(
+                              AutoPathsViewer(
                                 size: 300,
                                 paths: [
                                   for (final match

@@ -179,7 +179,7 @@ class _MatchPageState extends State<MatchPage> {
                 children: [
                   const SizedBox(height: 16),
                   Text("Autos", style: Theme.of(context).textTheme.titleMedium),
-                  FieldPaths(
+                  AutoPathsViewer(
                     paths: [
                       for (final robot in match.robot.values)
                         robot.timelineInterpolated

@@ -16,7 +16,7 @@ class AnalysisEventsHeatmap extends StatelessWidget {
       body: ListView(
         children: [
           Text("Autos", style: Theme.of(context).textTheme.titleMedium),
-          FieldPaths(
+          AutoPathsViewer(
             paths: [
               for (final match in data.event.matches.values)
                 for (final robot in match.robot.entries)

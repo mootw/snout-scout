@@ -44,6 +44,9 @@ dependencies:
   file_selector: ^1.0.1
   image_picker: ^1.0.5
 
+  # For image viewing lol
+  photo_view: ^0.14.0
+
   web_socket_channel: ^2.3.0
   simple_cluster: ^0.3.0
   url_launcher: ^6.2.1

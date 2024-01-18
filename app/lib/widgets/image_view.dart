@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:photo_view/photo_view.dart';
 
 ///TODO this is a TERRIBLE implementation haha
 class ImageViewer extends StatelessWidget {
@@ -14,13 +15,10 @@ class ImageViewer extends StatelessWidget {
         Navigator.of(context).push(MaterialPageRoute(
           builder: (context) => Scaffold(
               appBar: AppBar(),
-              body: InteractiveViewer(
-                constrained: false,
-                maxScale: 4,
-                minScale: 0.1,
+              body: PhotoView.customChild(
                 child: child,
-              )),
-        ));
+              ),
+        )));
       },
     );
   }
