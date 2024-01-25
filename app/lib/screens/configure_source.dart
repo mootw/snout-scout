@@ -180,4 +180,4 @@ Future<String?> createNewEvent(BuildContext context) async {
 }
 
 FRCEvent get emptyNewEvent => FRCEvent(
-    config: EventConfig(name: 'Event Name', team: 6749, fieldImage: ''));
+    config: const EventConfig(name: 'Event Name', team: 6749, fieldImage: ''));

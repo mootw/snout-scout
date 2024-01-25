@@ -178,17 +178,21 @@ class _TeamViewPageState extends State<TeamViewPage> {
                     const SizedBox(height: 16),
                     Text("Autos",
                         style: Theme.of(context).textTheme.titleMedium),
-                    AutoPathsViewer(
+                    PathsViewer(
                       // Make it larger since its the team page so BIG
                       size: 600,
                       paths: [
                         for (final match in data.event
                             .teamRecordedMatches(widget.teamNumber))
-                          match.value.robot[widget.teamNumber.toString()]!
-                              .timelineInterpolatedRedNormalized(
-                                  data.event.config.fieldStyle)
-                              .where((element) => element.isInAuto)
-                              .toList()
+                          (
+                            label: match.value.description,
+                            path: match
+                                .value.robot[widget.teamNumber.toString()]!
+                                .timelineInterpolatedRedNormalized(
+                                    data.event.config.fieldStyle)
+                                .where((element) => element.isInAuto)
+                                .toList()
+                          )
                       ],
                     ),
                   ],

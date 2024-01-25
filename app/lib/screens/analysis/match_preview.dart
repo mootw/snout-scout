@@ -201,16 +201,19 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                               Text("Autos",
                                   style:
                                       Theme.of(context).textTheme.titleMedium),
-                              AutoPathsViewer(
+                              PathsViewer(
                                 size: 300,
                                 paths: [
                                   for (final match
                                       in data.event.teamRecordedMatches(team))
-                                    match.value.robot[team.toString()]!
-                                        .timelineInterpolatedRedNormalized(
-                                            data.event.config.fieldStyle)
-                                        .where((element) => element.isInAuto)
-                                        .toList()
+                                    (
+                                      label: match.value.description,
+                                      path: match.value.robot[team.toString()]!
+                                          .timelineInterpolatedRedNormalized(
+                                              data.event.config.fieldStyle)
+                                          .where((element) => element.isInAuto)
+                                          .toList()
+                                    )
                                 ],
                               ),
                             ],

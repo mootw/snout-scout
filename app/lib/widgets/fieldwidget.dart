@@ -24,7 +24,6 @@ const double robotFieldProportion = robotSizeMeters / fieldWidthMeters;
 const double largeFieldSize = 355;
 const double smallFieldSize = 255;
 
-
 /// used on the scouting pages
 class FieldPositionSelector extends StatelessWidget {
   const FieldPositionSelector(
@@ -267,7 +266,7 @@ class FieldHeatMap extends StatelessWidget {
         child: FieldMap(
           //size: size,
           children: [
-            Container(color: Colors.black26),
+            Container(color: Colors.black12),
             CustomPaint(
               size: Size.infinite,
               painter: HeatMap(events: events),
@@ -280,76 +279,130 @@ class FieldHeatMap extends StatelessWidget {
 }
 
 class FullScreenFieldSelector extends StatelessWidget {
-
   final Widget child;
+  final Widget? showAbove;
 
-  const FullScreenFieldSelector({super.key, required this.child});
+  const FullScreenFieldSelector(
+      {super.key, required this.child, this.showAbove});
 
   @override
   Widget build(BuildContext context) {
+    if (showAbove != null) {
+      return Stack(
+        children: [
+          InkWell(
+            child: child,
+            onTap: () {
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => Scaffold(
+                        appBar: AppBar(),
+                        body: Stack(
+                          children: [
+                            child,
+                            showAbove!,
+                          ],
+                        ),
+                      )));
+            },
+          ),
+          showAbove!,
+        ],
+      );
+    }
     return InkWell(
       child: child,
       onTap: () {
         Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) => Scaffold(
-              appBar: AppBar(),
-              body: child,
-        )));
+            builder: (context) => Scaffold(
+                  appBar: AppBar(),
+                  body: child,
+                )));
       },
     );
   }
 }
 
-class AutoPathsViewer extends StatelessWidget {
-  final List<List<MatchEvent>> paths;
+class PathsViewer extends StatefulWidget {
+  final List<({String label, List<MatchEvent> path})> paths;
   final bool emphasizeStartPoint;
-  final bool eventLabels;
   final bool useRedNormalized;
   final double size;
 
-  const AutoPathsViewer(
+  const PathsViewer(
       {super.key,
       required this.paths,
       this.size = largeFieldSize,
       this.emphasizeStartPoint = true,
-      this.useRedNormalized = true,
-      this.eventLabels = true});
+      this.useRedNormalized = true});
+
+  @override
+  State<PathsViewer> createState() => _PathsViewerState();
+}
+
+class _PathsViewerState extends State<PathsViewer> {
+  int filterIndex = -1;
 
   @override
   Widget build(BuildContext context) {
+    final List<({String label, List<MatchEvent> path})> filteredPaths;
+    if (filterIndex == -1) {
+      filteredPaths = widget.paths;
+    } else {
+      filteredPaths = [widget.paths[filterIndex]];
+    }
+
     return ConstrainedBox(
-      constraints: BoxConstraints.loose(Size(size, size / 2)),
+      constraints: BoxConstraints.loose(Size(widget.size, widget.size / 2)),
       child: FullScreenFieldSelector(
+        showAbove: Align(
+          alignment: Alignment.bottomLeft,
+          child: Container(
+            color: Colors.black87,
+            height: 32,
+            child: ListView(scrollDirection: Axis.horizontal, children: [
+              TextButton(
+                  onPressed: () => setState(() {
+                        filterIndex = -1;
+                      }),
+                  child: const Text("All")),
+              for (final (idx, item) in widget.paths.indexed)
+                TextButton(
+                    onPressed: () => setState(() {
+                          filterIndex = idx;
+                        }),
+                    child: Text(
+                      item.label,
+                      style: TextStyle(
+                          color: getColorFromIndex(widget.paths.indexOf(item))),
+                    )),
+            ]),
+          ),
+        ),
         child: FieldMap(children: [
-          Container(color: Colors.black26),
-          for (final match in paths) ...[
+          Container(color: Colors.black12),
+          for (final path in filteredPaths) ...[
             CustomPaint(
               size: Size.infinite,
               painter: MapLine(
-                  emphasizeStartPoint: emphasizeStartPoint,
-                  color: getColorFromIndex(paths.indexOf(match)),
-                  events: match,
-                  eventLabels: eventLabels),
+                  emphasizeStartPoint: widget.emphasizeStartPoint,
+                  color: getColorFromIndex(filteredPaths.indexOf(path)),
+                  events: path.path),
             ),
           ],
-          Align(
-            alignment: Alignment.bottomRight,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                if (eventLabels)
-                  for (final match in paths)
-                    for (final event
-                        in match.where((event) => !event.isPositionEvent))
-                      Text(
-                          event.getLabelFromConfig(
-                              context.watch<DataProvider>().event.config),
-                          style: TextStyle(
-                              color: getColorFromIndex(paths.indexOf(match)),
-                              fontSize: 10,
-                              backgroundColor: Colors.black87)),
-              ],
-            ),
+          // Event Labels
+          Stack(
+            children: [
+              for (final match in filteredPaths)
+                for (final event
+                    in match.path.where((event) => !event.isPositionEvent))
+                  Align(
+                    alignment: Alignment(event.position.x, -event.position.y),
+                    child: Text(
+                        '${event.time}.${event.getLabelFromConfig(context.watch<DataProvider>().event.config)}',
+                        style: const TextStyle(
+                            fontSize: 11, backgroundColor: Colors.black26)),
+                  ),
+            ],
           ),
         ]),
       ),
@@ -415,12 +468,10 @@ class MapLine extends CustomPainter {
   Color color;
   List<MatchEvent> events;
   bool emphasizeStartPoint;
-  bool eventLabels;
 
   MapLine(
       {required this.events,
       required this.emphasizeStartPoint,
-      required this.eventLabels,
       this.color = Colors.green});
 
   @override
@@ -430,7 +481,7 @@ class MapLine extends CustomPainter {
     }
     Paint p = Paint();
     p.color = color;
-    p.strokeWidth = 2;
+    p.strokeWidth = 3;
     p.strokeCap = StrokeCap.round;
     p.style = PaintingStyle.stroke;
 
@@ -451,7 +502,7 @@ class MapLine extends CustomPainter {
     p.style = PaintingStyle.fill;
 
     if (emphasizeStartPoint) {
-      canvas.drawCircle(Offset(startingPosition[0], startingPosition[1]), 5, p);
+      canvas.drawCircle(Offset(startingPosition[0], startingPosition[1]), 6, p);
     }
   }
 
