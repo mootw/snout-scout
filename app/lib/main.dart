@@ -20,6 +20,7 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 import 'package:snout_db/config/eventconfig.dart';
+import 'package:snout_db/config/matcheventconfig.dart';
 import 'package:snout_db/patch.dart';
 import 'package:snout_db/snout_db.dart';
 import 'package:url_launcher/url_launcher_string.dart';
@@ -148,7 +149,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 NavigationRailDestination(
                   selectedIcon: Icon(Icons.analytics),
                   icon: Icon(Icons.analytics_outlined),
-                  label: Text('Analysis'),
+                  label: Text('Analyssis'),
                 ),
                 NavigationRailDestination(
                   selectedIcon: Icon(Icons.book),
@@ -242,22 +243,52 @@ class _MyHomePageState extends State<MyHomePage> {
             trailing: IconButton(
                 onPressed: () async {
                   final identity = context.read<IdentityProvider>().identity;
+
+                  final config = context.read<DataProvider>().event.config;
+
+                  final removeImage = EventConfig(
+                      name: config.name,
+                      team: config.team,
+                      fieldImage: 'Removed from editor for performance reasons. edit via the docs page.',
+                      docs: config.docs,
+                      fieldStyle: config.fieldStyle,
+                      matchscouting: config.matchscouting,
+                      pitscouting: config.pitscouting,
+                      tbaEventId: config.tbaEventId,
+                      tbaSecretKey: config.tbaSecretKey);
+
                   final result = await Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) => JSONEditor(
                           validate: EventConfig.fromJson,
-                          source: context.read<DataProvider>().event.config,
+                          source: removeImage,
                         ),
                       ));
 
                   if (result != null) {
+                    final modAsConfig = EventConfig.fromJson(jsonDecode(result));
+                    print("hi");
+                    final reAppendedConfig = EventConfig(
+                      name: modAsConfig.name,
+                      team: modAsConfig.team,
+                      fieldImage: config.fieldImage,
+                      docs: modAsConfig.docs,
+                      fieldStyle: modAsConfig.fieldStyle,
+                      matchscouting: modAsConfig.matchscouting,
+                      pitscouting: modAsConfig.pitscouting,
+                      tbaEventId: modAsConfig.tbaEventId,
+                      tbaSecretKey: modAsConfig.tbaSecretKey);
+                    print("hi2");
+
                     Patch patch = Patch(
                         identity: identity,
                         time: DateTime.now(),
                         path: Patch.buildPath(['config']),
-                        value: json.decode(result));
+                        value: reAppendedConfig.toJson());
                     //Save the scouting results to the server!!
+                    
+                    print("hi3");
                     await data.submitPatch(patch);
                   }
                 },
