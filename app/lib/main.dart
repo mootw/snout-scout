@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:app/providers/data_provider.dart';
+import 'package:app/providers/local_config_provider.dart';
 import 'package:app/style.dart';
 import 'package:app/providers/identity_provider.dart';
 import 'package:app/screens/analysis.dart';
@@ -51,6 +52,7 @@ class MyApp extends StatelessWidget {
           ChangeNotifierProvider<IdentityProvider>(
               create: (_) => IdentityProvider()),
           ChangeNotifierProvider<DataProvider>(create: (_) => DataProvider()),
+          ChangeNotifierProvider<LocalConfigProvider>(create: (_) => LocalConfigProvider()),
         ],
         child: MaterialApp(
           title: 'Snout Scout',

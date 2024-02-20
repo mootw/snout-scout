@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:app/providers/local_config_provider.dart';
 import 'package:app/screens/view_team_page.dart';
 import 'package:app/widgets/confirm_exit_dialog.dart';
 import 'package:app/widgets/datasheet.dart';
@@ -39,7 +40,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
   List<MatchEvent> _events = [];
   final PitScoutResult _postGameSurvey = {};
   int _time = 0;
-  double _mapRotation = 0;
+  bool _rotateField = false;
   Timer? _t;
 
   bool _showSurvey = false;
@@ -51,6 +52,12 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
   //Only use in buildcontext
   List<MatchEventConfig> get scoutingEvents =>
       context.watch<DataProvider>().event.config.matchscouting.events;
+
+  @override
+  void initState() {
+    super.initState();
+    _rotateField = context.read<LocalConfigProvider>().flipFieldImage;
+  }
 
   @override
   void dispose() {
@@ -234,13 +241,13 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                   constraints: const BoxConstraints(maxWidth: 690),
                   alignment: Alignment.bottomRight,
                   child: Transform.rotate(
-                    angle: _mapRotation,
+                    angle: _rotateField ? math.pi : 0,
                     child: FieldPositionSelector(
                       coverAlignment: _mode != MatchMode.setup
                           ? null
                           : widget.teamAlliance == Alliance.red
-                              ? 1
-                              : -1,
+                              ? -1
+                              : 1,
                       teamNumber: widget.team,
                       alliance: widget.teamAlliance,
                       robotPosition: _robotPosition,
@@ -294,7 +301,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
               width: 690,
               alignment: Alignment.bottomRight,
               child: Transform.rotate(
-                angle: _mapRotation,
+                angle: _rotateField ? math.pi : 0,
                 child: FieldPositionSelector(
                   teamNumber: widget.team,
                   coverAlignment: _mode != MatchMode.setup
@@ -358,7 +365,8 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
           IconButton(
               tooltip: "Rotate Map",
               onPressed: () => setState(() {
-                    _mapRotation += math.pi;
+                    _rotateField = !_rotateField;
+                    context.read<LocalConfigProvider>().setFlipFieldImage(_rotateField);
                   }),
               icon: const Icon(Icons.rotate_right)),
           const SizedBox(width: 8),
@@ -380,7 +388,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                           ],
                         );
                       }),
-                  child: const Text("Show Picture")),
+                  child: const Text("Show Robot")),
             ),
           const SizedBox(width: 8),
           FilledButton.icon(

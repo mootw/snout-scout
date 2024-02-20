@@ -3,7 +3,7 @@ import 'package:photo_view/photo_view.dart';
 
 ///TODO this is a TERRIBLE implementation haha
 class ImageViewer extends StatelessWidget {
-  final Widget child;
+  final Image child;
 
   const ImageViewer({super.key, required this.child});
 
@@ -15,8 +15,8 @@ class ImageViewer extends StatelessWidget {
         Navigator.of(context).push(MaterialPageRoute(
           builder: (context) => Scaffold(
               appBar: AppBar(),
-              body: PhotoView.customChild(
-                child: child,
+              body: PhotoView(
+                imageProvider: child.image,
               ),
         )));
       },
