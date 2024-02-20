@@ -9,9 +9,11 @@ import 'package:app/providers/data_provider.dart';
 import 'package:app/widgets/fieldwidget.dart';
 import 'package:app/style.dart';
 import 'package:app/scouting_tools/scouting_tool.dart';
+import 'package:app/widgets/image_view.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:photo_view/photo_view.dart';
 import 'package:provider/provider.dart';
 import 'package:snout_db/config/matcheventconfig.dart';
 import 'package:snout_db/event/matchevent.dart';
@@ -347,7 +349,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
   }
 
   Widget _statusAndToolBar() {
-    Widget? robotPicture;
+    Image? robotPicture;
     final pictureData = context
         .watch<DataProvider>()
         .event
@@ -366,7 +368,9 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
               tooltip: "Rotate Map",
               onPressed: () => setState(() {
                     _rotateField = !_rotateField;
-                    context.read<LocalConfigProvider>().setFlipFieldImage(_rotateField);
+                    context
+                        .read<LocalConfigProvider>()
+                        .setFlipFieldImage(_rotateField);
                   }),
               icon: const Icon(Icons.rotate_right)),
           const SizedBox(width: 8),
@@ -376,19 +380,14 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
           if (robotPicture != null)
             Center(
               child: TextButton(
-                  onPressed: () => showDialog(
-                      context: context,
-                      builder: (bc) {
-                        return AlertDialog(
-                          content: robotPicture!,
-                          actions: [
-                            TextButton(
-                                onPressed: () => Navigator.pop(bc),
-                                child: const Text("Okay")),
-                          ],
-                        );
-                      }),
-                  child: const Text("Show Robot")),
+                  onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => Scaffold(
+                            appBar: AppBar(),
+                            body: PhotoView(
+                              imageProvider: robotPicture!.image,
+                            ),
+                          ))),
+                  child: const Text("Robot Picture")),
             ),
           const SizedBox(width: 8),
           FilledButton.icon(

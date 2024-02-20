@@ -12,6 +12,7 @@ import 'package:shelf_router/shelf_router.dart';
 import 'package:shelf_web_socket/shelf_web_socket.dart';
 import 'package:snout_db/patch.dart';
 import 'package:snout_db/snout_db.dart';
+import 'package:synchronized/synchronized.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'edit_lock.dart';
@@ -21,8 +22,12 @@ import 'edit_lock.dart';
 final env = DotEnv(includePlatformEnvironment: true)..load();
 int serverPort = 6749;
 Map<String, EventData> loadedEvents = {};
+
 //To keep things simple we will just have 1 edit lock for all loaded events.
 EditLock editLock = EditLock();
+
+// used to prevent the server from writing the database multiple times at once
+final Lock dbWriteLock = Lock();
 
 final app = Router();
 
@@ -182,38 +187,44 @@ void main(List<String> args) async {
     }
   });
 
-  app.put("/events/<eventID>", (Request request, String eventID) async {
-    final File? f = loadedEvents[eventID]?.file;
-    if (f == null || await f.exists() == false) {
-      return Response.notFound("Event not found");
-    }
-    final event = SnoutDB.fromJson(
-      json.decode(await f.readAsString()) as Map<String, dynamic>,
-    );
-    //Uses UTF-8 by default
-    final String content = await request.readAsString();
-    try {
-      final Patch patch = Patch.fromJson(json.decode(content) as Map);
+  app.put(
+    "/events/<eventID>",
+    (Request request, String eventID) async {
+      // Require all writes to start with reading the file, only one at a time and do a full disk flush
+      return dbWriteLock.synchronized(() async {
+        final File? f = loadedEvents[eventID]?.file;
+        if (f == null || await f.exists() == false) {
+          return Response.notFound("Event not found");
+        }
+        final event = SnoutDB.fromJson(
+          json.decode(await f.readAsString()) as Map<String, dynamic>,
+        );
+        //Uses UTF-8 by default
+        final String content = await request.readAsString();
+        try {
+          final Patch patch = Patch.fromJson(json.decode(content) as Map);
 
-      event.addPatch(patch);
+          event.addPatch(patch);
 
-      logger.fine('added patch: ${json.encode(patch)}');
+          logger.fine('added patch: ${json.encode(patch)}');
 
-      //Successful patch, send this update to all listeners
-      for (final WebSocketChannel listener
-          in loadedEvents[eventID]?.listeners ?? []) {
-        listener.sink.add(json.encode(patch));
-      }
+          //Successful patch, send this update to all listeners
+          for (final WebSocketChannel listener
+              in loadedEvents[eventID]?.listeners ?? []) {
+            listener.sink.add(json.encode(patch));
+          }
 
-      //Write the new DB to disk
-      await f.writeAsString(json.encode(event));
+          //Write the new DB to disk
+          await f.writeAsString(json.encode(event), flush: true);
 
-      return Response.ok("");
-    } catch (e, s) {
-      logger.severe('failed to accept patch: $content', e, s);
-      return Response.internalServerError(body: e);
-    }
-  });
+          return Response.ok("");
+        } catch (e, s) {
+          logger.severe('failed to accept patch: $content', e, s);
+          return Response.internalServerError(body: e);
+        }
+      });
+    },
+  );
 
   final handler = const Pipeline()
       .addMiddleware(logRequests())
