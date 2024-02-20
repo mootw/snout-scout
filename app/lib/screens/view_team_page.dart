@@ -199,7 +199,7 @@ class _TeamViewPageState extends State<TeamViewPage> {
                 ),
                 const Divider(height: 32),
                 Center(
-                    child: Text("Pit Scouting",
+                    child: Text("Scouting",
                         style: Theme.of(context).textTheme.titleLarge)),
                 ScoutingResultsViewer(
                     teamNumber: widget.teamNumber, snoutData: data),

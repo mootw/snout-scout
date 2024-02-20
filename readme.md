@@ -76,3 +76,14 @@ eventually might have access policies or potentially gets distributed outside of
 this could cause a secret leak; however, i am also lazy and do not want to implement a
 spearate channel to distribute the secret to client devices, ideally the server distributes
 the tba api key (the server cannot proxy because the client must be able to do all functions without a server).
+
+
+# Example images (as of Feb 2024)
+
+<img src="schedule_page.png" width="400">
+<img src="team_list.png" width="400">
+<img src="team_page.png" width="400">
+<img src="match_page.png" width="400">
+<img src="analysis.png" width="400">
+<img src="boxplot.png" width="400">
+<img src="table.png" width="400">
