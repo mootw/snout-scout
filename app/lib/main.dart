@@ -21,7 +21,6 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 import 'package:snout_db/config/eventconfig.dart';
-import 'package:snout_db/config/matcheventconfig.dart';
 import 'package:snout_db/patch.dart';
 import 'package:snout_db/snout_db.dart';
 import 'package:url_launcher/url_launcher_string.dart';
@@ -151,7 +150,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 NavigationRailDestination(
                   selectedIcon: Icon(Icons.analytics),
                   icon: Icon(Icons.analytics_outlined),
-                  label: Text('Analyssis'),
+                  label: Text('Analysis'),
                 ),
                 NavigationRailDestination(
                   selectedIcon: Icon(Icons.book),
@@ -270,7 +269,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
                   if (result != null) {
                     final modAsConfig = EventConfig.fromJson(jsonDecode(result));
-                    print("hi");
                     final reAppendedConfig = EventConfig(
                       name: modAsConfig.name,
                       team: modAsConfig.team,
@@ -281,7 +279,6 @@ class _MyHomePageState extends State<MyHomePage> {
                       pitscouting: modAsConfig.pitscouting,
                       tbaEventId: modAsConfig.tbaEventId,
                       tbaSecretKey: modAsConfig.tbaSecretKey);
-                    print("hi2");
 
                     Patch patch = Patch(
                         identity: identity,
@@ -290,7 +287,6 @@ class _MyHomePageState extends State<MyHomePage> {
                         value: reAppendedConfig.toJson());
                     //Save the scouting results to the server!!
                     
-                    print("hi3");
                     await data.submitPatch(patch);
                   }
                 },

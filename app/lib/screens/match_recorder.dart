@@ -9,7 +9,6 @@ import 'package:app/providers/data_provider.dart';
 import 'package:app/widgets/fieldwidget.dart';
 import 'package:app/style.dart';
 import 'package:app/scouting_tools/scouting_tool.dart';
-import 'package:app/widgets/image_view.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -309,8 +308,8 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                   coverAlignment: _mode != MatchMode.setup
                       ? null
                       : widget.teamAlliance == Alliance.red
-                          ? 1
-                          : -1,
+                          ? -1
+                          : 1,
                   alliance: widget.teamAlliance,
                   robotPosition: _robotPosition,
                   onTap: (robotPosition) {

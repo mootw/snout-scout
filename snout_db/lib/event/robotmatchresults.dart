@@ -32,17 +32,18 @@ class RobotMatchResults {
       _$RobotMatchResultsFromJson(json);
   Map<String, dynamic> toJson() => _$RobotMatchResultsToJson(this);
 
-  List<MatchEvent> timelineRedNormalized(FieldStyle fieldStyle) =>
-      _normalizeRed(timeline, fieldStyle);
-  List<MatchEvent> timelineInterpolatedRedNormalized(FieldStyle fieldStyle) =>
-      _normalizeRed(timelineInterpolated, fieldStyle);
+  //TODO this is bad code
+  List<MatchEvent> timelineBlueNormalized(FieldStyle fieldStyle) =>
+      _normalizeBlue(timeline, fieldStyle);
+  List<MatchEvent> timelineInterpolatedBlueNormalized(FieldStyle fieldStyle) =>
+      _normalizeBlue(timelineInterpolated, fieldStyle);
 
   //internal function to normalize the timeline as red.
-  List<MatchEvent> _normalizeRed(
+  List<MatchEvent> _normalizeBlue(
     List<MatchEvent> events,
     FieldStyle fieldStyle,
   ) {
-    if (alliance == Alliance.blue) {
+    if (alliance == Alliance.red) {
       return List.generate(events.length, (index) {
         final MatchEvent event = events[index];
         final FieldPosition position = fieldStyle == FieldStyle.rotated

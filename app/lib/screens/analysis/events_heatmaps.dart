@@ -42,7 +42,7 @@ class AnalysisEventsHeatmap extends StatelessWidget {
                               (previousValue, element) => [
                                     ...previousValue,
                                     ...element
-                                        .timelineRedNormalized(
+                                        .timelineBlueNormalized(
                                             data.event.config.fieldStyle)
                                         .where(
                                             (event) => event.id == eventType.id)

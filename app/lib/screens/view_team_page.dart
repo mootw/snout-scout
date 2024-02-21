@@ -188,7 +188,7 @@ class _TeamViewPageState extends State<TeamViewPage> {
                             label: match.value.description,
                             path: match
                                 .value.robot[widget.teamNumber.toString()]!
-                                .timelineInterpolatedRedNormalized(
+                                .timelineInterpolatedBlueNormalized(
                                     data.event.config.fieldStyle)
                                 .where((element) => element.isInAuto)
                                 .toList()
@@ -291,7 +291,7 @@ class _TeamViewPageState extends State<TeamViewPage> {
                                       ...previousValue,
                                       ...?element.value
                                           .robot[widget.teamNumber.toString()]
-                                          ?.timelineRedNormalized(
+                                          ?.timelineBlueNormalized(
                                               data.event.config.fieldStyle)
                                           .where((event) =>
                                               event.id == eventType.id)
@@ -311,7 +311,7 @@ class _TeamViewPageState extends State<TeamViewPage> {
                                       ...previousValue,
                                       ...?element.value
                                           .robot[widget.teamNumber.toString()]
-                                          ?.timelineInterpolatedRedNormalized(
+                                          ?.timelineInterpolatedBlueNormalized(
                                               data.event.config.fieldStyle)
                                           .where(
                                               (event) => event.isPositionEvent)

@@ -79,7 +79,7 @@ class _AnalysisHeatMapByEventTypeState
                                       (previousValue, element) => [
                                             ...previousValue,
                                             ...element
-                                                .timelineRedNormalized(data
+                                                .timelineBlueNormalized(data
                                                     .event.config.fieldStyle)
                                                 .where((event) =>
                                                     event.id ==
