@@ -51,7 +51,8 @@ class MyApp extends StatelessWidget {
           ChangeNotifierProvider<IdentityProvider>(
               create: (_) => IdentityProvider()),
           ChangeNotifierProvider<DataProvider>(create: (_) => DataProvider()),
-          ChangeNotifierProvider<LocalConfigProvider>(create: (_) => LocalConfigProvider()),
+          ChangeNotifierProvider<LocalConfigProvider>(
+              create: (_) => LocalConfigProvider()),
         ],
         child: MaterialApp(
           title: 'Snout Scout',
@@ -250,7 +251,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   final removeImage = EventConfig(
                       name: config.name,
                       team: config.team,
-                      fieldImage: 'Removed from editor for performance reasons. edit via the docs page.',
+                      fieldImage:
+                          'Removed from editor for performance reasons. edit via the docs page.',
                       docs: config.docs,
                       fieldStyle: config.fieldStyle,
                       matchscouting: config.matchscouting,
@@ -268,17 +270,18 @@ class _MyHomePageState extends State<MyHomePage> {
                       ));
 
                   if (result != null) {
-                    final modAsConfig = EventConfig.fromJson(jsonDecode(result));
+                    final modAsConfig =
+                        EventConfig.fromJson(jsonDecode(result));
                     final reAppendedConfig = EventConfig(
-                      name: modAsConfig.name,
-                      team: modAsConfig.team,
-                      fieldImage: config.fieldImage,
-                      docs: modAsConfig.docs,
-                      fieldStyle: modAsConfig.fieldStyle,
-                      matchscouting: modAsConfig.matchscouting,
-                      pitscouting: modAsConfig.pitscouting,
-                      tbaEventId: modAsConfig.tbaEventId,
-                      tbaSecretKey: modAsConfig.tbaSecretKey);
+                        name: modAsConfig.name,
+                        team: modAsConfig.team,
+                        fieldImage: config.fieldImage,
+                        docs: modAsConfig.docs,
+                        fieldStyle: modAsConfig.fieldStyle,
+                        matchscouting: modAsConfig.matchscouting,
+                        pitscouting: modAsConfig.pitscouting,
+                        tbaEventId: modAsConfig.tbaEventId,
+                        tbaSecretKey: modAsConfig.tbaSecretKey);
 
                     Patch patch = Patch(
                         identity: identity,
@@ -286,7 +289,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         path: Patch.buildPath(['config']),
                         value: reAppendedConfig.toJson());
                     //Save the scouting results to the server!!
-                    
+
                     await data.submitPatch(patch);
                   }
                 },

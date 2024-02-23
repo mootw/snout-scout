@@ -6,8 +6,9 @@ default and it should be proxied over https for competition use using a reverse 
 support handling web socket upgrade requests or real time updates will not work.** 
 
 
+You must configure these environment variables (can be a .env file)
 
-The server also handles api requests to the FRC API to populate match data. This is an optional feature, and your api key can be set in .env in the executable directory.
+upload_password=Password for the server to accept file upload OR file deletion (by default it is "" if not set)
 
 
 # Docker

@@ -8,6 +8,8 @@ import 'package:rfc_6901/rfc_6901.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_gzip/shelf_gzip.dart';
+import 'package:shelf_multipart/form_data.dart';
+import 'package:shelf_multipart/multipart.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'package:shelf_web_socket/shelf_web_socket.dart';
 import 'package:snout_db/patch.dart';
@@ -33,6 +35,8 @@ final app = Router();
 
 final Logger logger = Logger("snout-scout-server");
 
+final eventsDirectory = Directory('events');
+
 //Stuff that should be done for each event that is loaded.
 class EventData {
   EventData(this.file);
@@ -43,8 +47,8 @@ class EventData {
 
 //Load all events from disk and instantiate an event data class for each one
 Future loadEvents() async {
-  final dir = Directory('events');
-  final List<FileSystemEntity> allEvents = await dir.list().toList();
+  final List<FileSystemEntity> allEvents =
+      await eventsDirectory.list().toList();
   for (final event in allEvents) {
     if (event is File) {
       logger.info(event.uri.pathSegments.last);
@@ -60,6 +64,9 @@ void main(List<String> args) async {
       '${event.level}: ${event.message} ${event.error ?? ''} ${event.stackTrace ?? ''}',
     );
   });
+
+  // Create the events directory if it does not exist
+  eventsDirectory.create();
 
   await loadEvents();
 
@@ -105,6 +112,61 @@ void main(List<String> args) async {
     }
     editLock.clear(key);
     return Response.ok("");
+  });
+
+  /// Just accept any files that are uploaded assuming the password is provided
+  app.post("/upload_event_file", (Request request) async {
+    // Since this edits db files, it could conflict with other writes
+    return dbWriteLock.synchronized(() async {
+      if (request.headers['upload_password'] !=
+          env.getOrElse("upload_password", () => "")) {
+        return Response.unauthorized("upload_password is invalid");
+      }
+
+      if (request.isMultipart) {
+        await for (final entry in request.multipartFormData) {
+          // Headers are available through part.headers as a map:
+          final part = entry.part;
+          final fileName = entry.name;
+
+          logger.info("Attempting file upload for event name $fileName");
+          final eventFile = File('${eventsDirectory.path}/$fileName');
+          // We will overrwrite automatically
+
+          final fileContent = await part.readBytes();
+
+          // Write file to disk and flush
+          eventFile.writeAsBytes(fileContent, flush: true);
+
+          // Load the event in-place. This might not need to be done in the future
+          loadedEvents[fileName] = EventData(eventFile);
+        }
+      }
+      return Response.ok("upload success");
+    });
+  });
+
+  /// Just accept any files that are uploaded assuming the password is provided
+  app.delete("/delete_event_file", (Request request) async {
+    // Since this edits db files, it could conflict with other writes
+    return dbWriteLock.synchronized(() async {
+      if (request.headers['upload_password'] !=
+          env.getOrElse("upload_password", () => "")) {
+        return Response.unauthorized("upload_password is invalid");
+      }
+
+      final fileName = request.headers['name'];
+
+      logger.info("Attempting file upload for event name $fileName");
+      final eventFile = File('${eventsDirectory.path}/$fileName');
+
+      // unload the file
+      loadedEvents.removeWhere((key, value) => key == fileName);
+      // delete from disk
+      await eventFile.delete();
+
+      return Response.ok("delete success");
+    });
   });
 
   app.get("/events", (Request request) {

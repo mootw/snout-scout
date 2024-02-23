@@ -233,10 +233,9 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                                                 ...previousValue,
                                                 ...?element.value
                                                     .robot[team.toString()]
-                                                    ?.timelineBlueNormalized(data
-                                                        .event
-                                                        .config
-                                                        .fieldStyle)
+                                                    ?.timelineBlueNormalized(
+                                                        data.event.config
+                                                            .fieldStyle)
                                                     .where((event) =>
                                                         event.id ==
                                                         eventType.id)
