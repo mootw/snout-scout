@@ -15,7 +15,9 @@ class AnalysisEventsHeatmap extends StatelessWidget {
       ),
       body: ListView(
         children: [
-          Center(child: Text("Autos", style: Theme.of(context).textTheme.titleMedium)),
+          Center(
+              child: Text("Autos",
+                  style: Theme.of(context).textTheme.titleMedium)),
           Center(
             child: PathsViewer(
               paths: [
@@ -50,8 +52,8 @@ class AnalysisEventsHeatmap extends StatelessWidget {
                                       ...element
                                           .timelineBlueNormalized(
                                               data.event.config.fieldStyle)
-                                          .where(
-                                              (event) => event.id == eventType.id)
+                                          .where((event) =>
+                                              event.id == eventType.id)
                                     ])
                           ])),
             ),

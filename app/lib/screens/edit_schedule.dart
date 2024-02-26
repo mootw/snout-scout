@@ -122,17 +122,18 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
                         ));
                 if (result == true) {
                   final matchesWithRemoved =
-                      Map<String, dynamic>.from(snoutData.event.matches);
+                      Map<String, FRCMatch>.from(snoutData.event.matches);
                   matchesWithRemoved.remove(match.key);
 
-                  //TODO this might not be deeply modified to raw types before being applied to the patch
                   Patch patch = Patch(
                       identity: identity,
                       time: DateTime.now(),
                       path: Patch.buildPath([
                         'matches',
                       ]),
-                      value: matchesWithRemoved);
+                      // convert to json first
+                      value: matchesWithRemoved
+                          .map((key, value) => MapEntry(key, value.toJson())));
                   await snoutData.submitPatch(patch);
                 }
               },

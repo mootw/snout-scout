@@ -43,10 +43,13 @@ class FRCEvent {
     this.pitscouting = const {},
     this.pitmap,
   })
-  //Enforce that the matches are sorted correctly
-  : matches = SplayTreeMap.from(
+  // SplayTreeMaps for some reason cannot have 2 values with the zero difference in the comparison.
+  // Objects that are "equal" get removed. not sure why given they do have unique keys.
+  // I had to make the matches compare first based on time, and then hashCode to make it work.
+  // the error is reproducable by creating 2 matches with different IDs, but the scheduled time is the same
+   : matches = SplayTreeMap.of(
           matches,
-          (key1, key2) => Comparable.compare(matches[key1]!, matches[key2]!),
+          (a, b) => matches[a]!.compareTo(matches[b]!),
         );
 
   factory FRCEvent.fromJson(Map json) => _$FRCEventFromJson(json);
@@ -57,21 +60,20 @@ class FRCEvent {
   /// a valid FRCEvent
   factory FRCEvent.fromPatches(List<Patch> patches) {
     //Start with empty!
-    Object? dbJson;
+    Map? dbJson;
     for (final patch in patches) {
       if (dbJson == null) {
         //Initialize the db with the first patch's data.
         dbJson = FRCEvent.fromJson(patch.value! as Map).toJson();
         continue;
       }
-      dbJson = JsonPointer(patch.path).write(dbJson, patch.value);
+      dbJson = JsonPointer(patch.path).write(dbJson, patch.value)! as Map;
     }
-    return FRCEvent.fromJson(dbJson! as Map);
+    return FRCEvent.fromJson(dbJson!);
   }
 
   //Returns the id for a given match
-  String matchIDFromMatch(FRCMatch match) =>
-      matches.keys.toList()[matches.values.toList().indexOf(match)];
+  String matchIDFromMatch(FRCMatch match) => matches.entries.firstWhere((element) => element.value == match).key;
 
   /// returns matches with a specific team in them
   List<FRCMatch> matchesWithTeam(int team) =>

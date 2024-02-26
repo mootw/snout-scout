@@ -40,10 +40,16 @@ class FRCMatch implements Comparable<FRCMatch> {
   factory FRCMatch.fromJson(Map json) => _$FRCMatchFromJson(json);
   Map toJson() => _$FRCMatchToJson(this);
 
-  //Default sorting should be based on match time
+  //Default sorting should be based on match time, and then hashCode
   @override
-  int compareTo(FRCMatch other) =>
-      scheduledTime.difference(other.scheduledTime).inMicroseconds;
+  int compareTo(FRCMatch other) {
+    final timeDiff = scheduledTime.difference(other.scheduledTime).inMicroseconds;
+    if(timeDiff == 0) {
+      return hashCode.compareTo(other.hashCode);
+    } else {
+      return timeDiff;
+    }
+  }
 
   bool hasTeam(int team) => red.contains(team) || blue.contains(team);
 

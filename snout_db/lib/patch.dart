@@ -20,7 +20,7 @@ class Patch {
 
   /// rfc_6901 JSON pointer in the scouting data
   /// when possible this should point as deeply as possible
-  /// to avoid conflicts
+  /// to avoid edit conflicts
   final String path;
 
   /// data this path should be patched with.
@@ -46,7 +46,7 @@ class Patch {
   /// Returns a NEW instance of FRCEvent, it does not mutate the original
   FRCEvent patch(FRCEvent database) {
     var dbJson = database.toJson();
-    dbJson = JsonPointer(path).write(dbJson, value)! as Map<dynamic, dynamic>;
+    dbJson = JsonPointer(path).write(dbJson, value)! as Map;
     return FRCEvent.fromJson(dbJson);
   }
 
