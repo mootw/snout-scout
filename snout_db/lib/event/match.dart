@@ -15,11 +15,11 @@ class FRCMatch implements Comparable<FRCMatch> {
   ///time the match was scheduled for
   final DateTime scheduledTime;
 
-  /// list of scheduled red teams
-  final List<int> red;
-
   ///list of scheduled blue teams
   final List<int> blue;
+
+  /// list of scheduled red teams
+  final List<int> red;
 
   ///results of the match (null if the match has not been played)
   final MatchResultValues? results;

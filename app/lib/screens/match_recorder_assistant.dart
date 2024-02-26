@@ -106,6 +106,20 @@ class _MatchRecorderAssistantPageState
               Expanded(
                 child: Column(
                   children: [
+                    for (final team in match.blue)
+                      _getTeamTile(
+                          team: team,
+                          isRecommended: _recommended == team,
+                          onTap: () => _recordTeam(
+                              widget.matchid, team, match.getAllianceOf(team)),
+                          subtitle: "Blue ${match.blue.indexOf(team) + 1}",
+                          subtitleColor: Colors.blue),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: Column(
+                  children: [
                     for (final team in match.red)
                       _getTeamTile(
                           team: team,
@@ -117,20 +131,6 @@ class _MatchRecorderAssistantPageState
                   ],
                 ),
               ),
-              Expanded(
-                child: Column(
-                  children: [
-                    for (final team in match.blue)
-                      _getTeamTile(
-                          team: team,
-                          isRecommended: _recommended == team,
-                          onTap: () => _recordTeam(
-                              widget.matchid, team, match.getAllianceOf(team)),
-                          subtitle: "Blue ${match.blue.indexOf(team) + 1}",
-                          subtitleColor: Colors.blue),
-                  ],
-                ),
-              )
             ],
           ),
           const Divider(),

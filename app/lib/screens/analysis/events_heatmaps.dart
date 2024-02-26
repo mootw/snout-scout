@@ -15,39 +15,46 @@ class AnalysisEventsHeatmap extends StatelessWidget {
       ),
       body: ListView(
         children: [
-          Text("Autos", style: Theme.of(context).textTheme.titleMedium),
-          PathsViewer(
-            paths: [
-              for (final match in data.event.matches.values)
-                for (final robot in match.robot.entries)
-                  (
-                    label: '${match.description} ${robot.key}',
-                    path: match.robot[robot.key]!.timelineInterpolated
-                        .where((element) => element.isInAuto)
-                        .toList()
-                  )
-            ],
+          Center(child: Text("Autos", style: Theme.of(context).textTheme.titleMedium)),
+          Center(
+            child: PathsViewer(
+              paths: [
+                for (final match in data.event.matches.values)
+                  for (final robot in match.robot.entries)
+                    (
+                      label: '${match.description} ${robot.key}',
+                      path: match.robot[robot.key]!.timelineInterpolated
+                          .where((element) => element.isInAuto)
+                          .toList()
+                    )
+              ],
+            ),
           ),
           for (final eventType in data.event.config.matchscouting.events) ...[
             const SizedBox(height: 16),
-            Text(eventType.label,
-                style: Theme.of(context).textTheme.titleMedium),
-            FieldHeatMap(
-                events: data.event.matches.values.fold(
-                    [],
-                    (previousValue, element) => [
-                          ...previousValue,
-                          ...element.robot.values.fold(
-                              [],
-                              (previousValue, element) => [
-                                    ...previousValue,
-                                    ...element
-                                        .timelineBlueNormalized(
-                                            data.event.config.fieldStyle)
-                                        .where(
-                                            (event) => event.id == eventType.id)
-                                  ])
-                        ])),
+            Center(
+              child: Text(eventType.label,
+                  style: Theme.of(context).textTheme.titleMedium),
+            ),
+            Center(
+              child: FieldHeatMap(
+                  size: largeFieldSize,
+                  events: data.event.matches.values.fold(
+                      [],
+                      (previousValue, element) => [
+                            ...previousValue,
+                            ...element.robot.values.fold(
+                                [],
+                                (previousValue, element) => [
+                                      ...previousValue,
+                                      ...element
+                                          .timelineBlueNormalized(
+                                              data.event.config.fieldStyle)
+                                          .where(
+                                              (event) => event.id == eventType.id)
+                                    ])
+                          ])),
+            ),
           ],
         ],
       ),

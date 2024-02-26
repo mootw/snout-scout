@@ -552,7 +552,7 @@ class FieldImage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Image.memory(
         Uint8List.fromList(
-            base64Decode(context.watch<DataProvider>().event.config.fieldImage)
+            base64Decode(context.read<DataProvider>().event.config.fieldImage)
                 .cast<int>()),
         scale: 0.25,
         fit: BoxFit.contain);

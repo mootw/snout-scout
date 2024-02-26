@@ -62,30 +62,34 @@ class _AnalysisHeatMapByEventTypeState
                 children: [
                   for (final team in data.event.teams) ...[
                     const SizedBox(height: 16),
-                    TextButton(
-                        onPressed: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    TeamViewPage(teamNumber: team))),
-                        child: Text(team.toString())),
-                    FieldHeatMap(
-                        events: data.event.matchesWithTeam(team).fold(
-                            [],
-                            (previousValue, element) => [
-                                  ...previousValue,
-                                  ...element.robot.values.fold(
-                                      [],
-                                      (previousValue, element) => [
-                                            ...previousValue,
-                                            ...element
-                                                .timelineBlueNormalized(data
-                                                    .event.config.fieldStyle)
-                                                .where((event) =>
-                                                    event.id ==
-                                                    _selectedEvent!.id)
-                                          ])
-                                ])),
+                    Center(
+                      child: TextButton(
+                          onPressed: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      TeamViewPage(teamNumber: team))),
+                          child: Text(team.toString())),
+                    ),
+                    Center(
+                      child: FieldHeatMap(
+                          events: data.event.matchesWithTeam(team).fold(
+                              [],
+                              (previousValue, element) => [
+                                    ...previousValue,
+                                    ...element.robot.values.fold(
+                                        [],
+                                        (previousValue, element) => [
+                                              ...previousValue,
+                                              ...element
+                                                  .timelineBlueNormalized(data
+                                                      .event.config.fieldStyle)
+                                                  .where((event) =>
+                                                      event.id ==
+                                                      _selectedEvent!.id)
+                                            ])
+                                  ])),
+                    ),
                   ],
                 ],
               ),

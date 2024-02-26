@@ -6,12 +6,12 @@ const String flipFieldImagePrefs = 'flipFieldImage';
 /// stores local preferences like whether to flip the field map image
 class LocalConfigProvider extends ChangeNotifier {
   ///whether or not to flip the field image in the match recorder
-  bool flipFieldImage = false;
+  bool flipFieldImage = true;
 
   LocalConfigProvider() {
     () async {
       final prefs = await SharedPreferences.getInstance();
-      flipFieldImage = prefs.getBool(flipFieldImagePrefs) ?? false;
+      flipFieldImage = prefs.getBool(flipFieldImagePrefs) ?? true;
     }();
   }
 
