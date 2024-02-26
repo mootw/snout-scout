@@ -1,40 +1,29 @@
 import 'package:flutter/foundation.dart';
 import 'package:fs_shim/fs_shim.dart';
 
+
+final fs = kIsWeb ? fileSystemWeb : fileSystemDefault;
+final storePath = fs.directory('/events');
+
 Future storeText(String key, String value) async {
-  final fs = kIsWeb ? fileSystemWeb : fileSystemDefault;
-
-  // Create a top level directory
-  final dir = fs.directory('/dir');
-
-  // and a file in it
-  final file = fs.file('${dir.path}/$key');
-
-  await file.create(recursive: true);
-  await file.writeAsString(value);
+  final file = fs.file('${storePath.path}/$key');
+  if(await file.exists() == false) {
+    await file.create(recursive: true);
+  }
+  await file.writeAsString(value, flush: true);
 }
 
 Future deleteText(String key) async {
-  final fs = kIsWeb ? fileSystemWeb : fileSystemDefault;
-
-  // Create a top level directory
-  final dir = fs.directory('/dir');
-
   // and a file in it
-  final file = fs.file('${dir.path}/$key');
+  final file = fs.file('${storePath.path}/$key');
 
-  await file.create(recursive: true);
-  await file.delete();
+  if(await file.exists()) {
+    await file.delete();
+  }
 }
 
 Future<String?> readText(String key) async {
-  final fs = kIsWeb ? fileSystemWeb : fileSystemDefault;
-
-  // Create a top level directory
-  final dir = fs.directory('/dir');
-
-  // and a file in it
-  final file = fs.file('${dir.path}/$key');
+  final file = fs.file('${storePath.path}/$key');
 
   if (await file.exists()) {
     return await file.readAsString();
