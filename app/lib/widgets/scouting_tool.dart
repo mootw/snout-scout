@@ -3,6 +3,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:app/providers/cache_memory_imageprovider.dart';
 import 'package:app/style.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
@@ -156,9 +157,11 @@ class _ScoutingToolWidgetState extends State<ScoutingToolWidget> {
         title: Text(widget.tool.label),
         subtitle: _value == null
             ? const Text("No Image")
-            : Image.memory(
+            : Image(
+                image: CacheMemoryImageProvider(
+                    Uint8List.fromList(base64Decode(_value).cast<int>())),
                 fit: BoxFit.contain,
-                Uint8List.fromList(base64Decode(_value).cast<int>())),
+              ),
       );
     }
 

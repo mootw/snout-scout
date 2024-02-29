@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:app/providers/cache_memory_imageprovider.dart';
 import 'package:app/style.dart';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/providers/identity_provider.dart';
@@ -55,10 +56,11 @@ class _DocumentationScreenState extends State<DocumentationScreen> {
           SizedBox(
               height: 250,
               child: ImageViewer(
-                child: Image.memory(
+                child: Image(
+                  image: CacheMemoryImageProvider(
+                      Uint8List.fromList(base64Decode(pitMap).cast<int>())),
                   fit: BoxFit.fitHeight,
-                  scale: 0.5,
-                  Uint8List.fromList(base64Decode(pitMap).cast<int>()),
+                  width: 2000,
                 ),
               )),
         if (pitMap == null)
@@ -92,7 +94,7 @@ class _DocumentationScreenState extends State<DocumentationScreen> {
         ),
         ListTile(
           title: const Text(
-              "Set Field Image (2:1 ratio, red alliance left, scoring table top)"),
+              "Set Field Image (2:1 ratio, blue alliance left, scoring table bottom)"),
           leading: const Icon(Icons.map),
           onTap: () async {
             final identity = context.read<IdentityProvider>().identity;

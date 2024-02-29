@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
+import 'package:app/providers/cache_memory_imageprovider.dart';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/style.dart';
 import 'package:collection/collection.dart';
@@ -544,17 +545,17 @@ class FieldMap extends StatelessWidget {
   }
 }
 
-/// to ensure that the image.memory is properly cached this is a separate widget
 class FieldImage extends StatelessWidget {
   const FieldImage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Image.memory(
-        Uint8List.fromList(
-            base64Decode(context.read<DataProvider>().event.config.fieldImage)
-                .cast<int>()),
-        scale: 0.25,
-        fit: BoxFit.contain);
+    return Image(
+      image: CacheMemoryImageProvider(Uint8List.fromList(
+          base64Decode(context.watch<DataProvider>().event.config.fieldImage)
+              .cast<int>())),
+      fit: BoxFit.contain,
+      width: 2000,
+    );
   }
 }

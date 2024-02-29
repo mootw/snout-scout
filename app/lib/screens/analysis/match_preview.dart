@@ -1,11 +1,13 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:app/providers/cache_memory_imageprovider.dart';
 import 'package:app/widgets/datasheet.dart';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/widgets/fieldwidget.dart';
 import 'package:app/style.dart';
 import 'package:app/screens/view_team_page.dart';
+import 'package:app/widgets/image_view.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -168,15 +170,18 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                                     null
                                 ? AspectRatio(
                                     aspectRatio: 1,
-                                    child: Image.memory(
-                                      fit: BoxFit.cover,
-                                      Uint8List.fromList(base64Decode(context
-                                                      .read<DataProvider>()
-                                                      .event
-                                                      .pitscouting[
-                                                  team.toString()]![
-                                              robotPictureReserved]!)
-                                          .cast<int>()),
+                                    child: ImageViewer(
+                                      child: Image(
+                                        image: CacheMemoryImageProvider(Uint8List
+                                            .fromList(base64Decode(context
+                                                            .read<DataProvider>()
+                                                            .event
+                                                            .pitscouting[
+                                                        team.toString()]![
+                                                    robotPictureReserved]!)
+                                                .cast<int>())),
+                                        fit: BoxFit.cover,
+                                      ),
                                     ),
                                   )
                                 : const Text("No image"),

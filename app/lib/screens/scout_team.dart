@@ -1,7 +1,7 @@
 import 'package:app/providers/identity_provider.dart';
 import 'package:app/widgets/confirm_exit_dialog.dart';
 import 'package:app/providers/data_provider.dart';
-import 'package:app/scouting_tools/scouting_tool.dart';
+import 'package:app/widgets/scouting_tool.dart';
 import 'package:app/widgets/load_status_or_error_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

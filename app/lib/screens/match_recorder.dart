@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:app/providers/cache_memory_imageprovider.dart';
 import 'package:app/providers/local_config_provider.dart';
 import 'package:app/screens/view_team_page.dart';
 import 'package:app/widgets/confirm_exit_dialog.dart';
@@ -8,7 +9,7 @@ import 'package:app/widgets/datasheet.dart';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/widgets/fieldwidget.dart';
 import 'package:app/style.dart';
-import 'package:app/scouting_tools/scouting_tool.dart';
+import 'package:app/widgets/scouting_tool.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -354,8 +355,9 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
         .event
         .pitscouting[widget.team.toString()]?[robotPictureReserved];
     if (pictureData != null) {
-      robotPicture = Image.memory(
-          Uint8List.fromList(base64Decode(pictureData).cast<int>()));
+      robotPicture = Image(
+          image: CacheMemoryImageProvider(
+              Uint8List.fromList(base64Decode(pictureData).cast<int>())));
     }
 
     return Padding(

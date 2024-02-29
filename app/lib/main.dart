@@ -19,6 +19,7 @@ import 'package:app/widgets/match_card.dart';
 import 'package:download/download.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:snout_db/config/eventconfig.dart';
 import 'package:snout_db/patch.dart';
@@ -294,6 +295,20 @@ class _MyHomePageState extends State<MyHomePage> {
                   }
                 },
                 icon: const Icon(Icons.edit)),
+          ),
+          ListTile(
+            title: const Text("App Version"),
+            subtitle: FutureBuilder<PackageInfo>(
+              future: PackageInfo.fromPlatform(),
+              builder: (context, snapshot) {
+                switch (snapshot.connectionState) {
+                  case ConnectionState.done:
+                    return Text(snapshot.data?.version ?? "unknown");
+                  default:
+                    return const SizedBox();
+                }
+              },
+            ),
           ),
         ]),
       ),
