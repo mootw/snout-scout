@@ -76,7 +76,7 @@ class _ScoutingToolWidgetState extends State<ScoutingToolWidget> {
           }
           _value = num.tryParse(text);
         },
-        keyboardType: TextInputType.number,
+        keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: true),
         decoration: InputDecoration(
           label: Text(widget.tool.label),
           border: const OutlineInputBorder(),

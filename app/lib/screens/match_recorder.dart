@@ -47,6 +47,8 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
 
   bool _showSurvey = false;
 
+  static Size maxRecorderPageSize = const Size(1440, 1000);
+
   MatchEvent? get _lastMoveEvent =>
       _events.toList().lastWhereOrNull((event) => event.isPositionEvent);
   FieldPosition? get _robotPosition => _lastMoveEvent?.position;
@@ -209,48 +211,116 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
               _statusAndToolBar()
             ],
           ),
-          body: Row(
-            children: [
-              SizedBox(
-                width: 130 * 2,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    _getTimeline(),
-                    Expanded(
-                      child: LayoutBuilder(builder: (context, constraints) {
-                        final newConstraints = constraints.tighten(height: 500);
-                        return Wrap(
-                          children: [
-                            for (int i = 0; i < scoutingEvents.length; i++)
-                              SizedBox(
-                                height: newConstraints.maxHeight /
-                                    ((scoutingEvents.length +
-                                            (scoutingEvents.length % 2)) /
-                                        2),
-                                width: 130,
-                                child: _getEventButton(scoutingEvents[i]),
-                              ),
-                          ],
-                        );
-                      }),
+          body: Center(
+            child: ConstrainedBox(
+              constraints: BoxConstraints.loose(maxRecorderPageSize),
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 130 * 2,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        _getTimeline(),
+                        Expanded(
+                          child: LayoutBuilder(builder: (context, constraints) {
+                            final newConstraints = constraints.tighten(height: 500);
+                            return Wrap(
+                              children: [
+                                for (int i = 0; i < scoutingEvents.length; i++)
+                                  SizedBox(
+                                    height: newConstraints.maxHeight /
+                                        ((scoutingEvents.length +
+                                                (scoutingEvents.length % 2)) /
+                                            2),
+                                    width: 130,
+                                    child: _getEventButton(scoutingEvents[i]),
+                                  ),
+                              ],
+                            );
+                          }),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                  Expanded(
+                    child: Container(
+                      constraints: const BoxConstraints(maxWidth: 690),
+                      alignment: Alignment.bottomRight,
+                      child: Transform.rotate(
+                        angle: _rotateField ? math.pi : 0,
+                        child: FieldPositionSelector(
+                          coverAlignment: _mode != MatchMode.setup
+                              ? null
+                              : widget.teamAlliance == Alliance.red
+                                  ? -1
+                                  : 1,
+                          teamNumber: widget.team,
+                          alliance: widget.teamAlliance,
+                          robotPosition: _robotPosition,
+                          onTap: (robotPosition) {
+                            HapticFeedback.lightImpact();
+                            setState(() {
+                              for (final event in _events.toList()) {
+                                if (event.isPositionEvent) {
+                                  //Is position event
+                                  if (event.time == _time) {
+                                    //Event is the same time, overrwite
+                                    _events.remove(event);
+                                  }
+                                }
+                              }
+                              _events.add(MatchEvent.robotPositionEvent(
+                                  time: _time, position: robotPosition));
+                            });
+                          },
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              Expanded(
-                child: Container(
-                  constraints: const BoxConstraints(maxWidth: 690),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return ConfirmExitDialog(
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text("${widget.team}"),
+          actions: [
+            FilledButton.tonal(
+                onPressed: () => setState(() {
+                      _showSurvey = !_showSurvey;
+                    }),
+                child: const Text("Show Survey")),
+            const SizedBox(width: 32),
+          ],
+        ),
+        body: Center(
+          child: ConstrainedBox(
+              constraints: BoxConstraints.loose(maxRecorderPageSize),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                _statusAndToolBar(),
+                const Divider(),
+                _getTimeline(),
+                const SizedBox(height: 8),
+                Container(
+                  width: 690,
                   alignment: Alignment.bottomRight,
                   child: Transform.rotate(
                     angle: _rotateField ? math.pi : 0,
                     child: FieldPositionSelector(
+                      teamNumber: widget.team,
                       coverAlignment: _mode != MatchMode.setup
                           ? null
                           : widget.teamAlliance == Alliance.red
                               ? -1
                               : 1,
-                      teamNumber: widget.team,
                       alliance: widget.teamAlliance,
                       robotPosition: _robotPosition,
                       onTap: (robotPosition) {
@@ -272,77 +342,19 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                     ),
                   ),
                 ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    return ConfirmExitDialog(
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text("${widget.team}"),
-          actions: [
-            FilledButton.tonal(
-                onPressed: () => setState(() {
-                      _showSurvey = !_showSurvey;
-                    }),
-                child: const Text("Show Survey")),
-            const SizedBox(width: 32),
-          ],
-        ),
-        body: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            _statusAndToolBar(),
-            const Divider(),
-            _getTimeline(),
-            const SizedBox(height: 8),
-            Container(
-              width: 690,
-              alignment: Alignment.bottomRight,
-              child: Transform.rotate(
-                angle: _rotateField ? math.pi : 0,
-                child: FieldPositionSelector(
-                  teamNumber: widget.team,
-                  coverAlignment: _mode != MatchMode.setup
-                      ? null
-                      : widget.teamAlliance == Alliance.red
-                          ? -1
-                          : 1,
-                  alliance: widget.teamAlliance,
-                  robotPosition: _robotPosition,
-                  onTap: (robotPosition) {
-                    HapticFeedback.lightImpact();
-                    setState(() {
-                      for (final event in _events.toList()) {
-                        if (event.isPositionEvent) {
-                          //Is position event
-                          if (event.time == _time) {
-                            //Event is the same time, overrwite
-                            _events.remove(event);
-                          }
-                        }
-                      }
-                      _events.add(MatchEvent.robotPositionEvent(
-                          time: _time, position: robotPosition));
-                    });
-                  },
+                Wrap(
+                  children: [
+                    for (int i = 0; i < scoutingEvents.length; i++)
+                      SizedBox(
+                        height: 54,
+                        width: (MediaQuery.of(context).size.width / 2),
+                        child: _getEventButton(scoutingEvents[i]),
+                      ),
+                  ],
                 ),
-              ),
-            ),
-            Wrap(
-              children: [
-                for (int i = 0; i < scoutingEvents.length; i++)
-                  SizedBox(
-                    height: 54,
-                    width: (MediaQuery.of(context).size.width / 2),
-                    child: _getEventButton(scoutingEvents[i]),
-                  ),
               ],
             ),
-          ],
+          ),
         ),
       ),
     );
