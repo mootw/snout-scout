@@ -118,6 +118,9 @@ void main(List<String> args) async {
   app.post("/upload_event_file", (Request request) async {
     // Since this edits db files, it could conflict with other writes
     return dbWriteLock.synchronized(() async {
+      final password = env.getOrElse("upload_password", () => "");
+      print(password);
+      print(request.headers['upload_password']);
       if (request.headers['upload_password'] !=
           env.getOrElse("upload_password", () => "")) {
         return Response.unauthorized("upload_password is invalid");
