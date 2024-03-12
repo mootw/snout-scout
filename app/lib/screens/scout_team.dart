@@ -51,6 +51,7 @@ class _PitScoutTeamPageState extends State<PitScoutTeamPage> {
                   }
 
                   final snoutData = context.read<DataProvider>();
+                  final identity = context.read<IdentityProvider>().identity;
 
                   //New map instance to avoid messing up the UI
                   final onlyChanges = Map.of(_surveyItems);
@@ -58,7 +59,7 @@ class _PitScoutTeamPageState extends State<PitScoutTeamPage> {
                       (key, value) => widget.initialData?[key] == value);
                   for (final item in onlyChanges.entries) {
                     Patch patch = Patch(
-                        identity: context.read<IdentityProvider>().identity,
+                        identity: identity,
                         time: DateTime.now(),
                         path: Patch.buildPath(
                             ['pitscouting', widget.team.toString(), item.key]),
@@ -66,7 +67,7 @@ class _PitScoutTeamPageState extends State<PitScoutTeamPage> {
                     //Save the scouting results to the server!!
                     await snoutData.submitPatch(patch);
                   }
-                  if (mounted) {
+                  if (context.mounted) {
                     Navigator.of(context).pop(true);
                   }
                 },

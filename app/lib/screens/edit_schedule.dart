@@ -33,9 +33,9 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
             onPressed: () async {
               List<Patch> patch;
               try {
-                patch = await loadScheduleFromTBA(snoutData.event, context);
+                patch = await loadScheduleFromTBA(snoutData.event, context.read<IdentityProvider>().identity);
               } catch (e) {
-                if (mounted) {
+                if (context.mounted) {
                   showDialog(
                       context: context,
                       builder: (context) {
@@ -48,7 +48,7 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
                 return;
               }
 
-              if (mounted) {
+              if (context.mounted) {
                 showDialog(
                     context: context,
                     builder: (context) {
@@ -62,7 +62,7 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
                                 for (var p in patch) {
                                   await snoutData.submitPatch(p);
                                 }
-                                if (mounted) {
+                                if (context.mounted) {
                                   Navigator.pop(context);
                                 }
                               },

@@ -42,7 +42,7 @@ class _FailedPatchStorageState extends State<FailedPatchStorage> {
                                       .errorContainer),
                               onPressed: () async {
                                 await serverConnection.clearFailedPatches();
-                                if (mounted) {
+                                if (context.mounted) {
                                   Navigator.pop(context);
                                 }
                               },

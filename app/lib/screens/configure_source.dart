@@ -190,6 +190,10 @@ class _ConfigureSourceScreenState extends State<ConfigureSourceScreen> {
                                             'name': event,
                                           });
 
+                                      if (!context.mounted) {
+                                        return;
+                                      }
+
                                       if (response.statusCode == 200) {
                                         Navigator.pop(context);
                                         showDialog(
@@ -260,7 +264,9 @@ class _ConfigureSourceScreenState extends State<ConfigureSourceScreen> {
                                       acceptedTypeGroups: <XTypeGroup>[
                                         typeGroup
                                       ]);
-
+                                  if (!context.mounted) {
+                                    return;
+                                  }
                                   if (file == null) {
                                     showDialog(
                                         context: context,
@@ -287,6 +293,9 @@ class _ConfigureSourceScreenState extends State<ConfigureSourceScreen> {
                                       http.MultipartFile.fromBytes(
                                           file.name, await file.readAsBytes()));
                                   final response = await request.send();
+                                  if (!context.mounted) {
+                                    return;
+                                  }
                                   if (response.statusCode == 200) {
                                     Navigator.pop(context);
                                     showDialog(

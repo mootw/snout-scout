@@ -60,7 +60,7 @@ class _TeamGridListState extends State<TeamGridList> {
                                               ),
                                             ));
 
-                                        if (result != null && mounted) {
+                                        if (result != null && context.mounted) {
                                           Patch patch = Patch(
                                               identity: context
                                                   .read<IdentityProvider>()
@@ -86,7 +86,7 @@ class _TeamGridListState extends State<TeamGridList> {
                                           //Some reason the teams do not come sorted...
                                           teams.sort();
                                         } catch (e) {
-                                          if (mounted) {
+                                          if (context.mounted) {
                                             showDialog(
                                                 context: context,
                                                 builder: (context) =>
@@ -104,7 +104,7 @@ class _TeamGridListState extends State<TeamGridList> {
                                           }
                                           return;
                                         }
-                                        if (!mounted) {
+                                        if (!context.mounted) {
                                           return;
                                         }
 
@@ -117,7 +117,7 @@ class _TeamGridListState extends State<TeamGridList> {
                                               ),
                                             ));
 
-                                        if (result != null && mounted) {
+                                        if (result != null && context.mounted) {
                                           Patch patch = Patch(
                                               identity: context
                                                   .read<IdentityProvider>()

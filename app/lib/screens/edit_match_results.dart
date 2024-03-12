@@ -67,7 +67,7 @@ class _EditMatchResultsState extends State<EditMatchResults> {
                     _blueScore.text = result.blueScore.toString();
                     _matchEndTime = result.startTime.add(matchLength);
 
-                    if (mounted) {
+                    if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                         content: Text('Match data has been filled in'),
                         duration: Duration(seconds: 4),
@@ -127,7 +127,7 @@ class _EditMatchResultsState extends State<EditMatchResults> {
                           _matchEndTime.hour, _matchEndTime.minute);
                     }
 
-                    if (mounted) {
+                    if (context.mounted) {
                       TimeOfDay? time = await showTimePicker(
                           context: context,
                           initialTime: TimeOfDay(
