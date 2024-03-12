@@ -21,7 +21,7 @@ import 'edit_lock.dart';
 
 //TODO implement https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/ETag
 
-final env = DotEnv(includePlatformEnvironment: true)..load();
+final env = DotEnv(includePlatformEnvironment: true);
 int serverPort = 6749;
 Map<String, EventData> loadedEvents = {};
 
@@ -64,6 +64,8 @@ void main(List<String> args) async {
       '${event.level}: ${event.message} ${event.error ?? ''} ${event.stackTrace ?? ''}',
     );
   });
+
+  env.load();
 
   // Create the events directory if it does not exist
   eventsDirectory.create();
@@ -118,10 +120,7 @@ void main(List<String> args) async {
   app.post("/upload_event_file", (Request request) async {
     // Since this edits db files, it could conflict with other writes
     return dbWriteLock.synchronized(() async {
-      final password = env.getOrElse("upload_password", () => "");
-      print(password);
-      print(request.headers['upload_password']);
-      if (request.headers['upload_password'] !=
+      if ((request.headers['upload_password'] ?? "") !=
           env.getOrElse("upload_password", () => "")) {
         return Response.unauthorized("upload_password is invalid");
       }
