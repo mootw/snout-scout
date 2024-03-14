@@ -33,7 +33,8 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
             onPressed: () async {
               List<Patch> patch;
               try {
-                patch = await loadScheduleFromTBA(snoutData.event, context.read<IdentityProvider>().identity);
+                patch = await loadScheduleFromTBA(
+                    snoutData.event, context.read<IdentityProvider>().identity);
               } catch (e) {
                 if (context.mounted) {
                   showDialog(

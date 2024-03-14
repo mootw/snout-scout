@@ -43,8 +43,9 @@ class FRCMatch implements Comparable<FRCMatch> {
   //Default sorting should be based on match time, and then hashCode
   @override
   int compareTo(FRCMatch other) {
-    final timeDiff = scheduledTime.difference(other.scheduledTime).inMicroseconds;
-    if(timeDiff == 0) {
+    final timeDiff =
+        scheduledTime.difference(other.scheduledTime).inMicroseconds;
+    if (timeDiff == 0) {
       return hashCode.compareTo(other.hashCode);
     } else {
       return timeDiff;

@@ -47,7 +47,7 @@ class FRCEvent {
   // Objects that are "equal" get removed. not sure why given they do have unique keys.
   // I had to make the matches compare first based on time, and then hashCode to make it work.
   // the error is reproducable by creating 2 matches with different IDs, but the scheduled time is the same
-   : matches = SplayTreeMap.of(
+  : matches = SplayTreeMap.of(
           matches,
           (a, b) => matches[a]!.compareTo(matches[b]!),
         );
@@ -73,7 +73,8 @@ class FRCEvent {
   }
 
   //Returns the id for a given match
-  String matchIDFromMatch(FRCMatch match) => matches.entries.firstWhere((element) => element.value == match).key;
+  String matchIDFromMatch(FRCMatch match) =>
+      matches.entries.firstWhere((element) => element.value == match).key;
 
   /// returns matches with a specific team in them
   List<FRCMatch> matchesWithTeam(int team) =>

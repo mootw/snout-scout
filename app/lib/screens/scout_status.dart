@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class ScoutStatusPage extends StatelessWidget {
-
   const ScoutStatusPage({super.key});
 
   @override
@@ -20,10 +19,10 @@ class ScoutStatusPage extends StatelessWidget {
             ListTile(
               title: Text(scout.identity),
               subtitle: Text(scout.status),
-              trailing: Text("${DateTime.now().difference(scout.time).inMinutes} min(s) ago"),
+              trailing: Text(
+                  "${DateTime.now().difference(scout.time).inMinutes} min(s) ago"),
             ),
-            if(scoutStatus.isEmpty)
-              const Text("No active scouts"),
+          if (scoutStatus.isEmpty) const Text("No active scouts"),
         ],
       ),
     );

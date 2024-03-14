@@ -43,9 +43,9 @@ class _EditMarkdownPageState extends State<EditMarkdownPage> {
               ),
             ),
             Expanded(
-                child: SingleChildScrollView(
-              child: MarkdownBody(data: _controller.text),
-            ),
+              child: SingleChildScrollView(
+                child: MarkdownBody(data: _controller.text),
+              ),
             ),
           ],
         ),

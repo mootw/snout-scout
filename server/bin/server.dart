@@ -115,7 +115,8 @@ void main(List<String> args) async {
                       (element) => element.identity == decoded['identity'],
                     );
                 loadedEvents[event]?.scoutStatus.removeWhere(
-                      (element) => DateTime.now().difference(element.time).inMinutes > 9,
+                      (element) =>
+                          DateTime.now().difference(element.time).inMinutes > 9,
                     );
                 loadedEvents[event]?.scoutStatus.add(
                   (
@@ -124,10 +125,11 @@ void main(List<String> args) async {
                     time: DateTime.now()
                   ),
                 );
-                loadedEvents[event]?.scoutStatus.sort((a, b) => a.identity.compareTo(b.identity));
+                loadedEvents[event]
+                    ?.scoutStatus
+                    .sort((a, b) => a.identity.compareTo(b.identity));
 
                 loadedEvents[event]?.sendScoutStatusToListeners();
-                break;
             }
           } catch (e, s) {
             logger.severe("failed to handle socket message", e, s);

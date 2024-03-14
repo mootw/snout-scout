@@ -37,7 +37,9 @@ class _PitScoutTeamPageState extends State<PitScoutTeamPage> {
 
   @override
   Widget build(BuildContext context) {
-    context.read<DataProvider>().updateStatus(context, "Scouting team ${widget.team}");
+    context
+        .read<DataProvider>()
+        .updateStatus(context, "Scouting team ${widget.team}");
     return ConfirmExitDialog(
       child: Scaffold(
         appBar: AppBar(

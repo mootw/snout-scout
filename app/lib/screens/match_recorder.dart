@@ -16,7 +16,6 @@ import 'package:flutter/services.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:provider/provider.dart';
 import 'package:snout_db/config/matcheventconfig.dart';
-import 'package:snout_db/event/match.dart';
 import 'package:snout_db/event/matchevent.dart';
 import 'package:snout_db/event/pitscoutresult.dart';
 import 'package:snout_db/event/robotmatchresults.dart';
@@ -30,7 +29,10 @@ class MatchRecorderPage extends StatefulWidget {
   final Alliance teamAlliance;
 
   const MatchRecorderPage(
-      {super.key, required this.matchDescription, required this.team, required this.teamAlliance});
+      {super.key,
+      required this.matchDescription,
+      required this.team,
+      required this.teamAlliance});
 
   @override
   State<MatchRecorderPage> createState() => _MatchRecorderPageState();
@@ -146,7 +148,8 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
     //Allow slightly wide to be considered vertical for foldable devices or near-square devices
     final isHorizontal = MediaQuery.of(context).size.aspectRatio > 1.2;
 
-    context.read<DataProvider>().updateStatus(context, "Scouting team ${widget.team} in ${widget.matchDescription}\n${_time == 0 ? "Waiting to start" : "$_time seconds into the match"}");
+    context.read<DataProvider>().updateStatus(context,
+        "Scouting team ${widget.team} in ${widget.matchDescription}\n${_time == 0 ? "Waiting to start" : "$_time seconds into the match"}");
 
     if (_showSurvey || _mode == MatchMode.finished) {
       return ConfirmExitDialog(
@@ -228,7 +231,8 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                         _getTimeline(),
                         Expanded(
                           child: LayoutBuilder(builder: (context, constraints) {
-                            final newConstraints = constraints.tighten(height: 500);
+                            final newConstraints =
+                                constraints.tighten(height: 500);
                             return Wrap(
                               children: [
                                 for (int i = 0; i < scoutingEvents.length; i++)
@@ -305,7 +309,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
         ),
         body: Center(
           child: ConstrainedBox(
-              constraints: BoxConstraints.loose(maxRecorderPageSize),
+            constraints: BoxConstraints.loose(maxRecorderPageSize),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [

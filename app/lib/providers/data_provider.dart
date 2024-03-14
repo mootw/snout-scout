@@ -113,9 +113,10 @@ class DataProvider extends ChangeNotifier {
   }
 
   String? oldStatus;
+
   /// Used to update the server with this scouts status (what they are doing right now) in text form
   void updateStatus(BuildContext context, String newStatus) {
-    if(ModalRoute.of(context)?.isCurrent == false) {
+    if (ModalRoute.of(context)?.isCurrent == false) {
       print("not top most route");
       return;
     }

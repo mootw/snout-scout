@@ -99,14 +99,15 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    
-    context.read<DataProvider>().updateStatus(context, switch (_currentPageIndex) {
-      (0) => "Checking out the Schedule",
-      (1) => "Looking at the Teams",
-      (2) => "Analyzing the numbers",
-      (3) => "Reading Docs",
-      _ => "In the matrix (Some home page this is a bug)",
-    } );
+    context.read<DataProvider>().updateStatus(
+        context,
+        switch (_currentPageIndex) {
+          (0) => "Checking out the Schedule",
+          (1) => "Looking at the Teams",
+          (2) => "Analyzing the numbers",
+          (3) => "Reading Docs",
+          _ => "In the matrix (Some home page this is a bug)",
+        });
 
     final data = context.watch<DataProvider>();
     final identityProvider = context.watch<IdentityProvider>();
@@ -241,8 +242,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ListTile(
             title: const Text("Scout Status"),
             trailing: const Icon(Icons.people),
-            subtitle:
-                Text('${data.scoutStatus.length.toString()} scouts'),
+            subtitle: Text('${data.scoutStatus.length.toString()} scouts'),
             onTap: () => Navigator.push(
                 context,
                 MaterialPageRoute(
