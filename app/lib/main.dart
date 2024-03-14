@@ -184,17 +184,15 @@ class _MyHomePageState extends State<MyHomePage> {
         child: ListView(children: [
           ListTile(
             title: const Text("Identity"),
+            onTap: () async {
+              final result = await showStringInputDialog(
+                  context, "Identity", identityProvider.identity);
+              if (result != null) {
+                await identityProvider.setIdentity(result);
+              }
+            },
             subtitle: Text(identityProvider.identity),
-            trailing: IconButton(
-              icon: const Icon(Icons.edit),
-              onPressed: () async {
-                final result = await showStringInputDialog(
-                    context, "Identity", identityProvider.identity);
-                if (result != null) {
-                  await identityProvider.setIdentity(result);
-                }
-              },
-            ),
+            leading: const Icon(Icons.edit),
           ),
           ListTile(
             title: const Text("Data Source"),
@@ -243,58 +241,56 @@ class _MyHomePageState extends State<MyHomePage> {
           ListTile(
             title: const Text("Event Config"),
             subtitle: Text(data.event.config.name),
-            trailing: IconButton(
-                onPressed: () async {
-                  final identity = context.read<IdentityProvider>().identity;
+            leading: const Icon(Icons.edit),
+            onTap: () async {
+              final identity = context.read<IdentityProvider>().identity;
 
-                  final config = context.read<DataProvider>().event.config;
+              final config = context.read<DataProvider>().event.config;
 
-                  final removeImage = EventConfig(
-                      name: config.name,
-                      team: config.team,
-                      fieldImage:
-                          'Removed from editor for performance reasons. edit via the docs page.',
-                      docs: config.docs,
-                      fieldStyle: config.fieldStyle,
-                      matchscouting: config.matchscouting,
-                      pitscouting: config.pitscouting,
-                      tbaEventId: config.tbaEventId,
-                      tbaSecretKey: config.tbaSecretKey);
+              final removeImage = EventConfig(
+                  name: config.name,
+                  team: config.team,
+                  fieldImage:
+                      'Removed from editor for performance reasons. edit via the docs page.',
+                  docs: config.docs,
+                  fieldStyle: config.fieldStyle,
+                  matchscouting: config.matchscouting,
+                  pitscouting: config.pitscouting,
+                  tbaEventId: config.tbaEventId,
+                  tbaSecretKey: config.tbaSecretKey);
 
-                  final result = await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => JSONEditor(
-                          validate: EventConfig.fromJson,
-                          source: removeImage,
-                        ),
-                      ));
+              final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => JSONEditor(
+                      validate: EventConfig.fromJson,
+                      source: removeImage,
+                    ),
+                  ));
 
-                  if (result != null) {
-                    final modAsConfig =
-                        EventConfig.fromJson(jsonDecode(result));
-                    final reAppendedConfig = EventConfig(
-                        name: modAsConfig.name,
-                        team: modAsConfig.team,
-                        fieldImage: config.fieldImage,
-                        docs: modAsConfig.docs,
-                        fieldStyle: modAsConfig.fieldStyle,
-                        matchscouting: modAsConfig.matchscouting,
-                        pitscouting: modAsConfig.pitscouting,
-                        tbaEventId: modAsConfig.tbaEventId,
-                        tbaSecretKey: modAsConfig.tbaSecretKey);
+              if (result != null) {
+                final modAsConfig = EventConfig.fromJson(jsonDecode(result));
+                final reAppendedConfig = EventConfig(
+                    name: modAsConfig.name,
+                    team: modAsConfig.team,
+                    fieldImage: config.fieldImage,
+                    docs: modAsConfig.docs,
+                    fieldStyle: modAsConfig.fieldStyle,
+                    matchscouting: modAsConfig.matchscouting,
+                    pitscouting: modAsConfig.pitscouting,
+                    tbaEventId: modAsConfig.tbaEventId,
+                    tbaSecretKey: modAsConfig.tbaSecretKey);
 
-                    Patch patch = Patch(
-                        identity: identity,
-                        time: DateTime.now(),
-                        path: Patch.buildPath(['config']),
-                        value: reAppendedConfig.toJson());
-                    //Save the scouting results to the server!!
+                Patch patch = Patch(
+                    identity: identity,
+                    time: DateTime.now(),
+                    path: Patch.buildPath(['config']),
+                    value: reAppendedConfig.toJson());
+                //Save the scouting results to the server!!
 
-                    await data.submitPatch(patch);
-                  }
-                },
-                icon: const Icon(Icons.edit)),
+                await data.submitPatch(patch);
+              }
+            },
           ),
           ListTile(
             title: const Text("App Version"),
