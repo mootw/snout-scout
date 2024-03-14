@@ -4,6 +4,7 @@ import 'package:app/providers/data_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:snout_db/patch.dart';
 
 class PatchHistoryPage extends StatefulWidget {
   final String? filter;
@@ -71,6 +72,24 @@ class _PatchHistoryPageState extends State<PatchHistoryPage> {
               onTap: () => showDialog(
                   context: context,
                   builder: (_) => AlertDialog(
+                        actions: [
+                          TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: const Text("Close")),
+                          TextButton(
+                              onPressed: () {
+                                final newPatchToApply = Patch(
+                                  identity: patch.identity,
+                                  path: patch.path,
+                                  time: DateTime.now(),
+                                  value: patch.value,
+                                );
+                                final snoutData = context.read<DataProvider>();
+                                snoutData.submitPatch(newPatchToApply);
+                                Navigator.pop(context);
+                              },
+                              child: const Text("Re-Submit Patch As NEW")),
+                        ],
                         content: SingleChildScrollView(
                             child: SelectableText(json.encode(patch))),
                       )),

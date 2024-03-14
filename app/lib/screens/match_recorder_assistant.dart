@@ -95,6 +95,8 @@ class _MatchRecorderAssistantPageState
   Widget build(BuildContext context) {
     final snoutData = context.watch<DataProvider>();
     FRCMatch match = snoutData.event.matches[widget.matchid]!;
+    context.read<DataProvider>().updateStatus(
+        context, "Match scouting ${match.description}: picking a team");
     return Scaffold(
       appBar: AppBar(
         title: Text("Recording ${match.description}"),
@@ -235,14 +237,18 @@ class _MatchRecorderAssistantPageState
   void _recordTeam(String matchid, int team, Alliance alliance) async {
     final snoutData = context.read<DataProvider>();
     final identity = context.read<IdentityProvider>().identity;
+    FRCMatch match = snoutData.event.matches[widget.matchid]!;
     RobotMatchResults? result = await navigateWithEditLock<RobotMatchResults>(
         context,
         "match:$matchid:$team:timeline",
         (context) => Navigator.pushReplacement(
               context,
               MaterialPageRoute(
-                  builder: (context) =>
-                      MatchRecorderPage(team: team, teamAlliance: alliance)),
+                  builder: (context) => MatchRecorderPage(
+                        team: team,
+                        teamAlliance: alliance,
+                        matchDescription: match.description,
+                      )),
             ));
 
     if (result != null) {

@@ -34,6 +34,7 @@ class _MatchPageState extends State<MatchPage> {
   Widget build(BuildContext context) {
     final snoutData = context.watch<DataProvider>();
     FRCMatch match = snoutData.event.matches[widget.matchid]!;
+    context.read<DataProvider>().updateStatus(context, "Looking at ${match.description}");
     return Scaffold(
       appBar: AppBar(
         title: Text(match.description),

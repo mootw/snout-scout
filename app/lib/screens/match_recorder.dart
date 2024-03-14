@@ -16,6 +16,7 @@ import 'package:flutter/services.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:provider/provider.dart';
 import 'package:snout_db/config/matcheventconfig.dart';
+import 'package:snout_db/event/match.dart';
 import 'package:snout_db/event/matchevent.dart';
 import 'package:snout_db/event/pitscoutresult.dart';
 import 'package:snout_db/event/robotmatchresults.dart';
@@ -24,11 +25,12 @@ import 'dart:math' as math;
 import 'package:snout_db/snout_db.dart';
 
 class MatchRecorderPage extends StatefulWidget {
+  final String matchDescription;
   final int team;
   final Alliance teamAlliance;
 
   const MatchRecorderPage(
-      {super.key, required this.team, required this.teamAlliance});
+      {super.key, required this.matchDescription, required this.team, required this.teamAlliance});
 
   @override
   State<MatchRecorderPage> createState() => _MatchRecorderPageState();
@@ -143,6 +145,8 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
   Widget build(BuildContext context) {
     //Allow slightly wide to be considered vertical for foldable devices or near-square devices
     final isHorizontal = MediaQuery.of(context).size.aspectRatio > 1.2;
+
+    context.read<DataProvider>().updateStatus(context, "Scouting team ${widget.team} in ${widget.matchDescription}\n${_time == 0 ? "Waiting to start" : "$_time seconds into the match"}");
 
     if (_showSurvey || _mode == MatchMode.finished) {
       return ConfirmExitDialog(

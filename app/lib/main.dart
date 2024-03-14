@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:app/providers/data_provider.dart';
 import 'package:app/providers/local_config_provider.dart';
+import 'package:app/screens/scout_status.dart';
 import 'package:app/style.dart';
 import 'package:app/providers/identity_provider.dart';
 import 'package:app/screens/analysis.dart';
@@ -98,6 +99,15 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    
+    context.read<DataProvider>().updateStatus(context, switch (_currentPageIndex) {
+      (0) => "Checking out the Schedule",
+      (1) => "Looking at the Teams",
+      (2) => "Analyzing the numbers",
+      (3) => "Reading Docs",
+      _ => "In the matrix (Some home page this is a bug)",
+    } );
+
     final data = context.watch<DataProvider>();
     final identityProvider = context.watch<IdentityProvider>();
     String? tbaKey = context.watch<DataProvider>().event.config.tbaEventId;
@@ -226,6 +236,17 @@ class _MyHomePageState extends State<MyHomePage> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => const PatchHistoryPage(),
+                )),
+          ),
+          ListTile(
+            title: const Text("Scout Status"),
+            trailing: const Icon(Icons.people),
+            subtitle:
+                Text('${data.scoutStatus.length.toString()} scouts'),
+            onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ScoutStatusPage(),
                 )),
           ),
           ListTile(

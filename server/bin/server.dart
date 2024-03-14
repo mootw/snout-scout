@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:dotenv/dotenv.dart';
 import 'package:logging/logging.dart';
 import 'package:rfc_6901/rfc_6901.dart';
+import 'package:server/socket_messages.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_gzip/shelf_gzip.dart';
@@ -40,6 +41,26 @@ final eventsDirectory = Directory('events');
 //Stuff that should be done for each event that is loaded.
 class EventData {
   EventData(this.file);
+
+  List<({String identity, String status, DateTime time})> scoutStatus = [];
+
+  void sendScoutStatusToListeners() {
+    for (final listener in listeners) {
+      listener.sink.add(
+        json.encode({
+          "type": SocketMessageType.scoutStatus,
+          "value": [
+            for (final status in scoutStatus)
+              {
+                "identity": status.identity,
+                "status": status.status,
+                "time": status.time.toIso8601String(),
+              },
+          ],
+        }),
+      );
+    }
+  }
 
   File file;
   List<WebSocketChannel> listeners = [];
@@ -79,9 +100,39 @@ void main(List<String> args) async {
         webSocket.sink.done
             .then((value) => loadedEvents[event]?.listeners.remove(webSocket));
         loadedEvents[event]?.listeners.add(webSocket);
-        // webSocket.stream.listen((message) {
-        //   webSocket.sink.add("echo $message");
-        // });
+        loadedEvents[event]?.sendScoutStatusToListeners();
+
+        webSocket.stream.listen((message) {
+          try {
+            final decoded =
+                json.decode(message as String) as Map<String, dynamic>;
+            logger.fine("got socket message");
+
+            switch (decoded['type'] as String) {
+              case SocketMessageType.scoutStatusUpdate:
+                //remove old status
+                loadedEvents[event]?.scoutStatus.removeWhere(
+                      (element) => element.identity == decoded['identity'],
+                    );
+                loadedEvents[event]?.scoutStatus.removeWhere(
+                      (element) => DateTime.now().difference(element.time).inMinutes > 9,
+                    );
+                loadedEvents[event]?.scoutStatus.add(
+                  (
+                    identity: decoded['identity'],
+                    status: decoded['value'],
+                    time: DateTime.now()
+                  ),
+                );
+                loadedEvents[event]?.scoutStatus.sort((a, b) => a.identity.compareTo(b.identity));
+
+                loadedEvents[event]?.sendScoutStatusToListeners();
+                break;
+            }
+          } catch (e, s) {
+            logger.severe("failed to handle socket message", e, s);
+          }
+        });
       },
       pingInterval: const Duration(hours: 8),
     );
@@ -275,7 +326,12 @@ void main(List<String> args) async {
           //Successful patch, send this update to all listeners
           for (final WebSocketChannel listener
               in loadedEvents[eventID]?.listeners ?? []) {
-            listener.sink.add(json.encode(patch));
+            listener.sink.add(
+              json.encode({
+                "type": SocketMessageType.newPatch,
+                "patch": patch.toJson(),
+              }),
+            );
           }
 
           //Write the new DB to disk

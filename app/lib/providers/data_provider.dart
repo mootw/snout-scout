@@ -2,11 +2,14 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:app/api.dart';
+import 'package:app/providers/identity_provider.dart';
 import 'package:app/providers/loading_status_service.dart';
 import 'package:app/screens/configure_source.dart';
 import 'package:app/services/data_service.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
+import 'package:provider/provider.dart';
+import 'package:server/socket_messages.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:snout_db/event/frcevent.dart';
 import 'package:snout_db/patch.dart';
@@ -109,6 +112,26 @@ class DataProvider extends ChangeNotifier {
     return future;
   }
 
+  String? oldStatus;
+  /// Used to update the server with this scouts status (what they are doing right now) in text form
+  void updateStatus(BuildContext context, String newStatus) {
+    if(ModalRoute.of(context)?.isCurrent == false) {
+      print("not top most route");
+      return;
+    }
+    final identity = context.read<IdentityProvider>().identity;
+
+    if (_channel != null && newStatus != oldStatus) {
+      //channel is still open
+      _channel?.sink.add(json.encode({
+        "type": SocketMessageType.scoutStatusUpdate,
+        "identity": identity,
+        "value": newStatus,
+      }));
+      oldStatus = newStatus;
+    }
+  }
+
   //Writes a patch to local disk and submits it to the server.
   Future submitPatch(Patch patch) {
     final future = () async {
@@ -190,6 +213,9 @@ class DataProvider extends ChangeNotifier {
   bool connected = true;
 
   WebSocketChannel? _channel;
+
+  //
+  List<({String identity, String status, DateTime time})> scoutStatus = [];
 
   Future<List<String>> getEventList() async {
     final url = serverURI.resolve("/events");
@@ -324,6 +350,14 @@ class DataProvider extends ChangeNotifier {
   void _initializeLiveServerPatches() async {
     //Do not close the stream if it already exists idk how that behaves
     //it might reuslt in the onDone being called unexpetedly.
+
+    // SO the IO implementation supports a ping interval. im like 90% sure there is a bug in the library implementation
+    // that makes it not correctly ping or reply to ping messages from the server.
+    // I want to avoid having an open dead connection without any frames, because proxies are likely to close it,
+    // and users implementing the app will have a hard time debugging the randomly closed connections. so i like the idea
+    // of sending garbage frames more regularly (every minute or two), to keep the connection "alive" for proxies
+    // right now there is no REASON to send data that frequently. There is a ping option in the IO implementation of the lib
+    // but since this is primarily a web app we cant use that.
     _channel = WebSocketChannel.connect(Uri.parse(
         '${serverURL.startsWith("https") ? "wss" : "ws"}://${serverURI.host}:${serverURI.port}/listen/$selectedEvent'));
 
@@ -349,16 +383,41 @@ class DataProvider extends ChangeNotifier {
       }
 
       try {
-        //apply patch to local state BUT do not save it to
-        //disk because it is AMBIGUOUS what the local state is
-        final patch = Patch.fromJson(json.decode(event));
+        final decoded = json.decode(event);
 
-        //Do not add a patch that exists already
-        //TODO make the server not send the patch back to the client that sent it, duh
-        if (database.patches.any((item) =>
-                json.encode(item.toJson()) == json.encode(patch.toJson())) ==
-            false) {
-          database.addPatch(patch);
+        switch (decoded['type'] as String?) {
+          case SocketMessageType.scoutStatus:
+            final list = decoded['value'] as List;
+
+            scoutStatus.clear();
+            for (final item in list) {
+              scoutStatus.add((
+                identity: item['identity'],
+                status: item['status'],
+                time: DateTime.parse(item['time']),
+              ));
+            }
+
+            break;
+          case SocketMessageType.newPatch:
+
+            //apply patch to local state BUT do not save it to
+            //disk because it is AMBIGUOUS what the local state is
+            final patch = Patch.fromJson(event['patch']);
+
+            //Do not add a patch that exists already
+            //TODO make the server not send the patch back to the client that sent it, duh
+            if (database.patches.any((item) =>
+                    json.encode(item.toJson()) ==
+                    json.encode(patch.toJson())) ==
+                false) {
+              database.addPatch(patch);
+            }
+            break;
+          default:
+            Logger.root
+                .warning("unknown socket message: $event", StackTrace.current);
+            break;
         }
       } catch (e, s) {
         Logger.root.severe("socket parse error", e, s);
@@ -375,7 +434,7 @@ class DataProvider extends ChangeNotifier {
       connected = false;
       notifyListeners();
       //Re-attempt a connection after some time
-      Timer(const Duration(seconds: 4), () {
+      Timer(const Duration(seconds: 2), () {
         if (connected == false) {
           _initializeLiveServerPatches();
         }

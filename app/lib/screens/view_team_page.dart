@@ -39,6 +39,8 @@ class _TeamViewPageState extends State<TeamViewPage> {
   @override
   Widget build(BuildContext context) {
     final data = context.watch<DataProvider>();
+    
+    context.read<DataProvider>().updateStatus(context, "Checking out team ${widget.teamNumber}");
 
     String? teamName =
         data.event.pitscouting[widget.teamNumber.toString()]?[teamNameReserved];
