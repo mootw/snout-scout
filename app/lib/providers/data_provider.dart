@@ -117,7 +117,6 @@ class DataProvider extends ChangeNotifier {
   /// Used to update the server with this scouts status (what they are doing right now) in text form
   void updateStatus(BuildContext context, String newStatus) {
     if (ModalRoute.of(context)?.isCurrent == false) {
-      print("not top most route");
       return;
     }
     final identity = context.read<IdentityProvider>().identity;
@@ -383,6 +382,8 @@ class DataProvider extends ChangeNotifier {
         return;
       }
 
+      print("new socket message: " + event);
+
       try {
         final decoded = json.decode(event);
 
@@ -401,10 +402,9 @@ class DataProvider extends ChangeNotifier {
 
             break;
           case SocketMessageType.newPatch:
-
             //apply patch to local state BUT do not save it to
             //disk because it is AMBIGUOUS what the local state is
-            final patch = Patch.fromJson(event['patch']);
+            final patch = Patch.fromJson(decoded['patch']);
 
             //Do not add a patch that exists already
             //TODO make the server not send the patch back to the client that sent it, duh
