@@ -312,6 +312,20 @@ class _TeamViewPageState extends State<TeamViewPage> {
                                               event.id == eventType.id)
                                     ])),
                   ]),
+                Column(children: [
+                  const SizedBox(height: 16),
+                  Text("Ending Positions", style: Theme.of(context).textTheme.titleMedium),
+                  FieldHeatMap(events: [
+                  for (final match in data.event
+                            .teamRecordedMatches(widget.teamNumber))
+                            match
+                                .value.robot[widget.teamNumber.toString()]!
+                                .timelineInterpolatedBlueNormalized(
+                                    data.event.config.fieldStyle)
+                                .where((element) => element.isPositionEvent).last
+                      ].nonNulls.toList(),
+                ),
+                ],),
                 Column(
                   children: [
                     const SizedBox(height: 16),

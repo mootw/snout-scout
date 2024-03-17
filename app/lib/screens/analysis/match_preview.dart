@@ -249,6 +249,26 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                           Column(
                             children: [
                               const SizedBox(height: 8),
+                              Text("Ending Positions",
+                                  style:
+                                      Theme.of(context).textTheme.titleMedium),
+                              FieldHeatMap(
+                                events: [
+                                  for (final match
+                                      in data.event.teamRecordedMatches(team))
+                                    match.value.robot[team.toString()]!
+                                        .timelineInterpolatedBlueNormalized(
+                                            data.event.config.fieldStyle)
+                                        .where((element) =>
+                                            element.isPositionEvent)
+                                        .last
+                                ].nonNulls.toList(),
+                              ),
+                            ],
+                          ),
+                          Column(
+                            children: [
+                              const SizedBox(height: 8),
                               Text("Driving Tendencies",
                                   style:
                                       Theme.of(context).textTheme.titleMedium),
