@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:app/providers/data_provider.dart';
 import 'package:app/style.dart';
 import 'package:app/screens/teams_page.dart';
@@ -111,7 +113,8 @@ class _SurveyItemRatioChartState extends State<SurveyItemRatioChart> {
                 for (int i = 0; i < valueKeys.entries.length; i++)
                   PieChartSectionData(
                     radius: _selectedIndex == i ? 45 : 40,
-                    title: valueKeys.entries.toList()[i].key,
+                    // Shorten the text to 30 "characters"
+                    title: valueKeys.entries.toList()[i].key.substring(0, min(valueKeys.entries.toList()[i].key.length, 30)),
                     value:
                         valueKeys.entries.toList()[i].value.length.toDouble(),
                     color: getColorFromIndex(i),

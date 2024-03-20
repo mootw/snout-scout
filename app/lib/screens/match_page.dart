@@ -201,28 +201,22 @@ class _MatchPageState extends State<MatchPage> {
                   const SizedBox(height: 16),
                   Text(eventType.label,
                       style: Theme.of(context).textTheme.titleMedium),
-                  FieldHeatMap(
-                      events: match.robot.values.fold(
-                          [],
-                          (previousValue, element) => [
-                                ...previousValue,
-                                ...element.timeline
-                                    .where((event) => event.id == eventType.id)
-                              ])),
+                  FieldHeatMap(events: [
+                    for (final robot in match.robot.values)
+                      ...robot.timeline
+                          .where((event) => event.id == eventType.id),
+                  ]),
                 ]),
               Column(
                 children: [
                   const SizedBox(height: 16),
                   Text("Driving Tendencies",
                       style: Theme.of(context).textTheme.titleMedium),
-                  FieldHeatMap(
-                      events: match.robot.values.fold(
-                          [],
-                          (previousValue, element) => [
-                                ...previousValue,
-                                ...element.timelineInterpolated
-                                    .where((event) => event.isPositionEvent)
-                              ])),
+                  FieldHeatMap(events: [
+                    for (final robot in match.robot.values)
+                      ...robot.timelineInterpolated
+                          .where((event) => event.isPositionEvent)
+                  ]),
                 ],
               ),
             ],

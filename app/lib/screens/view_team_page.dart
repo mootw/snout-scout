@@ -297,54 +297,46 @@ class _TeamViewPageState extends State<TeamViewPage> {
                     const SizedBox(height: 16),
                     Text(eventType.label,
                         style: Theme.of(context).textTheme.titleMedium),
-                    FieldHeatMap(
-                        events: data.event
-                            .teamRecordedMatches(widget.teamNumber)
-                            .fold(
-                                [],
-                                (previousValue, element) => [
-                                      ...previousValue,
-                                      ...?element.value
-                                          .robot[widget.teamNumber.toString()]
-                                          ?.timelineBlueNormalized(
-                                              data.event.config.fieldStyle)
-                                          .where((event) =>
-                                              event.id == eventType.id)
-                                    ])),
+                    FieldHeatMap(events: [
+                      for (final match
+                          in data.event.teamRecordedMatches(widget.teamNumber))
+                        ...?match.value.robot[widget.teamNumber.toString()]
+                            ?.timelineBlueNormalized(
+                                data.event.config.fieldStyle)
+                            .where((event) => event.id == eventType.id)
+                    ]),
                   ]),
-                Column(children: [
-                  const SizedBox(height: 16),
-                  Text("Ending Positions", style: Theme.of(context).textTheme.titleMedium),
-                  FieldHeatMap(events: [
-                  for (final match in data.event
+                Column(
+                  children: [
+                    const SizedBox(height: 16),
+                    Text("Ending Positions",
+                        style: Theme.of(context).textTheme.titleMedium),
+                    FieldHeatMap(
+                      events: [
+                        for (final match in data.event
                             .teamRecordedMatches(widget.teamNumber))
-                            match
-                                .value.robot[widget.teamNumber.toString()]!
-                                .timelineInterpolatedBlueNormalized(
-                                    data.event.config.fieldStyle)
-                                .where((element) => element.isPositionEvent).last
+                          match.value.robot[widget.teamNumber.toString()]!
+                              .timelineInterpolatedBlueNormalized(
+                                  data.event.config.fieldStyle)
+                              .where((element) => element.isPositionEvent)
+                              .last
                       ].nonNulls.toList(),
+                    ),
+                  ],
                 ),
-                ],),
                 Column(
                   children: [
                     const SizedBox(height: 16),
                     Text("Driving Tendencies",
                         style: Theme.of(context).textTheme.titleMedium),
-                    FieldHeatMap(
-                        events: data.event
-                            .teamRecordedMatches(widget.teamNumber)
-                            .fold(
-                                [],
-                                (previousValue, element) => [
-                                      ...previousValue,
-                                      ...?element.value
-                                          .robot[widget.teamNumber.toString()]
-                                          ?.timelineInterpolatedBlueNormalized(
-                                              data.event.config.fieldStyle)
-                                          .where(
-                                              (event) => event.isPositionEvent)
-                                    ])),
+                    FieldHeatMap(events: [
+                      for (final match
+                          in data.event.teamRecordedMatches(widget.teamNumber))
+                        ...?match.value.robot[widget.teamNumber.toString()]
+                            ?.timelineInterpolatedBlueNormalized(
+                                data.event.config.fieldStyle)
+                            .where((event) => event.isPositionEvent)
+                    ]),
                   ],
                 ),
               ],

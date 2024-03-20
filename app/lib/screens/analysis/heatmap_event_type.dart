@@ -72,24 +72,13 @@ class _AnalysisHeatMapByEventTypeState
                           child: Text(team.toString())),
                     ),
                     Center(
-                      child: FieldHeatMap(
-                          events: data.event.matchesWithTeam(team).fold(
-                              [],
-                              (previousValue, element) => [
-                                    ...previousValue,
-                                    ...element.robot.values.fold(
-                                        [],
-                                        (previousValue, element) => [
-                                              ...previousValue,
-                                              ...element
-                                                  .timelineBlueNormalized(data
-                                                      .event.config.fieldStyle)
-                                                  .where((event) =>
-                                                      event.id ==
-                                                      _selectedEvent!.id)
-                                            ])
-                                  ])),
-                    ),
+                        child: FieldHeatMap(events: [
+                      for (final match in data.event.matchesWithTeam(team))
+                        ...?match.robot[team.toString()]
+                            ?.timelineBlueNormalized(
+                                data.event.config.fieldStyle)
+                            .where((event) => event.id == _selectedEvent!.id)
+                    ])),
                   ],
                 ],
               ),

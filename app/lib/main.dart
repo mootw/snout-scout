@@ -71,12 +71,27 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
+
+  AppLifecycleState? _notification; 
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    setState(() {
+      _notification = state;
+    });
+    print("state change $state");
+    if(state == AppLifecycleState.resumed) {
+      showAboutDialog(context: context);
+    }
+  }
+
+
   int _currentPageIndex = 0;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     Logger.root.onRecord.listen((record) {
       if (record.level >= Level.SEVERE) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -95,6 +110,12 @@ class _MyHomePageState extends State<MyHomePage> {
         ));
       }
     });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
   }
 
   @override

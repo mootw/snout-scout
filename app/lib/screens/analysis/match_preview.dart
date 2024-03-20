@@ -85,6 +85,19 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
             [
               const DataItem(
                   displayValue:
+                      Text("BLUE", style: TextStyle(color: Colors.blue)),
+                  exportValue: "BLUE",
+                  sortingValue: "BLUE"),
+              for (final item in data.event.config.matchscouting.processes)
+                DataItem.fromNumber(_blue.fold<double>(
+                    0,
+                    (previousValue, team) =>
+                        previousValue +
+                        (data.event.teamAverageProcess(team, item) ?? 0))),
+            ],
+            [
+              const DataItem(
+                  displayValue:
                       Text("RED", style: TextStyle(color: Colors.red)),
                   exportValue: "RED",
                   sortingValue: "RED"),
@@ -95,19 +108,6 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                         previousValue +
                         (data.event.teamAverageProcess(team, item) ?? 0))),
             ],
-            [
-              const DataItem(
-                  displayValue:
-                      Text("BLUE", style: TextStyle(color: Colors.blue)),
-                  exportValue: "BLUE",
-                  sortingValue: "BLUE"),
-              for (final item in data.event.config.matchscouting.processes)
-                DataItem.fromNumber(_blue.fold<double>(
-                    0,
-                    (previousValue, team) =>
-                        previousValue +
-                        (data.event.teamAverageProcess(team, item) ?? 0))),
-            ]
           ]),
           const Divider(height: 42),
           DataSheet(title: "Team Averages", columns: [
@@ -117,7 +117,7 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
             for (final item in data.event.config.matchscouting.survey)
               DataItem.fromText(item.label),
           ], rows: [
-            for (final team in [..._red, ..._blue])
+            for (final team in [..._blue, ..._red])
               [
                 DataItem(
                     displayValue: TextButton(
@@ -155,7 +155,7 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   children: [
-                    for (final team in [..._red, ..._blue]) ...[
+                    for (final team in [..._blue, ..._red]) ...[
                       Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -223,6 +223,19 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                               ),
                             ],
                           ),
+                          const SizedBox(height: 8),
+                          Text("Autos Heatmap",
+                              style: Theme.of(context).textTheme.titleMedium),
+                          FieldHeatMap(
+                            events: [
+                              for (final match
+                                  in data.event.teamRecordedMatches(team))
+                                ...match.value.robot[team.toString()]!
+                                    .timelineInterpolatedBlueNormalized(
+                                        data.event.config.fieldStyle)
+                                    .where((element) => element.isInAuto)
+                            ],
+                          ),
                           for (final eventType
                               in data.event.config.matchscouting.events)
                             Column(children: [
@@ -230,21 +243,15 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                               Text(eventType.label,
                                   style:
                                       Theme.of(context).textTheme.titleMedium),
-                              FieldHeatMap(
-                                  events:
-                                      data.event.teamRecordedMatches(team).fold(
-                                          [],
-                                          (previousValue, element) => [
-                                                ...previousValue,
-                                                ...?element.value
-                                                    .robot[team.toString()]
-                                                    ?.timelineBlueNormalized(
-                                                        data.event.config
-                                                            .fieldStyle)
-                                                    .where((event) =>
-                                                        event.id ==
-                                                        eventType.id)
-                                              ])),
+                              FieldHeatMap(events: [
+                                for (final match
+                                    in data.event.teamRecordedMatches(team))
+                                  ...?match.value.robot[team.toString()]
+                                      ?.timelineBlueNormalized(
+                                          data.event.config.fieldStyle)
+                                      .where(
+                                          (event) => event.id == eventType.id)
+                              ]),
                             ]),
                           Column(
                             children: [
@@ -273,19 +280,15 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                                   style:
                                       Theme.of(context).textTheme.titleMedium),
                               FieldHeatMap(
-                                  events:
-                                      data.event.teamRecordedMatches(team).fold(
-                                          [],
-                                          (previousValue, element) => [
-                                                ...previousValue,
-                                                ...?element.value
-                                                    .robot[team.toString()]
-                                                    ?.timelineInterpolatedBlueNormalized(
-                                                        data.event.config
-                                                            .fieldStyle)
-                                                    .where((event) =>
-                                                        event.isPositionEvent)
-                                              ])),
+                                events: [
+                                  for (final match
+                                      in data.event.teamRecordedMatches(team))
+                                    ...match.value.robot[team.toString()]!
+                                        .timelineInterpolatedBlueNormalized(
+                                            data.event.config.fieldStyle)
+                                        .where((event) => event.isPositionEvent)
+                                ],
+                              ),
                             ],
                           ),
                         ],

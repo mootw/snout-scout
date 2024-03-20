@@ -66,6 +66,7 @@ class _BoxPlotAnalysisState extends State<BoxPlotAnalysis> {
                     ? previousValue
                     : element.min) ??
         0;
+
     num max = teamValues?.values.fold(
             0,
             (previousValue, element) => element.isEmpty
