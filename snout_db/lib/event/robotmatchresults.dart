@@ -1,7 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:meta/meta.dart';
+import 'package:snout_db/event/dynamic_property.dart';
 import 'package:snout_db/event/matchevent.dart';
-import 'package:snout_db/event/pitscoutresult.dart';
 import 'package:snout_db/snout_db.dart';
 
 part 'robotmatchresults.g.dart';
@@ -13,7 +13,7 @@ class RobotMatchResults {
   final Alliance alliance;
 
   //Post game survey like pit scouting; but used for scoring too
-  final PitScoutResult survey;
+  final DynamicProperties survey;
 
   /// List of events this robot did during the match
   final List<MatchEvent> timeline;

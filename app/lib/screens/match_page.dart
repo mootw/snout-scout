@@ -1,4 +1,5 @@
 import 'package:app/providers/identity_provider.dart';
+import 'package:app/screens/edit_match_properties.dart';
 import 'package:app/widgets/datasheet.dart';
 import 'package:app/edit_lock.dart';
 import 'package:app/providers/data_provider.dart';
@@ -259,6 +260,38 @@ class _MatchPageState extends State<MatchPage> {
               child: EditAudit(
                   path:
                       Patch.buildPath(['matches', widget.matchid, 'results']))),
+          Column(
+            children: [
+              const Text("Match Properties"),
+              TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => EditMatchPropertiesPage(
+                                  matchID: widget.matchid,
+                                  config: snoutData.event.config.matchscouting.properties,
+                                  initialData: match.properties,
+                                )));
+                  },
+                  child: const Text("Edit")),
+              for (final item
+                  in snoutData.event.config.matchscouting.properties) ...[
+                DynamicValueViewer(
+                    itemType: item, value: match.properties?[item.id]),
+                Container(
+                    padding: const EdgeInsets.only(right: 16),
+                    alignment: Alignment.centerRight,
+                    child: EditAudit(
+                        path: Patch.buildPath([
+                      'matches',
+                      widget.matchid,
+                      'properties',
+                      item.id
+                    ]))),
+              ]
+            ],
+          )
         ],
       ),
     );

@@ -9,20 +9,26 @@ import 'package:snout_db/config/surveyitem.dart';
 import 'package:snout_db/event/dynamic_property.dart';
 import 'package:snout_db/patch.dart';
 
-class PitScoutTeamPage extends StatefulWidget {
-  final int team;
+//TODO this is basically an identical copy of the Scout Team Page but with some minor changes
+//basically this should be converted to a single widget that has some sort of save function.
+class EditMatchPropertiesPage extends StatefulWidget {
+  final String matchID;
   final List<SurveyItem> config;
   final DynamicProperties? initialData;
 
-  const PitScoutTeamPage(
-      {super.key, required this.team, required this.config, this.initialData});
+  const EditMatchPropertiesPage(
+      {super.key,
+      required this.matchID,
+      required this.config,
+      this.initialData});
 
   @override
-  State<PitScoutTeamPage> createState() => _PitScoutTeamPageState();
+  State<EditMatchPropertiesPage> createState() =>
+      _EditMatchPropertiesPageState();
 }
 
-class _PitScoutTeamPageState extends State<PitScoutTeamPage> {
-  final DynamicProperties _surveyItems = {};
+class _EditMatchPropertiesPageState extends State<EditMatchPropertiesPage> {
+  final DynamicProperties _items = {};
   final _formKey = GlobalKey<FormState>();
 
   @override
@@ -31,7 +37,7 @@ class _PitScoutTeamPageState extends State<PitScoutTeamPage> {
 
     //populate existing data to pre-fill.
     if (widget.initialData != null) {
-      _surveyItems.addAll(widget.initialData!);
+      _items.addAll(widget.initialData!);
     }
   }
 
@@ -39,11 +45,11 @@ class _PitScoutTeamPageState extends State<PitScoutTeamPage> {
   Widget build(BuildContext context) {
     context
         .read<DataProvider>()
-        .updateStatus(context, "Scouting team ${widget.team}");
+        .updateStatus(context, "Editing Match Properties");
     return ConfirmExitDialog(
       child: Scaffold(
         appBar: AppBar(
-          title: Text("Scouting ${widget.team}"),
+          title: const Text("Match Properties"),
           bottom: const LoadOrErrorStatusBar(),
           actions: [
             IconButton(
@@ -57,15 +63,19 @@ class _PitScoutTeamPageState extends State<PitScoutTeamPage> {
                   final identity = context.read<IdentityProvider>().identity;
 
                   //New map instance to avoid messing up the UI
-                  final onlyChanges = Map.of(_surveyItems);
+                  final onlyChanges = Map.of(_items);
                   onlyChanges.removeWhere(
                       (key, value) => widget.initialData?[key] == value);
                   for (final item in onlyChanges.entries) {
                     Patch patch = Patch(
                         identity: identity,
                         time: DateTime.now(),
-                        path: Patch.buildPath(
-                            ['pitscouting', widget.team.toString(), item.key]),
+                        path: Patch.buildPath([
+                          'matches',
+                          widget.matchID,
+                          "properties",
+                          item.key
+                        ]),
                         value: item.value);
                     //Save the scouting results to the server!!
                     await snoutData.submitPatch(patch);
@@ -87,7 +97,7 @@ class _PitScoutTeamPageState extends State<PitScoutTeamPage> {
                     padding: const EdgeInsets.all(12),
                     child: DynamicPropertyEditorWidget(
                       tool: item,
-                      survey: _surveyItems,
+                      survey: _items,
                     )),
             ],
           ),

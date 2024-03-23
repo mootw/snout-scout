@@ -19,10 +19,14 @@ class MatchScouting {
   /// to the team that the scout was watching.
   final List<SurveyItem> survey;
 
+  /// properties stored on a per match basis
+  final List<SurveyItem> properties;
+
   const MatchScouting({
     this.events = const [],
     this.processes = const [],
     this.survey = const [],
+    this.properties = const [],
   });
 
   factory MatchScouting.fromJson(Map<String, dynamic> json) =>

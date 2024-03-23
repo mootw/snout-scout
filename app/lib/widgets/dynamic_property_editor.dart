@@ -7,21 +7,21 @@ import 'package:app/providers/cache_memory_imageprovider.dart';
 import 'package:app/style.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:snout_db/event/pitscoutresult.dart';
 import 'package:snout_db/config/surveyitem.dart';
+import 'package:snout_db/event/dynamic_property.dart';
 
-class ScoutingToolWidget extends StatefulWidget {
+class DynamicPropertyEditorWidget extends StatefulWidget {
   final SurveyItem tool;
-  final PitScoutResult survey;
+  final DynamicProperties survey;
 
-  const ScoutingToolWidget(
+  const DynamicPropertyEditorWidget(
       {super.key, required this.tool, required this.survey});
 
   @override
-  State<ScoutingToolWidget> createState() => _ScoutingToolWidgetState();
+  State<DynamicPropertyEditorWidget> createState() => _DynamicPropertyEditorWidgetState();
 }
 
-class _ScoutingToolWidgetState extends State<ScoutingToolWidget> {
+class _DynamicPropertyEditorWidgetState extends State<DynamicPropertyEditorWidget> {
   final _myController = TextEditingController();
 
   get _value => widget.survey[widget.tool.id];

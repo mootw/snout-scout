@@ -9,15 +9,15 @@ import 'package:app/widgets/datasheet.dart';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/widgets/fieldwidget.dart';
 import 'package:app/style.dart';
-import 'package:app/widgets/scouting_tool.dart';
+import 'package:app/widgets/dynamic_property_editor.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:provider/provider.dart';
 import 'package:snout_db/config/matcheventconfig.dart';
+import 'package:snout_db/event/dynamic_property.dart';
 import 'package:snout_db/event/matchevent.dart';
-import 'package:snout_db/event/pitscoutresult.dart';
 import 'package:snout_db/event/robotmatchresults.dart';
 import 'dart:math' as math;
 
@@ -44,7 +44,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   MatchMode _mode = MatchMode.setup;
   List<MatchEvent> _events = [];
-  final PitScoutResult _postGameSurvey = {};
+  final DynamicProperties _postGameSurvey = {};
   int _time = 0;
   bool _rotateField = false;
   Timer? _t;
@@ -193,7 +193,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                     .survey)
                   Container(
                       padding: const EdgeInsets.all(12),
-                      child: ScoutingToolWidget(
+                      child: DynamicPropertyEditorWidget(
                         tool: item,
                         survey: _postGameSurvey,
                       )),
@@ -234,6 +234,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                             final newConstraints =
                                 constraints.tighten(height: 500);
                             return Wrap(
+                              alignment: WrapAlignment.end,
                               children: [
                                 for (int i = 0; i < scoutingEvents.length; i++)
                                   SizedBox(

@@ -17,7 +17,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:snout_db/event/match.dart';
-import 'package:snout_db/event/pitscoutresult.dart';
 import 'package:snout_db/config/surveyitem.dart';
 import 'package:snout_db/patch.dart';
 
@@ -67,7 +66,7 @@ class _TeamViewPageState extends State<TeamViewPage> {
                             MaterialPageRoute(
                                 builder: (_) => PitScoutTeamPage(
                                     team: widget.teamNumber,
-                                    config: data.event.config,
+                                    config: data.event.config.pitscouting,
                                     initialData: data.event.pitscouting[
                                         widget.teamNumber.toString()])),
                           ));
@@ -208,6 +207,24 @@ class _TeamViewPageState extends State<TeamViewPage> {
                                 .where((element) => element.isInAuto)
                                 .toList()
                           )
+                      ],
+                    ),
+                    Column(
+                      children: [
+                        const SizedBox(height: 16),
+                        Text("Autos Heatmap",
+                            style: Theme.of(context).textTheme.titleMedium),
+                        FieldHeatMap(
+                          events: [
+                            for (final match in data.event
+                                .teamRecordedMatches(widget.teamNumber))
+                              match.value.robot[widget.teamNumber.toString()]!
+                                  .timelineInterpolatedBlueNormalized(
+                                      data.event.config.fieldStyle)
+                                  .where((element) => element.isInAuto)
+                                  .last
+                          ].nonNulls.toList(),
+                        ),
                       ],
                     ),
                   ],
@@ -362,7 +379,7 @@ class ScoutingResultsViewer extends StatelessWidget {
     return Column(
       children: [
         for (final item in snoutData.event.config.pitscouting) ...[
-          ScoutingResult(item: item, survey: data),
+          DynamicValueViewer(itemType: item, value: data[item.id]),
           Container(
               padding: const EdgeInsets.only(right: 16),
               alignment: Alignment.centerRight,
@@ -375,19 +392,18 @@ class ScoutingResultsViewer extends StatelessWidget {
   }
 }
 
-class ScoutingResult extends StatelessWidget {
-  final SurveyItem item;
-  final PitScoutResult survey;
+class DynamicValueViewer extends StatelessWidget {
+  final SurveyItem itemType;
+  final dynamic value;
 
-  const ScoutingResult({super.key, required this.item, required this.survey});
-
-  dynamic get value => survey[item.id];
+  const DynamicValueViewer(
+      {super.key, required this.itemType, required this.value});
 
   @override
   Widget build(BuildContext context) {
     if (value == null) {
       return ListTile(
-        title: Text(item.label),
+        title: Text(itemType.label),
         subtitle: const Text(
           "NOT SET",
           style: TextStyle(color: warningColor),
@@ -395,9 +411,9 @@ class ScoutingResult extends StatelessWidget {
       );
     }
 
-    if (item.type == SurveyItemType.picture) {
+    if (itemType.type == SurveyItemType.picture) {
       return ListTile(
-        title: Text(item.label),
+        title: Text(itemType.label),
         subtitle: ImageViewer(
           child: Image(
             image: CacheMemoryImageProvider(
@@ -410,7 +426,7 @@ class ScoutingResult extends StatelessWidget {
     }
 
     return ListTile(
-      title: Text(item.label),
+      title: Text(itemType.label),
       subtitle: Text(value.toString()),
     );
   }

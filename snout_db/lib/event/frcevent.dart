@@ -9,9 +9,9 @@ import 'package:meta/meta.dart';
 import 'package:rfc_6901/rfc_6901.dart';
 import 'package:snout_db/config/eventconfig.dart';
 import 'package:snout_db/config/matchresults_process.dart';
+import 'package:snout_db/event/dynamic_property.dart';
 import 'package:snout_db/event/match.dart';
 import 'package:snout_db/event/matchevent.dart';
-import 'package:snout_db/event/pitscoutresult.dart';
 import 'package:snout_db/event/robotmatchresults.dart';
 import 'package:snout_db/patch.dart';
 
@@ -30,7 +30,7 @@ class FRCEvent {
   final SplayTreeMap<String, FRCMatch> matches;
 
   //Pit scouting results
-  final Map<String, PitScoutResult> pitscouting;
+  final Map<String, DynamicProperties> pitscouting;
 
   /// image of the pit map
   final String? pitmap;

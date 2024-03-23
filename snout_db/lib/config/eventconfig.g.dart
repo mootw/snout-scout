@@ -9,7 +9,6 @@ part of 'eventconfig.dart';
 EventConfig _$EventConfigFromJson(Map json) => EventConfig(
       name: json['name'] as String,
       team: json['team'] as int,
-      fieldImage: json['fieldImage'] as String,
       tbaEventId: json['tbaEventId'] as String?,
       tbaSecretKey: json['tbaSecretKey'] as String?,
       fieldStyle:
@@ -25,6 +24,7 @@ EventConfig _$EventConfigFromJson(Map json) => EventConfig(
           : MatchScouting.fromJson(
               Map<String, dynamic>.from(json['matchscouting'] as Map)),
       docs: json['docs'] as String? ?? '',
+      fieldImage: json['fieldImage'] as String,
     );
 
 Map<String, dynamic> _$EventConfigToJson(EventConfig instance) =>

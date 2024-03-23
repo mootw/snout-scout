@@ -79,12 +79,10 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     setState(() {
       _notification = state;
     });
-    print("state change $state");
     if(state == AppLifecycleState.resumed) {
       showAboutDialog(context: context);
     }
   }
-
 
   int _currentPageIndex = 0;
 
