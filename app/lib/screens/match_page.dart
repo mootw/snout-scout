@@ -262,7 +262,7 @@ class _MatchPageState extends State<MatchPage> {
                       Patch.buildPath(['matches', widget.matchid, 'results']))),
           Column(
             children: [
-              const Text("Match Properties"),
+              Text("Properties", style: Theme.of(context).textTheme.titleMedium),
               TextButton(
                   onPressed: () {
                     Navigator.push(

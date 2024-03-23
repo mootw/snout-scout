@@ -122,7 +122,7 @@ void main(List<String> args) async {
                   (
                     identity: decoded['identity'],
                     status: decoded['value'],
-                    time: DateTime.now()
+                    time: DateTime.now().toUtc()
                   ),
                 );
                 loadedEvents[event]
