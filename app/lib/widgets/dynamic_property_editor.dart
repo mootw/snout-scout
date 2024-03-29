@@ -18,10 +18,12 @@ class DynamicPropertyEditorWidget extends StatefulWidget {
       {super.key, required this.tool, required this.survey});
 
   @override
-  State<DynamicPropertyEditorWidget> createState() => _DynamicPropertyEditorWidgetState();
+  State<DynamicPropertyEditorWidget> createState() =>
+      _DynamicPropertyEditorWidgetState();
 }
 
-class _DynamicPropertyEditorWidgetState extends State<DynamicPropertyEditorWidget> {
+class _DynamicPropertyEditorWidgetState
+    extends State<DynamicPropertyEditorWidget> {
   final _myController = TextEditingController();
 
   get _value => widget.survey[widget.tool.id];

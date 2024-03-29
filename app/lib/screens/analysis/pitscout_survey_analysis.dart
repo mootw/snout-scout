@@ -114,7 +114,8 @@ class _SurveyItemRatioChartState extends State<SurveyItemRatioChart> {
                   PieChartSectionData(
                     radius: _selectedIndex == i ? 45 : 40,
                     // Shorten the text to 30 "characters"
-                    title: valueKeys.entries.toList()[i].key.substring(0, min(valueKeys.entries.toList()[i].key.length, 30)),
+                    title: valueKeys.entries.toList()[i].key.substring(
+                        0, min(valueKeys.entries.toList()[i].key.length, 30)),
                     value:
                         valueKeys.entries.toList()[i].value.length.toDouble(),
                     color: getColorFromIndex(i),

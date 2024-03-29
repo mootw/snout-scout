@@ -72,18 +72,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
-
-  AppLifecycleState? _notification; 
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    setState(() {
-      _notification = state;
-    });
-    if(state == AppLifecycleState.resumed) {
-      showAboutDialog(context: context);
-    }
-  }
-
   int _currentPageIndex = 0;
 
   @override

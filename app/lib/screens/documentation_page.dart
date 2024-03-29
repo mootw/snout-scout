@@ -100,9 +100,11 @@ class _DocumentationScreenState extends State<DocumentationScreen> {
             final dataProvider = context.read<DataProvider>();
 
             String result;
-            //TAKE PHOTO
             try {
-              final photo = await pickOrTakeImageDialog(context);
+              // FOR THE PIT MAP ALLOW FOR resolution higher than the standard scouting 
+              // image. This is because the pitmap might contain super small text
+              final photo =
+                  await pickOrTakeImageDialog(context, scoutImageSize * 1.5);
               if (photo != null) {
                 Uint8List bytes = await photo.readAsBytes();
                 result = base64Encode(bytes);

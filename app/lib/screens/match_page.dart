@@ -262,7 +262,8 @@ class _MatchPageState extends State<MatchPage> {
                       Patch.buildPath(['matches', widget.matchid, 'results']))),
           Column(
             children: [
-              Text("Properties", style: Theme.of(context).textTheme.titleMedium),
+              Text("Properties",
+                  style: Theme.of(context).textTheme.titleMedium),
               TextButton(
                   onPressed: () {
                     Navigator.push(
@@ -270,7 +271,8 @@ class _MatchPageState extends State<MatchPage> {
                         MaterialPageRoute(
                             builder: (context) => EditMatchPropertiesPage(
                                   matchID: widget.matchid,
-                                  config: snoutData.event.config.matchscouting.properties,
+                                  config: snoutData
+                                      .event.config.matchscouting.properties,
                                   initialData: match.properties,
                                 )));
                   },

@@ -11,6 +11,7 @@ import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 import 'package:server/socket_messages.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:snout_db/db.dart';
 import 'package:snout_db/event/frcevent.dart';
 import 'package:snout_db/patch.dart';
 import 'package:snout_db/snout_db.dart';
@@ -161,21 +162,25 @@ class DataProvider extends ChangeNotifier {
 
   /// LOCAL DB STUFF
   ///
-  ///
 
   /// saves the data into storage
   Future writeLocalDiskDatabase(SnoutDB db) async {
-    await storeText("local_db", json.encode(db.toJson()));
+    await storeText('local_patches',
+        json.encode(db.patches.map((e) => e.toJson()).toList()));
     notifyListeners();
   }
 
   Future _loadLocalDBData() async {
-    final data = await readText("local_db");
+    final data = await readText('local_patches');
     if (data == null) {
       Logger.root.severe("local data is null oops");
       return;
     }
-    database = SnoutDB.fromJson(json.decode(data));
+    //Decode as list of patches
+    final patches = List.from(json.decode(data) as List)
+        .map((x) => Patch.fromJson(x))
+        .toList();
+    database = SnoutDB(patches: patches);
     notifyListeners();
   }
 
@@ -238,17 +243,23 @@ class DataProvider extends ChangeNotifier {
       //and the database is ONLY based on patches.
       final newData = await apiClient.get(path);
 
-      final List<Patch> patches = (json.decode(newData.body) as List<dynamic>)
+      final List<Patch> patches = (json.decode(newData.body) as List)
           .map((e) => Patch.fromJson(e as Map))
           .toList();
       final decodedDatabase = SnoutDB(patches: patches);
       database = decodedDatabase;
-      await storeText(storageKey, json.encode(decodedDatabase));
+      await storeText(storageKey,
+          json.encode(decodedDatabase.patches.map((e) => e.toJson()).toList()));
       notifyListeners();
       return;
     }
 
-    final diskDatabase = SnoutDB.fromJson(json.decode(diskData));
+    //Decode as list of patches
+    final patches = List.from(json.decode(diskData) as List)
+        .map((x) => Patch.fromJson(x))
+        .toList();
+    final diskDatabase = SnoutDB(patches: patches);
+
     //Assign to local database so even when it fails to load, we still have
     //the latest disk database
     database = diskDatabase;
@@ -265,7 +276,8 @@ class DataProvider extends ChangeNotifier {
       // update local with new patches ONLY if it is not empty
       // since instantiating a SnoutDB is SLOW
       database = SnoutDB(patches: [...diskDatabase.patches, ...diffPatches]);
-      await storeText(storageKey, json.encode(database));
+      await storeText(storageKey,
+          json.encode(database.patches.map((e) => e.toJson()).toList()));
     }
 
     notifyListeners();

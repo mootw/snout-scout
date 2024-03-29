@@ -122,7 +122,8 @@ class _PostGameRatioChartState extends State<PostGameRatioChart> {
                     // radius: _selectedIndex == i ? 45 : 40,
                     radius: 40,
                     // Shorten the text to 30 "characters"
-                    title: valueKeys.entries.toList()[i].key.substring(0,  min(valueKeys.entries.toList()[i].key.length, 30)),
+                    title: valueKeys.entries.toList()[i].key.substring(
+                        0, min(valueKeys.entries.toList()[i].key.length, 30)),
                     value:
                         valueKeys.entries.toList()[i].value['count'].toDouble(),
                     color: getColorFromIndex(i),

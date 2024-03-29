@@ -64,11 +64,12 @@ Future<String?> showStringInputDialog(
 /// (we do not want to store hundreds of MB sized images)
 /// for transport efficiency reasons, client performance
 /// for image decoding or db file, and data/disk usage.
-const double scoutImageSize = 600;
+const double scoutImageSize = 700;
 
 /// convenient dialog that will prompt the user to take a new image
 /// or select it from their device storage
-Future<XFile?> pickOrTakeImageDialog(BuildContext context) async {
+Future<XFile?> pickOrTakeImageDialog(BuildContext context,
+    [double imageSize = scoutImageSize]) async {
   ImageSource? result = await showDialog(
       context: context,
       builder: (dialogContext) => SimpleDialog(
@@ -102,8 +103,8 @@ Future<XFile?> pickOrTakeImageDialog(BuildContext context) async {
 
   final XFile? photo = await ImagePicker().pickImage(
       source: result,
-      maxWidth: scoutImageSize,
-      maxHeight: scoutImageSize,
+      maxWidth: imageSize,
+      maxHeight: imageSize,
       imageQuality: 50);
   return photo;
 }

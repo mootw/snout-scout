@@ -427,7 +427,7 @@ class DynamicValueViewer extends StatelessWidget {
 
     return ListTile(
       title: Text(itemType.label),
-      subtitle: Text(value.toString()),
+      subtitle: SelectableText(value.toString()),
     );
   }
 }
