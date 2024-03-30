@@ -352,62 +352,69 @@ class _PathsViewerState extends State<PathsViewer> {
       filteredPaths = [widget.paths[filterIndex]];
     }
 
-    return ConstrainedBox(
-      constraints: BoxConstraints.loose(Size(widget.size, widget.size / 2)),
-      child: FullScreenFieldSelector(
-        showAbove: Align(
-          alignment: Alignment.bottomLeft,
-          child: Container(
-            color: Colors.black87,
-            height: 32,
-            child: ListView(scrollDirection: Axis.horizontal, children: [
-              TextButton(
-                  onPressed: () => setState(() {
-                        filterIndex = -1;
-                      }),
-                  child: const Text("All")),
-              for (final (idx, item) in widget.paths.indexed)
-                TextButton(
-                    onPressed: () => setState(() {
-                          filterIndex = idx;
-                        }),
-                    child: Text(
-                      item.label,
-                      style: TextStyle(
-                          color: getColorFromIndex(widget.paths.indexOf(item))),
-                    )),
-            ]),
-          ),
-        ),
-        child: FieldMap(children: [
-          Container(color: Colors.black12),
-          for (final path in filteredPaths) ...[
-            CustomPaint(
-              size: Size.infinite,
-              painter: MapLine(
-                  emphasizeStartPoint: widget.emphasizeStartPoint,
-                  color: getColorFromIndex(filteredPaths.indexOf(path)),
-                  events: path.path),
-            ),
-          ],
-          // Event Labels
-          Stack(
-            children: [
-              for (final match in filteredPaths)
-                for (final event
-                    in match.path.where((event) => !event.isPositionEvent))
-                  Align(
-                    alignment: Alignment(event.position.x, -event.position.y),
-                    child: Text(
-                        '${event.time}.${event.getLabelFromConfig(context.watch<DataProvider>().event.config)}',
-                        style: const TextStyle(
-                            fontSize: 11, backgroundColor: Colors.black26)),
+      return ConstrainedBox(
+        constraints: BoxConstraints.loose(Size(widget.size, double.infinity)),
+        child: Column(
+          children: [ConstrainedBox(
+            constraints: BoxConstraints.loose(Size(widget.size, widget.size / 2)),
+            child: FullScreenFieldSelector(
+              showAbove: null,
+              child: FieldMap(children: [
+                Container(color: Colors.black12),
+                for (final path in filteredPaths) ...[
+                  CustomPaint(
+                    size: Size.infinite,
+                    painter: MapLine(
+                        emphasizeStartPoint: widget.emphasizeStartPoint,
+                        color: getColorFromIndex(filteredPaths.indexOf(path)),
+                        events: path.path),
                   ),
-            ],
+                ],
+                // Event Labels
+                Stack(
+                  children: [ for (final path in filteredPaths)
+                    for (final event
+                        in path.path.where((event) => !event.isPositionEvent))
+                      Align(
+                                      alignment: Alignment(event.position.x, -event.position.y),
+                                      child:Text(
+                          '${event.getLabelFromConfig(context.watch<DataProvider>().event.config)}',
+                          style: TextStyle(color: Colors.white,
+                              fontSize: 10, backgroundColor: Colors.black26)),
+                                    ),
+              ]),
+                
+              ]),
+            ),
           ),
+          Align(
+                  alignment: Alignment.bottomLeft,
+                  child: Container(
+                    color: Colors.black87,
+                    height: 32,
+                    child: ListView(scrollDirection: Axis.horizontal, children: [
+                      TextButton(
+                          onPressed: () => setState(() {
+                                filterIndex = -1;
+                              }),
+                          child: const Text("All")),
+                      for (final (idx, item) in widget.paths.indexed)
+                        TextButton(
+                            onPressed: () => setState(() {
+                                  filterIndex = idx;
+                                }),
+                            child: Text(
+                              item.label,
+                              style: TextStyle(
+                                  color: getColorFromIndex(
+                                      widget.paths.indexOf(item))),
+                            )),
+                    ]),
+                  ),
+                ),
         ]),
-      ),
-    );
+      );
+
   }
 }
 
