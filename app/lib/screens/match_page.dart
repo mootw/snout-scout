@@ -124,8 +124,8 @@ class _MatchPageState extends State<MatchPage> {
             ],
             rows: [
               for (final team in <int>{
-                ...match.red,
                 ...match.blue,
+                ...match.red,
                 //Also include all of the surrogate robots
                 ...match.robot.keys.map((e) => int.tryParse(e)).whereNotNull()
               })

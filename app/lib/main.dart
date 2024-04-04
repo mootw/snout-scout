@@ -58,6 +58,26 @@ class MyApp extends StatelessWidget {
         ],
         child: MaterialApp(
           title: 'Snout Scout',
+          // TODO this kinda thing to automatically set parameters for the app???
+          // onGenerateRoute: (settings) {
+          //   final dataProvider = context.read<DataProvider>();
+          //   print("asdf");
+          //   () async {
+          //     final uri = Uri.parse(settings.name ?? "");
+          //     print(uri.toString());
+          //     final server = uri.queryParameters['server'];
+          //     if (server != null) {
+          //       print("set server");
+          //       dataProvider.setServer(server);
+          //     }
+          //     final event = uri.queryParameters['event'];
+          //     if (event != null) {
+          //       await dataProvider.setSelectedEvent(event);
+          //       dataProvider.setDataSource(DataSource.remoteServer);
+          //     }
+          //   }();
+          //   return null;
+          // },
           theme: defaultTheme,
           home: const MyHomePage(),
         ));
@@ -96,6 +116,13 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
         ));
       }
     });
+
+    Future.delayed(const Duration(seconds: 1), () {
+      final identityProvider = context.read<IdentityProvider>();
+      if (identityProvider.identity == unknownIdentity) {
+        editIdentityFunction(context, identityProvider);
+      }
+    });
   }
 
   @override
@@ -129,7 +156,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
       appBar: AppBar(
         bottom: const LoadOrErrorStatusBar(),
         titleSpacing: 0,
-        title: Text(data.event.config.name),
+        title: Text('${identityProvider.identity} @ ${data.event.config.name}'),
         actions: [
           if (tbaKey != null)
             Padding(
@@ -202,13 +229,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
         child: ListView(children: [
           ListTile(
             title: const Text("Identity"),
-            onTap: () async {
-              final result = await showStringInputDialog(
-                  context, "Identity", identityProvider.identity);
-              if (result != null) {
-                await identityProvider.setIdentity(result);
-              }
-            },
+            onTap: () => editIdentityFunction(context, identityProvider),
             subtitle: Text(identityProvider.identity),
             leading: const Icon(Icons.edit),
           ),
@@ -369,5 +390,14 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
               ],
             ),
     );
+  }
+}
+
+Future editIdentityFunction(
+    BuildContext context, IdentityProvider identityProvider) async {
+  final result = await showStringInputDialog(
+      context, "Identity", identityProvider.identity);
+  if (result != null) {
+    await identityProvider.setIdentity(result);
   }
 }

@@ -138,7 +138,7 @@ Future<List<Patch>> loadScheduleFromTBA(
           robot: const {});
 
       Patch patch = Patch(
-          identity: identity,
+          identity: 'schedule autofill - $identity',
           time: DateTime.now(),
           path: Patch.buildPath([
             'matches',

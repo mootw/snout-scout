@@ -218,23 +218,17 @@ class _TeamViewPageState extends State<TeamViewPage> {
                           events: [
                             for (final match in data.event
                                 .teamRecordedMatches(widget.teamNumber))
-                              match.value.robot[widget.teamNumber.toString()]!
+                              ...match
+                                  .value.robot[widget.teamNumber.toString()]!
                                   .timelineInterpolatedBlueNormalized(
                                       data.event.config.fieldStyle)
                                   .where((element) => element.isInAuto)
-                                  .last
-                          ].nonNulls.toList(),
+                          ],
                         ),
                       ],
                     ),
                   ],
                 ),
-                const Divider(height: 32),
-                Center(
-                    child: Text("Scouting",
-                        style: Theme.of(context).textTheme.titleLarge)),
-                ScoutingResultsViewer(
-                    teamNumber: widget.teamNumber, snoutData: data),
                 const Divider(height: 32),
                 DataSheet(
                   title: 'Matches',
@@ -309,6 +303,24 @@ class _TeamViewPageState extends State<TeamViewPage> {
                   ],
                 ),
                 const Divider(),
+                Column(
+                  children: [
+                    const SizedBox(height: 16),
+                    Text("Starting Positions",
+                        style: Theme.of(context).textTheme.titleMedium),
+                    FieldHeatMap(
+                      events: [
+                        for (final match in data.event
+                            .teamRecordedMatches(widget.teamNumber))
+                          match.value.robot[widget.teamNumber.toString()]!
+                              .timelineInterpolatedBlueNormalized(
+                                  data.event.config.fieldStyle)
+                              .where((element) => element.isPositionEvent)
+                              .first
+                      ].nonNulls.toList(),
+                    ),
+                  ],
+                ),
                 for (final eventType in data.event.config.matchscouting.events)
                   Column(children: [
                     const SizedBox(height: 16),
@@ -358,6 +370,12 @@ class _TeamViewPageState extends State<TeamViewPage> {
                 ),
               ],
             ),
+            const Divider(height: 32),
+            Center(
+                child: Text("Scouting",
+                    style: Theme.of(context).textTheme.titleLarge)),
+            ScoutingResultsViewer(
+                teamNumber: widget.teamNumber, snoutData: data),
           ],
         ));
   }

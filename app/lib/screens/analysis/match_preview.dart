@@ -207,7 +207,7 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                                   style:
                                       Theme.of(context).textTheme.titleMedium),
                               PathsViewer(
-                                size: 300,
+                                size: 280,
                                 paths: [
                                   for (final match
                                       in data.event.teamRecordedMatches(team))
@@ -224,6 +224,26 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                             ],
                           ),
                           const SizedBox(height: 8),
+                          Column(
+                            children: [
+                              const SizedBox(height: 8),
+                              Text("Starting Positions",
+                                  style:
+                                      Theme.of(context).textTheme.titleMedium),
+                              FieldHeatMap(
+                                events: [
+                                  for (final match
+                                      in data.event.teamRecordedMatches(team))
+                                    match.value.robot[team.toString()]!
+                                        .timelineInterpolatedBlueNormalized(
+                                            data.event.config.fieldStyle)
+                                        .where((element) =>
+                                            element.isPositionEvent)
+                                        .first
+                                ].nonNulls.toList(),
+                              ),
+                            ],
+                          ),
                           Text("Autos Heatmap",
                               style: Theme.of(context).textTheme.titleMedium),
                           FieldHeatMap(

@@ -12,24 +12,38 @@ class ScoutLeaderboardPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final data = context.watch<DataProvider>().database.patches;
 
+    final expression = RegExp(r'\/matches\/.+\/robot\/');
+
     Map<String, int> scores = SplayTreeMap<String, int>();
+    Map<String, int> edits = SplayTreeMap<String, int>();
 
     for (final patch in data) {
       if (scores[patch.identity] == null) {
         scores[patch.identity] = 0;
+        edits[patch.identity] = 0;
       }
 
       int addValue = 1;
-      if (patch.path.startsWith("/matches")) {
-        //MATCH SCOUTS ARE WORTH DOUBLE POINTS!
-        addValue = 2;
+      if (expression.hasMatch(patch.path)) {
+        addValue = 5;
       }
 
+      edits[patch.identity] = edits[patch.identity]! + 1;
       scores[patch.identity] = scores[patch.identity]! + addValue;
     }
 
-    var sortedByKeyMap = SplayTreeMap<String, int>.from(
-        scores, (k1, k2) => scores[k2]!.compareTo(scores[k1]!));
+    print(scores);
+
+    List<({String identity, int score, int edits})> sorted = [
+      for (final scout in scores.entries)
+        (
+          identity: scout.key,
+          score: scout.value,
+          edits: edits[scout.key]!,
+        ),
+    ];
+
+    sorted.sort((k1, k2) => k2.score.compareTo(k1.score));
 
     return Scaffold(
       appBar: AppBar(
@@ -37,10 +51,12 @@ class ScoutLeaderboardPage extends StatelessWidget {
       ),
       body: ListView(
         children: [
-          for (final item in sortedByKeyMap.entries)
+          const Text(
+              "This is just for fun! Each normal edit is worth 1 point (pit scouting is worth 1 point per field). A edits that match 'r'\\/matches\\/.+\\/robot\\/'' are worth 5 points because match recordings take longer."),
+          for (final item in sorted)
             ListTile(
-              title: Text(item.key),
-              subtitle: Text("${item.value}"),
+              title: Text(item.identity),
+              subtitle: Text("Score: ${item.score}\nEdits: ${item.edits}"),
             )
         ],
       ),

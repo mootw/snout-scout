@@ -343,6 +343,8 @@ class PathsViewer extends StatefulWidget {
 class _PathsViewerState extends State<PathsViewer> {
   int filterIndex = -1;
 
+  int viewMode = 0; //0 = paths only, 1 = overlay text
+
   @override
   Widget build(BuildContext context) {
     final List<({String label, List<MatchEvent> path})> filteredPaths;
@@ -352,69 +354,107 @@ class _PathsViewerState extends State<PathsViewer> {
       filteredPaths = [widget.paths[filterIndex]];
     }
 
-      return ConstrainedBox(
-        constraints: BoxConstraints.loose(Size(widget.size, double.infinity)),
-        child: Column(
-          children: [ConstrainedBox(
-            constraints: BoxConstraints.loose(Size(widget.size, widget.size / 2)),
-            child: FullScreenFieldSelector(
-              showAbove: null,
-              child: FieldMap(children: [
-                Container(color: Colors.black12),
-                for (final path in filteredPaths) ...[
-                  CustomPaint(
-                    size: Size.infinite,
-                    painter: MapLine(
-                        emphasizeStartPoint: widget.emphasizeStartPoint,
-                        color: getColorFromIndex(filteredPaths.indexOf(path)),
-                        events: path.path),
-                  ),
-                ],
-                // Event Labels
-                Stack(
-                  children: [ for (final path in filteredPaths)
+    return ConstrainedBox(
+      constraints: BoxConstraints.loose(Size(widget.size, double.infinity)),
+      child: Column(children: [
+        ConstrainedBox(
+          constraints: BoxConstraints.loose(Size(widget.size, widget.size / 2)),
+          child: FullScreenFieldSelector(
+            showAbove: null,
+            child: FieldMap(children: [
+              Container(color: Colors.black12),
+              for (final path in filteredPaths) ...[
+                CustomPaint(
+                  size: Size.infinite,
+                  painter: MapLine(
+                      emphasizeStartPoint: widget.emphasizeStartPoint,
+                      color: getColorFromIndex(filteredPaths.indexOf(path)),
+                      events: path.path),
+                ),
+              ],
+              // Event Labels
+              if (viewMode == 1)
+                Stack(children: [
+                  for (final path in filteredPaths)
                     for (final event
                         in path.path.where((event) => !event.isPositionEvent))
                       Align(
-                                      alignment: Alignment(event.position.x, -event.position.y),
-                                      child:Text(
-                          '${event.getLabelFromConfig(context.watch<DataProvider>().event.config)}',
-                          style: TextStyle(color: Colors.white,
-                              fontSize: 10, backgroundColor: Colors.black26)),
-                                    ),
-              ]),
-                
-              ]),
-            ),
-          ),
-          Align(
-                  alignment: Alignment.bottomLeft,
-                  child: Container(
-                    color: Colors.black87,
-                    height: 32,
-                    child: ListView(scrollDirection: Axis.horizontal, children: [
-                      TextButton(
-                          onPressed: () => setState(() {
-                                filterIndex = -1;
-                              }),
-                          child: const Text("All")),
-                      for (final (idx, item) in widget.paths.indexed)
-                        TextButton(
-                            onPressed: () => setState(() {
-                                  filterIndex = idx;
-                                }),
-                            child: Text(
-                              item.label,
-                              style: TextStyle(
-                                  color: getColorFromIndex(
-                                      widget.paths.indexOf(item))),
-                            )),
-                    ]),
+                        alignment:
+                            Alignment(event.position.x, -event.position.y),
+                        child: Text(
+                            event.getLabelFromConfig(
+                                context.watch<DataProvider>().event.config),
+                            style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                backgroundColor: Colors.black26)),
+                      ),
+                ]),
+
+              if (viewMode == 2)
+                Expanded(
+                  child: Align(
+                    alignment: Alignment.topRight,
+                    child: SingleChildScrollView(
+                      child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            for (final path in filteredPaths)
+                              for (final event in path.path
+                                  .where((event) => !event.isPositionEvent))
+                                Text(
+                                    '${event.time} ${event.getLabelFromConfig(context.watch<DataProvider>().event.config)}',
+                                    style: TextStyle(
+                                        color: getColorFromIndex(
+                                            filteredPaths.indexOf(path)),
+                                        backgroundColor: Colors.black26)),
+                          ]),
+                    ),
                   ),
                 ),
-        ]),
-      );
-
+            ]),
+          ),
+        ),
+        Align(
+          alignment: Alignment.bottomLeft,
+          child: Container(
+            color: Colors.black87,
+            height: 32,
+            child: ListView(scrollDirection: Axis.horizontal, children: [
+              TextButton(
+                child: Text("M$viewMode"),
+                onPressed: () => setState(() {
+                  setState(() {
+                    if (viewMode == 0) {
+                      viewMode = 1;
+                    } else if (viewMode == 1) {
+                      viewMode = 2;
+                    } else {
+                      viewMode = 0;
+                    }
+                  });
+                }),
+              ),
+              TextButton(
+                  onPressed: () => setState(() {
+                        filterIndex = -1;
+                      }),
+                  child: const Text("All")),
+              for (final (idx, item) in widget.paths.indexed)
+                TextButton(
+                    onPressed: () => setState(() {
+                          filterIndex = idx;
+                        }),
+                    child: Text(
+                      item.label,
+                      style: TextStyle(
+                          color: getColorFromIndex(widget.paths.indexOf(item))),
+                    )),
+            ]),
+          ),
+        ),
+      ]),
+    );
   }
 }
 

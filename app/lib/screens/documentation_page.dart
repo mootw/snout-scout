@@ -101,7 +101,7 @@ class _DocumentationScreenState extends State<DocumentationScreen> {
 
             String result;
             try {
-              // FOR THE PIT MAP ALLOW FOR resolution higher than the standard scouting 
+              // FOR THE PIT MAP ALLOW FOR resolution higher than the standard scouting
               // image. This is because the pitmap might contain super small text
               final photo =
                   await pickOrTakeImageDialog(context, scoutImageSize * 1.5);

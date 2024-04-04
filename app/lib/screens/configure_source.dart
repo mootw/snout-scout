@@ -140,7 +140,6 @@ class _ConfigureSourceScreenState extends State<ConfigureSourceScreen> {
                   context, "Server", provider.serverURL);
               if (result != null) {
                 await provider.setServer(result);
-                
               }
               updateEvents();
             },

@@ -67,7 +67,8 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
                                   Navigator.pop(context);
                                 }
                               },
-                              child: const Text("Apply"))
+                              child: const Text(
+                                  "Apply (Wait for dialog to close after pressing ik its jank)"))
                         ],
                       );
                     });
