@@ -1,9 +1,9 @@
+import 'package:app/screens/analysis/match_preview.dart';
 import 'package:app/widgets/datasheet.dart';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/screens/view_team_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:snout_db/config/surveyitem.dart';
 
 class TableTeamAveragesPage extends StatelessWidget {
   const TableTeamAveragesPage({super.key});
@@ -18,9 +18,8 @@ class TableTeamAveragesPage extends StatelessWidget {
           DataItem.fromText("Team"),
           for (final item in data.event.config.matchscouting.processes)
             DataItem.fromText(item.label),
-          for (final pitSurvey in data.event.config.pitscouting
-              .where((element) => element.type != SurveyItemType.picture))
-            DataItem.fromText(pitSurvey.label),
+          for (final item in data.event.config.matchscouting.survey)
+              DataItem.fromText(item.label),
         ], rows: [
           for (final team in data.event.teams)
             [
@@ -37,11 +36,8 @@ class TableTeamAveragesPage extends StatelessWidget {
                   sortingValue: team),
               for (final item in data.event.config.matchscouting.processes)
                 DataItem.fromNumber(data.event.teamAverageProcess(team, item)),
-              for (final pitSurvey in data.event.config.pitscouting
-                  .where((element) => element.type != SurveyItemType.picture))
-                DataItem.fromText(data
-                    .event.pitscouting[team.toString()]?[pitSurvey.id]
-                    ?.toString())
+              for (final item in data.event.config.matchscouting.survey)
+                teamPostGameSurveyTableDisplay(data.event, team, item),
             ]
         ]),
       ),

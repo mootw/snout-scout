@@ -6,7 +6,7 @@ import 'package:csv/csv.dart';
 import 'package:flutter/material.dart';
 import 'package:download/download.dart';
 
-String noDataText = "";
+const String noDataText = "";
 
 class DataItem {
   //Helpers to create data items from different types
@@ -61,7 +61,6 @@ class DataSheet extends StatefulWidget {
   const DataSheet(
       {super.key, this.title, required this.columns, required this.rows});
 
-  ///Rows<Columns<DataItem<Comparable>>
   final String? title;
   final List<List<DataItem>> rows;
   final List<DataItem> columns;
@@ -159,15 +158,18 @@ class _DataSheetState extends State<DataSheet> {
                     for (final cell in row)
                       DataCell(
                           ConstrainedBox(
-                              constraints: const BoxConstraints(maxWidth: 160),
-                              //Make the text smaller so that long text fits
-                              //This is more of a hack than best practice
+                            constraints: const BoxConstraints(maxWidth: 160),
+                            child: Container(
+                              color: cell.exportValue.length < 40
+                                  ? null
+                                  : Colors.blue.withAlpha(40),
                               child: DefaultTextStyle(
                                   maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
                                   style:
                                       Theme.of(context).textTheme.bodyMedium!,
-                                  child: cell.displayValue)),
+                                  child: cell.displayValue),
+                            ),
+                          ),
                           onTap: cell.exportValue.length < 40
                               ? null
                               : () {
@@ -207,7 +209,8 @@ class MouseInteractableScrollBehavior extends MaterialScrollBehavior {
   Set<PointerDeviceKind> get dragDevices => {
         PointerDeviceKind.touch,
         PointerDeviceKind.mouse,
-        // etc.
+        PointerDeviceKind.trackpad,
+        PointerDeviceKind.stylus,
       };
 }
 

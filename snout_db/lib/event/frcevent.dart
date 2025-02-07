@@ -131,32 +131,6 @@ class FRCEvent {
         recordedMatches.length;
   }
 
-  /// For each recorded match of this team, it will return a map of each
-  /// Value with the key being the value, and the value being the percent frequency
-  /// The map will be empty if there are no recordings
-  Map<String, double> teamPostGameSurveyByFrequency(int team, String eventId) {
-    final recordedMatches = teamRecordedMatches(team);
-    final Map<String, double> toReturn = {};
-
-    for (final match in recordedMatches) {
-      final surveyValue =
-          match.value.robot[team.toString()]!.survey[eventId]?.toString();
-      if (surveyValue == null) {
-        continue;
-      }
-      if (toReturn[surveyValue] == null) {
-        toReturn[surveyValue] = 1;
-      } else {
-        toReturn[surveyValue] = toReturn[surveyValue]! + 1;
-      }
-    }
-    //We have to calculate the total values since not all matches have a survey value
-    final totalValues = toReturn.values
-        .fold<double>(0, (previousValue, element) => previousValue + element);
-    //Convert the map to be a percentage rather than total sum
-    return toReturn.map((key, value) => MapEntry(key, value / totalValues));
-  }
-
   //TODO the match results process returns a record with a value and optional string error.
   //this might not be the best way to implement it, as the behavior/typing is slightly ambiguous
   //

@@ -35,7 +35,7 @@ class _AnalysisHeatMapByEventTypeState
     final data = context.watch<DataProvider>();
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Events Heatmap Analysis"),
+        title: const Text("Heatmap By Event Type"),
       ),
       body: Column(
         children: [

@@ -6,6 +6,7 @@ import 'package:app/screens/analysis/pitscout_survey_analysis.dart';
 import 'package:app/screens/analysis/postmatch_survey_analysis.dart';
 import 'package:app/screens/analysis/table_match_recordings.dart';
 import 'package:app/screens/analysis/table_team_averages.dart';
+import 'package:app/screens/analysis/table_team_scouting.dart';
 import 'package:flutter/material.dart';
 
 class AnalysisPage extends StatefulWidget {
@@ -21,6 +22,16 @@ class _AnalysisPageState extends State<AnalysisPage> {
     return ListView(children: [
       const Text(
           "Scoreboard (shows average value of all metrics for each team, like heatmaps) - Metrics Explorer - Maybe allow for more 'sql' like queries here?? - Scatter plot!!! AND PLOT FOR METRIC OVER TIME"),
+      ListTile(
+        title: const Text("Pit Survey"),
+        leading: const Icon(Icons.table_chart),
+        onTap: () {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (builder) => const TableTeamPitSurvey()));
+        },
+      ),
       ListTile(
         title: const Text("Team Averages"),
         leading: const Icon(Icons.table_chart),

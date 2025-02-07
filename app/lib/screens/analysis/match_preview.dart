@@ -11,6 +11,8 @@ import 'package:app/widgets/image_view.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:snout_db/config/surveyitem.dart';
+import 'package:snout_db/event/frcevent.dart';
 import 'package:snout_db/snout_db.dart';
 
 class AnalysisMatchPreview extends StatefulWidget {
@@ -138,14 +140,7 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                   DataItem.fromNumber(
                       data.event.teamAverageProcess(team, item)),
                 for (final item in data.event.config.matchscouting.survey)
-                  DataItem.fromText(data.event
-                      .teamPostGameSurveyByFrequency(team, item.id)
-                      .entries
-                      .sorted((a, b) => Comparable.compare(a.value, b.value))
-                      .fold<String>(
-                          "",
-                          (previousValue, element) =>
-                              "${previousValue == "" ? "" : "$previousValue\n"} ${(element.value * 100).round()}% ${element.key}")),
+                  teamPostGameSurveyTableDisplay(data.event, team, item),
               ]
           ]),
           const Divider(height: 32),
@@ -155,163 +150,175 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   children: [
-                    for (final team in [..._blue, ..._red]) ...[
-                      Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          SizedBox(
-                            width: 250,
-                            height: 250,
-                            child: context
-                                            .read<DataProvider>()
-                                            .event
-                                            .pitscouting[team.toString()]
-                                        ?[robotPictureReserved] !=
-                                    null
-                                ? AspectRatio(
-                                    aspectRatio: 1,
-                                    child: ImageViewer(
-                                      child: Image(
-                                        image: CacheMemoryImageProvider(Uint8List
-                                            .fromList(base64Decode(context
-                                                            .read<DataProvider>()
-                                                            .event
-                                                            .pitscouting[
-                                                        team.toString()]![
-                                                    robotPictureReserved]!)
-                                                .cast<int>())),
-                                        fit: BoxFit.cover,
+                    for (final (idx, team) in [..._blue, ..._red].indexed) ...[
+                      Container(
+                        color: (idx > 2 ? Colors.red : Colors.blue)
+                            .withAlpha(45 + ((idx % 2) * 45)),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            SizedBox(
+                              width: 250,
+                              height: 250,
+                              child: context
+                                              .read<DataProvider>()
+                                              .event
+                                              .pitscouting[team.toString()]
+                                          ?[robotPictureReserved] !=
+                                      null
+                                  ? AspectRatio(
+                                      aspectRatio: 1,
+                                      child: ImageViewer(
+                                        child: Image(
+                                          image: CacheMemoryImageProvider(Uint8List
+                                              .fromList(base64Decode(context
+                                                              .read<DataProvider>()
+                                                              .event
+                                                              .pitscouting[
+                                                          team.toString()]![
+                                                      robotPictureReserved]!)
+                                                  .cast<int>())),
+                                          fit: BoxFit.cover,
+                                        ),
                                       ),
-                                    ),
-                                  )
-                                : const Text("No image"),
-                          ),
-                          TextButton(
-                              onPressed: () => Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          TeamViewPage(teamNumber: team))),
-                              child: Text(team.toString(),
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleLarge
-                                      ?.copyWith(
-                                          color: getAllianceColor(
-                                              _red.contains(team)
-                                                  ? Alliance.red
-                                                  : Alliance.blue)))),
-                          Column(
-                            children: [
-                              Text("Autos",
-                                  style:
-                                      Theme.of(context).textTheme.titleMedium),
-                              PathsViewer(
-                                size: 280,
-                                paths: [
-                                  for (final match
-                                      in data.event.teamRecordedMatches(team))
-                                    (
-                                      label: match.value.description,
-                                      path: match.value.robot[team.toString()]!
+                                    )
+                                  : const Text("No image"),
+                            ),
+                            TextButton(
+                                onPressed: () => Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            TeamViewPage(teamNumber: team))),
+                                child: Text(team.toString(),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleLarge
+                                        ?.copyWith(
+                                            color: getAllianceColor(
+                                                _red.contains(team)
+                                                    ? Alliance.red
+                                                    : Alliance.blue)))),
+                            Column(
+                              children: [
+                                Text("Autos",
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium),
+                                PathsViewer(
+                                  size: 280,
+                                  paths: [
+                                    for (final match
+                                        in data.event.teamRecordedMatches(team))
+                                      (
+                                        label: match.value.description,
+                                        path: match
+                                            .value.robot[team.toString()]!
+                                            .timelineInterpolatedBlueNormalized(
+                                                data.event.config.fieldStyle)
+                                            .where(
+                                                (element) => element.isInAuto)
+                                            .toList()
+                                      )
+                                  ],
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Column(
+                              children: [
+                                const SizedBox(height: 8),
+                                Text("Starting Positions",
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium),
+                                FieldHeatMap(
+                                  events: [
+                                    for (final match
+                                        in data.event.teamRecordedMatches(team))
+                                      match.value.robot[team.toString()]!
                                           .timelineInterpolatedBlueNormalized(
                                               data.event.config.fieldStyle)
-                                          .where((element) => element.isInAuto)
-                                          .toList()
-                                    )
-                                ],
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          Column(
-                            children: [
-                              const SizedBox(height: 8),
-                              Text("Starting Positions",
-                                  style:
-                                      Theme.of(context).textTheme.titleMedium),
-                              FieldHeatMap(
-                                events: [
-                                  for (final match
-                                      in data.event.teamRecordedMatches(team))
-                                    match.value.robot[team.toString()]!
-                                        .timelineInterpolatedBlueNormalized(
-                                            data.event.config.fieldStyle)
-                                        .where((element) =>
-                                            element.isPositionEvent)
-                                        .first
-                                ].nonNulls.toList(),
-                              ),
-                            ],
-                          ),
-                          Text("Autos Heatmap",
-                              style: Theme.of(context).textTheme.titleMedium),
-                          FieldHeatMap(
-                            events: [
-                              for (final match
-                                  in data.event.teamRecordedMatches(team))
-                                ...match.value.robot[team.toString()]!
-                                    .timelineInterpolatedBlueNormalized(
-                                        data.event.config.fieldStyle)
-                                    .where((element) => element.isInAuto)
-                            ],
-                          ),
-                          for (final eventType
-                              in data.event.config.matchscouting.events)
-                            Column(children: [
-                              const SizedBox(height: 8),
-                              Text(eventType.label,
-                                  style:
-                                      Theme.of(context).textTheme.titleMedium),
-                              FieldHeatMap(events: [
+                                          .where((element) =>
+                                              element.isPositionEvent)
+                                          .first
+                                  ].nonNulls.toList(),
+                                ),
+                              ],
+                            ),
+                            Text("Autos Heatmap",
+                                style: Theme.of(context).textTheme.titleMedium),
+                            FieldHeatMap(
+                              events: [
                                 for (final match
                                     in data.event.teamRecordedMatches(team))
-                                  ...?match.value.robot[team.toString()]
-                                      ?.timelineBlueNormalized(
+                                  ...match.value.robot[team.toString()]!
+                                      .timelineInterpolatedBlueNormalized(
                                           data.event.config.fieldStyle)
-                                      .where(
-                                          (event) => event.id == eventType.id)
+                                      .where((element) => element.isInAuto)
+                              ],
+                            ),
+                            for (final eventType
+                                in data.event.config.matchscouting.events)
+                              Column(children: [
+                                const SizedBox(height: 8),
+                                Text(eventType.label,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium),
+                                FieldHeatMap(events: [
+                                  for (final match
+                                      in data.event.teamRecordedMatches(team))
+                                    ...?match.value.robot[team.toString()]
+                                        ?.timelineBlueNormalized(
+                                            data.event.config.fieldStyle)
+                                        .where(
+                                            (event) => event.id == eventType.id)
+                                ]),
                               ]),
-                            ]),
-                          Column(
-                            children: [
-                              const SizedBox(height: 8),
-                              Text("Ending Positions",
-                                  style:
-                                      Theme.of(context).textTheme.titleMedium),
-                              FieldHeatMap(
-                                events: [
-                                  for (final match
-                                      in data.event.teamRecordedMatches(team))
-                                    match.value.robot[team.toString()]!
-                                        .timelineInterpolatedBlueNormalized(
-                                            data.event.config.fieldStyle)
-                                        .where((element) =>
-                                            element.isPositionEvent)
-                                        .last
-                                ].nonNulls.toList(),
-                              ),
-                            ],
-                          ),
-                          Column(
-                            children: [
-                              const SizedBox(height: 8),
-                              Text("Driving Tendencies",
-                                  style:
-                                      Theme.of(context).textTheme.titleMedium),
-                              FieldHeatMap(
-                                events: [
-                                  for (final match
-                                      in data.event.teamRecordedMatches(team))
-                                    ...match.value.robot[team.toString()]!
-                                        .timelineInterpolatedBlueNormalized(
-                                            data.event.config.fieldStyle)
-                                        .where((event) => event.isPositionEvent)
-                                ],
-                              ),
-                            ],
-                          ),
-                        ],
+                            Column(
+                              children: [
+                                const SizedBox(height: 8),
+                                Text("Ending Positions",
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium),
+                                FieldHeatMap(
+                                  events: [
+                                    for (final match
+                                        in data.event.teamRecordedMatches(team))
+                                      match.value.robot[team.toString()]!
+                                          .timelineInterpolatedBlueNormalized(
+                                              data.event.config.fieldStyle)
+                                          .where((element) =>
+                                              element.isPositionEvent)
+                                          .last
+                                  ].nonNulls.toList(),
+                                ),
+                              ],
+                            ),
+                            Column(
+                              children: [
+                                const SizedBox(height: 8),
+                                Text("Driving Tendencies",
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium),
+                                FieldHeatMap(
+                                  events: [
+                                    for (final match
+                                        in data.event.teamRecordedMatches(team))
+                                      ...match.value.robot[team.toString()]!
+                                          .timelineInterpolatedBlueNormalized(
+                                              data.event.config.fieldStyle)
+                                          .where(
+                                              (event) => event.isPositionEvent)
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     ]
                   ],
@@ -321,4 +328,54 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
       ),
     );
   }
+}
+
+DataItem teamPostGameSurveyTableDisplay(
+    FRCEvent event, int team, SurveyItem surveyItem) {
+  final recordedMatches = event.teamRecordedMatches(team).toList();
+
+  if (surveyItem.type == SurveyItemType.selector) {
+    final Map<String, double> toReturn = {};
+
+    for (final match in recordedMatches) {
+      final surveyValue =
+          match.value.robot[team.toString()]!.survey[surveyItem.id]?.toString();
+      if (surveyValue == null) {
+        continue;
+      }
+      if (toReturn[surveyValue] == null) {
+        toReturn[surveyValue] = 1;
+      } else {
+        toReturn[surveyValue] = toReturn[surveyValue]! + 1;
+      }
+    }
+
+    //Convert the map to be a percentage rather than total sum
+    return DataItem.fromText(toReturn.entries
+        .sorted((a, b) => Comparable.compare(b.value, a.value))
+        .fold<String>(
+            "",
+            (previousValue, element) =>
+                "${previousValue == "" ? "" : "$previousValue\n"} ${element.value}: ${element.key}"));
+  }
+
+  if (surveyItem.type == SurveyItemType.picture) {
+    // TODO implement display of the image in the table...
+    return DataItem.fromText('Image');
+  }
+
+  String result = "";
+  // Reversed to display the most recent match first in the table
+  for (final match in recordedMatches.reversed) {
+    final surveyValue =
+        match.value.robot[team.toString()]!.survey[surveyItem.id]?.toString();
+
+    if (surveyValue == null) {
+      continue;
+    }
+
+    result += '${match.value.description}: $surveyValue\n';
+  }
+
+  return DataItem.fromText(result);
 }
