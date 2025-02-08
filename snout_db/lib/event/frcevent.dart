@@ -77,8 +77,9 @@ class FRCEvent {
       matches.entries.firstWhere((element) => element.value == match).key;
 
   /// returns matches with a specific team in them
-  List<FRCMatch> matchesWithTeam(int team) =>
-      matches.values.where((match) => match.hasTeam(team)).toList();
+  List<FRCMatch> matchesWithTeam(int team) => matches.values
+      .where((match) => match.isScheduledToHaveTeam(team))
+      .toList();
 
   //returns the match after the last match with results
   FRCMatch? get nextMatch => matches.values

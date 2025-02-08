@@ -11,7 +11,7 @@ import 'package:provider/provider.dart';
 Future<T?> navigateWithEditLock<T>(BuildContext context, String key,
     Function(BuildContext context) navigteFunction) async {
   final editLockUri =
-      context.read<DataProvider>().serverURI.resolve("/edit_lock");
+      context.read<DataProvider>().dataSourceUri.resolve("/edit_lock");
 
   //Check if this key is being edited
   try {

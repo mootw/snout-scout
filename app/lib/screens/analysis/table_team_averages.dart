@@ -19,7 +19,7 @@ class TableTeamAveragesPage extends StatelessWidget {
           for (final item in data.event.config.matchscouting.processes)
             DataItem.fromText(item.label),
           for (final item in data.event.config.matchscouting.survey)
-              DataItem.fromText(item.label),
+            DataItem.fromText(item.label),
         ], rows: [
           for (final team in data.event.teams)
             [

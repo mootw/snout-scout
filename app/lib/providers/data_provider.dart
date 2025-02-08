@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'package:app/api.dart';
 import 'package:app/providers/identity_provider.dart';
 import 'package:app/providers/loading_status_service.dart';
-import 'package:app/screens/configure_source.dart';
+import 'package:app/screens/select_data_source.dart';
 import 'package:app/services/data_service.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
@@ -18,20 +18,20 @@ import 'package:snout_db/snout_db.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 /// determines how the app should load data and apply changes
-enum DataSource {
+enum DataSourceType {
   memory(value: 'memory'),
   localDisk(value: 'localDisk'),
   remoteServer(value: 'remoteServer');
 
-  const DataSource({
+  const DataSourceType({
     required this.value,
   });
 
   final String value;
   String toJson() => value;
 
-  factory DataSource.fromJson(String data) {
-    for (final item in DataSource.values) {
+  factory DataSourceType.fromJson(String data) {
+    for (final item in DataSourceType.values) {
       if (item.value == data) {
         return item;
       }
@@ -40,7 +40,28 @@ enum DataSource {
   }
 }
 
+/// URI scheme handling
+///
+/// IF a specific resource requires credentials, it is NOT stored in the string
+/// This string is considered NOT protected
+///
+/// // scout is for http / ws (Only use for testing!!!!)
+/// scout://scout.xqkz.net/EventFile.snoutdb
+///
+/// // scout is for https / wss
+/// scouts://scout.xqkz.net/EventFile.snoutdb
+///
+/// http / https are treated as scout/scouts respectively for now
+///
+/// TODO support LDAP/SMB and other network protocols
+///
+/// // Everything else is treated as a file
+/// file://adjjaiwda/dw/awd/awdawd/EventFile.snoutdb
+
+/// To be used within the context of a single data source
 class DataProvider extends ChangeNotifier {
+  final Uri dataSourceUri;
+
   //Initialize the database as empty
   //this value should get quickly overwritten
   //i just dont like this being nullable is all.
@@ -53,22 +74,22 @@ class DataProvider extends ChangeNotifier {
     )
   ]);
 
-  DataSource dataSource = DataSource.memory;
+  DataSourceType dataSource = DataSourceType.memory;
 
   FRCEvent get event => database.event;
 
-  DataProvider() {
+  DataProvider(this.dataSourceUri) {
+    print('created new dataProvider ${dataSourceUri}');
     () async {
       final prefs = await SharedPreferences.getInstance();
 
-      dataSource = DataSource.fromJson(
-          prefs.getString('dataSource') ?? DataSource.memory.toJson());
+      dataSource = DataSourceType.fromJson(
+          prefs.getString('dataSource') ?? DataSourceType.memory.toJson());
 
       //Initialize the patches array to be used in the UI.
       failedPatches = prefs.getStringList("failed_patches") ?? [];
 
       //Load data and initialize the app
-      serverURL = prefs.getString("server") ?? "http://localhost:6749";
       selectedEvent = prefs.getString("selectedServerFile");
 
       try {
@@ -77,7 +98,7 @@ class DataProvider extends ChangeNotifier {
         Logger.root.severe("Failed to load data", e, s);
       }
 
-      if (dataSource == DataSource.remoteServer) {
+      if (dataSource == DataSourceType.remoteServer) {
         _initializeLiveServerPatches();
       }
 
@@ -87,7 +108,7 @@ class DataProvider extends ChangeNotifier {
 
   /// Changing the data source requires a few things
   /// depending on the source
-  Future setDataSource(DataSource newSource) async {
+  Future setDataSource(DataSourceType newSource) async {
     final prefs = await SharedPreferences.getInstance();
     prefs.setString("dataSource", newSource.toJson());
     dataSource = newSource;
@@ -98,13 +119,13 @@ class DataProvider extends ChangeNotifier {
   Future _loadSelectedDataSource() {
     final future = () async {
       switch (dataSource) {
-        case DataSource.memory:
+        case DataSourceType.memory:
           //DO NOTHING
           break;
-        case DataSource.localDisk:
+        case DataSourceType.localDisk:
           await _loadLocalDBData();
           break;
-        case DataSource.remoteServer:
+        case DataSourceType.remoteServer:
           await _getDatabaseFromServer();
           break;
       }
@@ -137,14 +158,14 @@ class DataProvider extends ChangeNotifier {
   Future submitPatch(Patch patch) {
     final future = () async {
       switch (dataSource) {
-        case DataSource.memory:
+        case DataSourceType.memory:
           database.addPatch(patch);
           break;
-        case DataSource.localDisk:
+        case DataSourceType.localDisk:
           database.addPatch(patch);
           await writeLocalDiskDatabase(database);
           break;
-        case DataSource.remoteServer:
+        case DataSourceType.remoteServer:
           database.addPatch(patch);
           await _postPatchToServer(patch);
           //importantly we DO NOT save this
@@ -200,17 +221,10 @@ class DataProvider extends ChangeNotifier {
   /// 'CALL UP' THE NOTIFIER BUT THE DART ANALYSIS ENGINE IS TOO SMART
   /// FOR ME :SOBBING:
 
-  String serverURL = "http://localhost:6749";
-
   String? selectedEvent;
 
   String get selectedEventStorageKey =>
-      base64Encode(utf8.encode(getEventPath.toString()));
-
-  Uri get serverURI => Uri.parse(serverURL);
-
-  //Root path for the selected event
-  Uri get getEventPath => serverURI.resolve("/events/$selectedEvent");
+      base64Encode(utf8.encode(dataSourceUri.toString()));
 
   //Used in the UI to see failed and successful patches
   List<String> failedPatches = <String>[];
@@ -222,12 +236,6 @@ class DataProvider extends ChangeNotifier {
   //
   List<({String identity, String status, DateTime time})> scoutStatus = [];
 
-  Future<List<String>> getEventList() async {
-    final url = serverURI.resolve("/events");
-    final result = await apiClient.get(url);
-    return List<String>.from(json.decode(result.body));
-  }
-
   //this will load the entire database if it has
   //not been loaded yet, OR it will load only
   //the changes that have been made since it's
@@ -236,7 +244,7 @@ class DataProvider extends ChangeNotifier {
     final storageKey = selectedEventStorageKey;
     final diskData = await readText(storageKey);
 
-    Uri path = Uri.parse('${getEventPath.toString()}/patches');
+    Uri path = Uri.parse('${dataSourceUri.toString()}/patches');
 
     if (diskData == null) {
       //Load the changest only, since it is more bandwidth efficient
@@ -263,7 +271,7 @@ class DataProvider extends ChangeNotifier {
     //Assign to local database so even when it fails to load, we still have
     //the latest disk database
     database = diskDatabase;
-    Uri diffPath = Uri.parse('${getEventPath.toString()}/patchDiff');
+    Uri diffPath = Uri.parse('${dataSourceUri.toString()}/patchDiff');
     final diffResult = await apiClient.get(diffPath, headers: {
       "head": diskDatabase.patches.length.toString(),
     });
@@ -287,7 +295,7 @@ class DataProvider extends ChangeNotifier {
   Future _postPatchToServer(Patch patch) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     try {
-      final res = await apiClient.put(getEventPath, body: json.encode(patch));
+      final res = await apiClient.put(dataSourceUri, body: json.encode(patch));
       if (res.statusCode == 200) {
         //Remove it from the failed patches if it exists there
         if (failedPatches.contains(json.encode(patch))) {
@@ -311,15 +319,6 @@ class DataProvider extends ChangeNotifier {
       }
       prefs.setStringList("failed_patches", failedPatches);
     }
-  }
-
-  Future setServer(String newServer) async {
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setString("server", newServer);
-    serverURL = newServer;
-    setSelectedEvent(null);
-
-    notifyListeners();
   }
 
   Future setSelectedEvent(String? newFile) async {
@@ -370,11 +369,12 @@ class DataProvider extends ChangeNotifier {
     // of sending garbage frames more regularly (every minute or two), to keep the connection "alive" for proxies
     // right now there is no REASON to send data that frequently. There is a ping option in the IO implementation of the lib
     // but since this is primarily a web app we cant use that.
+
     _channel = WebSocketChannel.connect(Uri.parse(
-        '${serverURL.startsWith("https") ? "wss" : "ws"}://${serverURI.host}:${serverURI.port}/listen/$selectedEvent'));
+        '${dataSourceUri.toString().startsWith("https") ? "wss" : "ws"}://${dataSourceUri.host}:${dataSourceUri.port}/listen/$selectedEvent'));
 
     _channel!.ready.then((_) {
-      if (dataSource != DataSource.remoteServer) {
+      if (dataSource != DataSourceType.remoteServer) {
         return;
       }
 
@@ -390,7 +390,7 @@ class DataProvider extends ChangeNotifier {
     });
 
     _channel!.stream.listen((event) async {
-      if (dataSource != DataSource.remoteServer) {
+      if (dataSource != DataSourceType.remoteServer) {
         return;
       }
 
@@ -441,7 +441,7 @@ class DataProvider extends ChangeNotifier {
       // prefs.setString("db", json.encode(db));
       notifyListeners();
     }, onDone: () {
-      if (dataSource != DataSource.remoteServer) {
+      if (dataSource != DataSourceType.remoteServer) {
         return;
       }
       connected = false;

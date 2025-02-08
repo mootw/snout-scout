@@ -74,7 +74,7 @@ class _MatchRecorderAssistantPageState
     List<Future> futures = [];
     for (final team in teams) {
       futures.add(apiClient
-          .get(context.read<DataProvider>().serverURI.resolve("/edit_lock"),
+          .get(context.read<DataProvider>().dataSourceUri.resolve("/edit_lock"),
               headers: {"key": "match:${widget.matchid}:$team:timeline"})
           .timeout(const Duration(seconds: 1))
           .then((isLocked) {

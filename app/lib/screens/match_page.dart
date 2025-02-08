@@ -11,7 +11,6 @@ import 'package:app/screens/edit_match_results.dart';
 import 'package:app/screens/match_recorder_assistant.dart';
 import 'package:app/screens/view_team_page.dart';
 import 'package:app/widgets/load_status_or_error_bar.dart';
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -127,22 +126,23 @@ class _MatchPageState extends State<MatchPage> {
                 ...match.blue,
                 ...match.red,
                 //Also include all of the surrogate robots
-                ...match.robot.keys.map((e) => int.tryParse(e)).whereNotNull()
+                ...match.robot.keys.map((e) => int.tryParse(e)).nonNulls
               })
                 [
                   DataItem(
                       displayValue: TextButton(
                           child: Text(
                               team.toString() +
-                                  (match.hasTeam(team) == false
+                                  (match.isScheduledToHaveTeam(team) == false
                                       ? " [surrogate]"
                                       : ""),
                               style: TextStyle(
-                                  color: match.hasTeam(team) == false
-                                      ? getAllianceColor(match
-                                          .robot[team.toString()]!.alliance)
-                                      : getAllianceColor(
-                                          match.getAllianceOf(team)))),
+                                  color:
+                                      match.isScheduledToHaveTeam(team) == false
+                                          ? getAllianceColor(match
+                                              .robot[team.toString()]!.alliance)
+                                          : getAllianceColor(
+                                              match.getAllianceOf(team)))),
                           onPressed: () => Navigator.push(
                                 context,
                                 MaterialPageRoute(

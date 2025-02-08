@@ -47,7 +47,8 @@ class _AllMatchesPageState extends State<AllMatchesPage> {
                 Container(
                     color: match == snoutData.event.nextMatch
                         ? Theme.of(context).colorScheme.onPrimary
-                        : (match.hasTeam(snoutData.event.config.team)
+                        : (match.isScheduledToHaveTeam(
+                                snoutData.event.config.team)
                             ? Theme.of(context).colorScheme.onSecondary
                             : null),
                     child: MatchCard(

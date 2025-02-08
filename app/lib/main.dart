@@ -3,11 +3,12 @@ import 'dart:convert';
 
 import 'package:app/providers/data_provider.dart';
 import 'package:app/providers/local_config_provider.dart';
+import 'package:app/screens/scout_selector_screen.dart';
 import 'package:app/screens/scout_status.dart';
 import 'package:app/style.dart';
 import 'package:app/providers/identity_provider.dart';
 import 'package:app/screens/analysis.dart';
-import 'package:app/screens/configure_source.dart';
+import 'package:app/screens/select_data_source.dart';
 import 'package:app/screens/documentation_page.dart';
 import 'package:app/screens/edit_json.dart';
 import 'package:app/screens/patch_history.dart';
@@ -22,10 +23,12 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
-import 'package:snout_db/config/eventconfig.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:snout_db/patch.dart';
 import 'package:snout_db/snout_db.dart';
-import 'package:url_launcher/url_launcher_string.dart';
+
+/// Only update this value when there is a VALID data source loaded,
+const String defaultSourceKey = 'default_source_uri';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -40,11 +43,44 @@ void main() async {
         '${record.level.name}: ${record.time}: ${record.message}\n${record.error}\n${record.stackTrace}');
   });
 
-  runApp(const MyApp());
+  runApp(const SnoutScoutApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class SnoutScoutApp extends StatefulWidget {
+  const SnoutScoutApp({super.key});
+
+  static SnoutScoutAppState? getState(BuildContext context) {
+    return context.findAncestorStateOfType<SnoutScoutAppState>();
+  }
+
+  @override
+  State<SnoutScoutApp> createState() => SnoutScoutAppState();
+}
+
+class SnoutScoutAppState extends State<SnoutScoutApp> {
+  Uri? _dataSource;
+
+  Future setSource(Uri newSource) async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setString(defaultSourceKey, newSource.toString());
+    setState(() {
+      _dataSource = newSource;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    () async {
+      final prefs = await SharedPreferences.getInstance();
+
+      // Check if the device has a Data Source Selected.
+      final defaultDataSource = prefs.getString(defaultSourceKey);
+      _dataSource =
+          defaultDataSource == null ? null : Uri.parse(defaultDataSource);
+    }();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,46 +88,44 @@ class MyApp extends StatelessWidget {
         providers: [
           ChangeNotifierProvider<IdentityProvider>(
               create: (_) => IdentityProvider()),
-          ChangeNotifierProvider<DataProvider>(create: (_) => DataProvider()),
           ChangeNotifierProvider<LocalConfigProvider>(
               create: (_) => LocalConfigProvider()),
         ],
         child: MaterialApp(
           title: 'Snout Scout',
-          // TODO this kinda thing to automatically set parameters for the app???
-          // onGenerateRoute: (settings) {
-          //   final dataProvider = context.read<DataProvider>();
-          //   print("asdf");
-          //   () async {
-          //     final uri = Uri.parse(settings.name ?? "");
-          //     print(uri.toString());
-          //     final server = uri.queryParameters['server'];
-          //     if (server != null) {
-          //       print("set server");
-          //       dataProvider.setServer(server);
-          //     }
-          //     final event = uri.queryParameters['event'];
-          //     if (event != null) {
-          //       await dataProvider.setSelectedEvent(event);
-          //       dataProvider.setDataSource(DataSource.remoteServer);
-          //     }
-          //   }();
-          //   return null;
-          // },
+          onGenerateRoute: (settings) {
+            final name = settings.name;
+            if (name != null) {
+              print('new route $name');
+              final uri = Uri.tryParse(name.substring(1));
+              if (uri != null) {
+                setState(() {
+                  _dataSource = uri;
+                });
+              }
+            }
+            return null;
+          },
           theme: defaultTheme,
-          home: const MyHomePage(),
+          home: _dataSource != null
+              ? ChangeNotifierProvider<DataProvider>(
+                  key: Key(_dataSource.toString()),
+                  create: (_) => DataProvider(_dataSource!),
+                  child: const DatabaseBrowserScreen())
+              : const SelectDataSourceScreen(),
         ));
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key});
+class DatabaseBrowserScreen extends StatefulWidget {
+  const DatabaseBrowserScreen({super.key});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<DatabaseBrowserScreen> createState() => _DatabaseBrowserScreenState();
 }
 
-class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
+class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
+    with WidgetsBindingObserver {
   int _currentPageIndex = 0;
 
   @override
@@ -100,27 +134,22 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     Logger.root.onRecord.listen((record) {
       if (record.level >= Level.SEVERE) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(record.message),
-          duration: const Duration(seconds: 8),
-          action: SnackBarAction(
-              label: "Details",
-              onPressed: () => showDialog(
-                  context: context,
-                  builder: (dialogContext) => AlertDialog(
-                        content: SingleChildScrollView(
-                          child: SelectableText(
-                              "${record.message}\n${record.error}\n${record.object}\n${record.stackTrace}"),
-                        ),
-                      ))),
-        ));
-      }
-    });
-
-    Future.delayed(const Duration(seconds: 1), () {
-      final identityProvider = context.read<IdentityProvider>();
-      if (identityProvider.identity == unknownIdentity) {
-        editIdentityFunction(context, identityProvider);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(record.message),
+            duration: const Duration(seconds: 8),
+            action: SnackBarAction(
+                label: "Details",
+                onPressed: () => showDialog(
+                    context: context,
+                    builder: (dialogContext) => AlertDialog(
+                          content: SingleChildScrollView(
+                            child: SelectableText(
+                                "${record.message}\n${record.error}\n${record.object}\n${record.stackTrace}"),
+                          ),
+                        ))),
+          ));
+        }
       }
     });
   }
@@ -145,7 +174,6 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
     final data = context.watch<DataProvider>();
     final identityProvider = context.watch<IdentityProvider>();
-    String? tbaKey = context.watch<DataProvider>().event.config.tbaEventId;
     final serverConnection = context.watch<DataProvider>();
 
     final nextMatch = data.event.nextMatch;
@@ -156,20 +184,20 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
       appBar: AppBar(
         bottom: const LoadOrErrorStatusBar(),
         titleSpacing: 0,
-        title: Text('${identityProvider.identity} @ ${data.event.config.name}'),
+        title: Text(data.event.config.name),
         actions: [
-          if (tbaKey != null)
-            Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: FilledButton.tonal(
-                  onPressed: () => launchUrlString(
-                      "https://www.thebluealliance.com/event/$tbaKey#rankings"),
-                  child: const Text("Rankings")),
-            ),
           IconButton(
               onPressed: () =>
                   showSearch(context: context, delegate: SnoutScoutSearch()),
-              icon: const Icon(Icons.search))
+              icon: const Icon(Icons.search)),
+          Padding(
+            padding: const EdgeInsets.only(left: 8, right: 8),
+            child: FilledButton(
+                onPressed: () {
+                  editIdentityFunction(context, identityProvider);
+                },
+                child: Text(identityProvider.identity)),
+          ),
         ],
       ),
       body: Row(children: [
@@ -228,18 +256,13 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
       drawer: Drawer(
         child: ListView(children: [
           ListTile(
-            title: const Text("Identity"),
-            onTap: () => editIdentityFunction(context, identityProvider),
-            subtitle: Text(identityProvider.identity),
-            leading: const Icon(Icons.edit),
-          ),
-          ListTile(
             title: const Text("Data Source"),
-            subtitle: Text(serverConnection.dataSource.toJson()),
+            subtitle:
+                Text(Uri.decodeFull(serverConnection.dataSourceUri.toString())),
             onTap: () => Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const ConfigureSourceScreen(),
+                  builder: (context) => const SelectDataSourceScreen(),
                 )),
           ),
           const Divider(),
@@ -251,7 +274,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                     final data = context.read<DataProvider>().database;
                     final stream =
                         Stream.fromIterable(utf8.encode(json.encode(data)));
-                    download(stream, '${data.event.config.name}.json');
+                    download(stream, '${data.event.config.name}.snoutdb');
                   },
                   child: const Text("Download DB as File")),
             ),
@@ -395,8 +418,10 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
 Future editIdentityFunction(
     BuildContext context, IdentityProvider identityProvider) async {
-  final result = await showStringInputDialog(
-      context, "Identity", identityProvider.identity);
+  final result = await Navigator.of(context).push(MaterialPageRoute(
+      builder: (context) => ScoutSelectorScreen(
+          database: context.read<DataProvider>().database)));
+
   if (result != null) {
     await identityProvider.setIdentity(result);
   }

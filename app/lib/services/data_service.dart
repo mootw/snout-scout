@@ -1,11 +1,10 @@
-import 'package:flutter/foundation.dart';
 import 'package:fs_shim/fs_shim.dart';
 
-final fs = kIsWeb ? fileSystemWeb : fileSystemDefault;
-final storePath = fs.directory('/events');
+final fs = fileSystemDefault;
+final localSnoutDBPath = fs.directory('/events');
 
 Future storeText(String key, String value) async {
-  final file = fs.file('${storePath.path}/$key');
+  final file = fs.file('${localSnoutDBPath.path}/$key');
   if (await file.exists() == false) {
     await file.create(recursive: true);
   }
@@ -14,7 +13,7 @@ Future storeText(String key, String value) async {
 
 Future deleteText(String key) async {
   // and a file in it
-  final file = fs.file('${storePath.path}/$key');
+  final file = fs.file('${localSnoutDBPath.path}/$key');
 
   if (await file.exists()) {
     await file.delete();
@@ -22,7 +21,7 @@ Future deleteText(String key) async {
 }
 
 Future<String?> readText(String key) async {
-  final file = fs.file('${storePath.path}/$key');
+  final file = fs.file('${localSnoutDBPath.path}/$key');
 
   if (await file.exists()) {
     return await file.readAsString();

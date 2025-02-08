@@ -1,3 +1,4 @@
+import 'package:app/providers/data_provider.dart';
 import 'package:app/screens/analysis/boxplot_analysis.dart';
 import 'package:app/screens/analysis/events_heatmaps.dart';
 import 'package:app/screens/analysis/heatmap_event_type.dart';
@@ -7,7 +8,10 @@ import 'package:app/screens/analysis/postmatch_survey_analysis.dart';
 import 'package:app/screens/analysis/table_match_recordings.dart';
 import 'package:app/screens/analysis/table_team_averages.dart';
 import 'package:app/screens/analysis/table_team_scouting.dart';
+import 'package:app/search.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class AnalysisPage extends StatefulWidget {
   const AnalysisPage({super.key});
@@ -19,9 +23,23 @@ class AnalysisPage extends StatefulWidget {
 class _AnalysisPageState extends State<AnalysisPage> {
   @override
   Widget build(BuildContext context) {
+    final tbaKey = context.watch<DataProvider>().event.config.tbaEventId;
+
     return ListView(children: [
       const Text(
           "Scoreboard (shows average value of all metrics for each team, like heatmaps) - Metrics Explorer - Maybe allow for more 'sql' like queries here?? - Scatter plot!!! AND PLOT FOR METRIC OVER TIME"),
+      if (tbaKey != null)
+        FilledButton.tonal(
+            onPressed: () => launchUrlString(
+                "https://www.thebluealliance.com/event/$tbaKey#rankings"),
+            child: const Text("TBA Rankings")),
+      ListTile(
+        title: const Text("Search Raw Data"),
+        leading: const Icon(Icons.search),
+        onTap: () {
+          showSearch(context: context, delegate: SnoutScoutSearch());
+        },
+      ),
       ListTile(
         title: const Text("Pit Survey"),
         leading: const Icon(Icons.table_chart),

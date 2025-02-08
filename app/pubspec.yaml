@@ -29,6 +29,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_web_plugins:
+    sdk: flutter
 
   logging: ^1.2.0
   provider: ^6.1.2
@@ -74,6 +76,7 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.6
   package_info_plus: ^8.2.1
+  pointycastle: ^3.9.1
 
 dev_dependencies:
   flutter_test:
