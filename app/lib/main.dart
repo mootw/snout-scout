@@ -90,6 +90,11 @@ class SnoutScoutAppState extends State<SnoutScoutApp> {
               create: (_) => IdentityProvider()),
           ChangeNotifierProvider<LocalConfigProvider>(
               create: (_) => LocalConfigProvider()),
+          // TODO make this a separate widget or something, right now i dont think they get closed out.
+          if (_dataSource != null)
+            ChangeNotifierProvider<DataProvider>(
+                key: Key(_dataSource.toString()),
+                create: (_) => DataProvider(_dataSource!)),
         ],
         child: MaterialApp(
           title: 'Snout Scout',
@@ -108,10 +113,7 @@ class SnoutScoutAppState extends State<SnoutScoutApp> {
           },
           theme: defaultTheme,
           home: _dataSource != null
-              ? ChangeNotifierProvider<DataProvider>(
-                  key: Key(_dataSource.toString()),
-                  create: (_) => DataProvider(_dataSource!),
-                  child: const DatabaseBrowserScreen())
+              ? const DatabaseBrowserScreen()
               : const SelectDataSourceScreen(),
         ));
   }

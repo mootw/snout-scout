@@ -25,9 +25,22 @@ class SelectDataSourceScreen extends StatefulWidget {
 }
 
 class _SelectDataSourceScreenState extends State<SelectDataSourceScreen> {
+  List<String> _localDatabases = [];
+
   @override
   void initState() {
     super.initState();
+    updateLocalDbs();
+  }
+
+  Future updateLocalDbs() async {
+    final items = <String>[];
+    await for (final item in localSnoutDBPath.list()) {
+      items.add(item.path);
+    }
+    setState(() {
+      _localDatabases = items;
+    });
   }
 
   @override
@@ -38,6 +51,7 @@ class _SelectDataSourceScreenState extends State<SelectDataSourceScreen> {
       ),
       body: ListView(
         children: [
+          /// DEMO Data (generate mocked data?! could use real randomized data)
           ListTile(
             leading: const Icon(Icons.phone_android),
             title: const Text("DEMO"),
@@ -47,8 +61,7 @@ class _SelectDataSourceScreenState extends State<SelectDataSourceScreen> {
 
           ListTile(
             leading: const Icon(Icons.create_new_folder),
-            title: const Text("Disk: New Database"),
-            subtitle: const Text("Create a new local database"),
+            title: const Text("New Local Database"),
             onTap: () async {
               final identity = context.read<IdentityProvider>().identity;
               final value = await createNewEvent(context);
@@ -90,15 +103,16 @@ class _SelectDataSourceScreenState extends State<SelectDataSourceScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.file_open),
-            title: const Text("Disk: Upload Database"),
+            title: const Text("Load From Device"),
             subtitle: const Text(
-                "Upload a database from your device. It will override any local databases with the same name."),
+                "It will override any local databases with the same name."),
             onTap: () async {
               final future = () async {
                 try {
                   const XTypeGroup typeGroup = XTypeGroup(
-                    label: 'Snout DB JSON',
-                    extensions: <String>['json'],
+                    label: 'Snout DB',
+                    // TODO remove json extension support once it is unused
+                    extensions: <String>['snoutdb', 'json'],
                   );
                   final XFile? selectedFile = await openFile(
                       acceptedTypeGroups: <XTypeGroup>[typeGroup]);
@@ -162,44 +176,27 @@ class _SelectDataSourceScreenState extends State<SelectDataSourceScreen> {
           ),
           const Divider(),
 
-          /// DEMO Data (generate mocked data?! could use real randomized data)
-          /// Local Disk
-          ///   - New Database (Prompt to select location, and initial Scout ID)
-          ///   - Open Existing Database
-          /// Server
-          ///   - Prompts to connect to server
-          ///
-          /// Recently Used ??
+          const ListTile(
+            title: Text('Local Databases'),
+          ),
 
-          /// Each "DataStore" is a string containing:
-          /// - Connection type (server, disk, memory?)
-          /// - URI (either server URI or file path)
-          /// URI is used to encode the storage location of all related resources (probably hash?)
-          ///   - Database file itself (which contains some media)
-          ///   - any cached items
-          ///   - list of all published and failed patches
-
-          // const ListTile(
-          //   title: Text('Recently Used'),
-          // ),
-          // // ListTile(
-          // //   autofocus: true,
-          // //   leading: const Icon(Icons.refresh),
-          // //   title: const Text("Use Currently Selected"),
-          // //   subtitle: const Text(
-          // //       "Insert uri here https://scout.xqkz.net/events/WeekZero.snoutdb"),
-          // //   onTap: () => {},
-          // // ),
-          // ListTile(
-          //   title: Text('https://scout.xqkz.net'),
-          //   subtitle: Text('Server'),
-          //   trailing: Icon(Icons.delete),
-          // ),
-          // ListTile(
-          //   title: Text('WeekZero'),
-          //   subtitle: Text('file://storage/lol/directory/WeekZero.snoutdb'),
-          //   trailing: Icon(Icons.delete),
-          // ),
+          for (final item in _localDatabases)
+            ListTile(
+              title: Text(item),
+              onTap: () async {
+                await SnoutScoutApp.getState(context)
+                    ?.setSource(Uri.parse(item));
+                if (context.mounted && Navigator.canPop(context)) {
+                  Navigator.pop(context);
+                }
+              },
+              trailing: IconButton(
+                  onPressed: () async {
+                    await fs.file(item).delete();
+                    updateLocalDbs();
+                  },
+                  icon: const Icon(Icons.delete)),
+            ),
         ],
       ),
     );
