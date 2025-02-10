@@ -133,8 +133,7 @@ class _SelectDataSourceScreenState extends State<SelectDataSourceScreen> {
                 try {
                   const XTypeGroup typeGroup = XTypeGroup(
                     label: 'Snout DB',
-                    // TODO remove json extension support once it is unused
-                    extensions: <String>['snoutdb', 'json'],
+                    extensions: ['snoutdb'],
                   );
                   final XFile? selectedFile = await openFile(
                       acceptedTypeGroups: <XTypeGroup>[typeGroup]);

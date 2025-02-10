@@ -102,7 +102,6 @@ class SnoutScoutAppState extends State<SnoutScoutApp> {
           onGenerateRoute: (settings) {
             final name = settings.name;
             if (name != null) {
-              print('new route $name');
               final uri = Uri.tryParse(name.substring(1));
               if (uri != null) {
                 setSource(uri);
@@ -428,7 +427,7 @@ Future editIdentityFunction(BuildContext context) async {
   final result = await Navigator.of(context).push(
       MaterialPageRoute(builder: (context) => const ScoutSelectorScreen()));
 
-  if (result != null) {
+  if (context.mounted && result != null) {
     await context.read<IdentityProvider>().setIdentity(result);
   }
 }

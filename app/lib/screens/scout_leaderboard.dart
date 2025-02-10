@@ -33,8 +33,6 @@ class ScoutLeaderboardPage extends StatelessWidget {
       scores[patch.identity] = scores[patch.identity]! + addValue;
     }
 
-    print(scores);
-
     List<({String identity, int score, int edits})> sorted = [
       for (final scout in scores.entries)
         (
@@ -68,7 +66,7 @@ class ScoutLeaderboardPage extends StatelessWidget {
               child: ListView(
                 scrollDirection: Axis.horizontal,
                 children: [
-                  SizedBox(
+                  const SizedBox(
                     width: 24,
                   ),
                   for (final (idx, item) in sorted.indexed) ...[
@@ -115,7 +113,7 @@ class ScoutLeaderboardPage extends StatelessWidget {
               width: 32,
               color: Colors.red,
             ),
-            title: Text("Score"),
+            title: const Text("Score"),
           ),
           ListTile(
             leading: Container(
@@ -123,7 +121,7 @@ class ScoutLeaderboardPage extends StatelessWidget {
               width: 32,
               color: Colors.blue,
             ),
-            title: Text("Edits"),
+            title: const Text("Edits"),
           ),
         ],
       ),

@@ -123,7 +123,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                         '${item.time.round()}  ${item.getLabelFromConfig(context.watch<DataProvider>().event.config)}',
                         style: TextStyle(
                             color: item.isPositionEvent
-                                ? Theme.of(context).colorScheme.onBackground
+                                ? Theme.of(context).colorScheme.onSurface
                                 : item.getColorFromConfig(context
                                             .watch<DataProvider>()
                                             .event

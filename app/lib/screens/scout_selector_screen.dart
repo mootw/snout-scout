@@ -1,6 +1,4 @@
 import 'package:app/providers/data_provider.dart';
-import 'package:app/providers/loading_status_service.dart';
-import 'package:app/screens/select_data_source.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -41,8 +39,6 @@ class _ScoutSelectorScreenState extends State<ScoutSelectorScreen> {
   Widget build(BuildContext context) {
     final dp = context.watch<DataProvider>();
     final database = dp.database;
-
-    bool isLoading = database.event.config.team == emptyNewEvent.config.team;
 
     final allKnownIdentities = database.patches
         .fold<List<String>>([], (a, b) => [...a, b.identity])

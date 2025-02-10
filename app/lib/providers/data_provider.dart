@@ -46,8 +46,6 @@ class DataProvider extends ChangeNotifier {
   FRCEvent get event => database.event;
 
   DataProvider(this.dataSourceUri) {
-    print('created new dataProvider ${dataSourceUri}');
-
     () async {
       final prefs = await SharedPreferences.getInstance();
 
@@ -142,8 +140,6 @@ class DataProvider extends ChangeNotifier {
 
     Uri path = Uri.parse('${Uri.decodeFull(dataSourceUri.toString())}/patches');
 
-    print(storageKey);
-
     if (diskData == null) {
       //Load the changest only, since it is more bandwidth efficient
       //and the database is ONLY based on patches.
@@ -236,7 +232,6 @@ class DataProvider extends ChangeNotifier {
   StreamSubscription? _subscription;
 
   void _initializeLiveServerPatches() async {
-    print('starting connection to server for real time updates');
     //Do not close the stream if it already exists idk how that behaves
     //it might reuslt in the onDone being called unexpetedly.
 
@@ -264,7 +259,7 @@ class DataProvider extends ChangeNotifier {
     });
 
     _subscription = _channel!.stream.listen((event) async {
-      print("new socket message: " + event);
+      print("new socket message: $event");
 
       try {
         final decoded = json.decode(event);
@@ -331,7 +326,6 @@ class DataProvider extends ChangeNotifier {
 
   @override
   void dispose() {
-    print('cleaning up data provider');
     _subscription?.cancel();
     _channel?.sink.close();
     super.dispose();
