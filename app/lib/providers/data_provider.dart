@@ -29,14 +29,22 @@ Future writeLocalDiskDatabase(SnoutDB db, Uri path) async {
 /// To be used within the context of a single data source
 class DataProvider extends ChangeNotifier {
   final Uri dataSourceUri;
-  bool get isDataSourceUriRemote => dataSourceUri.scheme.startsWith('http');
+
+  // Disgusting way to handle paths but it works so whatever
+  bool get isDataSourceUriRemote => dataSourceUri.toString().startsWith('http');
 
   //Initialize the database as empty
   //this value should get quickly overwritten
   //i just dont like this being nullable is all.
   SnoutDB database = SnoutDB(patches: [
     Patch(
-      identity: 'root',
+      /// Trick to get around the temporary database lol
+      /// This is super duper uber cursed. Basically
+      /// It is this to show a "loading..." chip in the UI
+      /// because right now the app loads the database after
+      /// displaying the dialog for selecting the scout
+      /// when it should really load the database before that...
+      identity: 'Loading...',
       path: Patch.buildPath(['']),
       time: DateTime.now(),
       value: emptyNewEvent.toJson(),
@@ -322,6 +330,8 @@ class DataProvider extends ChangeNotifier {
     }, onError: (e) {
       //Dont try and reconnect on an error
       Logger.root.warning("DB Listener Error", e);
+
+      _channel?.sink.close();
       _subscription?.cancel();
       connected = false;
       notifyListeners();

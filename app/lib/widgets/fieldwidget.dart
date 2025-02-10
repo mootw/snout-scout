@@ -1,8 +1,6 @@
 //Ratio of width to height
 import 'dart:async';
-import 'dart:convert';
 import 'dart:math' as math;
-import 'dart:typed_data';
 
 import 'package:app/providers/cache_memory_imageprovider.dart';
 import 'package:app/providers/data_provider.dart';
@@ -598,9 +596,8 @@ class FieldImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Image(
-      image: CacheMemoryImageProvider(Uint8List.fromList(
-          base64Decode(context.watch<DataProvider>().event.config.fieldImage)
-              .cast<int>())),
+      image: CacheMemoryImageProvider(
+          context.watch<DataProvider>().event.config.fieldImage),
       fit: BoxFit.contain,
       width: 2000,
     );

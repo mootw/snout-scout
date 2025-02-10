@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:app/providers/cache_memory_imageprovider.dart';
 import 'package:app/widgets/datasheet.dart';
@@ -170,14 +169,13 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                                       aspectRatio: 1,
                                       child: ImageViewer(
                                         child: Image(
-                                          image: CacheMemoryImageProvider(Uint8List
-                                              .fromList(base64Decode(context
-                                                              .read<DataProvider>()
-                                                              .event
-                                                              .pitscouting[
-                                                          team.toString()]![
-                                                      robotPictureReserved]!)
-                                                  .cast<int>())),
+                                          image: CacheMemoryImageProvider(
+                                              context
+                                                          .read<DataProvider>()
+                                                          .event
+                                                          .pitscouting[
+                                                      team.toString()]![
+                                                  robotPictureReserved]!),
                                           fit: BoxFit.cover,
                                         ),
                                       ),

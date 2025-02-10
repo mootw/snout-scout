@@ -9,8 +9,7 @@ import 'package:server/socket_messages.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_gzip/shelf_gzip.dart';
-import 'package:shelf_multipart/form_data.dart';
-import 'package:shelf_multipart/multipart.dart';
+import 'package:shelf_multipart/shelf_multipart.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'package:shelf_web_socket/shelf_web_socket.dart';
 import 'package:snout_db/patch.dart';
@@ -96,7 +95,7 @@ void main(List<String> args) async {
   app.get("/listen/<event>", (Request request, String event) {
     event = Uri.decodeComponent(event);
     final handler = webSocketHandler(
-      (WebSocketChannel webSocket) {
+      (WebSocketChannel webSocket, _) {
         logger.info('new listener for $event');
         webSocket.sink.done
             .then((value) => loadedEvents[event]?.listeners.remove(webSocket));
@@ -179,8 +178,8 @@ void main(List<String> args) async {
         return Response.unauthorized("upload_password is invalid");
       }
 
-      if (request.isMultipart) {
-        await for (final entry in request.multipartFormData) {
+      if (request.formData() case final form?) {
+        await for (final entry in form.formData) {
           // Headers are available through part.headers as a map:
           final part = entry.part;
           final fileName = entry.name;

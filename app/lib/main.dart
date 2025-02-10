@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:app/providers/data_provider.dart';
 import 'package:app/providers/local_config_provider.dart';
+import 'package:app/screens/edit_markdown.dart';
 import 'package:app/screens/scout_selector_screen.dart';
 import 'package:app/screens/scout_status.dart';
 import 'package:app/style.dart';
@@ -102,7 +104,7 @@ class SnoutScoutAppState extends State<SnoutScoutApp> {
           onGenerateRoute: (settings) {
             final name = settings.name;
             if (name != null) {
-              final uri = Uri.tryParse(name.substring(1));
+              final uri = Uri.tryParse(Uri.decodeComponent(name.substring(1)));
               if (uri != null) {
                 setSource(uri);
                 setState(() {
@@ -368,6 +370,54 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
                 //Save the scouting results to the server!!
 
                 await data.newTransaction(patch);
+              }
+            },
+          ),
+          ListTile(
+            title: const Text("Edit Docs"),
+            leading: const Icon(Icons.book),
+            onTap: () async {
+              final identity = context.read<IdentityProvider>().identity;
+              final dataProvider = context.read<DataProvider>();
+              final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => EditMarkdownPage(
+                          source: dataProvider.event.config.docs)));
+              if (result != null) {
+                Patch patch = Patch(
+                    identity: identity,
+                    time: DateTime.now(),
+                    path: Patch.buildPath(['config', 'docs']),
+                    value: result);
+                //Save the scouting results to the server!!
+                await dataProvider.newTransaction(patch);
+              }
+            },
+          ),
+          ListTile(
+            title: const Text(
+                "Set Field Image (2:1 ratio, blue alliance left, scoring table bottom)"),
+            leading: const Icon(Icons.map),
+            onTap: () async {
+              final identity = context.read<IdentityProvider>().identity;
+              final dataProvider = context.read<DataProvider>();
+              String result;
+              try {
+                final photo = await pickOrTakeImageDialog(context);
+                if (photo != null) {
+                  Uint8List bytes = await photo.readAsBytes();
+                  result = base64Encode(bytes);
+                  Patch patch = Patch(
+                      identity: identity,
+                      time: DateTime.now(),
+                      path: Patch.buildPath(['config', 'fieldImage']),
+                      value: result);
+                  //Save the scouting results to the server!!
+                  await dataProvider.newTransaction(patch);
+                }
+              } catch (e, s) {
+                Logger.root.severe("Error taking image from device", e, s);
               }
             },
           ),

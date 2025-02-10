@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:app/providers/cache_memory_imageprovider.dart';
@@ -51,8 +50,7 @@ class DataItem {
                 ? const SizedBox()
                 : ImageViewer(
                     child: Image(
-                    image: CacheMemoryImageProvider(
-                        Uint8List.fromList(base64Decode(value).cast<int>())),
+                    image: CacheMemoryImageProvider(value),
                     fit: BoxFit.cover,
                   )),
             exportValue: value == null ? '' : 'Image',

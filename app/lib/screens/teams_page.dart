@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:app/providers/cache_memory_imageprovider.dart';
 import 'package:app/providers/data_provider.dart';
@@ -159,10 +158,8 @@ class TeamListTile extends StatelessWidget {
     if (data != null) {
       image = AspectRatio(
           aspectRatio: 1,
-          child: Image(
-              image: CacheMemoryImageProvider(
-                  Uint8List.fromList(base64Decode(data).cast<int>())),
-              fit: BoxFit.cover));
+          child:
+              Image(image: CacheMemoryImageProvider(data), fit: BoxFit.cover));
     }
 
     return InkWell(

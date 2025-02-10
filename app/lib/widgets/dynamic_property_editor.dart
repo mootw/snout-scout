@@ -175,8 +175,7 @@ class _DynamicPropertyEditorWidgetState
                 subtitle: _value == null
                     ? const Text("No Image")
                     : Image(
-                        image: CacheMemoryImageProvider(Uint8List.fromList(
-                            base64Decode(_value).cast<int>())),
+                        image: CacheMemoryImageProvider(_value),
                         fit: BoxFit.contain,
                       ),
               ),

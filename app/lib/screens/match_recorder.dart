@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:app/providers/cache_memory_imageprovider.dart';
 import 'package:app/providers/local_config_provider.dart';
@@ -376,9 +375,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
         .event
         .pitscouting[widget.team.toString()]?[robotPictureReserved];
     if (pictureData != null) {
-      robotPicture = Image(
-          image: CacheMemoryImageProvider(
-              Uint8List.fromList(base64Decode(pictureData).cast<int>())));
+      robotPicture = Image(image: CacheMemoryImageProvider(pictureData));
     }
 
     return Padding(

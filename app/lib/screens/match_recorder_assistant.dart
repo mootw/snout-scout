@@ -1,6 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:app/api.dart';
 import 'package:app/edit_lock.dart';
@@ -198,10 +196,8 @@ class _MatchRecorderAssistantPageState
     if (data != null) {
       image = AspectRatio(
           aspectRatio: 1,
-          child: Image(
-              image: CacheMemoryImageProvider(
-                  Uint8List.fromList(base64Decode(data).cast<int>())),
-              fit: BoxFit.cover));
+          child:
+              Image(image: CacheMemoryImageProvider(data), fit: BoxFit.cover));
     }
 
     return InkWell(

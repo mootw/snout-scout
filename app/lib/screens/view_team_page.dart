@@ -1,6 +1,3 @@
-import 'dart:convert';
-import 'dart:typed_data';
-
 import 'package:app/providers/cache_memory_imageprovider.dart';
 import 'package:app/widgets/datasheet.dart';
 import 'package:app/edit_lock.dart';
@@ -13,7 +10,6 @@ import 'package:app/screens/scout_team.dart';
 import 'package:app/widgets/image_view.dart';
 import 'package:app/widgets/timeduration.dart';
 import 'package:collection/collection.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:snout_db/event/match.dart';
@@ -106,9 +102,23 @@ class _TeamViewPageState extends State<TeamViewPage> {
                   )
                 : const Center(child: Text('No upcoming matches')),
             Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                if (robotPicture != null)
+                  SizedBox(
+                    width: 240,
+                    height: 240,
+                    child: AspectRatio(
+                      aspectRatio: 1,
+                      child: ImageViewer(
+                        child: Image(
+                          image: CacheMemoryImageProvider(robotPicture),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                  ),
+                if (robotPicture == null)
+                  const Text("No $robotPictureReserved :("),
                 Flexible(
                   child: Padding(
                       padding: const EdgeInsets.all(16),
@@ -118,23 +128,6 @@ class _TeamViewPageState extends State<TeamViewPage> {
                         ],
                       )),
                 ),
-                if (robotPicture != null)
-                  SizedBox(
-                    width: 240,
-                    height: 240,
-                    child: AspectRatio(
-                      aspectRatio: 1,
-                      child: ImageViewer(
-                        child: Image(
-                          image: CacheMemoryImageProvider(Uint8List.fromList(
-                              base64Decode(robotPicture).cast<int>())),
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                  ),
-                if (robotPicture == null)
-                  const Text("No $robotPictureReserved :("),
               ],
             ),
 
@@ -427,8 +420,7 @@ class DynamicValueViewer extends StatelessWidget {
         title: Text(itemType.label),
         subtitle: ImageViewer(
           child: Image(
-            image: CacheMemoryImageProvider(
-                Uint8List.fromList(base64Decode(value).cast<int>())),
+            image: CacheMemoryImageProvider(value),
             height: 500,
             fit: BoxFit.contain,
           ),

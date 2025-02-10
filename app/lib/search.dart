@@ -1,6 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:app/providers/cache_memory_imageprovider.dart';
 import 'package:app/providers/data_provider.dart';
@@ -98,7 +96,7 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
         Expanded(
           child: ListView(cacheExtent: 10000, children: [
             if (!_loading && _results.isEmpty)
-              Text('No Results. Try a different query'),
+              const Text('No Results. Try a different query'),
             for (final result in _results) result(context),
           ]),
         ),
@@ -126,8 +124,7 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
           robotPicture = AspectRatio(
               aspectRatio: 1,
               child: Image(
-                  image: CacheMemoryImageProvider(Uint8List.fromList(
-                      base64Decode(pictureData).cast<int>())),
+                  image: CacheMemoryImageProvider(pictureData),
                   fit: BoxFit.cover));
         }
         yield (context) => ListTile(
@@ -199,12 +196,11 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
             robotPicture = AspectRatio(
                 aspectRatio: 1,
                 child: Image(
-                    image: CacheMemoryImageProvider(Uint8List.fromList(
-                        base64Decode(pictureData).cast<int>())),
+                    image: CacheMemoryImageProvider(pictureData),
                     fit: BoxFit.cover));
           }
 
-          await Future.delayed(Duration(seconds: 0));
+          await Future.delayed(const Duration(seconds: 0));
           yield (context) => ListTile(
                 leading: robotPicture,
                 title: Text('${item.value}'),
@@ -240,7 +236,7 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
               .toString()
               .toLowerCase()
               .contains(widget.query.toLowerCase())) {
-            await Future.delayed(Duration(seconds: 0));
+            await Future.delayed(const Duration(seconds: 0));
             yield (context) => ListTile(
                   title: Text(value.value.toString()),
                   subtitle: Text(
