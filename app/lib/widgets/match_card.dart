@@ -1,4 +1,5 @@
 import 'package:app/providers/data_provider.dart';
+import 'package:app/style.dart';
 import 'package:app/widgets/timeduration.dart';
 import 'package:provider/provider.dart';
 import 'package:app/screens/match_page.dart';
@@ -6,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:snout_db/event/match.dart';
 import 'package:snout_db/snout_db.dart';
 
-const double matchCardHeight = 45;
+const double matchCardHeight = 46;
 
 const TextStyle whiteText = TextStyle(color: Colors.white, fontSize: 12);
 const TextStyle whiteTextBold =
@@ -34,15 +35,27 @@ class MatchCard extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             SizedBox(
-              width: 69,
+              width: 65,
               child: TimeDuration(
                   time: match.results != null
                       ? match.results!.time
                       : match.scheduledTime
                           .add(snoutData.event.scheduleDelay ?? Duration.zero)),
             ),
+            match.isScheduledToHaveTeam(focusTeam ?? 0)
+                ? SizedBox(
+                    width: 19,
+                    child: Icon(
+                      Icons.star,
+                      color:
+                          getAllianceColor(match.getAllianceOf(focusTeam ?? 0)),
+                    ),
+                  )
+                : const SizedBox(
+                    width: 19,
+                  ),
             SizedBox(
-                width: 125,
+                width: 110,
                 child: Text(match.description, textAlign: TextAlign.center)),
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -55,10 +68,7 @@ class MatchCard extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
                         for (final team in match.red)
-                          Text("$team",
-                              style: focusTeam == team
-                                  ? whiteTextBold
-                                  : whiteText),
+                          Text("$team", style: whiteText),
                         SizedBox(
                           width: 25,
                           child: Text(
@@ -82,10 +92,7 @@ class MatchCard extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
                         for (final team in match.blue)
-                          Text("$team",
-                              style: focusTeam == team
-                                  ? whiteTextBold
-                                  : whiteText),
+                          Text("$team", style: whiteText),
                         SizedBox(
                           width: 25,
                           child: Text(

@@ -61,7 +61,7 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
                           TextButton(
                               onPressed: () async {
                                 for (var p in patch) {
-                                  await snoutData.submitPatch(p);
+                                  await snoutData.newTransaction(p);
                                 }
                                 if (context.mounted) {
                                   Navigator.pop(context);
@@ -136,7 +136,7 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
                       // convert to json first
                       value: matchesWithRemoved
                           .map((key, value) => MapEntry(key, value.toJson())));
-                  await snoutData.submitPatch(patch);
+                  await snoutData.newTransaction(patch);
                 }
               },
             ),
@@ -161,7 +161,7 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
             matchID ?? resultMatch.description,
           ]),
           value: resultMatch.toJson());
-      await data.submitPatch(patch);
+      await data.newTransaction(patch);
     }
   }
 }

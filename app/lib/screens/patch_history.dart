@@ -58,7 +58,7 @@ class _PatchHistoryPageState extends State<PatchHistoryPage> {
             //I ALSO DONT CARE TO FIX IT
           }),
           decoration: const InputDecoration(
-            hintText: 'Edit History Filter',
+            hintText: 'Ledger Filter',
           ),
         ),
       ),
@@ -85,7 +85,7 @@ class _PatchHistoryPageState extends State<PatchHistoryPage> {
                                   value: patch.value,
                                 );
                                 final snoutData = context.read<DataProvider>();
-                                snoutData.submitPatch(newPatchToApply);
+                                snoutData.newTransaction(newPatchToApply);
                                 Navigator.pop(context);
                               },
                               child: const Text("Re-Submit Patch As NEW")),

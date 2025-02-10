@@ -71,7 +71,7 @@ class _DocumentationScreenState extends State<DocumentationScreen> {
                     path: Patch.buildPath(['config', 'fieldImage']),
                     value: result);
                 //Save the scouting results to the server!!
-                await dataProvider.submitPatch(patch);
+                await dataProvider.newTransaction(patch);
               }
             } catch (e, s) {
               Logger.root.severe("Error taking image from device", e, s);
@@ -114,7 +114,7 @@ class _DocumentationScreenState extends State<DocumentationScreen> {
                     path: Patch.buildPath(['pitmap']),
                     value: result);
                 //Save the scouting results to the server!!
-                await dataProvider.submitPatch(patch);
+                await dataProvider.newTransaction(patch);
               }
             } catch (e, s) {
               Logger.root.severe("Error taking image from device", e, s);
@@ -140,7 +140,7 @@ class _DocumentationScreenState extends State<DocumentationScreen> {
                   path: Patch.buildPath(['config', 'docs']),
                   value: result);
               //Save the scouting results to the server!!
-              await dataProvider.submitPatch(patch);
+              await dataProvider.newTransaction(patch);
             }
           },
         ),

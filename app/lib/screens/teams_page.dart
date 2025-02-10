@@ -71,7 +71,7 @@ class _TeamGridListState extends State<TeamGridList> {
                                           //Save the scouting results to the server!!
                                           await context
                                               .read<DataProvider>()
-                                              .submitPatch(patch);
+                                              .newTransaction(patch);
                                         }
                                       },
                                       child: const Text("Manual")),
@@ -128,7 +128,7 @@ class _TeamGridListState extends State<TeamGridList> {
                                           //Save the scouting results to the server!!
                                           await context
                                               .read<DataProvider>()
-                                              .submitPatch(patch);
+                                              .newTransaction(patch);
                                         }
                                       },
                                       child: const Text("TBA AutoFill")),

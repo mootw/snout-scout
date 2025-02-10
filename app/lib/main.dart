@@ -20,6 +20,7 @@ import 'package:app/widgets/load_status_or_error_bar.dart';
 import 'package:app/widgets/match_card.dart';
 import 'package:download/download.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:logging/logging.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
@@ -43,11 +44,19 @@ void main() async {
         '${record.level.name}: ${record.time}: ${record.message}\n${record.error}\n${record.stackTrace}');
   });
 
-  runApp(const SnoutScoutApp());
+  final prefs = await SharedPreferences.getInstance();
+
+  // Check if the device has a Data Source Selected.
+  final defaultDataSource = prefs.getString(defaultSourceKey);
+  final ds = defaultDataSource == null ? null : Uri.parse(defaultDataSource);
+
+  runApp(SnoutScoutApp(defaultSourceKey: ds));
 }
 
 class SnoutScoutApp extends StatefulWidget {
-  const SnoutScoutApp({super.key});
+  final Uri? defaultSourceKey;
+
+  const SnoutScoutApp({this.defaultSourceKey, super.key});
 
   static SnoutScoutAppState? getState(BuildContext context) {
     return context.findAncestorStateOfType<SnoutScoutAppState>();
@@ -71,15 +80,7 @@ class SnoutScoutAppState extends State<SnoutScoutApp> {
   @override
   void initState() {
     super.initState();
-
-    () async {
-      final prefs = await SharedPreferences.getInstance();
-
-      // Check if the device has a Data Source Selected.
-      final defaultDataSource = prefs.getString(defaultSourceKey);
-      _dataSource =
-          defaultDataSource == null ? null : Uri.parse(defaultDataSource);
-    }();
+    _dataSource = widget.defaultSourceKey;
   }
 
   @override
@@ -104,6 +105,7 @@ class SnoutScoutAppState extends State<SnoutScoutApp> {
               print('new route $name');
               final uri = Uri.tryParse(name.substring(1));
               if (uri != null) {
+                setSource(uri);
                 setState(() {
                   _dataSource = uri;
                 });
@@ -154,6 +156,10 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
         }
       }
     });
+
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      editIdentityFunction(context);
+    });
   }
 
   @override
@@ -196,7 +202,7 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
             padding: const EdgeInsets.only(left: 8, right: 8),
             child: FilledButton(
                 onPressed: () {
-                  editIdentityFunction(context, identityProvider);
+                  editIdentityFunction(context);
                 },
                 child: Text(identityProvider.identity)),
           ),
@@ -268,6 +274,17 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
                 )),
           ),
           const Divider(),
+          ListTile(
+            title: const Text("Ledger"),
+            trailing: const Icon(Icons.receipt_long),
+            subtitle:
+                Text('${data.database.patches.length.toString()} transactions'),
+            onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const PatchHistoryPage(),
+                )),
+          ),
           Center(
             child: Padding(
               padding: const EdgeInsets.all(8.0),
@@ -280,17 +297,6 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
                   },
                   child: const Text("Download DB as File")),
             ),
-          ),
-          ListTile(
-            title: const Text("Edit History"),
-            trailing: const Icon(Icons.receipt_long),
-            subtitle:
-                Text('${data.database.patches.length.toString()} entries'),
-            onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const PatchHistoryPage(),
-                )),
           ),
           ListTile(
             title: const Text("Scout Status"),
@@ -362,7 +368,7 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
                     value: reAppendedConfig.toJson());
                 //Save the scouting results to the server!!
 
-                await data.submitPatch(patch);
+                await data.newTransaction(patch);
               }
             },
           ),
@@ -418,13 +424,11 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
   }
 }
 
-Future editIdentityFunction(
-    BuildContext context, IdentityProvider identityProvider) async {
-  final result = await Navigator.of(context).push(MaterialPageRoute(
-      builder: (context) => ScoutSelectorScreen(
-          database: context.read<DataProvider>().database)));
+Future editIdentityFunction(BuildContext context) async {
+  final result = await Navigator.of(context).push(
+      MaterialPageRoute(builder: (context) => const ScoutSelectorScreen()));
 
   if (result != null) {
-    await identityProvider.setIdentity(result);
+    await context.read<IdentityProvider>().setIdentity(result);
   }
 }

@@ -94,6 +94,7 @@ void main(List<String> args) async {
   await loadEvents();
 
   app.get("/listen/<event>", (Request request, String event) {
+    event = Uri.decodeComponent(event);
     final handler = webSocketHandler(
       (WebSocketChannel webSocket) {
         logger.info('new listener for $event');
@@ -225,10 +226,18 @@ void main(List<String> args) async {
   });
 
   app.get("/events", (Request request) {
-    return Response.ok(json.encode(loadedEvents.keys.toList()));
+    return Response.ok(
+      json.encode(loadedEvents.keys.toList()),
+      headers: {
+        'Content-Type':
+            ContentType('application', 'json', charset: 'utf-8').toString(),
+      },
+    );
   });
 
   app.get("/events/<eventID>", (Request request, String eventID) async {
+    eventID = Uri.decodeComponent(eventID);
+
     final File? f = loadedEvents[eventID]?.file;
     if (f == null || await f.exists() == false) {
       return Response.notFound("Event not found");
@@ -248,6 +257,7 @@ void main(List<String> args) async {
 
   app.get("/events/<eventID>/patchDiff",
       (Request request, String eventID) async {
+    eventID = Uri.decodeComponent(eventID);
     final File? f = loadedEvents[eventID]?.file;
     if (f == null || await f.exists() == false) {
       return Response.notFound("Event not found");
@@ -279,6 +289,7 @@ void main(List<String> args) async {
 
   app.get("/events/<eventID>/<subPath|.*>",
       (Request request, String eventID, String subPath) async {
+    eventID = Uri.decodeComponent(eventID);
     final File? f = loadedEvents[eventID]?.file;
     if (f == null || await f.exists() == false) {
       return Response.notFound("Event not found");
@@ -307,6 +318,7 @@ void main(List<String> args) async {
   app.put(
     "/events/<eventID>",
     (Request request, String eventID) async {
+      eventID = Uri.decodeComponent(eventID);
       // Require all writes to start with reading the file, only one at a time and do a full disk flush
       return dbWriteLock.synchronized(() async {
         final File? f = loadedEvents[eventID]?.file;

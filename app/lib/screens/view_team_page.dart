@@ -84,31 +84,32 @@ class _TeamViewPageState extends State<TeamViewPage> {
                 style: Theme.of(context).textTheme.headlineLarge,
               ),
             ),
-            if (teamNextMatch != null && scheduleDelay != null)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text("next match"),
-                  TextButton(
-                    onPressed: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => MatchPage(
-                              matchid:
-                                  data.event.matchIDFromMatch(teamNextMatch))),
-                    ),
-                    child: Text(
-                      teamNextMatch.description,
-                      style: TextStyle(
-                          color: getAllianceColor(
-                              teamNextMatch.getAllianceOf(widget.teamNumber))),
-                    ),
-                  ),
-                  TimeDuration(
-                      time: teamNextMatch.scheduledTime.add(scheduleDelay),
-                      displayDurationDefault: true),
-                ],
-              ),
+            teamNextMatch != null && scheduleDelay != null
+                ? Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text("next match"),
+                      TextButton(
+                        onPressed: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => MatchPage(
+                                  matchid: data.event
+                                      .matchIDFromMatch(teamNextMatch))),
+                        ),
+                        child: Text(
+                          teamNextMatch.description,
+                          style: TextStyle(
+                              color: getAllianceColor(teamNextMatch
+                                  .getAllianceOf(widget.teamNumber))),
+                        ),
+                      ),
+                      TimeDuration(
+                          time: teamNextMatch.scheduledTime.add(scheduleDelay),
+                          displayDurationDefault: true),
+                    ],
+                  )
+                : const Center(child: Text('No upcoming matches')),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,

@@ -103,7 +103,7 @@ class _MatchPageState extends State<MatchPage> {
                             ['matches', widget.matchid, 'results']),
                         value: result.toJson());
 
-                    await snoutData.submitPatch(patch);
+                    await snoutData.newTransaction(patch);
                   }
                 },
               ),

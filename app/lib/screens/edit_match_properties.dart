@@ -78,7 +78,7 @@ class _EditMatchPropertiesPageState extends State<EditMatchPropertiesPage> {
                         ]),
                         value: item.value);
                     //Save the scouting results to the server!!
-                    await snoutData.submitPatch(patch);
+                    await snoutData.newTransaction(patch);
                   }
                   if (context.mounted) {
                     Navigator.of(context).pop(true);

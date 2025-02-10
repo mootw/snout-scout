@@ -1,16 +1,17 @@
 import 'dart:convert';
 
 import 'package:app/main.dart';
+import 'package:app/providers/data_provider.dart';
+import 'package:app/screens/scout_selector_screen.dart';
 import 'package:app/services/data_service.dart';
 import 'package:app/style.dart';
-import 'package:app/providers/identity_provider.dart';
 import 'package:app/providers/loading_status_service.dart';
 import 'package:app/screens/edit_json.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:snout_db/event/frcevent.dart';
 import 'package:snout_db/patch.dart';
 import 'package:snout_db/snout_db.dart';
@@ -27,20 +28,46 @@ class SelectDataSourceScreen extends StatefulWidget {
 class _SelectDataSourceScreenState extends State<SelectDataSourceScreen> {
   List<String> _localDatabases = [];
 
+  List<(String uri, String path)> _previousServers = [];
+
   @override
   void initState() {
     super.initState();
     updateLocalDbs();
+    updateServerList();
+  }
+
+  Future updateServerList() async {
+    final items = <(String uri, String path)>[];
+    if (await remoteDBPath.exists() == false) {
+      return;
+    }
+    await for (final item in remoteDBPath.list()) {
+      items.add((
+        Uri.decodeFull(utf8.decode(base64Decode(item.path.split('/').last))),
+        item.path
+      ));
+    }
+    if (context.mounted) {
+      setState(() {
+        _previousServers = items;
+      });
+    }
   }
 
   Future updateLocalDbs() async {
     final items = <String>[];
+    if (await localSnoutDBPath.exists() == false) {
+      return;
+    }
     await for (final item in localSnoutDBPath.list()) {
       items.add(item.path);
     }
-    setState(() {
-      _localDatabases = items;
-    });
+    if (context.mounted) {
+      setState(() {
+        _localDatabases = items;
+      });
+    }
   }
 
   @override
@@ -63,40 +90,35 @@ class _SelectDataSourceScreenState extends State<SelectDataSourceScreen> {
             leading: const Icon(Icons.create_new_folder),
             title: const Text("New Local Database"),
             onTap: () async {
-              final identity = context.read<IdentityProvider>().identity;
-              final value = await createNewEvent(context);
-              if (value == null) {
-                return;
-              }
+              final String? scout = await showDialog(
+                  context: context,
+                  builder: (context) => const ScoutRegistrationScreen());
 
-              FRCEvent event = FRCEvent.fromJson(json.decode(value));
-              Patch p = Patch(
-                  identity: identity,
-                  time: DateTime.now(),
-                  path: Patch.buildPath([""]),
-                  value: event.toJson());
+              if (context.mounted && scout != null) {
+                final value = await createNewEvent(context);
+                if (value == null) {
+                  return;
+                }
 
-              event.toJson();
+                if (context.mounted) {
+                  FRCEvent event = FRCEvent.fromJson(json.decode(value));
+                  Patch p = Patch(
+                      identity: scout,
+                      time: DateTime.now(),
+                      path: Patch.buildPath([""]),
+                      value: event.toJson());
 
-              final dbText = json.encode(SnoutDB(patches: [p])
-                  .patches
-                  .map((e) => e.toJson())
-                  .toList());
+                  final sourceUri = Uri.parse(
+                      '${localSnoutDBPath.path}/${event.config.name}.snoutdb');
+                  await writeLocalDiskDatabase(
+                      SnoutDB(patches: [p]), sourceUri);
 
-              final fileContent = utf8.encode(dbText);
-
-              final localFile = fs.file(
-                  '${localSnoutDBPath.path}/${event.config.name}.snoutdb');
-              if (await localFile.exists() == false) {
-                await localFile.create(recursive: true);
-              }
-              await localFile.writeAsBytes(fileContent, flush: true);
-              final sourceUri = Uri.parse(localFile.path);
-
-              if (context.mounted) {
-                await SnoutScoutApp.getState(context)?.setSource(sourceUri);
-                if (context.mounted && Navigator.canPop(context)) {
-                  Navigator.pop(context, sourceUri);
+                  if (context.mounted) {
+                    await SnoutScoutApp.getState(context)?.setSource(sourceUri);
+                    if (context.mounted && Navigator.canPop(context)) {
+                      Navigator.pop(context, sourceUri);
+                    }
+                  }
                 }
               }
             },
@@ -177,7 +199,7 @@ class _SelectDataSourceScreenState extends State<SelectDataSourceScreen> {
           const Divider(),
 
           const ListTile(
-            title: Text('Local Databases'),
+            title: Text('Databases'),
           ),
 
           for (final item in _localDatabases)
@@ -194,6 +216,30 @@ class _SelectDataSourceScreenState extends State<SelectDataSourceScreen> {
                   onPressed: () async {
                     await fs.file(item).delete();
                     updateLocalDbs();
+                  },
+                  icon: const Icon(Icons.delete)),
+            ),
+
+          // The servers and local implementations are different due to how
+          // the data is handled right now
+          for (final item in _previousServers)
+            ListTile(
+              title: Text(item.$1),
+              leading: IconButton(
+                  onPressed: () => Share.share(
+                      'https://snout-scout.web.app/#/${Uri.encodeComponent(item.$1)}'),
+                  icon: const Icon(Icons.share)),
+              onTap: () async {
+                await SnoutScoutApp.getState(context)
+                    ?.setSource(Uri.parse(item.$1));
+                if (context.mounted && Navigator.canPop(context)) {
+                  Navigator.pop(context);
+                }
+              },
+              trailing: IconButton(
+                  onPressed: () async {
+                    await fs.file(item.$2).delete();
+                    updateServerList();
                   },
                   icon: const Icon(Icons.delete)),
             ),
@@ -239,9 +285,11 @@ class _SnoutServerPageState extends State<SnoutServerPage> {
       });
 
       final res = List<String>.from(json.decode((await result).body));
-      setState(() {
-        _eventOptions = res;
-      });
+      if (mounted) {
+        setState(() {
+          _eventOptions = res;
+        });
+      }
     } catch (e, s) {
       Logger.root.severe("Failed to load server event list", e, s);
     }
