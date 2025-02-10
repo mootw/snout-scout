@@ -1,10 +1,14 @@
 import 'dart:convert';
+import 'dart:typed_data';
 import 'dart:ui';
 
+import 'package:app/providers/cache_memory_imageprovider.dart';
 import 'package:app/style.dart';
+import 'package:app/widgets/image_view.dart';
 import 'package:csv/csv.dart';
 import 'package:flutter/material.dart';
 import 'package:download/download.dart';
+import 'package:snout_db/config/surveyitem.dart';
 
 const String noDataText = "";
 
@@ -37,6 +41,26 @@ class DataItem {
         sortingValue = number.value == null || number.value!.isNaN
             ? double.negativeInfinity
             : number.value!;
+
+  // This is a builder because why not
+  static DataItem fromSurveyItem(int team, dynamic value, SurveyItem survey) {
+    switch (survey.type) {
+      case SurveyItemType.picture:
+        return DataItem(
+            displayValue: value == null
+                ? const SizedBox()
+                : ImageViewer(
+                    child: Image(
+                    image: CacheMemoryImageProvider(
+                        Uint8List.fromList(base64Decode(value).cast<int>())),
+                    fit: BoxFit.cover,
+                  )),
+            exportValue: value == null ? '' : 'Image',
+            sortingValue: value == null ? 0 : 1);
+      default:
+        return DataItem.fromText(value?.toString());
+    }
+  }
 
   DataItem.fromText(String? text)
       : displayValue = Text(text ?? noDataText),

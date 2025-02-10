@@ -279,6 +279,7 @@ class DataProvider extends ChangeNotifier {
 
             break;
           case SocketMessageType.newPatch:
+
             //apply patch to local state BUT do not save it to
             //disk because it is AMBIGUOUS what the local state is
             // This is due to time of arrival and whatnot...
@@ -310,6 +311,8 @@ class DataProvider extends ChangeNotifier {
     }, onDone: () {
       connected = false;
       notifyListeners();
+
+      _channel?.sink.close();
       //Re-attempt a connection after some time
       Timer(const Duration(seconds: 3), () {
         if (connected == false) {
@@ -319,6 +322,7 @@ class DataProvider extends ChangeNotifier {
     }, onError: (e) {
       //Dont try and reconnect on an error
       Logger.root.warning("DB Listener Error", e);
+      _subscription?.cancel();
       connected = false;
       notifyListeners();
     });

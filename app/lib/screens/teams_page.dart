@@ -13,9 +13,9 @@ import 'package:snout_db/patch.dart';
 
 /// Displays a wrapped grid of teams
 class TeamGridList extends StatefulWidget {
-  const TeamGridList({super.key, this.teamFiler, this.showEditButton = false});
+  const TeamGridList({super.key, this.teamFilter, this.showEditButton = false});
 
-  final List<int>? teamFiler;
+  final List<int>? teamFilter;
   final bool showEditButton;
 
   @override
@@ -34,7 +34,8 @@ class _TeamGridListState extends State<TeamGridList> {
           alignment: WrapAlignment.spaceEvenly,
           children: [
             for (final team in context.watch<DataProvider>().event.teams)
-              if (widget.teamFiler == null || widget.teamFiler!.contains(team))
+              if (widget.teamFilter == null ||
+                  widget.teamFilter!.contains(team))
                 TeamListTile(teamNumber: team),
             if (widget.showEditButton)
               Padding(

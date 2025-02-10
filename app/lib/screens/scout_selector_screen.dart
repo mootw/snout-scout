@@ -112,6 +112,7 @@ class _ScoutRegistrationScreenState extends State<ScoutRegistrationScreen> {
         title: const Text('Register New Scout'),
       ),
       body: Form(
+        autovalidateMode: AutovalidateMode.onUserInteraction,
         key: _formKey,
         child: ListView(
           children: [
@@ -132,7 +133,6 @@ class _ScoutRegistrationScreenState extends State<ScoutRegistrationScreen> {
             // Padding(
             //   padding: const EdgeInsets.all(16.0),
             //   child: TextFormField(
-            //     onEditingComplete: () => _formKey.currentState!.validate(),
             //     decoration: const InputDecoration(
             //       hintText: 'Password',
             //     ),

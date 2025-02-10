@@ -6,7 +6,6 @@ import 'package:app/screens/view_team_page.dart';
 import 'package:app/widgets/edit_audit.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:snout_db/config/surveyitem.dart';
 import 'package:snout_db/patch.dart';
 
 class TableMatchRecordingsPage extends StatelessWidget {
@@ -65,12 +64,9 @@ class TableMatchRecordingsPage extends StatelessWidget {
                             match.value.robot[robot.key],
                             int.tryParse(robot.key) ?? 0) ??
                         (value: null, error: "Missing Results")),
-                  for (final item in data.event.config.matchscouting.survey
-                      .where(
-                          (element) => element.type != SurveyItemType.picture))
-                    DataItem.fromText(match
-                        .value.robot[robot.key]?.survey[item.id]
-                        ?.toString()),
+                  for (final item in data.event.config.matchscouting.survey)
+                    DataItem.fromSurveyItem(int.parse(robot.key),
+                        match.value.robot[robot.key]?.survey[item.id], item),
                   DataItem.fromText(getAuditString(context
                       .watch<DataProvider>()
                       .database

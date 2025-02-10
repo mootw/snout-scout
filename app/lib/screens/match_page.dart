@@ -14,7 +14,6 @@ import 'package:app/widgets/load_status_or_error_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:snout_db/config/surveyitem.dart';
 import 'package:snout_db/event/match.dart';
 import 'package:snout_db/event/matchresults.dart';
 import 'package:snout_db/patch.dart';
@@ -158,12 +157,10 @@ class _MatchPageState extends State<MatchPage> {
                                 item, match.robot[team.toString()], team) ??
                         //Missing results, this is not an error
                         (value: null, error: null)),
-                  for (final item in snoutData.event.config.matchscouting.survey
-                      .where(
-                          (element) => element.type != SurveyItemType.picture))
-                    DataItem.fromText(match
-                        .robot[team.toString()]?.survey[item.id]
-                        ?.toString()),
+                  for (final item
+                      in snoutData.event.config.matchscouting.survey)
+                    DataItem.fromSurveyItem(team,
+                        match.robot[team.toString()]?.survey[item.id], item),
                   DataItem.fromText(getAuditString(context
                       .watch<DataProvider>()
                       .database

@@ -360,8 +360,7 @@ DataItem teamPostGameSurveyTableDisplay(
   }
 
   if (surveyItem.type == SurveyItemType.picture) {
-    // TODO implement display of the image in the table...
-    return DataItem.fromText('Image');
+    return DataItem.fromText("See team page or match recordings");
   }
 
   String result = "";

@@ -73,17 +73,12 @@ class _TeamViewPageState extends State<TeamViewPage> {
                 },
                 child: const Text("Scout"))
           ],
-          title: Text("Team ${widget.teamNumber}"),
+          title: Text(
+              "Team ${widget.teamNumber}${teamName == null ? '' : ': $teamName'}"),
         ),
         body: ListView(
           cacheExtent: 5000,
           children: [
-            Center(
-              child: Text(
-                teamName ?? teamNameReserved,
-                style: Theme.of(context).textTheme.headlineLarge,
-              ),
-            ),
             teamNextMatch != null && scheduleDelay != null
                 ? Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -239,10 +234,8 @@ class _TeamViewPageState extends State<TeamViewPage> {
                     for (final item
                         in data.event.config.matchscouting.processes)
                       DataItem.fromText(item.label),
-                    for (final pitSurvey in data
-                        .event.config.matchscouting.survey
-                        .where((element) =>
-                            element.type != SurveyItemType.picture))
+                    for (final pitSurvey
+                        in data.event.config.matchscouting.survey)
                       DataItem.fromText(pitSurvey.label),
                     DataItem.fromText("Scout"),
                   ],
@@ -283,14 +276,13 @@ class _TeamViewPageState extends State<TeamViewPage> {
                                       widget.teamNumber) ??
                               //Missing results, this is not an error
                               (value: null, error: null)),
-                        for (final pitSurvey in data
-                            .event.config.matchscouting.survey
-                            .where((element) =>
-                                element.type != SurveyItemType.picture))
-                          DataItem.fromText(match
-                              .robot[widget.teamNumber.toString()]
-                              ?.survey[pitSurvey.id]
-                              ?.toString()),
+                        for (final pitSurvey
+                            in data.event.config.matchscouting.survey)
+                          DataItem.fromSurveyItem(
+                              widget.teamNumber,
+                              match.robot[widget.teamNumber.toString()]
+                                  ?.survey[pitSurvey.id],
+                              pitSurvey),
                         DataItem.fromText(getAuditString(context
                             .watch<DataProvider>()
                             .database

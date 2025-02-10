@@ -98,7 +98,7 @@ class _SurveyItemRatioChartState extends State<SurveyItemRatioChart> {
                                   title: Text(
                                       '${widget.surveyItem.label}: ${valueKeys.entries.toList()[_selectedIndex].key}')),
                               body: TeamGridList(
-                                  teamFiler: valueKeys.entries
+                                  teamFilter: valueKeys.entries
                                       .toList()[_selectedIndex]
                                       .value
                                       .map((e) => int.parse(e))
