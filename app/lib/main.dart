@@ -21,6 +21,7 @@ import 'package:app/search.dart';
 import 'package:app/widgets/load_status_or_error_bar.dart';
 import 'package:app/widgets/match_card.dart';
 import 'package:download/download.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:logging/logging.dart';
@@ -276,6 +277,26 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
           ),
           const Divider(),
           ListTile(
+            title: const Text("Scout Status"),
+            trailing: const Icon(Icons.people),
+            subtitle: Text('${data.scoutStatus.length.toString()} scouts'),
+            onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ScoutStatusPage(),
+                )),
+          ),
+          ListTile(
+            title: const Text("Scouting Leaderboard"),
+            trailing: const Icon(Icons.leaderboard),
+            onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ScoutLeaderboardPage(),
+                )),
+          ),
+          const Divider(),
+          ListTile(
             title: const Text("Ledger"),
             trailing: const Icon(Icons.receipt_long),
             subtitle:
@@ -298,25 +319,6 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
                   },
                   child: const Text("Download DB as File")),
             ),
-          ),
-          ListTile(
-            title: const Text("Scout Status"),
-            trailing: const Icon(Icons.people),
-            subtitle: Text('${data.scoutStatus.length.toString()} scouts'),
-            onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const ScoutStatusPage(),
-                )),
-          ),
-          ListTile(
-            title: const Text("Scouting Leaderboard"),
-            trailing: const Icon(Icons.leaderboard),
-            onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const ScoutLeaderboardPage(),
-                )),
           ),
           const Divider(),
           ListTile(
@@ -422,6 +424,35 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
             },
           ),
           ListTile(
+          title: const Text("Set Pit Map Image"),
+          leading: const Icon(Icons.camera_alt),
+          onTap: () async {
+            final identity = context.read<IdentityProvider>().identity;
+            final dataProvider = context.read<DataProvider>();
+
+            String result;
+            try {
+              // FOR THE PIT MAP ALLOW FOR resolution higher than the standard scouting
+              // image. This is because the pitmap might contain super small text
+              final photo =
+                  await pickOrTakeImageDialog(context, scoutImageSize * 1.5);
+              if (photo != null) {
+                Uint8List bytes = await photo.readAsBytes();
+                result = base64Encode(bytes);
+                Patch patch = Patch(
+                    identity: identity,
+                    time: DateTime.now(),
+                    path: Patch.buildPath(['pitmap']),
+                    value: result);
+                //Save the scouting results to the server!!
+                await dataProvider.newTransaction(patch);
+              }
+            } catch (e, s) {
+              Logger.root.severe("Error taking image from device", e, s);
+            }
+          },
+        ),
+          ListTile(
             title: const Text("App Version"),
             subtitle: FutureBuilder<PackageInfo>(
               future: PackageInfo.fromPlatform(),
@@ -434,6 +465,7 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
                 }
               },
             ),
+            trailing: Text('Runtime: ${kIsWasm ? 'WASM' : 'JS'}'),
           ),
         ]),
       ),

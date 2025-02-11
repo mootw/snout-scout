@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:snout_db/config/surveyitem.dart';
 import 'package:snout_db/event/frcevent.dart';
+import 'package:string_similarity/string_similarity.dart';
 
 class SnoutScoutSearch extends SearchDelegate {
   @override
@@ -55,7 +56,7 @@ class SearchResultsWidget extends StatefulWidget {
 }
 
 class _SearchResultsWidgetState extends State<SearchResultsWidget> {
-  List<WidgetBuilder> _results = [];
+  final _results = <SearchResult>[];
   StreamSubscription? _subscription;
 
   bool _loading = false;
@@ -65,18 +66,16 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.query != widget.query) {
       _subscription?.cancel();
-
-      print('uipdated wigdet ${widget.query}');
       setState(() {
-        _results = [];
+        _results.clear();
       });
       DataProvider db = context.read<DataProvider>();
-      _subscription = search(db.event).listen((data) {
-        print('got data');
+      _subscription = throttledSearch(db.event).listen((data) {
         if (mounted) {
           setState(() {
             _results.add(data);
           });
+          _results.sort();
         }
       });
       setState(() {
@@ -88,6 +87,16 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
     }
   }
 
+  Stream<SearchResult> throttledSearch(FRCEvent event) async* {
+    await for (final event in _search(event, widget.query.toLowerCase())) {
+      yield event;
+      // Throttle the search stream to unblock after each item.
+      // This is not a perfect solution since a query with no results
+      // That iterates through every item is still going to be slow.
+      await Future.delayed(Duration.zero);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -95,9 +104,11 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
         if (_loading) const LinearProgressIndicator(),
         Expanded(
           child: ListView(cacheExtent: 10000, children: [
+            // if (!_loading && _results.isEmpty)
+            //  Text('Search Hints go here'),
             if (!_loading && _results.isEmpty)
-              const Text('No Results. Try a different query'),
-            for (final result in _results) result(context),
+              ListTile(title: Text('No Results. Try a different query')),
+            for (final result in _results) result.builder(context),
           ]),
         ),
       ],
@@ -109,13 +120,107 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
     _subscription?.cancel();
     super.dispose();
   }
+}
 
-  Stream<WidgetBuilder> search(FRCEvent event) async* {
-    for (final team in event.teams) {
-      if (widget.query.runes.isEmpty) {
+class SearchResult implements Comparable<SearchResult> {
+  final WidgetBuilder builder;
+  final double quality;
+
+  const SearchResult(this.quality, this.builder);
+
+  @override
+  int compareTo(SearchResult other) {
+    return other.quality.compareTo(quality);
+  }
+}
+
+Stream<SearchResult> _search(FRCEvent event, String query) async* {
+  // Generally pretty low since we want more results than not..
+  const double threshold = 0.5;
+
+  for (final team in event.teams) {
+    if (query.runes.isEmpty) {
+      continue;
+    }
+
+    final quality = team.toString().startsWith(query)
+        ? 1
+        : (team.toString().contains(query) ? 0.9 : -1);
+    if (quality >= 0) {
+      //Load the robot picture to show in the search if it is available
+      Widget? robotPicture;
+      final pictureData =
+          event.pitscouting[team.toString()]?[robotPictureReserved];
+      if (pictureData != null) {
+        robotPicture = AspectRatio(
+            aspectRatio: 1,
+            child: Image(
+                image: CacheMemoryImageProvider(pictureData),
+                fit: BoxFit.cover));
+      }
+      yield SearchResult(
+          quality.toDouble(),
+          (context) => ListTile(
+                leading: robotPicture,
+                title: Text(team.toString()),
+                subtitle: const Text("Team"),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => TeamViewPage(teamNumber: team)),
+                  );
+                },
+              ));
+    }
+  }
+
+  for (final match in event.matches.values) {
+    if (query.isEmpty) {
+      continue;
+    }
+    final quality = match.description.toLowerCase().similarityTo(query);
+    if (quality >= 0.8) {
+      yield SearchResult(
+          quality,
+          (context) => ListTile(
+                title: Text(match.description.toString()),
+                subtitle: const Text("Match"),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) =>
+                            MatchPage(matchid: event.matchIDFromMatch(match))),
+                  );
+                },
+              ));
+    }
+  }
+
+  //Search in pit scouting
+  for (final team in event.teams) {
+    if (query.isEmpty) {
+      continue;
+    }
+    final pitScouting = event.pitscouting[team.toString()];
+    if (pitScouting == null) {
+      continue;
+    }
+
+    for (final item in pitScouting.entries) {
+      final surveyItem = event.config.pitscouting
+          .firstWhereOrNull((element) => element.id == item.key);
+      if (surveyItem == null) {
         continue;
       }
-      if (team.toString().contains(widget.query)) {
+      if (surveyItem.type == SurveyItemType.picture) {
+        //Do not include image data.
+        continue;
+      }
+      final quality =
+          _fuzzyMatchSentence(item.value.toString().toLowerCase(), query);
+      if (quality >= threshold) {
         //Load the robot picture to show in the search if it is available
         Widget? robotPicture;
         final pictureData =
@@ -127,132 +232,76 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
                   image: CacheMemoryImageProvider(pictureData),
                   fit: BoxFit.cover));
         }
-        yield (context) => ListTile(
-              leading: robotPicture,
-              title: Text(team.toString()),
-              subtitle: const Text("Team"),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (_) => TeamViewPage(teamNumber: team)),
-                );
-              },
-            );
-      }
-    }
 
-    for (final match in event.matches.values) {
-      if (widget.query.isEmpty) {
-        continue;
-      }
-      if (match.description
-          .toLowerCase()
-          .contains(widget.query.toLowerCase())) {
-        yield (context) => ListTile(
-              title: Text(match.description.toString()),
-              subtitle: const Text("Match"),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (_) =>
-                          MatchPage(matchid: event.matchIDFromMatch(match))),
-                );
-              },
-            );
-      }
-    }
-
-    //Search in pit scouting
-    for (final team in event.teams) {
-      if (widget.query.isEmpty) {
-        continue;
-      }
-      final pitScouting = event.pitscouting[team.toString()];
-      if (pitScouting == null) {
-        continue;
-      }
-
-      for (final item in pitScouting.entries) {
-        final surveyItem = event.config.pitscouting
-            .firstWhereOrNull((element) => element.id == item.key);
-        if (surveyItem == null) {
-          continue;
-        }
-        if (surveyItem.type == SurveyItemType.picture) {
-          //Do not include image data.
-          continue;
-        }
-        if (item.value
-            .toString()
-            .toLowerCase()
-            .contains(widget.query.toLowerCase())) {
-          //Load the robot picture to show in the search if it is available
-          Widget? robotPicture;
-          final pictureData =
-              event.pitscouting[team.toString()]?[robotPictureReserved];
-          if (pictureData != null) {
-            robotPicture = AspectRatio(
-                aspectRatio: 1,
-                child: Image(
-                    image: CacheMemoryImageProvider(pictureData),
-                    fit: BoxFit.cover));
-          }
-
-          await Future.delayed(const Duration(seconds: 0));
-          yield (context) => ListTile(
-                leading: robotPicture,
-                title: Text('${item.value}'),
-                subtitle:
-                    Text("${team.toString()} scouting - ${surveyItem.label}"),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (_) => TeamViewPage(teamNumber: team)),
-                  );
-                },
-              );
-        }
-      }
-    }
-
-    //Search in post match survey
-    for (final match in event.matches.values) {
-      if (widget.query.isEmpty) {
-        continue;
-      }
-      for (final robot in match.robot.entries) {
-        for (final value in robot.value.survey.entries) {
-          final surveyItem = event.config.matchscouting.survey
-              .firstWhereOrNull((element) => element.id == value.key);
-          if (surveyItem?.type == SurveyItemType.picture) {
-            //Do not include image data.
-            continue;
-          }
-
-          if (value.value
-              .toString()
-              .toLowerCase()
-              .contains(widget.query.toLowerCase())) {
-            await Future.delayed(const Duration(seconds: 0));
-            yield (context) => ListTile(
-                  title: Text(value.value.toString()),
-                  subtitle: Text(
-                      "${match.description} - ${robot.key} - ${value.key}"),
+        yield SearchResult(
+            quality,
+            (context) => ListTile(
+                  leading: robotPicture,
+                  title: Text('${item.value}'),
+                  subtitle: Text("${team.toString()}: ${surveyItem.id}"),
                   onTap: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => MatchPage(
-                              matchid: event.matchIDFromMatch(match))),
+                          builder: (_) => TeamViewPage(teamNumber: team)),
                     );
                   },
-                );
-          }
+                ));
+      }
+    }
+  }
+
+  //Search in post match survey
+  for (final match in event.matches.values) {
+    if (query.isEmpty) {
+      continue;
+    }
+    for (final robot in match.robot.entries) {
+      for (final value in robot.value.survey.entries) {
+        final surveyItem = event.config.matchscouting.survey
+            .firstWhereOrNull((element) => element.id == value.key);
+        if (surveyItem?.type == SurveyItemType.picture) {
+          //Do not include image data.
+          continue;
+        }
+
+        final quality =
+            _fuzzyMatchSentence(value.value.toString().toLowerCase(), query);
+
+        if (quality >= threshold) {
+          yield SearchResult(
+              quality,
+              (context) => ListTile(
+                    title: Text(value.value.toString()),
+                    subtitle: Text(
+                        "${match.description}: ${robot.key}: ${value.key}"),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => MatchPage(
+                                matchid: event.matchIDFromMatch(match))),
+                      );
+                    },
+                  ));
         }
       }
     }
   }
+}
+
+// 0 no match 1 = full match
+double _fuzzyMatchSentence(String source, String query) {
+  final sourceSegments = source.split(' ');
+
+  double score = 0;
+
+  for (final word in sourceSegments) {
+    final match = word.similarityTo(query);
+    if (match > score) {
+      score = match;
+    }
+  }
+
+  return score;
 }
