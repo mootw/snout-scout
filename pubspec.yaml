@@ -4,5 +4,3 @@ environment:
   sdk: ^3.6.0
 workspace:
   - app
-  - server
-  - snout_db

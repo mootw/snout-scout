@@ -15,7 +15,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.3.1+5
+version: 1.4.0+6
 
 environment:
   sdk: '>=3.6.0 <4.0.0'
@@ -39,7 +39,7 @@ dependencies:
   intl: ^0.20.2
   shared_preferences: ^2.5.2
   # store more than 10MB that localStorageAllows
-  fs_shim: ^2.3.3+1
+  fs_shim: ^2.3.4
   http: ^1.1.2
   file_selector: ^1.0.1
   image_picker: ^1.0.5
@@ -56,7 +56,9 @@ dependencies:
   # Potential alternate charting package: https://pub.dev/packages/community_charts_flutter
   
   snout_db:
+    path: ../snout_db
   server:
+    path: ../server
 
   #boolean_selector: ^2.1.1
   package_info_plus: ^8.2.1
