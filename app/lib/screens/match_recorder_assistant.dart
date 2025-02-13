@@ -1,11 +1,9 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:app/api.dart';
 import 'package:app/edit_lock.dart';
-import 'package:app/providers/cache_memory_imageprovider.dart';
 import 'package:app/providers/data_provider.dart';
+import 'package:app/services/snout_image_cache.dart';
 import 'package:app/style.dart';
 import 'package:app/providers/identity_provider.dart';
 import 'package:app/screens/match_recorder.dart';
@@ -74,7 +72,7 @@ class _MatchRecorderAssistantPageState
     List<Future> futures = [];
     for (final team in teams) {
       futures.add(apiClient
-          .get(context.read<DataProvider>().serverURI.resolve("/edit_lock"),
+          .get(context.read<DataProvider>().dataSourceUri.resolve("/edit_lock"),
               headers: {"key": "match:${widget.matchid}:$team:timeline"})
           .timeout(const Duration(seconds: 1))
           .then((isLocked) {
@@ -198,10 +196,8 @@ class _MatchRecorderAssistantPageState
     if (data != null) {
       image = AspectRatio(
           aspectRatio: 1,
-          child: Image(
-              image: CacheMemoryImageProvider(
-                  Uint8List.fromList(base64Decode(data).cast<int>())),
-              fit: BoxFit.cover));
+          child:
+              Image(image: snoutImageCache.getCached(data), fit: BoxFit.cover));
     }
 
     return InkWell(
@@ -258,7 +254,7 @@ class _MatchRecorderAssistantPageState
           path: Patch.buildPath(['matches', matchid, 'robot', team.toString()]),
           value: result.toJson());
 
-      await snoutData.submitPatch(patch);
+      await snoutData.newTransaction(patch);
     }
   }
 }

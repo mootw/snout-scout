@@ -58,10 +58,10 @@ class FRCMatch implements Comparable<FRCMatch> {
     }
   }
 
-  bool hasTeam(int team) => red.contains(team) || blue.contains(team);
-
   Alliance getAllianceOf(int team) =>
       red.contains(team) ? Alliance.red : Alliance.blue;
+  bool isScheduledToHaveTeam(int team) =>
+      red.contains(team) || blue.contains(team);
 
   /// difference between the time that the match was scheduled and the actual time
   /// the match started

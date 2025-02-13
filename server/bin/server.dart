@@ -9,8 +9,7 @@ import 'package:server/socket_messages.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_gzip/shelf_gzip.dart';
-import 'package:shelf_multipart/form_data.dart';
-import 'package:shelf_multipart/multipart.dart';
+import 'package:shelf_multipart/shelf_multipart.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'package:shelf_web_socket/shelf_web_socket.dart';
 import 'package:snout_db/patch.dart';
@@ -94,8 +93,9 @@ void main(List<String> args) async {
   await loadEvents();
 
   app.get("/listen/<event>", (Request request, String event) {
+    event = Uri.decodeComponent(event);
     final handler = webSocketHandler(
-      (WebSocketChannel webSocket) {
+      (WebSocketChannel webSocket, _) {
         logger.info('new listener for $event');
         webSocket.sink.done
             .then((value) => loadedEvents[event]?.listeners.remove(webSocket));
@@ -169,17 +169,16 @@ void main(List<String> args) async {
     return Response.ok("");
   });
 
-  /// Just accept any files that are uploaded assuming the password is provided
-  app.post("/upload_event_file", (Request request) async {
+  app.put("/upload_events", (Request request) async {
     // Since this edits db files, it could conflict with other writes
     return dbWriteLock.synchronized(() async {
-      if ((request.headers['upload_password'] ?? "") !=
-          env.getOrElse("upload_password", () => "")) {
+      if ((request.headers['upload_password'] ?? '') !=
+          env.getOrElse("upload_password", () => '')) {
         return Response.unauthorized("upload_password is invalid");
       }
 
-      if (request.isMultipart) {
-        await for (final entry in request.multipartFormData) {
+      if (request.formData() case final form?) {
+        await for (final entry in form.formData) {
           // Headers are available through part.headers as a map:
           final part = entry.part;
           final fileName = entry.name;
@@ -202,21 +201,20 @@ void main(List<String> args) async {
   });
 
   /// Just accept any files that are uploaded assuming the password is provided
-  app.delete("/delete_event_file", (Request request) async {
+  app.delete("/events/<eventID>", (Request request, String eventID) async {
+    eventID = Uri.decodeComponent(eventID);
     // Since this edits db files, it could conflict with other writes
     return dbWriteLock.synchronized(() async {
-      if (request.headers['upload_password'] !=
-          env.getOrElse("upload_password", () => "")) {
+      if ((request.headers['upload_password'] ?? '') !=
+          env.getOrElse("upload_password", () => '')) {
         return Response.unauthorized("upload_password is invalid");
       }
 
-      final fileName = request.headers['name'];
-
-      logger.info("Attempting file upload for event name $fileName");
-      final eventFile = File('${eventsDirectory.path}/$fileName');
+      logger.info("Attempting file upload for event name $eventID");
+      final eventFile = File('${eventsDirectory.path}/$eventID');
 
       // unload the file
-      loadedEvents.removeWhere((key, value) => key == fileName);
+      loadedEvents.removeWhere((key, value) => key == eventID);
       // delete from disk
       await eventFile.delete();
 
@@ -225,10 +223,18 @@ void main(List<String> args) async {
   });
 
   app.get("/events", (Request request) {
-    return Response.ok(json.encode(loadedEvents.keys.toList()));
+    return Response.ok(
+      json.encode(loadedEvents.keys.toList()),
+      headers: {
+        'Content-Type':
+            ContentType('application', 'json', charset: 'utf-8').toString(),
+      },
+    );
   });
 
   app.get("/events/<eventID>", (Request request, String eventID) async {
+    eventID = Uri.decodeComponent(eventID);
+
     final File? f = loadedEvents[eventID]?.file;
     if (f == null || await f.exists() == false) {
       return Response.notFound("Event not found");
@@ -248,6 +254,7 @@ void main(List<String> args) async {
 
   app.get("/events/<eventID>/patchDiff",
       (Request request, String eventID) async {
+    eventID = Uri.decodeComponent(eventID);
     final File? f = loadedEvents[eventID]?.file;
     if (f == null || await f.exists() == false) {
       return Response.notFound("Event not found");
@@ -279,6 +286,7 @@ void main(List<String> args) async {
 
   app.get("/events/<eventID>/<subPath|.*>",
       (Request request, String eventID, String subPath) async {
+    eventID = Uri.decodeComponent(eventID);
     final File? f = loadedEvents[eventID]?.file;
     if (f == null || await f.exists() == false) {
       return Response.notFound("Event not found");
@@ -307,6 +315,7 @@ void main(List<String> args) async {
   app.put(
     "/events/<eventID>",
     (Request request, String eventID) async {
+      eventID = Uri.decodeComponent(eventID);
       // Require all writes to start with reading the file, only one at a time and do a full disk flush
       return dbWriteLock.synchronized(() async {
         final File? f = loadedEvents[eventID]?.file;

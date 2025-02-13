@@ -10,12 +10,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 
 class CacheMemoryImageProvider extends ImageProvider<CacheMemoryImageProvider> {
-  final String tag; //the cache id use to get cache
-  final Uint8List img; //the bytes of image to cache
+  final String imageDataStringBase64;
+  final String tag;
 
-  CacheMemoryImageProvider(this.img)
-      : tag = convert.base64.encode(
-            img.getRange(0, img.length < 1420 ? img.length : 1420).toList());
+  CacheMemoryImageProvider(this.imageDataStringBase64)
+      : tag = imageDataStringBase64.substring(0, 64);
 
   @override
   ImageStreamCompleter loadImage(
@@ -32,7 +31,8 @@ class CacheMemoryImageProvider extends ImageProvider<CacheMemoryImageProvider> {
 
   Future<Codec> _loadAsync(ImageDecoderCallback decode) async {
     // the DefaultCacheManager() encapsulation, it get cache from local storage.
-    final Uint8List bytes = img;
+
+    final Uint8List bytes = convert.base64Decode(imageDataStringBase64);
 
     if (bytes.lengthInBytes == 0) {
       // The file may become available later.
@@ -52,12 +52,13 @@ class CacheMemoryImageProvider extends ImageProvider<CacheMemoryImageProvider> {
   @override
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType) return false;
-    bool res = other is CacheMemoryImageProvider && other.tag == tag;
+    bool res = other is CacheMemoryImageProvider &&
+        other.imageDataStringBase64 == imageDataStringBase64;
     return res;
   }
 
   @override
-  int get hashCode => tag.hashCode;
+  int get hashCode => imageDataStringBase64.hashCode;
 
   @override
   String toString() =>

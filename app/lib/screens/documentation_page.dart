@@ -1,18 +1,10 @@
-import 'dart:convert';
-import 'dart:typed_data';
-
-import 'package:app/providers/cache_memory_imageprovider.dart';
-import 'package:app/screens/edit_markdown.dart';
-import 'package:app/style.dart';
 import 'package:app/providers/data_provider.dart';
-import 'package:app/providers/identity_provider.dart';
 import 'package:app/screens/debug_field_position.dart';
+import 'package:app/services/snout_image_cache.dart';
 import 'package:app/widgets/image_view.dart';
 import 'package:app/widgets/markdown_wrapper.dart';
 import 'package:flutter/material.dart';
-import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
-import 'package:snout_db/patch.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class DocumentationScreen extends StatefulWidget {
@@ -52,98 +44,20 @@ class _DocumentationScreenState extends State<DocumentationScreen> {
             );
           },
         ),
-        ListTile(
-          title: const Text(
-              "Set Field Image (2:1 ratio, blue alliance left, scoring table bottom)"),
-          leading: const Icon(Icons.map),
-          onTap: () async {
-            final identity = context.read<IdentityProvider>().identity;
-            final dataProvider = context.read<DataProvider>();
-            String result;
-            try {
-              final photo = await pickOrTakeImageDialog(context);
-              if (photo != null) {
-                Uint8List bytes = await photo.readAsBytes();
-                result = base64Encode(bytes);
-                Patch patch = Patch(
-                    identity: identity,
-                    time: DateTime.now(),
-                    path: Patch.buildPath(['config', 'fieldImage']),
-                    value: result);
-                //Save the scouting results to the server!!
-                await dataProvider.submitPatch(patch);
-              }
-            } catch (e, s) {
-              Logger.root.severe("Error taking image from device", e, s);
-            }
-          },
-        ),
         const Divider(),
         if (pitMap != null)
           SizedBox(
               height: 250,
               child: ImageViewer(
                 child: Image(
-                  image: CacheMemoryImageProvider(
-                      Uint8List.fromList(base64Decode(pitMap).cast<int>())),
+                  image: snoutImageCache.getCached(pitMap),
                   fit: BoxFit.fitHeight,
                   width: 2000,
                 ),
               )),
         if (pitMap == null)
-          const ListTile(title: Text("No pit map has been added yet :(")),
-        ListTile(
-          title: const Text("Set Pit Map Image"),
-          leading: const Icon(Icons.camera_alt),
-          onTap: () async {
-            final identity = context.read<IdentityProvider>().identity;
-            final dataProvider = context.read<DataProvider>();
-
-            String result;
-            try {
-              // FOR THE PIT MAP ALLOW FOR resolution higher than the standard scouting
-              // image. This is because the pitmap might contain super small text
-              final photo =
-                  await pickOrTakeImageDialog(context, scoutImageSize * 1.5);
-              if (photo != null) {
-                Uint8List bytes = await photo.readAsBytes();
-                result = base64Encode(bytes);
-                Patch patch = Patch(
-                    identity: identity,
-                    time: DateTime.now(),
-                    path: Patch.buildPath(['pitmap']),
-                    value: result);
-                //Save the scouting results to the server!!
-                await dataProvider.submitPatch(patch);
-              }
-            } catch (e, s) {
-              Logger.root.severe("Error taking image from device", e, s);
-            }
-          },
-        ),
+          const ListTile(title: Text("No pitmap has been set yet :(")),
         const Divider(),
-        ListTile(
-          title: const Text("Edit Docs"),
-          leading: const Icon(Icons.edit),
-          onTap: () async {
-            final identity = context.read<IdentityProvider>().identity;
-            final dataProvider = context.read<DataProvider>();
-            final result = await Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) =>
-                        EditMarkdownPage(source: config.docs)));
-            if (result != null) {
-              Patch patch = Patch(
-                  identity: identity,
-                  time: DateTime.now(),
-                  path: Patch.buildPath(['config', 'docs']),
-                  value: result);
-              //Save the scouting results to the server!!
-              await dataProvider.submitPatch(patch);
-            }
-          },
-        ),
         Padding(
           padding: const EdgeInsets.only(left: 16, right: 16),
           child: MarkdownText(

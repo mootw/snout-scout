@@ -1,9 +1,10 @@
 name: server
 publish_to: none
-version: 1.1.0+2
+version: 2.2.0+3
 
 environment:
-  sdk: '>=3.3.0 <4.0.0'
+  sdk: '>=3.6.0 <4.0.0'
+resolution: workspace
 
 dependencies:
   dotenv: ^4.2.0
@@ -12,17 +13,17 @@ dependencies:
   logging: ^1.2.0
   rfc_6901: ^0.2.0
 
-  shelf: ^1.4.1
-  shelf_gzip: ^4.0.1
-  shelf_multipart: ^1.0.0
+  shelf: ^1.4.2
+  shelf_gzip: ^4.1.0
+  shelf_multipart: ^2.0.1
   shelf_router: ^1.1.4
-  shelf_web_socket: ^1.0.4
+  shelf_web_socket: ^3.0.0
 
   snout_db:
     path: ../snout_db
 
-  synchronized: ^3.1.0+1
-  web_socket_channel: ^2.4.0
+  synchronized: ^3.3.0+3
+  web_socket_channel: ^3.0.2
 
 dev_dependencies:
   lint: 2.3.0

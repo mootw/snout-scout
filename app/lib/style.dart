@@ -1,7 +1,13 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_avif/flutter_avif.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:logging/logging.dart';
 import 'package:snout_db/snout_db.dart';
 import 'dart:math';
+import 'dart:ui' as ui;
+import 'package:image/image.dart' as img;
 
 // DESIGN GUIDELINES MIN SCREEN WIDTH = 355
 // this means that the unfolded z fold could overflow slightly...
@@ -64,12 +70,16 @@ Future<String?> showStringInputDialog(
 /// (we do not want to store hundreds of MB sized images)
 /// for transport efficiency reasons, client performance
 /// for image decoding or db file, and data/disk usage.
-const double scoutImageSize = 700;
+const double defaultImageSize = 800;
+
+/// specially used for SOME images that need higher fidelity.
+/// For now, they are just over twice the resultion of the default image. sqrt(2) would be exactly twice
+const double largeImageSize = defaultImageSize * 1.5;
 
 /// convenient dialog that will prompt the user to take a new image
 /// or select it from their device storage
-Future<XFile?> pickOrTakeImageDialog(BuildContext context,
-    [double imageSize = scoutImageSize]) async {
+Future<Uint8List?> pickOrTakeImageDialog(BuildContext context,
+    [double imageSize = defaultImageSize]) async {
   ImageSource? result = await showDialog(
       context: context,
       builder: (dialogContext) => SimpleDialog(
@@ -101,10 +111,40 @@ Future<XFile?> pickOrTakeImageDialog(BuildContext context,
     return null;
   }
 
-  final XFile? photo = await ImagePicker().pickImage(
-      source: result,
-      maxWidth: imageSize,
-      maxHeight: imageSize,
-      imageQuality: 50);
-  return photo;
+  final XFile? photo = await ImagePicker()
+      .pickImage(source: result, maxWidth: imageSize, maxHeight: imageSize);
+
+  if (photo == null) {
+    return null;
+  }
+
+  // prefer flutter native UI decoder, as it is likely to be the highest compatibility
+  // final codec = await ui.instantiateImageCodec(await photo.readAsBytes());
+  // final inputImage = (await codec.getNextFrame()).image;
+
+  // // final inputImage = img.decodeImage(await photo.readAsBytes());
+
+  // final loaded = img.Image.fromBytes(
+  //     numChannels: 4,
+  //     // This WILL crush HDR images into SDR. Which is fine.
+  //     bytes: (await inputImage.toByteData(format: ui.ImageByteFormat.rawRgba))!
+  //         .buffer,
+  //     width: inputImage.width,
+  //     height: inputImage.height);
+
+  // TODO scale the image here rather than in the image picker.
+  // final scaledImage = copyResize(inputImage!, width: 200);
+
+  // https://github.com/yekeskin/flutter_avif/issues/39#issuecomment-1858844793
+  // https://web.dev/articles/compress-images-avif
+  // https://github.com/yekeskin/flutter_avif/issues/70
+  final avifFile = await encodeAvif(await photo.readAsBytes(),
+      // 0 (slowest/highest quality) - 10 (fastest/lowest quality)
+      speed: 6,
+      // 0 (lossless) - 63 (lowest quality)
+      maxQuantizer: 36,
+      minQuantizer: 28,
+      maxQuantizerAlpha: 36,
+      minQuantizerAlpha: 28);
+  return avifFile;
 }

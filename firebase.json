@@ -1,5 +1,20 @@
 {
   "hosting": {
-    "public": "app/build/web"
+    "public": "app/build/web",
+    "headers": [
+        {
+           "source": "**/*",
+            "headers": [
+                {
+                    "key": "Cross-Origin-Embedder-Policy",
+                    "value": "require-corp"
+                },
+                {
+                    "key": "Cross-Origin-Opener-Policy",
+                    "value": "same-origin"
+                }
+            ]
+        }
+    ]
   }
 }

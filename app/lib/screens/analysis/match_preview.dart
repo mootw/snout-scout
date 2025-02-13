@@ -1,7 +1,6 @@
 import 'dart:convert';
-import 'dart:typed_data';
 
-import 'package:app/providers/cache_memory_imageprovider.dart';
+import 'package:app/services/snout_image_cache.dart';
 import 'package:app/widgets/datasheet.dart';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/widgets/fieldwidget.dart';
@@ -170,14 +169,13 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                                       aspectRatio: 1,
                                       child: ImageViewer(
                                         child: Image(
-                                          image: CacheMemoryImageProvider(Uint8List
-                                              .fromList(base64Decode(context
-                                                              .read<DataProvider>()
-                                                              .event
-                                                              .pitscouting[
-                                                          team.toString()]![
-                                                      robotPictureReserved]!)
-                                                  .cast<int>())),
+                                          image: snoutImageCache.getCached(
+                                              context
+                                                          .read<DataProvider>()
+                                                          .event
+                                                          .pitscouting[
+                                                      team.toString()]![
+                                                  robotPictureReserved]!),
                                           fit: BoxFit.cover,
                                         ),
                                       ),
@@ -360,8 +358,7 @@ DataItem teamPostGameSurveyTableDisplay(
   }
 
   if (surveyItem.type == SurveyItemType.picture) {
-    // TODO implement display of the image in the table...
-    return DataItem.fromText('Image');
+    return DataItem.fromText("See team page or match recordings");
   }
 
   String result = "";

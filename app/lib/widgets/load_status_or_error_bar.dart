@@ -29,7 +29,7 @@ class LoadOrErrorStatusBar extends StatelessWidget
       );
     }
 
-    if (data.dataSource == DataSource.remoteServer && data.connected == false) {
+    if (data.isDataSourceUriRemote && data.connected == false) {
       return Container(
           alignment: Alignment.center,
           width: double.infinity,

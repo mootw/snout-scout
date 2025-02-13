@@ -47,9 +47,7 @@ class _AllMatchesPageState extends State<AllMatchesPage> {
                 Container(
                     color: match == snoutData.event.nextMatch
                         ? Theme.of(context).colorScheme.onPrimary
-                        : (match.hasTeam(snoutData.event.config.team)
-                            ? Theme.of(context).colorScheme.onSecondary
-                            : null),
+                        : null,
                     child: MatchCard(
                         match: match, focusTeam: snoutData.event.config.team)),
 
@@ -73,7 +71,7 @@ class _AllMatchesPageState extends State<AllMatchesPage> {
         ),
         if (teamNextMatch != null && scheduleDelay != null)
           Container(
-            color: Theme.of(context).colorScheme.surfaceVariant,
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [

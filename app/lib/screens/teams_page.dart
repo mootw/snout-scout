@@ -1,11 +1,10 @@
 import 'dart:convert';
-import 'dart:typed_data';
 
-import 'package:app/providers/cache_memory_imageprovider.dart';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/providers/identity_provider.dart';
 import 'package:app/screens/edit_json.dart';
 import 'package:app/screens/view_team_page.dart';
+import 'package:app/services/snout_image_cache.dart';
 import 'package:app/services/tba_autofill.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -13,9 +12,9 @@ import 'package:snout_db/patch.dart';
 
 /// Displays a wrapped grid of teams
 class TeamGridList extends StatefulWidget {
-  const TeamGridList({super.key, this.teamFiler, this.showEditButton = false});
+  const TeamGridList({super.key, this.teamFilter, this.showEditButton = false});
 
-  final List<int>? teamFiler;
+  final List<int>? teamFilter;
   final bool showEditButton;
 
   @override
@@ -34,7 +33,8 @@ class _TeamGridListState extends State<TeamGridList> {
           alignment: WrapAlignment.spaceEvenly,
           children: [
             for (final team in context.watch<DataProvider>().event.teams)
-              if (widget.teamFiler == null || widget.teamFiler!.contains(team))
+              if (widget.teamFilter == null ||
+                  widget.teamFilter!.contains(team))
                 TeamListTile(teamNumber: team),
             if (widget.showEditButton)
               Padding(
@@ -71,7 +71,7 @@ class _TeamGridListState extends State<TeamGridList> {
                                           //Save the scouting results to the server!!
                                           await context
                                               .read<DataProvider>()
-                                              .submitPatch(patch);
+                                              .newTransaction(patch);
                                         }
                                       },
                                       child: const Text("Manual")),
@@ -128,7 +128,7 @@ class _TeamGridListState extends State<TeamGridList> {
                                           //Save the scouting results to the server!!
                                           await context
                                               .read<DataProvider>()
-                                              .submitPatch(patch);
+                                              .newTransaction(patch);
                                         }
                                       },
                                       child: const Text("TBA AutoFill")),
@@ -152,16 +152,15 @@ class TeamListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final snoutData = context.watch<DataProvider>();
+
     Widget? image;
     final data = snoutData.event.pitscouting[teamNumber.toString()]
         ?[robotPictureReserved];
     if (data != null) {
       image = AspectRatio(
           aspectRatio: 1,
-          child: Image(
-              image: CacheMemoryImageProvider(
-                  Uint8List.fromList(base64Decode(data).cast<int>())),
-              fit: BoxFit.cover));
+          child:
+              Image(image: snoutImageCache.getCached(data), fit: BoxFit.cover));
     }
 
     return InkWell(

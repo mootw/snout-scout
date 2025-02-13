@@ -51,7 +51,7 @@ class _PostGameRatioChartState extends State<PostGameRatioChart> {
     final data = context.watch<DataProvider>();
 
     //Map of all of the values, to their respective teams
-    Map<String, Map<String, dynamic>> valueKeys = {};
+    Map<String, ({int count, List<String> teams})> valueKeys = {};
 
     for (final match in data.event.matches.values) {
       for (final robot in match.robot.entries) {
@@ -61,13 +61,12 @@ class _PostGameRatioChartState extends State<PostGameRatioChart> {
           continue;
         }
         if (valueKeys[item] == null) {
-          valueKeys[item] = {
-            "count": 1,
-            "teams": [robot.key]
-          };
+          valueKeys[item] = (count: 1, teams: [robot.key]);
         } else {
-          valueKeys[item]!['count']++;
-          valueKeys[item]!['teams'].add(robot.key);
+          valueKeys[item] = (
+            count: valueKeys[item]!.count + 1,
+            teams: [...valueKeys[item]!.teams, robot.key]
+          );
         }
       }
     }
@@ -99,9 +98,10 @@ class _PostGameRatioChartState extends State<PostGameRatioChart> {
                                   title: Text(
                                       '${widget.surveyItem.label}:  ${valueKeys.entries.toList()[asdf].key}')),
                               body: TeamGridList(
-                                  teamFiler: valueKeys.entries
+                                  teamFilter: valueKeys.entries
                                       .toList()[asdf]
-                                      .value['teams']
+                                      .value
+                                      .teams
                                       .map<int>((e) => int.parse(e))
                                       .toList()),
                             ),
@@ -124,8 +124,7 @@ class _PostGameRatioChartState extends State<PostGameRatioChart> {
                     // Shorten the text to 30 "characters"
                     title: valueKeys.entries.toList()[i].key.substring(
                         0, min(valueKeys.entries.toList()[i].key.length, 30)),
-                    value:
-                        valueKeys.entries.toList()[i].value['count'].toDouble(),
+                    value: valueKeys.entries.toList()[i].value.count.toDouble(),
                     color: getColorFromIndex(i),
                   ),
               ])),

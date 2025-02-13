@@ -75,7 +75,7 @@ class _FailedPatchStorageState extends State<FailedPatchStorage> {
                       onPressed: () async {
                         //wtf is this
                         await snoutData
-                            .submitPatch(Patch.fromJson(json.decode(patch)));
+                            .newTransaction(Patch.fromJson(json.decode(patch)));
                         setState(() {});
                       },
                       icon: const Icon(Icons.refresh)),

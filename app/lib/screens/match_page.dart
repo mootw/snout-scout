@@ -11,11 +11,9 @@ import 'package:app/screens/edit_match_results.dart';
 import 'package:app/screens/match_recorder_assistant.dart';
 import 'package:app/screens/view_team_page.dart';
 import 'package:app/widgets/load_status_or_error_bar.dart';
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:snout_db/config/surveyitem.dart';
 import 'package:snout_db/event/match.dart';
 import 'package:snout_db/event/matchresults.dart';
 import 'package:snout_db/patch.dart';
@@ -104,7 +102,7 @@ class _MatchPageState extends State<MatchPage> {
                             ['matches', widget.matchid, 'results']),
                         value: result.toJson());
 
-                    await snoutData.submitPatch(patch);
+                    await snoutData.newTransaction(patch);
                   }
                 },
               ),
@@ -127,22 +125,23 @@ class _MatchPageState extends State<MatchPage> {
                 ...match.blue,
                 ...match.red,
                 //Also include all of the surrogate robots
-                ...match.robot.keys.map((e) => int.tryParse(e)).whereNotNull()
+                ...match.robot.keys.map((e) => int.tryParse(e)).nonNulls
               })
                 [
                   DataItem(
                       displayValue: TextButton(
                           child: Text(
                               team.toString() +
-                                  (match.hasTeam(team) == false
+                                  (match.isScheduledToHaveTeam(team) == false
                                       ? " [surrogate]"
                                       : ""),
                               style: TextStyle(
-                                  color: match.hasTeam(team) == false
-                                      ? getAllianceColor(match
-                                          .robot[team.toString()]!.alliance)
-                                      : getAllianceColor(
-                                          match.getAllianceOf(team)))),
+                                  color:
+                                      match.isScheduledToHaveTeam(team) == false
+                                          ? getAllianceColor(match
+                                              .robot[team.toString()]!.alliance)
+                                          : getAllianceColor(
+                                              match.getAllianceOf(team)))),
                           onPressed: () => Navigator.push(
                                 context,
                                 MaterialPageRoute(
@@ -158,12 +157,10 @@ class _MatchPageState extends State<MatchPage> {
                                 item, match.robot[team.toString()], team) ??
                         //Missing results, this is not an error
                         (value: null, error: null)),
-                  for (final item in snoutData.event.config.matchscouting.survey
-                      .where(
-                          (element) => element.type != SurveyItemType.picture))
-                    DataItem.fromText(match
-                        .robot[team.toString()]?.survey[item.id]
-                        ?.toString()),
+                  for (final item
+                      in snoutData.event.config.matchscouting.survey)
+                    DataItem.fromSurveyItem(team,
+                        match.robot[team.toString()]?.survey[item.id], item),
                   DataItem.fromText(getAuditString(context
                       .watch<DataProvider>()
                       .database

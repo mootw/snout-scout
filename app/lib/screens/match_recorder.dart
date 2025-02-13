@@ -1,9 +1,8 @@
 import 'dart:async';
-import 'dart:convert';
 
-import 'package:app/providers/cache_memory_imageprovider.dart';
 import 'package:app/providers/local_config_provider.dart';
 import 'package:app/screens/view_team_page.dart';
+import 'package:app/services/snout_image_cache.dart';
 import 'package:app/widgets/confirm_exit_dialog.dart';
 import 'package:app/widgets/datasheet.dart';
 import 'package:app/providers/data_provider.dart';
@@ -123,7 +122,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                         '${item.time.round()}  ${item.getLabelFromConfig(context.watch<DataProvider>().event.config)}',
                         style: TextStyle(
                             color: item.isPositionEvent
-                                ? Theme.of(context).colorScheme.onBackground
+                                ? Theme.of(context).colorScheme.onSurface
                                 : item.getColorFromConfig(context
                                             .watch<DataProvider>()
                                             .event
@@ -376,9 +375,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
         .event
         .pitscouting[widget.team.toString()]?[robotPictureReserved];
     if (pictureData != null) {
-      robotPicture = Image(
-          image: CacheMemoryImageProvider(
-              Uint8List.fromList(base64Decode(pictureData).cast<int>())));
+      robotPicture = Image(image: snoutImageCache.getCached(pictureData));
     }
 
     return Padding(

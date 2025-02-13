@@ -57,10 +57,12 @@ class _PitScoutTeamPageState extends State<PitScoutTeamPage> {
                   final identity = context.read<IdentityProvider>().identity;
 
                   //New map instance to avoid messing up the UI
-                  final onlyChanges = Map.of(_surveyItems);
-                  onlyChanges.removeWhere(
-                      (key, value) => widget.initialData?[key] == value);
-                  for (final item in onlyChanges.entries) {
+                  final onlyChanges = Map.of(_surveyItems)
+                      .entries
+                      .where((entry) =>
+                          widget.initialData?[entry.key] != entry.value)
+                      .toList();
+                  for (final item in onlyChanges) {
                     Patch patch = Patch(
                         identity: identity,
                         time: DateTime.now(),
@@ -68,7 +70,7 @@ class _PitScoutTeamPageState extends State<PitScoutTeamPage> {
                             ['pitscouting', widget.team.toString(), item.key]),
                         value: item.value);
                     //Save the scouting results to the server!!
-                    await snoutData.submitPatch(patch);
+                    await snoutData.newTransaction(patch);
                   }
                   if (context.mounted) {
                     Navigator.of(context).pop(true);
@@ -86,6 +88,7 @@ class _PitScoutTeamPageState extends State<PitScoutTeamPage> {
                 Container(
                     padding: const EdgeInsets.all(12),
                     child: DynamicPropertyEditorWidget(
+                      initialData: widget.initialData,
                       tool: item,
                       survey: _surveyItems,
                     )),
