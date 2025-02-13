@@ -1,9 +1,8 @@
 //Data class that handles scouting tool things
 
 import 'dart:convert';
-import 'dart:typed_data';
 
-import 'package:app/providers/cache_memory_imageprovider.dart';
+import 'package:app/services/snout_image_cache.dart';
 import 'package:app/style.dart';
 import 'package:app/widgets/markdown_wrapper.dart';
 import 'package:flutter/material.dart';
@@ -159,9 +158,8 @@ class _DynamicPropertyEditorWidgetState
                     icon: const Icon(Icons.camera_alt),
                     onPressed: () async {
                       try {
-                        final photo = await pickOrTakeImageDialog(context);
-                        if (photo != null) {
-                          Uint8List bytes = await photo.readAsBytes();
+                        final bytes = await pickOrTakeImageDialog(context);
+                        if (bytes != null) {
                           setState(() {
                             _value = base64Encode(bytes);
                           });
@@ -175,7 +173,7 @@ class _DynamicPropertyEditorWidgetState
                 subtitle: _value == null
                     ? const Text("No Image")
                     : Image(
-                        image: CacheMemoryImageProvider(_value),
+                        image: snoutImageCache.getCached(_value),
                         fit: BoxFit.contain,
                       ),
               ),

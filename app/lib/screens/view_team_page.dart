@@ -1,4 +1,4 @@
-import 'package:app/providers/cache_memory_imageprovider.dart';
+import 'package:app/services/snout_image_cache.dart';
 import 'package:app/widgets/datasheet.dart';
 import 'package:app/edit_lock.dart';
 import 'package:app/providers/data_provider.dart';
@@ -111,7 +111,7 @@ class _TeamViewPageState extends State<TeamViewPage> {
                       aspectRatio: 1,
                       child: ImageViewer(
                         child: Image(
-                          image: CacheMemoryImageProvider(robotPicture),
+                          image: snoutImageCache.getCached(robotPicture),
                           fit: BoxFit.cover,
                         ),
                       ),
@@ -420,7 +420,7 @@ class DynamicValueViewer extends StatelessWidget {
         title: Text(itemType.label),
         subtitle: ImageViewer(
           child: Image(
-            image: CacheMemoryImageProvider(value),
+            image: snoutImageCache.getCached(value),
             height: 500,
             fit: BoxFit.contain,
           ),

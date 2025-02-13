@@ -338,12 +338,10 @@ class _SnoutServerPageState extends State<SnoutServerPage> {
                                 TextButton(
                                     onPressed: () async {
                                       final response = await http.delete(
-                                          widget.serverUri.replace(
-                                              path: "/delete_event_file"),
+                                          getEventPath(event),
                                           headers: {
                                             'upload_password':
                                                 passwordTextController.text,
-                                            'name': event,
                                           });
 
                                       if (!context.mounted) {
@@ -411,8 +409,8 @@ class _SnoutServerPageState extends State<SnoutServerPage> {
                             TextButton(
                                 onPressed: () async {
                                   const XTypeGroup typeGroup = XTypeGroup(
-                                    label: 'Scouting Config',
-                                    extensions: <String>['json'],
+                                    label: 'Snout DB',
+                                    extensions: <String>['snoutdb'],
                                   );
                                   final XFile? file = await openFile(
                                       acceptedTypeGroups: <XTypeGroup>[
@@ -438,9 +436,9 @@ class _SnoutServerPageState extends State<SnoutServerPage> {
                                   }
 
                                   final request = http.MultipartRequest(
-                                      "POST",
+                                      "PUT",
                                       widget.serverUri
-                                          .replace(path: "/upload_event_file"));
+                                          .replace(path: "/upload_events"));
                                   request.headers['upload_password'] =
                                       passwordTextController.text;
                                   request.files.add(

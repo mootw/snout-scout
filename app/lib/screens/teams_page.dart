@@ -1,10 +1,10 @@
 import 'dart:convert';
 
-import 'package:app/providers/cache_memory_imageprovider.dart';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/providers/identity_provider.dart';
 import 'package:app/screens/edit_json.dart';
 import 'package:app/screens/view_team_page.dart';
+import 'package:app/services/snout_image_cache.dart';
 import 'package:app/services/tba_autofill.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -152,6 +152,7 @@ class TeamListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final snoutData = context.watch<DataProvider>();
+
     Widget? image;
     final data = snoutData.event.pitscouting[teamNumber.toString()]
         ?[robotPictureReserved];
@@ -159,7 +160,7 @@ class TeamListTile extends StatelessWidget {
       image = AspectRatio(
           aspectRatio: 1,
           child:
-              Image(image: CacheMemoryImageProvider(data), fit: BoxFit.cover));
+              Image(image: snoutImageCache.getCached(data), fit: BoxFit.cover));
     }
 
     return InkWell(

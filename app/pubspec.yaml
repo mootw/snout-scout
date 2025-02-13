@@ -15,10 +15,11 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.2.0+3
+version: 1.3.1+5
 
 environment:
   sdk: '>=3.6.0 <4.0.0'
+resolution: workspace
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -53,15 +54,16 @@ dependencies:
   fl_chart: ^0.70.2
   flutter_markdown: 0.7.6+2 # TODO this package is going to be unsuported
   # Potential alternate charting package: https://pub.dev/packages/community_charts_flutter
+  
   snout_db:
-    path: ../snout_db
   server:
-    path: ../server
 
   #boolean_selector: ^2.1.1
   package_info_plus: ^8.2.1
   pointycastle: ^3.9.1
   string_similarity: ^2.1.1
+  flutter_avif: ^3.0.0
+  image: ^4.5.2
 
 dev_dependencies:
   flutter_test:

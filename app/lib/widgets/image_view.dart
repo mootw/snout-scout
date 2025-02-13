@@ -16,6 +16,7 @@ class ImageViewer extends StatelessWidget {
             builder: (context) => Scaffold(
                   appBar: AppBar(),
                   body: PhotoView(
+                    filterQuality: FilterQuality.medium,
                     imageProvider: child.image,
                   ),
                 )));

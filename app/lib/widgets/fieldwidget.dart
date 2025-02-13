@@ -2,8 +2,8 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:app/providers/cache_memory_imageprovider.dart';
 import 'package:app/providers/data_provider.dart';
+import 'package:app/services/snout_image_cache.dart';
 import 'package:app/style.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
@@ -596,8 +596,8 @@ class FieldImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Image(
-      image: CacheMemoryImageProvider(
-          context.watch<DataProvider>().event.config.fieldImage),
+      image: snoutImageCache
+          .getCached(context.watch<DataProvider>().event.config.fieldImage),
       fit: BoxFit.contain,
       width: 2000,
     );

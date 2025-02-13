@@ -169,12 +169,11 @@ void main(List<String> args) async {
     return Response.ok("");
   });
 
-  /// Just accept any files that are uploaded assuming the password is provided
-  app.post("/upload_event_file", (Request request) async {
+  app.put("/upload_events", (Request request) async {
     // Since this edits db files, it could conflict with other writes
     return dbWriteLock.synchronized(() async {
-      if ((request.headers['upload_password'] ?? "") !=
-          env.getOrElse("upload_password", () => "")) {
+      if ((request.headers['upload_password'] ?? '') !=
+          env.getOrElse("upload_password", () => '')) {
         return Response.unauthorized("upload_password is invalid");
       }
 
@@ -202,21 +201,20 @@ void main(List<String> args) async {
   });
 
   /// Just accept any files that are uploaded assuming the password is provided
-  app.delete("/delete_event_file", (Request request) async {
+  app.delete("/events/<eventID>", (Request request, String eventID) async {
+    eventID = Uri.decodeComponent(eventID);
     // Since this edits db files, it could conflict with other writes
     return dbWriteLock.synchronized(() async {
-      if (request.headers['upload_password'] !=
-          env.getOrElse("upload_password", () => "")) {
+      if ((request.headers['upload_password'] ?? '') !=
+          env.getOrElse("upload_password", () => '')) {
         return Response.unauthorized("upload_password is invalid");
       }
 
-      final fileName = request.headers['name'];
-
-      logger.info("Attempting file upload for event name $fileName");
-      final eventFile = File('${eventsDirectory.path}/$fileName');
+      logger.info("Attempting file upload for event name $eventID");
+      final eventFile = File('${eventsDirectory.path}/$eventID');
 
       // unload the file
-      loadedEvents.removeWhere((key, value) => key == fileName);
+      loadedEvents.removeWhere((key, value) => key == eventID);
       // delete from disk
       await eventFile.delete();
 

@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:app/providers/data_provider.dart';
 import 'package:app/providers/local_config_provider.dart';
@@ -406,9 +405,9 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
               final dataProvider = context.read<DataProvider>();
               String result;
               try {
-                final photo = await pickOrTakeImageDialog(context);
-                if (photo != null) {
-                  Uint8List bytes = await photo.readAsBytes();
+                final bytes =
+                    await pickOrTakeImageDialog(context, largeImageSize);
+                if (bytes != null) {
                   result = base64Encode(bytes);
                   Patch patch = Patch(
                       identity: identity,
@@ -424,34 +423,33 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
             },
           ),
           ListTile(
-          title: const Text("Set Pit Map Image"),
-          leading: const Icon(Icons.camera_alt),
-          onTap: () async {
-            final identity = context.read<IdentityProvider>().identity;
-            final dataProvider = context.read<DataProvider>();
+            title: const Text("Set Pit Map Image"),
+            leading: const Icon(Icons.camera_alt),
+            onTap: () async {
+              final identity = context.read<IdentityProvider>().identity;
+              final dataProvider = context.read<DataProvider>();
 
-            String result;
-            try {
-              // FOR THE PIT MAP ALLOW FOR resolution higher than the standard scouting
-              // image. This is because the pitmap might contain super small text
-              final photo =
-                  await pickOrTakeImageDialog(context, scoutImageSize * 1.5);
-              if (photo != null) {
-                Uint8List bytes = await photo.readAsBytes();
-                result = base64Encode(bytes);
-                Patch patch = Patch(
-                    identity: identity,
-                    time: DateTime.now(),
-                    path: Patch.buildPath(['pitmap']),
-                    value: result);
-                //Save the scouting results to the server!!
-                await dataProvider.newTransaction(patch);
+              String result;
+              try {
+                // FOR THE PIT MAP ALLOW FOR resolution higher than the standard scouting
+                // image. This is because the pitmap might contain super small text
+                final bytes =
+                    await pickOrTakeImageDialog(context, largeImageSize);
+                if (bytes != null) {
+                  result = base64Encode(bytes);
+                  Patch patch = Patch(
+                      identity: identity,
+                      time: DateTime.now(),
+                      path: Patch.buildPath(['pitmap']),
+                      value: result);
+                  //Save the scouting results to the server!!
+                  await dataProvider.newTransaction(patch);
+                }
+              } catch (e, s) {
+                Logger.root.severe("Error taking image from device", e, s);
               }
-            } catch (e, s) {
-              Logger.root.severe("Error taking image from device", e, s);
-            }
-          },
-        ),
+            },
+          ),
           ListTile(
             title: const Text("App Version"),
             subtitle: FutureBuilder<PackageInfo>(

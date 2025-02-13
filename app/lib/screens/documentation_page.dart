@@ -1,6 +1,6 @@
-import 'package:app/providers/cache_memory_imageprovider.dart';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/screens/debug_field_position.dart';
+import 'package:app/services/snout_image_cache.dart';
 import 'package:app/widgets/image_view.dart';
 import 'package:app/widgets/markdown_wrapper.dart';
 import 'package:flutter/material.dart';
@@ -50,7 +50,7 @@ class _DocumentationScreenState extends State<DocumentationScreen> {
               height: 250,
               child: ImageViewer(
                 child: Image(
-                  image: CacheMemoryImageProvider(pitMap),
+                  image: snoutImageCache.getCached(pitMap),
                   fit: BoxFit.fitHeight,
                   width: 2000,
                 ),

@@ -1,9 +1,9 @@
 import 'dart:async';
 
-import 'package:app/providers/cache_memory_imageprovider.dart';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/screens/match_page.dart';
 import 'package:app/screens/view_team_page.dart';
+import 'package:app/services/snout_image_cache.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -155,7 +155,7 @@ Stream<SearchResult> _search(FRCEvent event, String query) async* {
         robotPicture = AspectRatio(
             aspectRatio: 1,
             child: Image(
-                image: CacheMemoryImageProvider(pictureData),
+                image: snoutImageCache.getCached(pictureData),
                 fit: BoxFit.cover));
       }
       yield SearchResult(
@@ -229,7 +229,7 @@ Stream<SearchResult> _search(FRCEvent event, String query) async* {
           robotPicture = AspectRatio(
               aspectRatio: 1,
               child: Image(
-                  image: CacheMemoryImageProvider(pictureData),
+                  image: snoutImageCache.getCached(pictureData),
                   fit: BoxFit.cover));
         }
 

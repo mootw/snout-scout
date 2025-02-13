@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:app/providers/cache_memory_imageprovider.dart';
+import 'package:app/services/snout_image_cache.dart';
 import 'package:app/widgets/datasheet.dart';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/widgets/fieldwidget.dart';
@@ -169,7 +169,7 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                                       aspectRatio: 1,
                                       child: ImageViewer(
                                         child: Image(
-                                          image: CacheMemoryImageProvider(
+                                          image: snoutImageCache.getCached(
                                               context
                                                           .read<DataProvider>()
                                                           .event

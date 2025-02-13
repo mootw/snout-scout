@@ -54,7 +54,7 @@ for a 40 team 80 match event:
 - **Disk size: 25MB**; latest state: **10MB**. to get a range of patches varies on the patch data and quantity, is porportional to how up to date the client is
 
 - A match recording for 1 team could be as large as 4-8KB (~1KB compressed)
-- Image (As compressed and sized in the app): ~150KB
+- Image (As compressed and sized in the app): ~80KB-160KB (small-large)
 
 
 # technical philosophy

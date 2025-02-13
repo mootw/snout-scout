@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:ui';
 
-import 'package:app/providers/cache_memory_imageprovider.dart';
+import 'package:app/services/snout_image_cache.dart';
 import 'package:app/style.dart';
 import 'package:app/widgets/image_view.dart';
 import 'package:csv/csv.dart';
@@ -50,7 +50,7 @@ class DataItem {
                 ? const SizedBox()
                 : ImageViewer(
                     child: Image(
-                    image: CacheMemoryImageProvider(value),
+                    image: snoutImageCache.getCached(value),
                     fit: BoxFit.cover,
                   )),
             exportValue: value == null ? '' : 'Image',

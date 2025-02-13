@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:app/api.dart';
 import 'package:app/edit_lock.dart';
-import 'package:app/providers/cache_memory_imageprovider.dart';
 import 'package:app/providers/data_provider.dart';
+import 'package:app/services/snout_image_cache.dart';
 import 'package:app/style.dart';
 import 'package:app/providers/identity_provider.dart';
 import 'package:app/screens/match_recorder.dart';
@@ -197,7 +197,7 @@ class _MatchRecorderAssistantPageState
       image = AspectRatio(
           aspectRatio: 1,
           child:
-              Image(image: CacheMemoryImageProvider(data), fit: BoxFit.cover));
+              Image(image: snoutImageCache.getCached(data), fit: BoxFit.cover));
     }
 
     return InkWell(
