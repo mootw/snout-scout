@@ -28,13 +28,17 @@ class SnoutImageCache {
     }
   }
 
+  /// This gets a compatible image decoder
   ImageProvider getCached(String data) {
     final bytes = _getBytesCached(data);
 
-    // TODO bug with google chrome (works in firefox): https://github.com/flutter/flutter/issues/160600
-    if (BrowserDetection.instance.browserEngine == BrowserEngine.blink) {
+    // TODO bug with google chrome: https://github.com/flutter/flutter/issues/160600
+    // TODO safari(webkit) supports AVIF since iOS 16.
+    //  This can be removed once most devices are on iOS 16 (https://iosref.com/ios-usage)
+    if (BrowserDetection.instance.browserEngine == BrowserEngine.blink ||
+        BrowserDetection.instance.browserEngine == BrowserEngine.webkit) {
       // Detect if Image is avif and use the compatibility decoder which is likely slower
-      // than the platform decoder. This entire check can be removed once 160600 is fixed
+      // than the platform decoder.
       if (isAvifFile(bytes.sublist(0, 16)) == AvifFileType.avif) {
         return MemoryAvifImage(bytes);
       } else {
