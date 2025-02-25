@@ -75,7 +75,7 @@ class _AllMatchesPageState extends State<AllMatchesPage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text("delay ${offsetDurationInMins(scheduleDelay)}"),
+                Text("Schedule ${offsetDurationInMins(scheduleDelay)}"),
                 TextButton(
                   onPressed: () => Navigator.push(
                     context,

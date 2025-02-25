@@ -68,8 +68,6 @@ class FRCMatch implements Comparable<FRCMatch> {
   Duration? get delayFromScheduledTime =>
       results?.time.difference(scheduledTime);
 
-  /// returns if we have 'any' data for the match to help with
-  /// if match results are not submitted but a recording was to calculate
-  /// scheduling delays
-  bool get isComplete => results != null || robot.entries.isNotEmpty;
+  /// is true when the match has match results, which means the match is complete
+  bool get isComplete => results != null;
 }
