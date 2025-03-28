@@ -62,7 +62,6 @@ dependencies:
 
   #boolean_selector: ^2.1.1
   package_info_plus: ^8.2.1
-  pointycastle: ^3.9.1
   string_similarity: ^2.1.1
   flutter_avif: ^3.0.0
   image: ^4.5.2
