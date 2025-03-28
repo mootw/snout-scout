@@ -87,7 +87,7 @@ class _AllMatchesPageState extends State<AllMatchesPage> {
                   child: Text(
                     teamNextMatch.description,
                     style: TextStyle(
-                        color: getAllianceColor(teamNextMatch
+                        color: getAllianceUIColor(teamNextMatch
                             .getAllianceOf(snoutData.event.config.team))),
                   ),
                 ),

@@ -75,32 +75,6 @@ class _TeamViewPageState extends State<TeamViewPage> {
         body: ListView(
           cacheExtent: 5000,
           children: [
-            teamNextMatch != null && scheduleDelay != null
-                ? Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text("next match"),
-                      TextButton(
-                        onPressed: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => MatchPage(
-                                  matchid: data.event
-                                      .matchIDFromMatch(teamNextMatch))),
-                        ),
-                        child: Text(
-                          teamNextMatch.description,
-                          style: TextStyle(
-                              color: getAllianceColor(teamNextMatch
-                                  .getAllianceOf(widget.teamNumber))),
-                        ),
-                      ),
-                      TimeDuration(
-                          time: teamNextMatch.scheduledTime.add(scheduleDelay),
-                          displayDurationDefault: true),
-                    ],
-                  )
-                : const Center(child: Text('No upcoming matches')),
             Row(
               children: [
                 if (robotPicture != null)
@@ -130,48 +104,88 @@ class _TeamViewPageState extends State<TeamViewPage> {
                 ),
               ],
             ),
-
+            teamNextMatch != null && scheduleDelay != null
+                ? Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text("next match"),
+                      TextButton(
+                        onPressed: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => MatchPage(
+                                  matchid: data.event
+                                      .matchIDFromMatch(teamNextMatch))),
+                        ),
+                        child: Text(
+                          teamNextMatch.description,
+                          style: TextStyle(
+                              color: getAllianceUIColor(teamNextMatch
+                                  .getAllianceOf(widget.teamNumber))),
+                        ),
+                      ),
+                      TimeDuration(
+                          time: teamNextMatch.scheduledTime.add(scheduleDelay),
+                          displayDurationDefault: true),
+                    ],
+                  )
+                : const Center(child: Text('No upcoming matches')),
             const Divider(),
-            //Display this teams matches
-
             DataSheet(
-              title: 'Metrics',
+              title: 'Matches',
               //Data is a list of rows and columns
               columns: [
-                DataItem.fromText("Metric"),
-                for (final event in data.event.config.matchscouting.events)
-                  DataItem.fromText(event.label),
+                DataItem.fromText("Match"),
+                for (final item in data.event.config.matchscouting.processes)
+                  DataItem.fromText(item.label),
+                for (final pitSurvey in data.event.config.matchscouting.survey)
+                  DataItem.fromText(pitSurvey.label),
+                DataItem.fromText("Scout"),
               ],
               rows: [
-                [
-                  DataItem.fromText("Total"),
-                  for (final event in data.event.config.matchscouting.events)
-                    DataItem.fromNumber(data.event
-                        .teamAverageMetric(widget.teamNumber, event.id)),
-                ],
-                [
-                  DataItem.fromText("Auto"),
-                  for (final eventType
-                      in data.event.config.matchscouting.events)
-                    DataItem.fromNumber(data.event.teamAverageMetric(
-                        widget.teamNumber,
-                        eventType.id,
-                        (event) => event.isInAuto)),
-                ],
-                [
-                  DataItem.fromText("Teleop"),
-                  for (final eventType
-                      in data.event.config.matchscouting.events)
-                    DataItem.fromNumber(data.event.teamAverageMetric(
-                        widget.teamNumber,
-                        eventType.id,
-                        (event) => !event.isInAuto)),
-                ]
+                //Show ALL matches the team is scheduled for ALONG with all matches they played regardless of it it is scheduled sorted
+                for (final match in <FRCMatch>{
+                  ...data.event.matchesWithTeam(widget.teamNumber),
+                  ...data.event
+                      .teamRecordedMatches(widget.teamNumber)
+                      .map((e) => e.value)
+                }.sorted((a, b) => Comparable.compare(a, b)))
+                  [
+                    DataItem.match(
+                        context: context,
+                        description: match.description,
+                        key: data.event.matchIDFromMatch(match),
+                        time: match.scheduledTime,
+                        color: getAllianceUIColor(
+                            match.getAllianceOf(widget.teamNumber))),
+                    for (final item
+                        in data.event.config.matchscouting.processes)
+                      DataItem.fromErrorNumber(data.event
+                              .runMatchResultsProcess(
+                                  item,
+                                  match.robot[widget.teamNumber.toString()],
+                                  widget.teamNumber) ??
+                          //Missing results, this is not an error
+                          (value: null, error: null)),
+                    for (final pitSurvey
+                        in data.event.config.matchscouting.survey)
+                      DataItem.fromSurveyItem(
+                          match.robot[widget.teamNumber.toString()]
+                              ?.survey[pitSurvey.id],
+                          pitSurvey),
+                    DataItem.fromText(getAuditString(context
+                        .watch<DataProvider>()
+                        .database
+                        .getLastPatchFor(Patch.buildPath([
+                          'matches',
+                          data.event.matchIDFromMatch(match),
+                          'robot',
+                          '${widget.teamNumber}'
+                        ])))),
+                  ],
               ],
             ),
-
-            const Divider(height: 16),
-
+            const Divider(),
             Wrap(
               spacing: 12,
               alignment: WrapAlignment.center,
@@ -220,72 +234,39 @@ class _TeamViewPageState extends State<TeamViewPage> {
                 ),
                 const Divider(height: 32),
                 DataSheet(
-                  title: 'Matches',
+                  title: 'Metrics',
                   //Data is a list of rows and columns
                   columns: [
-                    DataItem.fromText("Match"),
-                    for (final item
-                        in data.event.config.matchscouting.processes)
-                      DataItem.fromText(item.label),
-                    for (final pitSurvey
-                        in data.event.config.matchscouting.survey)
-                      DataItem.fromText(pitSurvey.label),
-                    DataItem.fromText("Scout"),
+                    DataItem.fromText("Metric"),
+                    for (final event in data.event.config.matchscouting.events)
+                      DataItem.fromText(event.label),
                   ],
                   rows: [
-                    //Show ALL matches the team is scheduled for ALONG with all matches they played regardless of it it is scheduled sorted
-                    for (final match in <FRCMatch>{
-                      ...data.event.matchesWithTeam(widget.teamNumber),
-                      ...data.event
-                          .teamRecordedMatches(widget.teamNumber)
-                          .map((e) => e.value)
-                    }.sorted((a, b) => Comparable.compare(a, b)))
-                      [
-                        DataItem(
-                            displayValue: TextButton(
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => MatchPage(
-                                            matchid: data.event
-                                                .matchIDFromMatch(match))),
-                                  );
-                                },
-                                child: Text(
-                                  match.description,
-                                  style: TextStyle(
-                                      color: getAllianceColor(match
-                                          .getAllianceOf(widget.teamNumber))),
-                                )),
-                            exportValue: match.description,
-                            sortingValue: match),
-                        for (final item
-                            in data.event.config.matchscouting.processes)
-                          DataItem.fromErrorNumber(data.event
-                                  .runMatchResultsProcess(
-                                      item,
-                                      match.robot[widget.teamNumber.toString()],
-                                      widget.teamNumber) ??
-                              //Missing results, this is not an error
-                              (value: null, error: null)),
-                        for (final pitSurvey
-                            in data.event.config.matchscouting.survey)
-                          DataItem.fromSurveyItem(
-                              widget.teamNumber,
-                              match.robot[widget.teamNumber.toString()]
-                                  ?.survey[pitSurvey.id],
-                              pitSurvey),
-                        DataItem.fromText(getAuditString(context
-                            .watch<DataProvider>()
-                            .database
-                            .getLastPatchFor(Patch.buildPath([
-                              'matches',
-                              data.event.matchIDFromMatch(match),
-                              'robot',
-                              '${widget.teamNumber}'
-                            ])))),
-                      ],
+                    [
+                      DataItem.fromText("Total"),
+                      for (final event
+                          in data.event.config.matchscouting.events)
+                        DataItem.fromNumber(data.event
+                            .teamAverageMetric(widget.teamNumber, event.id)),
+                    ],
+                    [
+                      DataItem.fromText("Auto"),
+                      for (final eventType
+                          in data.event.config.matchscouting.events)
+                        DataItem.fromNumber(data.event.teamAverageMetric(
+                            widget.teamNumber,
+                            eventType.id,
+                            (event) => event.isInAuto)),
+                    ],
+                    [
+                      DataItem.fromText("Teleop"),
+                      for (final eventType
+                          in data.event.config.matchscouting.events)
+                        DataItem.fromNumber(data.event.teamAverageMetric(
+                            widget.teamNumber,
+                            eventType.id,
+                            (event) => !event.isInAuto)),
+                    ]
                   ],
                 ),
                 const Divider(),

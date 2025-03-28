@@ -30,7 +30,4 @@ String offsetDurationInMins(Duration duration) {
     return 'on time';
   }
   return '${duration.abs().inMinutes} mins ${duration.isNegative ? 'ahead' : 'behind'}';
-
-  //Do not add a negative sign since it is already included in the minutes.
-  return "${duration.isNegative == true ? "" : "+"}${duration.inMinutes} min${duration.inMinutes == 1 ? "" : "s"}";
 }

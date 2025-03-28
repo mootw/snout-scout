@@ -36,7 +36,7 @@ class DataProvider extends ChangeNotifier {
   //Initialize the database as empty
   //this value should get quickly overwritten
   //i just dont like this being nullable is all.
-  SnoutDB database = SnoutDB(patches: [
+  SnoutDB _database = SnoutDB(patches: [
     Patch(
       /// Trick to get around the temporary database lol
       /// This is super duper uber cursed. Basically
@@ -50,6 +50,17 @@ class DataProvider extends ChangeNotifier {
       value: emptyNewEvent.toJson(),
     )
   ]);
+
+  set database(SnoutDB newDatabase) {
+    _database = newDatabase;
+    isInitialLoad = true;
+  }
+
+  SnoutDB get database {
+    return _database;
+  }
+
+  bool isInitialLoad = false;
 
   FRCEvent get event => database.event;
 
@@ -198,7 +209,9 @@ class DataProvider extends ChangeNotifier {
   Future _postPatchToServer(Patch patch) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     try {
-      final res = await apiClient.put(dataSourceUri, body: json.encode(patch));
+      final res = await apiClient
+          .put(dataSourceUri, body: json.encode(patch))
+          .timeout(Duration(seconds: 20));
       if (res.statusCode == 200) {
         //Remove it from the failed patches if it exists there
         if (failedPatches.contains(json.encode(patch))) {

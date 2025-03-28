@@ -1,7 +1,6 @@
 import 'package:app/widgets/datasheet.dart';
 import 'package:app/style.dart';
 import 'package:app/providers/data_provider.dart';
-import 'package:app/screens/match_page.dart';
 import 'package:app/screens/view_team_page.dart';
 import 'package:app/widgets/edit_audit.dart';
 import 'package:flutter/material.dart';
@@ -33,23 +32,17 @@ class TableMatchRecordingsPage extends StatelessWidget {
             for (final match in data.event.matches.entries.toList().reversed)
               for (final robot in match.value.robot.entries)
                 [
-                  DataItem(
-                      displayValue: TextButton(
-                          child: Text(match.value.description),
-                          onPressed: () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        MatchPage(matchid: match.key)),
-                              )),
-                      exportValue: match.value.description,
-                      sortingValue: match.value),
+                  DataItem.match(
+                      context: context,
+                      key: match.key,
+                      description: match.value.description,
+                      time: match.value.scheduledTime),
                   DataItem(
                       displayValue: TextButton(
                           child: Text(robot.key,
                               style: TextStyle(
-                                  color:
-                                      getAllianceColor(robot.value.alliance))),
+                                  color: getAllianceUIColor(
+                                      robot.value.alliance))),
                           onPressed: () => Navigator.push(
                                 context,
                                 MaterialPageRoute(
@@ -65,7 +58,7 @@ class TableMatchRecordingsPage extends StatelessWidget {
                             int.tryParse(robot.key) ?? 0) ??
                         (value: null, error: "Missing Results")),
                   for (final item in data.event.config.matchscouting.survey)
-                    DataItem.fromSurveyItem(int.parse(robot.key),
+                    DataItem.fromSurveyItem(
                         match.value.robot[robot.key]?.survey[item.id], item),
                   DataItem.fromText(getAuditString(context
                       .watch<DataProvider>()

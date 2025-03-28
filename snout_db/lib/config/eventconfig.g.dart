@@ -8,7 +8,7 @@ part of 'eventconfig.dart';
 
 EventConfig _$EventConfigFromJson(Map json) => EventConfig(
       name: json['name'] as String,
-      team: json['team'] as int,
+      team: (json['team'] as num).toInt(),
       tbaEventId: json['tbaEventId'] as String?,
       tbaSecretKey: json['tbaSecretKey'] as String?,
       fieldStyle:

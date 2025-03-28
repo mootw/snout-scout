@@ -3,11 +3,8 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_avif/flutter_avif.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:logging/logging.dart';
 import 'package:snout_db/snout_db.dart';
 import 'dart:math';
-import 'dart:ui' as ui;
-import 'package:image/image.dart' as img;
 
 // DESIGN GUIDELINES MIN SCREEN WIDTH = 355
 // this means that the unfolded z fold could overflow slightly...
@@ -28,7 +25,7 @@ ThemeData defaultTheme =
 const warningColor = Colors.yellow;
 
 /// Returns a UI color for a given alliance.
-Color getAllianceColor(Alliance alliance) =>
+Color getAllianceUIColor(Alliance alliance) =>
     alliance == Alliance.red ? Colors.red : Colors.blue;
 
 /// Generates a 'random' color from an index

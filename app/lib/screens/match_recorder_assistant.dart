@@ -159,7 +159,7 @@ class _MatchRecorderAssistantPageState
                   return DropdownMenuItem<Alliance>(
                     value: value,
                     child: Text(value.toString(),
-                        style: TextStyle(color: getAllianceColor(value))),
+                        style: TextStyle(color: getAllianceUIColor(value))),
                   );
                 }).toList(),
               ),

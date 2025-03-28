@@ -41,6 +41,42 @@ class _MatchPageState extends State<MatchPage> {
         title: Text(match.description),
         bottom: const LoadOrErrorStatusBar(),
         actions: [
+          FilledButton(
+              onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (builder) =>
+                          MatchRecorderAssistantPage(matchid: widget.matchid))),
+              child: const Text("Scout")),
+          const SizedBox(width: 12),
+          FilledButton.tonal(
+              onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (builder) => AnalysisMatchPreview(
+                          red: match.red,
+                          blue: match.blue,
+                          matchLabel: match.description,
+                          plan: Column(children: [
+                            for (final item in snoutData
+                                .event.config.matchscouting.properties) ...[
+                              DynamicValueViewer(
+                                  itemType: item,
+                                  value: match.properties?[item.id]),
+                              Container(
+                                  padding: const EdgeInsets.only(right: 16),
+                                  alignment: Alignment.centerRight,
+                                  child: EditAudit(
+                                      path: Patch.buildPath([
+                                    'matches',
+                                    widget.matchid,
+                                    'properties',
+                                    item.id
+                                  ]))),
+                            ],
+                          ])))),
+              child: const Text("Preview")),
+          const SizedBox(width: 12),
           //If there is a TBA event ID we will add a button to view the match id
           //since we will assume that all of the matches (or at least most)
           //have been imported to match the tba id format
@@ -56,58 +92,88 @@ class _MatchPageState extends State<MatchPage> {
       body: ListView(
         cacheExtent: 5000,
         children: [
-          const SizedBox(height: 8),
-          Wrap(
+          Row(
             children: [
-              const SizedBox(width: 12),
-              FilledButton(
-                  onPressed: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (builder) => MatchRecorderAssistantPage(
-                              matchid: widget.matchid))),
-                  child: const Text("Scout This Match")),
-              const SizedBox(width: 12),
-              FilledButton.tonal(
-                  onPressed: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (builder) => AnalysisMatchPreview(
-                              red: match.red, blue: match.blue))),
-                  child: const Text("Preview")),
-              const SizedBox(width: 12),
-              TextButton(
-                child: match.results == null
-                    ? const Text("Add Results")
-                    : const Text("Edit Results"),
-                onPressed: () async {
-                  final identiy = context.read<IdentityProvider>().identity;
-                  final result = await navigateWithEditLock<MatchResultValues>(
-                      context,
-                      "match:${match.description}:results",
-                      (context) => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => EditMatchResults(
-                                results: match.results,
-                                config: snoutData.event.config,
-                                matchID: widget.matchid),
-                          )));
+              if (match.results != null)
+                Flexible(
+                  child: Column(
+                    children: [
+                      DataTable(
+                        columns: const [
+                          DataColumn(label: Text("Results")),
+                          DataColumn(label: Text("Red")),
+                          DataColumn(label: Text("Blue")),
+                        ],
+                        rows: [
+                          DataRow(cells: [
+                            const DataCell(Text("Score")),
+                            DataCell(Text(match.results!.redScore.toString())),
+                            DataCell(Text(match.results!.blueScore.toString())),
+                          ]),
+                        ],
+                      ),
+                      TextButton(
+                        child: match.results == null
+                            ? const Text("Add Results")
+                            : const Text("Edit Results"),
+                        onPressed: () async {
+                          final identiy =
+                              context.read<IdentityProvider>().identity;
+                          final result =
+                              await navigateWithEditLock<MatchResultValues>(
+                                  context,
+                                  "match:${match.description}:results",
+                                  (context) => Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => EditMatchResults(
+                                            results: match.results,
+                                            config: snoutData.event.config,
+                                            matchID: widget.matchid),
+                                      )));
 
-                  if (result != null) {
-                    Patch patch = Patch(
-                        identity: identiy,
-                        time: DateTime.now(),
-                        path: Patch.buildPath(
-                            ['matches', widget.matchid, 'results']),
-                        value: result.toJson());
+                          if (result != null) {
+                            Patch patch = Patch(
+                                identity: identiy,
+                                time: DateTime.now(),
+                                path: Patch.buildPath(
+                                    ['matches', widget.matchid, 'results']),
+                                value: result.toJson());
 
-                    await snoutData.newTransaction(patch);
-                  }
-                },
+                            await snoutData.newTransaction(patch);
+                          }
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              Flexible(
+                child: Column(
+                  children: [
+                    ListTile(
+                      title: const Text("Scheduled Time"),
+                      subtitle: Text(DateFormat.jm()
+                          .add_yMd()
+                          .format(match.scheduledTime.toLocal())),
+                    ),
+                    if (match.results != null)
+                      ListTile(
+                        title: const Text("Actual Time"),
+                        subtitle: Text(DateFormat.jm()
+                            .add_yMd()
+                            .format(match.results!.time.toLocal())),
+                      ),
+                  ],
+                ),
               ),
             ],
           ),
+          Container(
+              padding: const EdgeInsets.only(right: 16),
+              alignment: Alignment.centerRight,
+              child: EditAudit(
+                  path:
+                      Patch.buildPath(['matches', widget.matchid, 'results']))),
           const SizedBox(height: 8),
           DataSheet(
             title: 'Per Team Performance',
@@ -138,9 +204,9 @@ class _MatchPageState extends State<MatchPage> {
                               style: TextStyle(
                                   color:
                                       match.isScheduledToHaveTeam(team) == false
-                                          ? getAllianceColor(match
+                                          ? getAllianceUIColor(match
                                               .robot[team.toString()]!.alliance)
-                                          : getAllianceColor(
+                                          : getAllianceUIColor(
                                               match.getAllianceOf(team)))),
                           onPressed: () => Navigator.push(
                                 context,
@@ -159,7 +225,7 @@ class _MatchPageState extends State<MatchPage> {
                         (value: null, error: null)),
                   for (final item
                       in snoutData.event.config.matchscouting.survey)
-                    DataItem.fromSurveyItem(team,
+                    DataItem.fromSurveyItem(
                         match.robot[team.toString()]?.survey[item.id], item),
                   DataItem.fromText(getAuditString(context
                       .watch<DataProvider>()
@@ -219,49 +285,12 @@ class _MatchPageState extends State<MatchPage> {
               ),
             ],
           ),
-
-          ListTile(
-            title: const Text("Scheduled Time"),
-            subtitle: Text(DateFormat.jm()
-                .add_yMd()
-                .format(match.scheduledTime.toLocal())),
-          ),
-          if (match.results != null)
-            ListTile(
-              title: const Text("Actual Time"),
-              subtitle: Text(DateFormat.jm()
-                  .add_yMd()
-                  .format(match.results!.time.toLocal())),
-            ),
-          if (match.results != null)
-            Align(
-              alignment: Alignment.center,
-              child: DataTable(
-                columns: const [
-                  DataColumn(label: Text("Results")),
-                  DataColumn(label: Text("Red")),
-                  DataColumn(label: Text("Blue")),
-                ],
-                rows: [
-                  DataRow(cells: [
-                    const DataCell(Text("Score")),
-                    DataCell(Text(match.results!.redScore.toString())),
-                    DataCell(Text(match.results!.blueScore.toString())),
-                  ]),
-                ],
-              ),
-            ),
-          Container(
-              padding: const EdgeInsets.only(right: 16),
-              alignment: Alignment.centerRight,
-              child: EditAudit(
-                  path:
-                      Patch.buildPath(['matches', widget.matchid, 'results']))),
+          SizedBox(height: 16),
           Column(
             children: [
               Text("Properties",
                   style: Theme.of(context).textTheme.titleMedium),
-              TextButton(
+              FilledButton(
                   onPressed: () {
                     Navigator.push(
                         context,

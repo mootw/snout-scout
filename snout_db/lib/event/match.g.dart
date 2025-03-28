@@ -9,8 +9,12 @@ part of 'match.dart';
 FRCMatch _$FRCMatchFromJson(Map json) => FRCMatch(
       description: json['description'] as String,
       scheduledTime: DateTime.parse(json['scheduledTime'] as String),
-      red: (json['red'] as List<dynamic>).map((e) => e as int).toList(),
-      blue: (json['blue'] as List<dynamic>).map((e) => e as int).toList(),
+      red: (json['red'] as List<dynamic>)
+          .map((e) => (e as num).toInt())
+          .toList(),
+      blue: (json['blue'] as List<dynamic>)
+          .map((e) => (e as num).toInt())
+          .toList(),
       results: json['results'] == null
           ? null
           : MatchResultValues.fromJson(json['results'] as Map),

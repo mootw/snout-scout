@@ -5,13 +5,15 @@ import 'package:app/screens/analysis/heatmap_event_type.dart';
 import 'package:app/screens/analysis/match_preview.dart';
 import 'package:app/screens/analysis/pitscout_survey_analysis.dart';
 import 'package:app/screens/analysis/postmatch_survey_analysis.dart';
+import 'package:app/screens/analysis/table_match_properties.dart';
 import 'package:app/screens/analysis/table_match_recordings.dart';
 import 'package:app/screens/analysis/table_team_averages.dart';
-import 'package:app/screens/analysis/table_team_scouting.dart';
+import 'package:app/screens/analysis/table_team_survey.dart';
 import 'package:app/search.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher_string.dart';
+
 
 class AnalysisPage extends StatefulWidget {
   const AnalysisPage({super.key});
@@ -68,6 +70,16 @@ class _AnalysisPageState extends State<AnalysisPage> {
               context,
               MaterialPageRoute(
                   builder: (builder) => const TableMatchRecordingsPage()));
+        },
+      ),
+      ListTile(
+        title: const Text("Match Data"),
+        leading: const Icon(Icons.table_chart),
+        onTap: () {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (builder) => const TableMatchProperties()));
         },
       ),
       ListTile(

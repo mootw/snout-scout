@@ -26,21 +26,29 @@ class FRCEvent {
   ///List of teams in the event, ideally ordered smallest number to largest
   final List<int> teams;
 
-  ///List of matches
+  // TODO store Match schedule configuration separate from the match data
+  final List<dynamic> schedule;
+
+  ///List of match results
   final SplayTreeMap<String, FRCMatch> matches;
 
-  //Pit scouting results
+  //Team Survey results
   final Map<String, DynamicProperties> pitscouting;
 
   /// image of the pit map
   final String? pitmap;
 
+  // List of registered scouts and their passwords
+  final Map<String, String> scoutPasswords;
+
   //Enforce that all matches are sorted
   FRCEvent({
     required this.config,
     this.teams = const [],
+    this.schedule = const [],
     Map<String, FRCMatch> matches = const {},
     this.pitscouting = const {},
+    this.scoutPasswords = const {},
     this.pitmap,
   })
   // SplayTreeMaps for some reason cannot have 2 values with the zero difference in the comparison.

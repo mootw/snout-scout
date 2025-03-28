@@ -47,8 +47,8 @@ class MatchCard extends StatelessWidget {
                     width: 19,
                     child: Icon(
                       Icons.star,
-                      color:
-                          getAllianceColor(match.getAllianceOf(focusTeam ?? 0)),
+                      color: getAllianceUIColor(
+                          match.getAllianceOf(focusTeam ?? 0)),
                     ),
                   )
                 : const SizedBox(

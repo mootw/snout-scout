@@ -66,6 +66,7 @@ dependencies:
   string_similarity: ^2.1.1
   flutter_avif: ^3.0.0
   image: ^4.5.2
+  hashlib: ^1.21.2
 
 dev_dependencies:
   flutter_test:

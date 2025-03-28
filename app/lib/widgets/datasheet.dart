@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:ui';
 
+import 'package:app/screens/match_page.dart';
 import 'package:app/services/snout_image_cache.dart';
 import 'package:app/style.dart';
 import 'package:app/widgets/image_view.dart';
@@ -42,7 +43,7 @@ class DataItem {
             : number.value!;
 
   // This is a builder because why not
-  static DataItem fromSurveyItem(int team, dynamic value, SurveyItem survey) {
+  static DataItem fromSurveyItem(dynamic value, SurveyItem survey) {
     switch (survey.type) {
       case SurveyItemType.picture:
         return DataItem(
@@ -65,6 +66,25 @@ class DataItem {
         exportValue = text ?? noDataText,
         //Empty string will sort to the bottom by default
         sortingValue = text?.toLowerCase() ?? "";
+
+  DataItem.match(
+      {required BuildContext context,
+      required String key,
+      required String description,
+      Color? color,
+      DateTime? time})
+      : displayValue = TextButton(
+            child: Text(
+              description,
+              style: TextStyle(color: color),
+            ),
+            onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => MatchPage(matchid: key)),
+                )),
+        exportValue = description,
+        sortingValue = time ?? description.toLowerCase();
 
   const DataItem(
       {required this.displayValue,

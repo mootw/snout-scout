@@ -33,7 +33,6 @@ class TableTeamPitSurvey extends StatelessWidget {
                   sortingValue: team),
               for (final surveyItem in data.event.config.pitscouting)
                 DataItem.fromSurveyItem(
-                    team,
                     data.event.pitscouting[team.toString()]?[surveyItem.id],
                     surveyItem)
             ]

@@ -16,8 +16,14 @@ import 'package:snout_db/snout_db.dart';
 
 class AnalysisMatchPreview extends StatefulWidget {
   const AnalysisMatchPreview(
-      {super.key, required this.red, required this.blue});
+      {super.key,
+      required this.red,
+      required this.blue,
+      this.plan,
+      this.matchLabel});
 
+  final String? matchLabel;
+  final Widget? plan;
   final List<int> red;
   final List<int> blue;
 
@@ -39,45 +45,48 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
   @override
   Widget build(BuildContext context) {
     final data = context.watch<DataProvider>();
+    final redController = TextEditingController(text: json.encode(_red));
+    final blueController = TextEditingController(text: json.encode(_red));
+
     return Scaffold(
-      appBar: AppBar(title: const Text("Match Preview"), actions: [
-        TextButton(
-            onPressed: () {
-              showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                        title: const Text("PRESS ENTER TO 'SUBMIT' THE CHANGE"),
-                        content:
-                            Column(mainAxisSize: MainAxisSize.min, children: [
-                          const Text("Red"),
-                          TextField(
-                            controller:
-                                TextEditingController(text: json.encode(_red)),
-                            onSubmitted: (value) {
-                              setState(() {
-                                _red = List<int>.from(json.decode(value));
-                              });
-                            },
-                          ),
-                          const SizedBox(height: 16),
-                          const Text("Blue"),
-                          TextField(
-                            controller:
-                                TextEditingController(text: json.encode(_blue)),
-                            onSubmitted: (value) {
-                              setState(() {
-                                _blue = List<int>.from(json.decode(value));
-                              });
-                            },
-                          )
-                        ]),
-                      ));
-            },
-            child: const Text("Edit Teams"))
-      ]),
+      appBar: AppBar(
+          title: widget.matchLabel != null
+              ? Text("${widget.matchLabel} Preview")
+              : const Text("Match Preview"),
+          actions: [
+            TextButton(
+                onPressed: () {
+                  showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                            title: const Text("Set Teams"),
+                            content: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Text("Red"),
+                                  TextField(controller: redController),
+                                  const SizedBox(height: 16),
+                                  const Text("Blue"),
+                                  TextField(controller: blueController),
+                                  FilledButton(
+                                      onPressed: () {
+                                        setState(() {
+                                          _red = List<int>.from(
+                                              json.decode(redController.text));
+                                          _blue = List<int>.from(
+                                              json.decode(blueController.text));
+                                        });
+                                      },
+                                      child: Text("Submit"))
+                                ]),
+                          ));
+                },
+                child: const Text("Edit Teams"))
+          ]),
       body: ListView(
         cacheExtent: 5000,
         children: [
+          if (widget.plan != null) widget.plan!,
           DataSheet(title: "Alliance Sum of Avg", columns: [
             DataItem.fromText("Alliance"),
             for (final item in data.event.config.matchscouting.processes)
@@ -124,7 +133,7 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                     displayValue: TextButton(
                       child: Text(team.toString(),
                           style: TextStyle(
-                              color: getAllianceColor(_red.contains(team)
+                              color: getAllianceUIColor(_red.contains(team)
                                   ? Alliance.red
                                   : Alliance.blue))),
                       onPressed: () => Navigator.push(
@@ -193,7 +202,7 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                                         .textTheme
                                         .titleLarge
                                         ?.copyWith(
-                                            color: getAllianceColor(
+                                            color: getAllianceUIColor(
                                                 _red.contains(team)
                                                     ? Alliance.red
                                                     : Alliance.blue)))),

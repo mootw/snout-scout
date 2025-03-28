@@ -8,8 +8,8 @@ part of 'matchresults.dart';
 
 MatchResultValues _$MatchResultValuesFromJson(Map json) => MatchResultValues(
       time: DateTime.parse(json['time'] as String),
-      redScore: json['redScore'] as int,
-      blueScore: json['blueScore'] as int,
+      redScore: (json['redScore'] as num).toInt(),
+      blueScore: (json['blueScore'] as num).toInt(),
     );
 
 Map<String, dynamic> _$MatchResultValuesToJson(MatchResultValues instance) =>

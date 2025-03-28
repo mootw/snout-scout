@@ -22,7 +22,6 @@ import 'package:app/widgets/match_card.dart';
 import 'package:download/download.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:logging/logging.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
@@ -158,9 +157,6 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
       }
     });
 
-    SchedulerBinding.instance.addPostFrameCallback((_) {
-      editIdentityFunction(context);
-    });
   }
 
   @override
@@ -171,7 +167,35 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
 
   @override
   Widget build(BuildContext context) {
-    context.read<DataProvider>().updateStatus(
+    final data = context.watch<DataProvider>();
+    final identityProvider = context.watch<IdentityProvider>();
+    final serverConnection = context.watch<DataProvider>();
+
+    if (data.isInitialLoad == false) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text(
+              "Loading ${Uri.decodeFull(serverConnection.dataSourceUri.toString())}"),
+          bottom: LoadOrErrorStatusBar(),
+        ),
+        body: TextButton(
+            onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const SelectDataSourceScreen(),
+                )),
+            child: Text("Change Source")),
+      );
+    }
+
+    if (getAllKnownIdentities(data.database)
+            .contains(identityProvider.identity) ==
+        false) {
+      // TODO allow new scout to register
+      return ScoutSelectorScreen(allowBackButton: false);
+    }
+
+    data.updateStatus(
         context,
         switch (_currentPageIndex) {
           (0) => "Checking out the Schedule",
@@ -180,10 +204,6 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
           (3) => "Reading Docs",
           _ => "In the matrix (Some home page this is a bug)",
         });
-
-    final data = context.watch<DataProvider>();
-    final identityProvider = context.watch<IdentityProvider>();
-    final serverConnection = context.watch<DataProvider>();
 
     final nextMatch = data.event.nextMatch;
 
@@ -203,7 +223,7 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
             padding: const EdgeInsets.only(left: 8, right: 8),
             child: FilledButton(
                 onPressed: () {
-                  editIdentityFunction(context);
+                  editIdentityFunction(context: context);
                 },
                 child: Text(identityProvider.identity)),
           ),
@@ -503,11 +523,18 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
   }
 }
 
-Future editIdentityFunction(BuildContext context) async {
-  final result = await Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => const ScoutSelectorScreen()));
+class ScoutSelectorScreenWrapper extends StatelessWidget {
+  const ScoutSelectorScreenWrapper({super.key});
 
-  if (context.mounted && result != null) {
-    await context.read<IdentityProvider>().setIdentity(result);
+  @override
+  Widget build(BuildContext context) {
+    return const Placeholder();
   }
+}
+
+Future editIdentityFunction(
+    {required BuildContext context, bool allowBackButton = true}) async {
+  await Navigator.of(context).push(MaterialPageRoute(
+      builder: (context) =>
+          ScoutSelectorScreen(allowBackButton: allowBackButton)));
 }
