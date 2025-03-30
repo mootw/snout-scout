@@ -341,7 +341,7 @@ class PathsViewer extends StatefulWidget {
 class _PathsViewerState extends State<PathsViewer> {
   int filterIndex = -1;
 
-  int viewMode = 0; //0 = paths only, 1 = overlay text
+  int viewMode = 1; //0 = paths only, 1 = overlay text
 
   @override
   Widget build(BuildContext context) {
@@ -390,24 +390,22 @@ class _PathsViewerState extends State<PathsViewer> {
                 ]),
 
               if (viewMode == 2)
-                Expanded(
-                  child: Align(
-                    alignment: Alignment.topRight,
-                    child: SingleChildScrollView(
-                      child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            for (final path in filteredPaths)
-                              for (final event in path.path
-                                  .where((event) => !event.isPositionEvent))
-                                Text(
-                                    '${event.time} ${event.getLabelFromConfig(context.watch<DataProvider>().event.config)}',
-                                    style: TextStyle(
-                                        color: getColorFromIndex(
-                                            filteredPaths.indexOf(path)),
-                                        backgroundColor: Colors.black26)),
-                          ]),
-                    ),
+                Align(
+                  alignment: Alignment.topRight,
+                  child: SingleChildScrollView(
+                    child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          for (final path in filteredPaths)
+                            for (final event in path.path
+                                .where((event) => !event.isPositionEvent))
+                              Text(
+                                  '${event.time} ${event.getLabelFromConfig(context.watch<DataProvider>().event.config)}',
+                                  style: TextStyle(
+                                      color: getColorFromIndex(
+                                          filteredPaths.indexOf(path)),
+                                      backgroundColor: Colors.black26)),
+                        ]),
                   ),
                 ),
             ]),

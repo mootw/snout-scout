@@ -261,7 +261,7 @@ class _ScoutRegistrationScreenState extends State<ScoutRegistrationScreen> {
                               ];
 
                               final password = argon2id(
-                                  utf8.encode("1234"), salt,
+                                  utf8.encode(_scoutPassword.text), salt,
                                   hashLength: 16,
                                   security: Argon2Security.little);
 
