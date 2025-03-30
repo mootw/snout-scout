@@ -9,15 +9,23 @@ class MatchResultsProcess {
   /// documentation about this item
   final String docs;
 
-  /// unique
+  /// Must be unique
   final String id;
+
+  /// Displayed in the app for this process
   final String label;
+
+  /// Calculation to determine the value from this process
   final String expression;
+
+  /// Used for rainbow table views
+  final bool isLargerBetter;
 
   const MatchResultsProcess({
     required this.id,
     required this.label,
     required this.expression,
+    this.isLargerBetter = true,
     this.docs = '',
   });
 

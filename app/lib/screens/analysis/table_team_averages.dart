@@ -15,11 +15,11 @@ class TableTeamAveragesPage extends StatelessWidget {
       appBar: AppBar(),
       body: SingleChildScrollView(
         child: DataSheet(title: 'Team Averages', columns: [
-          DataItem.fromText("Team"),
+          DataItemWithHints(DataItem.fromText("Team")),
           for (final item in data.event.config.matchscouting.processes)
-            DataItem.fromText(item.label),
+            DataItemWithHints(DataItem.fromText(item.label), largerIsBetter: item.isLargerBetter),
           for (final item in data.event.config.matchscouting.survey)
-            DataItem.fromText(item.label),
+            DataItemWithHints(DataItem.fromText(item.label)),
         ], rows: [
           for (final team in data.event.teams)
             [

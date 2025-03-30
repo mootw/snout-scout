@@ -21,7 +21,8 @@ class DataItem {
             number == null || number.isNaN ? noDataText : number.toString(),
         //negative infinity will sort no data to the bottom by default
         sortingValue =
-            number == null || number.isNaN ? double.negativeInfinity : number;
+            number == null || number.isNaN ? double.negativeInfinity : number,
+        numericValue = number;
 
   DataItem.fromErrorNumber(({double? value, String? error}) number)
       : displayValue = number.error != null
@@ -40,7 +41,9 @@ class DataItem {
         //negative infinity will sort no data to the bottom by default
         sortingValue = number.value == null || number.value!.isNaN
             ? double.negativeInfinity
-            : number.value!;
+            : number.value!,
+        numericValue =
+            number.value == null || number.value!.isNaN ? null : number.value!;
 
   // This is a builder because why not
   static DataItem fromSurveyItem(dynamic value, SurveyItem survey) {
@@ -65,7 +68,8 @@ class DataItem {
       : displayValue = Text(text ?? noDataText),
         exportValue = text ?? noDataText,
         //Empty string will sort to the bottom by default
-        sortingValue = text?.toLowerCase() ?? "";
+        sortingValue = text?.toLowerCase() ?? "",
+        numericValue = null;
 
   DataItem.match(
       {required BuildContext context,
@@ -84,19 +88,33 @@ class DataItem {
                       builder: (context) => MatchPage(matchid: key)),
                 )),
         exportValue = description,
-        sortingValue = time ?? description.toLowerCase();
+        sortingValue = time ?? description.toLowerCase(),
+        numericValue = null;
 
   const DataItem(
       {required this.displayValue,
       required this.exportValue,
-      required this.sortingValue});
+      required this.sortingValue,
+      this.numericValue});
 
   final Widget displayValue; //Widget to be displayed in the app
   final String exportValue; //Used to export to CSV
   final Comparable sortingValue; //Value used to sort the data
+  final double? numericValue;
 
   @override
   String toString() => exportValue;
+}
+
+class DataItemWithHints {
+  DataItem item;
+  bool largerIsBetter;
+
+  DataItemWithHints(this.item, {this.largerIsBetter = true});
+
+  @override
+  String toString() =>
+      'DataItemWithHints(label:${item.exportValue} largerIsBetter: $largerIsBetter)';
 }
 
 class DataSheet extends StatefulWidget {
@@ -105,11 +123,14 @@ class DataSheet extends StatefulWidget {
 
   final String? title;
   final List<List<DataItem>> rows;
-  final List<DataItem> columns;
+  final List<DataItemWithHints> columns;
 
   @override
   State<DataSheet> createState() => _DataSheetState();
 }
+
+const double numericWidth = 80;
+const double defaultColumnWidth = 160;
 
 //Creates a data-table that can be scrolled horizontally and can export to csv
 class _DataSheetState extends State<DataSheet> {
@@ -118,11 +139,20 @@ class _DataSheetState extends State<DataSheet> {
   int? _currentSortColumn;
   bool _sortAscending = true;
 
+  bool _showRainbow = true;
+
   void updateSort(int columnIndex, bool ascending) {
     setState(() {
       _currentSortColumn = columnIndex;
       _sortAscending = ascending;
     });
+  }
+
+  Color rainbowColor(double min, double max, double value) {
+    return HSVColor.lerp(HSVColor.fromColor(Colors.red),
+            HSVColor.fromColor(Colors.green), (value - min) / (max - min))!
+        .withAlpha(0.7)
+        .toColor();
   }
 
   @override
@@ -136,6 +166,41 @@ class _DataSheetState extends State<DataSheet> {
             : Comparable.compare(bValue, aValue);
       });
     }
+
+    // Calculate minMaxes
+    int numRows = widget.rows.length;
+    int numColumns = numRows == 0 ? 0 : widget.rows[0].length;
+
+    final numericMinMaxes = List<(double, double)?>.filled(numColumns, null);
+
+    if (widget.rows.isNotEmpty) {
+      for (int columnIdx = 0; columnIdx < numColumns; columnIdx++) {
+        double? min;
+        double? max;
+
+        for (int rowIdx = 0; rowIdx < numRows; rowIdx++) {
+          // Go through each row in the column to calculate the min and max
+          final numeric = widget.rows[rowIdx][columnIdx].numericValue;
+
+          if (numeric != null) {
+            min ??= numeric;
+            max ??= numeric;
+
+            if (numeric < min) {
+              min = numeric;
+            }
+            if (numeric > max) {
+              max = numeric;
+            }
+          }
+        }
+
+        if ((min != null && max != null) && (max - min != 0)) {
+          numericMinMaxes[columnIdx] = (min, max);
+        }
+      }
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -146,10 +211,21 @@ class _DataSheetState extends State<DataSheet> {
               if (widget.title != null)
                 Text('${widget.title}',
                     style: Theme.of(context).textTheme.titleLarge),
+              SizedBox(width: 32),
+              Checkbox(
+                value: _showRainbow,
+                onChanged: (newValue) => setState(() {
+                  _showRainbow = newValue!;
+                }),
+              ),
+              Text("Rainbow"),
+              SizedBox(width: 8),
               TextButton(
                   onPressed: () async {
-                    final stream = Stream.fromIterable(utf8
-                        .encode(dataTableToCSV(widget.columns, widget.rows)));
+                    final stream = Stream.fromIterable(utf8.encode(
+                        dataTableToCSV(
+                            widget.columns.map((e) => e.item).toList(),
+                            widget.rows)));
                     download(
                         stream,
                         widget.title != null
@@ -168,48 +244,89 @@ class _DataSheetState extends State<DataSheet> {
             scrollDirection: Axis.horizontal,
             child: DataTable(
               //This is to make the data more compact
-              columnSpacing: 12,
-              sortAscending: _sortAscending,
-              sortColumnIndex: _currentSortColumn,
-              border: const TableBorder(
-                  verticalInside: BorderSide(
-                width: 1,
-                color: Colors.white10,
-              )),
+              columnSpacing: 0,
               //Make the data-table more compact (this basically fits 2 lines perfectly)
               //This is definitely against best practice, but it significantly improves
               //the readability of the table at the cost of touch target size
-              dataRowMaxHeight: kMinInteractiveDimension - 8,
-              dataRowMinHeight: kMinInteractiveDimension - 8,
+              dataRowMaxHeight: 40,
+              dataRowMinHeight: 40,
+              sortAscending: _sortAscending,
+              sortColumnIndex: _currentSortColumn,
+              border: const TableBorder(
+                  horizontalInside: BorderSide(
+                    width: 0,
+                    color: Colors.white10,
+                  ),
+                  verticalInside: BorderSide(
+                    width: 0,
+                    color: Colors.white10,
+                  )),
               columns: [
-                for (final column in widget.columns)
+                for (final (idx, column) in widget.columns.indexed)
                   DataColumn(
                       label: ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 160),
+                          constraints: BoxConstraints(
+                              maxWidth: numericMinMaxes[idx] != null
+                                  ? numericWidth
+                                  : defaultColumnWidth),
                           //Make the text smaller so that long text fits
                           //This is more of a hack than best practice
                           child: DefaultTextStyle(
                               maxLines: 2,
                               style: Theme.of(context).textTheme.bodySmall!,
-                              child: column.displayValue)),
+                              child: Padding(
+                                padding: const EdgeInsets.only(left: 8),
+                                child: column.item.displayValue,
+                              ))),
                       onSort: updateSort),
               ],
               rows: [
                 for (final row in widget.rows)
                   DataRow(cells: [
-                    for (final cell in row)
+                    for (final (columnIdx, cell) in row.indexed)
                       DataCell(
-                          ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 160),
-                            child: Container(
-                              color: cell.exportValue.length < 40
-                                  ? null
-                                  : Colors.blue.withAlpha(40),
-                              child: DefaultTextStyle(
-                                  maxLines: 2,
-                                  style:
-                                      Theme.of(context).textTheme.bodyMedium!,
-                                  child: cell.displayValue),
+                          SizedBox.expand(
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(
+                                  maxWidth: defaultColumnWidth),
+                              child: Container(
+                                padding: EdgeInsets.only(left: 4, right: 4),
+                                color: () {
+                                  if (cell.exportValue == "true") {
+                                    return Colors.green;
+                                  }
+                                  if (cell.exportValue == "false") {
+                                    return Colors.red;
+                                  }
+
+                                  if (_showRainbow &&
+                                      cell.numericValue != null &&
+                                      numericMinMaxes[columnIdx] != null) {
+                                    double min = numericMinMaxes[columnIdx]!.$1;
+                                    double max = numericMinMaxes[columnIdx]!.$2;
+
+                                    return widget
+                                            .columns[columnIdx].largerIsBetter
+                                        ? rainbowColor(
+                                            min, max, cell.numericValue!)
+                                        : rainbowColor(
+                                            max, min, cell.numericValue!);
+                                  }
+
+                                  return cell.exportValue.length < 40
+                                      ? null
+                                      : Colors.blue.withAlpha(40);
+                                }(),
+                                child: DefaultTextStyle(
+                                    maxLines: 2,
+                                    style:
+                                        Theme.of(context).textTheme.bodyMedium!,
+                                    child: Align(
+                                        alignment: cell.numericValue != null
+                                            ? Alignment.centerRight
+                                            : Alignment.centerLeft,
+                                        child: cell.displayValue)),
+                              ),
                             ),
                           ),
                           onTap: cell.exportValue.length < 40

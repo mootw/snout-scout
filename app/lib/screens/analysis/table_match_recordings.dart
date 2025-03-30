@@ -20,13 +20,13 @@ class TableMatchRecordingsPage extends StatelessWidget {
           title: 'Match Recordings',
           //Data is a list of rows and columns
           columns: [
-            DataItem.fromText("Match"),
-            DataItem.fromText("Team"),
+            DataItemWithHints(DataItem.fromText("Match")),
+            DataItemWithHints(DataItem.fromText("Team")),
             for (final item in data.event.config.matchscouting.processes)
-              DataItem.fromText(item.label),
+              DataItemWithHints(DataItem.fromText(item.label), largerIsBetter: item.isLargerBetter),
             for (final item in data.event.config.matchscouting.survey)
-              DataItem.fromText(item.label),
-            DataItem.fromText("Scout")
+              DataItemWithHints(DataItem.fromText(item.label)),
+            DataItemWithHints(DataItem.fromText("Scout"))
           ],
           rows: [
             for (final match in data.event.matches.entries.toList().reversed)

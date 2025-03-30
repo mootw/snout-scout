@@ -14,7 +14,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
-
 class AnalysisPage extends StatefulWidget {
   const AnalysisPage({super.key});
 
@@ -28,8 +27,6 @@ class _AnalysisPageState extends State<AnalysisPage> {
     final tbaKey = context.watch<DataProvider>().event.config.tbaEventId;
 
     return ListView(children: [
-      const Text(
-          "Scoreboard (shows average value of all metrics for each team, like heatmaps) - Metrics Explorer - Maybe allow for more 'sql' like queries here?? - Scatter plot!!! AND PLOT FOR METRIC OVER TIME"),
       if (tbaKey != null)
         FilledButton.tonal(
             onPressed: () => launchUrlString(

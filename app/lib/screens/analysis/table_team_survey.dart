@@ -14,9 +14,9 @@ class TableTeamPitSurvey extends StatelessWidget {
       appBar: AppBar(),
       body: SingleChildScrollView(
         child: DataSheet(title: 'Team Survey', columns: [
-          DataItem.fromText("Team"),
+          DataItemWithHints(DataItem.fromText("Team")),
           for (final pitSurvey in data.event.config.pitscouting)
-            DataItem.fromText(pitSurvey.label),
+            DataItemWithHints(DataItem.fromText(pitSurvey.label)),
         ], rows: [
           for (final team in data.event.teams)
             [

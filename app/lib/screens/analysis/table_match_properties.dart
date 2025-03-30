@@ -16,9 +16,9 @@ class TableMatchProperties extends StatelessWidget {
           title: 'Match Data',
           //Data is a list of rows and columns
           columns: [
-            DataItem.fromText("Match"),
+            DataItemWithHints(DataItem.fromText("Match")),
             for (final item in data.event.config.matchscouting.properties)
-              DataItem.fromText(item.label),
+              DataItemWithHints(DataItem.fromText(item.label)),
           ],
           rows: [
             for (final match in data.event.matches.entries)

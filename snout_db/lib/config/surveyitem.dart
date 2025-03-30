@@ -6,17 +6,20 @@ part 'surveyitem.g.dart';
 @immutable
 @JsonSerializable()
 class SurveyItem {
-  /// documentation about this item
+  /// Documentation about this item
   final String docs;
 
-  /// unique
+  /// Must be unique
   final String id;
+
+  /// Displyed in the app
   final String label;
+
+  /// What value type this is
   final SurveyItemType type;
 
-  //Used by the selector type
+  /// Used by the selector type to give a list of options
   final List<String>? options;
-  //List<dynamic>? options_values;
 
   const SurveyItem({
     required this.id,

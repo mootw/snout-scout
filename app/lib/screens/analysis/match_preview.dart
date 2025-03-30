@@ -88,9 +88,9 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
         children: [
           if (widget.plan != null) widget.plan!,
           DataSheet(title: "Alliance Sum of Avg", columns: [
-            DataItem.fromText("Alliance"),
+            DataItemWithHints(DataItem.fromText("Alliance")),
             for (final item in data.event.config.matchscouting.processes)
-              DataItem.fromText(item.label),
+              DataItemWithHints(DataItem.fromText(item.label)),
           ], rows: [
             [
               const DataItem(
@@ -121,11 +121,12 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
           ]),
           const Divider(height: 42),
           DataSheet(title: "Team Averages", columns: [
-            DataItem.fromText("Team"),
+            DataItemWithHints(DataItem.fromText("Team")),
             for (final item in data.event.config.matchscouting.processes)
-              DataItem.fromText(item.label),
+              DataItemWithHints(DataItem.fromText(item.label),
+                  largerIsBetter: item.isLargerBetter),
             for (final item in data.event.config.matchscouting.survey)
-              DataItem.fromText(item.label),
+              DataItemWithHints(DataItem.fromText(item.label)),
           ], rows: [
             for (final team in [..._blue, ..._red])
               [

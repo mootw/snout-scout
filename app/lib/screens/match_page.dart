@@ -179,12 +179,13 @@ class _MatchPageState extends State<MatchPage> {
             title: 'Per Team Performance',
             //Data is a list of rows and columns
             columns: [
-              DataItem.fromText("Team"),
+              DataItemWithHints(DataItem.fromText("Team")),
               for (final item in snoutData.event.config.matchscouting.processes)
-                DataItem.fromText(item.label),
+                DataItemWithHints(DataItem.fromText(item.label),
+                    largerIsBetter: item.isLargerBetter),
               for (final item in snoutData.event.config.matchscouting.survey)
-                DataItem.fromText(item.label),
-              DataItem.fromText("Scout")
+                DataItemWithHints(DataItem.fromText(item.label)),
+              DataItemWithHints(DataItem.fromText("Scout"))
             ],
             rows: [
               for (final team in <int>{

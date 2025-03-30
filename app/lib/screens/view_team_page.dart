@@ -135,12 +135,13 @@ class _TeamViewPageState extends State<TeamViewPage> {
               title: 'Matches',
               //Data is a list of rows and columns
               columns: [
-                DataItem.fromText("Match"),
+                DataItemWithHints(DataItem.fromText("Match")),
                 for (final item in data.event.config.matchscouting.processes)
-                  DataItem.fromText(item.label),
+                  DataItemWithHints(DataItem.fromText(item.label),
+                      largerIsBetter: item.isLargerBetter),
                 for (final pitSurvey in data.event.config.matchscouting.survey)
-                  DataItem.fromText(pitSurvey.label),
-                DataItem.fromText("Scout"),
+                  DataItemWithHints(DataItem.fromText(pitSurvey.label)),
+                DataItemWithHints(DataItem.fromText("Scout")),
               ],
               rows: [
                 //Show ALL matches the team is scheduled for ALONG with all matches they played regardless of it it is scheduled sorted
@@ -237,9 +238,10 @@ class _TeamViewPageState extends State<TeamViewPage> {
                   title: 'Metrics',
                   //Data is a list of rows and columns
                   columns: [
-                    DataItem.fromText("Metric"),
+                    DataItemWithHints(DataItem.fromText("Metric")),
                     for (final event in data.event.config.matchscouting.events)
-                      DataItem.fromText(event.label),
+                      DataItemWithHints(DataItem.fromText(event.label),
+                          largerIsBetter: event.isLargerBetter),
                   ],
                   rows: [
                     [

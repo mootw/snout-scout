@@ -104,10 +104,10 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
         if (_loading) const LinearProgressIndicator(),
         Expanded(
           child: ListView(cacheExtent: 10000, children: [
-            // if (!_loading && _results.isEmpty)
-            //  Text('Search Hints go here'),
             if (!_loading && _results.isEmpty)
-              ListTile(title: Text('No Results. Try a different query')),
+              ListTile(
+                  title: Text(
+                      'No Results. Try a different query like: "broke", "fast", or "disabled"')),
             for (final result in _results) result.builder(context),
           ]),
         ),

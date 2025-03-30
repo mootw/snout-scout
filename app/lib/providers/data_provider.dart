@@ -280,6 +280,7 @@ class DataProvider extends ChangeNotifier {
     });
 
     _subscription = _channel!.stream.listen((event) async {
+      // ignore: avoid_print
       print("new socket message: $event");
 
       try {

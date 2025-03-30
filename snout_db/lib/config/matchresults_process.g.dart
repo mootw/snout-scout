@@ -11,6 +11,7 @@ MatchResultsProcess _$MatchResultsProcessFromJson(Map json) =>
       id: json['id'] as String,
       label: json['label'] as String,
       expression: json['expression'] as String,
+      isLargerBetter: json['isLargerBetter'] as bool? ?? true,
       docs: json['docs'] as String? ?? '',
     );
 
@@ -21,4 +22,5 @@ Map<String, dynamic> _$MatchResultsProcessToJson(
       'id': instance.id,
       'label': instance.label,
       'expression': instance.expression,
+      'isLargerBetter': instance.isLargerBetter,
     };

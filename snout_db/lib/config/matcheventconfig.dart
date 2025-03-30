@@ -19,10 +19,13 @@ class MatchEventConfig {
   /// the background of event buttons in match recorder
   final String? color;
 
+  final bool isLargerBetter;
+
   const MatchEventConfig({
     required this.id,
     required this.label,
     this.color,
+    this.isLargerBetter = true,
     this.docs = '',
   });
 
