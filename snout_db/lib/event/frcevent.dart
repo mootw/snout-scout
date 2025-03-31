@@ -36,6 +36,15 @@ class FRCEvent {
   /// Match Data
   final Map<String, MatchData> matches;
 
+  List<MapEntry<String, MatchData>> matchesSorted() {
+    return matches.entries.sorted((a, b) {
+      final aValue = a.value.getSchedule(this, a.key);
+      final bValue = b.value.getSchedule(this, b.key);
+
+      return aValue == null || bValue == null ? 0 : aValue.compareTo(bValue);
+    });
+  }
+
   //Team Survey results
   final Map<String, DynamicProperties> pitscouting;
 

@@ -100,7 +100,7 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
 
                 await editMatch(match, snoutData, null);
               },
-              child: const Text("Add Match"),
+              child: const Text('Add Match'),
             ),
           ),
           for (final match in snoutData.event.schedule.entries)
@@ -200,7 +200,7 @@ class EditMatchDetailsState extends State<EditMatchDetails> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text("Match"),
+      title: const Text('Match'),
       actions: [
         TextButton(
           onPressed: () {

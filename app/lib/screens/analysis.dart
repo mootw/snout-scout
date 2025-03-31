@@ -6,7 +6,7 @@ import 'package:app/screens/analysis/match_preview.dart';
 import 'package:app/screens/analysis/pitscout_survey_analysis.dart';
 import 'package:app/screens/analysis/postmatch_survey_analysis.dart';
 import 'package:app/screens/analysis/table_match_properties.dart';
-import 'package:app/screens/analysis/table_match_recordings.dart';
+import 'package:app/screens/analysis/table_robot_recordings.dart';
 import 'package:app/screens/analysis/table_team_averages.dart';
 import 'package:app/screens/analysis/table_team_survey.dart';
 import 'package:app/search.dart';
@@ -47,13 +47,14 @@ class _AnalysisPageState extends State<AnalysisPage> {
           },
         ),
         ListTile(
-          title: const Text("Pit Survey"),
+          title: const Text("Team Survey"),
           leading: const Icon(Icons.table_chart),
           onTap: () {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (builder) => const TableTeamPitSurvey(),
+                builder:
+                    (builder) => const TableTeamSurvey(),
               ),
             );
           },

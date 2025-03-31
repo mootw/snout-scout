@@ -226,15 +226,16 @@ class _MatchPageState extends State<MatchPage> {
             title: 'Per Team Performance',
             //Data is a list of rows and columns
             columns: [
-              DataItemWithHints(DataItem.fromText("Team")),
+              DataItemColumn(DataItem.fromText("Team")),
               for (final item in snoutData.event.config.matchscouting.processes)
-                DataItemWithHints(
+                DataItemColumn(
                   DataItem.fromText(item.label),
                   largerIsBetter: item.isLargerBetter,
+                  width: numericWidth,
                 ),
               for (final item in snoutData.event.config.matchscouting.survey)
-                DataItemWithHints(DataItem.fromText(item.label)),
-              DataItemWithHints(DataItem.fromText("Scout")),
+                DataItemColumn(DataItem.fromText(item.label)),
+              DataItemColumn(DataItem.fromText("Scout")),
             ],
             rows: [
               for (final team in <int>{

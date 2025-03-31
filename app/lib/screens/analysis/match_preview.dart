@@ -100,9 +100,12 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
           DataSheet(
             title: "Alliance Sum of Avg",
             columns: [
-              DataItemWithHints(DataItem.fromText("Alliance")),
+              DataItemColumn(DataItem.fromText("Alliance")),
               for (final item in data.event.config.matchscouting.processes)
-                DataItemWithHints(DataItem.fromText(item.label)),
+                DataItemColumn(
+                  DataItem.fromText(item.label),
+                  width: numericWidth,
+                ),
             ],
             rows: [
               [
@@ -149,14 +152,15 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
           DataSheet(
             title: "Team Averages",
             columns: [
-              DataItemWithHints(DataItem.fromText("Team")),
+              DataItemColumn(DataItem.fromText("Team")),
               for (final item in data.event.config.matchscouting.processes)
-                DataItemWithHints(
+                DataItemColumn(
                   DataItem.fromText(item.label),
                   largerIsBetter: item.isLargerBetter,
+                  width: numericWidth,
                 ),
               for (final item in data.event.config.matchscouting.survey)
-                DataItemWithHints(DataItem.fromText(item.label)),
+                DataItemColumn(DataItem.fromText(item.label)),
             ],
             rows: [
               for (final team in [..._blue, ..._red])
@@ -468,7 +472,7 @@ DataItem teamPostGameSurveyTableDisplay(
     }
 
     result +=
-        '${match.value.getSchedule(event, match.key)?.label}: $surveyValue\n';
+        '${match.value.getSchedule(event, match.key)?.label ?? match.key}: $surveyValue\n';
   }
 
   return DataItem.fromText(result);

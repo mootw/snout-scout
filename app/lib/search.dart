@@ -205,7 +205,7 @@ Stream<SearchResult> _search(FRCEvent event, String query) async* {
         quality,
         (context) => ListTile(
           title: Text(match.label),
-          subtitle: const Text("Match"),
+          subtitle: const Text('Match'),
           onTap: () {
             Navigator.push(
               context,
