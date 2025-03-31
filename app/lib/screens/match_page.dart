@@ -418,6 +418,7 @@ class _MatchPageState extends State<MatchPage> {
               ],
             ],
           ),
+          Text(widget.matchid),
         ],
       ),
     );

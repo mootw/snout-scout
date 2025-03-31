@@ -152,7 +152,8 @@ Stream<SearchResult> _search(FRCEvent event, String query) async* {
 
     final quality =
         team.toString().startsWith(query)
-            ? 1
+            // lower than 1 so that teams show below matches
+            ? 0.99
             : (team.toString().contains(query) ? 0.9 : -1);
     if (quality >= 0) {
       //Load the robot picture to show in the search if it is available
@@ -185,11 +186,20 @@ Stream<SearchResult> _search(FRCEvent event, String query) async* {
     }
   }
 
+  // Search the schedule
   for (final match in event.schedule.values) {
     if (query.isEmpty) {
       continue;
     }
-    final quality = match.label.toLowerCase().similarityTo(query);
+    double quality = match.label.toLowerCase().similarityTo(query);
+
+    // check for exact number match. Example: searching for '10' should show quals 10, rather than needing to search for 'quals 10'
+    if (int.tryParse(query) != null &&
+        (match.label.split(' ').contains(query) ||
+            match.id.split(' ').contains(query))) {
+      quality = 1;
+    }
+
     if (quality >= 0.8) {
       yield SearchResult(
         quality,

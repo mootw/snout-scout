@@ -46,12 +46,12 @@ class _EditMatchPropertiesPageState extends State<EditMatchPropertiesPage> {
   Widget build(BuildContext context) {
     context.read<DataProvider>().updateStatus(
       context,
-      "Editing Match Properties",
+      "Editing Match Properties ${widget.matchID}",
     );
     return ConfirmExitDialog(
       child: Scaffold(
         appBar: AppBar(
-          title: const Text("Match Properties"),
+          title: Text("${widget.matchID} Match Properties"),
           bottom: const LoadOrErrorStatusBar(),
           actions: [
             IconButton(

@@ -49,7 +49,7 @@ class _MatchRecorderAssistantPageState
     () async {
       final teams = {...matchSchedule.red, ...matchSchedule.blue};
       for (final scoutedTeam in await _getScoutedTeams(
-        matchSchedule.getData(snoutData.event)!,
+        matchSchedule.getData(snoutData.event),
         teams,
       )) {
         teams.remove(scoutedTeam);
@@ -64,11 +64,11 @@ class _MatchRecorderAssistantPageState
   }
 
   //Updates teams that are already being scouted.
-  Future<Set<int>> _getScoutedTeams(MatchData match, Set<int> teams) async {
+  Future<Set<int>> _getScoutedTeams(MatchData? match, Set<int> teams) async {
     final alreadyScouted = <int>{};
     //Add teams that already have recordings
     for (final team in teams) {
-      if (match.robot[team.toString()] != null) {
+      if (match?.robot[team.toString()] != null) {
         alreadyScouted.add(team);
       }
     }

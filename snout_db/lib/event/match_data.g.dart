@@ -14,10 +14,13 @@ MatchData _$MatchDataFromJson(Map json) => MatchData(
             (k, e) => MapEntry(k as String, e),
           ) ??
           const {},
-      robot: (json['robot'] as Map).map(
-        (k, e) => MapEntry(k as String,
-            RobotMatchResults.fromJson(Map<String, dynamic>.from(e as Map))),
-      ),
+      robot: (json['robot'] as Map?)?.map(
+            (k, e) => MapEntry(
+                k as String,
+                RobotMatchResults.fromJson(
+                    Map<String, dynamic>.from(e as Map))),
+          ) ??
+          const {},
     );
 
 Map<String, dynamic> _$MatchDataToJson(MatchData instance) => <String, dynamic>{

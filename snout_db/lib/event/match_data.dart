@@ -25,7 +25,7 @@ class MatchData {
     required this.results,
     // For backwards compatibility
     this.properties = const {},
-    required this.robot,
+    this.robot = const {},
   });
 
   MatchScheduleItem? getSchedule(FRCEvent event, String id) =>
