@@ -13,9 +13,13 @@ FRCEvent _$FRCEventFromJson(Map json) => FRCEvent(
               ?.map((e) => (e as num).toInt())
               .toList() ??
           const [],
-      schedule: json['schedule'] as List<dynamic>? ?? const [],
+      schedule: (json['schedule'] as Map?)?.map(
+            (k, e) =>
+                MapEntry(k as String, MatchScheduleItem.fromJson(e as Map)),
+          ) ??
+          const {},
       matches: (json['matches'] as Map?)?.map(
-            (k, e) => MapEntry(k as String, FRCMatch.fromJson(e as Map)),
+            (k, e) => MapEntry(k as String, MatchData.fromJson(e as Map)),
           ) ??
           const {},
       pitscouting: (json['pitscouting'] as Map?)?.map(
@@ -33,7 +37,7 @@ FRCEvent _$FRCEventFromJson(Map json) => FRCEvent(
 Map<String, dynamic> _$FRCEventToJson(FRCEvent instance) => <String, dynamic>{
       'config': instance.config.toJson(),
       'teams': instance.teams,
-      'schedule': instance.schedule,
+      'schedule': instance.schedule.map((k, e) => MapEntry(k, e.toJson())),
       'matches': instance.matches.map((k, e) => MapEntry(k, e.toJson())),
       'pitscouting': instance.pitscouting,
       'pitmap': instance.pitmap,

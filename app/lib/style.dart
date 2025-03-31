@@ -24,9 +24,10 @@ ThemeData defaultTheme =
 
 const warningColor = Colors.yellow;
 
-/// Returns a UI color for a given alliance.
-Color getAllianceUIColor(Alliance alliance) =>
-    alliance == Alliance.red ? Colors.red : Colors.blue;
+/// Returns a UI color for a given alliance. If null, it returns null
+Color? getAllianceUIColor(Alliance? alliance) => alliance == null
+    ? null
+    : (alliance == Alliance.red ? Colors.red : Colors.blue);
 
 /// Generates a 'random' color from an index
 Color getColorFromIndex(int index) =>

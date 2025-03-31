@@ -12,8 +12,8 @@ import 'package:app/widgets/timeduration.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:snout_db/event/match.dart';
 import 'package:snout_db/config/surveyitem.dart';
+import 'package:snout_db/event/match_schedule_item.dart';
 import 'package:snout_db/patch.dart';
 
 // Reserved pit scouting IDs that are used within the app
@@ -46,8 +46,14 @@ class _TeamViewPageState extends State<TeamViewPage> {
     String? teamNotes = data.event.pitscouting[widget.teamNumber.toString()]
         ?[teamNotesReserved];
 
-    FRCMatch? teamNextMatch = data.event.nextMatchForTeam(widget.teamNumber);
+    MatchScheduleItem? teamNextMatch =
+        data.event.nextMatchForTeam(widget.teamNumber);
     Duration? scheduleDelay = data.event.scheduleDelay;
+
+    final matchIds = {
+      ...data.event.matchesWithTeam(widget.teamNumber).map((e) => e.id),
+      ...data.event.teamRecordedMatches(widget.teamNumber).map((e) => e.key),
+    };
 
     return Scaffold(
         appBar: AppBar(
@@ -113,12 +119,11 @@ class _TeamViewPageState extends State<TeamViewPage> {
                         onPressed: () => Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => MatchPage(
-                                  matchid: data.event
-                                      .matchIDFromMatch(teamNextMatch))),
+                              builder: (context) =>
+                                  MatchPage(matchid: teamNextMatch.id)),
                         ),
                         child: Text(
-                          teamNextMatch.description,
+                          teamNextMatch.label,
                           style: TextStyle(
                               color: getAllianceUIColor(teamNextMatch
                                   .getAllianceOf(widget.teamNumber))),
@@ -145,33 +150,40 @@ class _TeamViewPageState extends State<TeamViewPage> {
               ],
               rows: [
                 //Show ALL matches the team is scheduled for ALONG with all matches they played regardless of it it is scheduled sorted
-                for (final match in <FRCMatch>{
-                  ...data.event.matchesWithTeam(widget.teamNumber),
-                  ...data.event
-                      .teamRecordedMatches(widget.teamNumber)
-                      .map((e) => e.value)
-                }.sorted((a, b) => Comparable.compare(a, b)))
+                for (final match in {
+                  for (final matchId in matchIds)
+                    (
+                      data.event.schedule[matchId],
+                      data.event.matches[matchId],
+                      matchId
+                    ),
+                }.sorted((a, b) => a.$1 == null || b.$1 == null
+                    ? 0
+                    : a.$1?.compareTo(b.$1!) ?? 0))
                   [
                     DataItem.match(
                         context: context,
-                        description: match.description,
-                        key: data.event.matchIDFromMatch(match),
-                        time: match.scheduledTime,
-                        color: getAllianceUIColor(
-                            match.getAllianceOf(widget.teamNumber))),
+                        label: match.$1?.label ?? match.$3,
+                        key: match.$3,
+                        time: match.$1?.scheduledTime,
+                        color: getAllianceUIColor(match
+                                .$2
+                                ?.robot[widget.teamNumber.toString()]
+                                ?.alliance) ??
+                            getAllianceUIColor(
+                                match.$1?.getAllianceOf(widget.teamNumber))),
                     for (final item
                         in data.event.config.matchscouting.processes)
                       DataItem.fromErrorNumber(data.event
                               .runMatchResultsProcess(
                                   item,
-                                  match.robot[widget.teamNumber.toString()],
+                                  match.$2?.robot[widget.teamNumber.toString()],
                                   widget.teamNumber) ??
-                          //Missing results, this is not an error
                           (value: null, error: null)),
                     for (final pitSurvey
                         in data.event.config.matchscouting.survey)
                       DataItem.fromSurveyItem(
-                          match.robot[widget.teamNumber.toString()]
+                          match.$2?.robot[widget.teamNumber.toString()]
                               ?.survey[pitSurvey.id],
                           pitSurvey),
                     DataItem.fromText(getAuditString(context
@@ -179,7 +191,7 @@ class _TeamViewPageState extends State<TeamViewPage> {
                         .database
                         .getLastPatchFor(Patch.buildPath([
                           'matches',
-                          data.event.matchIDFromMatch(match),
+                          match.$3,
                           'robot',
                           '${widget.teamNumber}'
                         ])))),
@@ -203,7 +215,10 @@ class _TeamViewPageState extends State<TeamViewPage> {
                         for (final match in data.event
                             .teamRecordedMatches(widget.teamNumber))
                           (
-                            label: match.value.description,
+                            label: match.value
+                                    .getSchedule(data.event, match.key)
+                                    ?.label ??
+                                match.key,
                             path: match
                                 .value.robot[widget.teamNumber.toString()]!
                                 .timelineInterpolatedBlueNormalized(

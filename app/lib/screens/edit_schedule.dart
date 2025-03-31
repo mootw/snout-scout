@@ -7,13 +7,14 @@ import 'package:app/services/tba_autofill.dart';
 import 'package:app/widgets/load_status_or_error_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:snout_db/event/match.dart';
+import 'package:snout_db/event/match_data.dart';
+import 'package:snout_db/event/match_schedule_item.dart';
 import 'package:snout_db/patch.dart';
 
 class EditSchedulePage extends StatefulWidget {
   const EditSchedulePage({super.key, required this.matches});
 
-  final Map<String, FRCMatch> matches;
+  final Map<String, MatchScheduleItem> matches;
 
   @override
   State<EditSchedulePage> createState() => _EditSchedulePageState();
@@ -78,28 +79,23 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
         ],
       ),
       body: ListView(children: [
-        Text(
-          "Warning: Editing the schedule is potentially incredibly destructive! Data could be lost if the edit removes matches or a match was edited in-between some sub-edit",
-          style: TextStyle(color: Theme.of(context).colorScheme.error),
-        ),
         Center(
           child: FilledButton(
               onPressed: () async {
-                FRCMatch match = FRCMatch(
-                    description: "description",
+                MatchScheduleItem match = MatchScheduleItem(
+                    id: "",
+                    label: "",
                     scheduledTime: DateTime.now(),
                     blue: const [],
-                    red: const [],
-                    results: null,
-                    robot: const {});
+                    red: const []);
 
                 await editMatch(match, snoutData, null);
               },
               child: const Text("Add Match")),
         ),
-        for (final match in snoutData.event.matches.entries)
+        for (final match in snoutData.event.schedule.entries)
           ListTile(
-            title: Text(match.value.description),
+            title: Text(match.value.label),
             subtitle: Text(match.key),
             onTap: () => editMatch(match.value, snoutData, match.key),
             trailing: IconButton(
@@ -110,7 +106,7 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
                     context: context,
                     builder: (context) => AlertDialog(
                           title: Text(
-                              "Are you sure you want to delete ${match.value.description}?"),
+                              "Are you sure you want to delete ${match.value.label}?"),
                           actions: [
                             TextButton(
                                 child: const Text("No"),
@@ -124,14 +120,15 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
                         ));
                 if (result == true) {
                   final matchesWithRemoved =
-                      Map<String, FRCMatch>.from(snoutData.event.matches);
+                      Map<String, MatchScheduleItem>.from(
+                          snoutData.event.schedule);
                   matchesWithRemoved.remove(match.key);
 
                   Patch patch = Patch(
                       identity: identity,
                       time: DateTime.now(),
                       path: Patch.buildPath([
-                        'matches',
+                        'schedule',
                       ]),
                       // convert to json first
                       value: matchesWithRemoved
@@ -145,20 +142,22 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
     );
   }
 
-  Future editMatch(FRCMatch match, DataProvider data, String? matchID) async {
+  Future editMatch(
+      MatchScheduleItem match, DataProvider data, String? matchID) async {
     final identity = context.read<IdentityProvider>().identity;
     String? result = await Navigator.of(context).push(MaterialPageRoute(
         builder: (context) =>
-            JSONEditor(source: match, validate: FRCMatch.fromJson)));
+            JSONEditor(source: match, validate: MatchScheduleItem.fromJson)));
 
     if (result != null) {
-      FRCMatch resultMatch = FRCMatch.fromJson(json.decode(result));
+      MatchScheduleItem resultMatch =
+          MatchScheduleItem.fromJson(json.decode(result));
       Patch patch = Patch(
           identity: identity,
           time: DateTime.now(),
           path: Patch.buildPath([
-            'matches',
-            matchID ?? resultMatch.description,
+            'schedule',
+            matchID ?? resultMatch.label,
           ]),
           value: resultMatch.toJson());
       await data.newTransaction(patch);
@@ -170,7 +169,7 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
 class EditMatchDetails extends StatefulWidget {
   const EditMatchDetails({super.key, required this.match});
 
-  final FRCMatch match;
+  final MatchData match;
 
   @override
   State<EditMatchDetails> createState() => EditMatchDetailsState();

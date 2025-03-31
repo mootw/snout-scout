@@ -7,8 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:snout_db/patch.dart';
 
-class TableMatchRecordingsPage extends StatelessWidget {
-  const TableMatchRecordingsPage({super.key});
+class TableRobotRecordingsPage extends StatelessWidget {
+  const TableRobotRecordingsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -17,26 +17,32 @@ class TableMatchRecordingsPage extends StatelessWidget {
       appBar: AppBar(),
       body: SingleChildScrollView(
         child: DataSheet(
-          title: 'Match Recordings',
+          title: 'Robot Recordings',
           //Data is a list of rows and columns
           columns: [
             DataItemWithHints(DataItem.fromText("Match")),
             DataItemWithHints(DataItem.fromText("Team")),
             for (final item in data.event.config.matchscouting.processes)
-              DataItemWithHints(DataItem.fromText(item.label), largerIsBetter: item.isLargerBetter),
+              DataItemWithHints(DataItem.fromText(item.label),
+                  largerIsBetter: item.isLargerBetter),
             for (final item in data.event.config.matchscouting.survey)
               DataItemWithHints(DataItem.fromText(item.label)),
             DataItemWithHints(DataItem.fromText("Scout"))
           ],
           rows: [
-            for (final match in data.event.matches.entries.toList().reversed)
+            for (final match in data.event.matches.entries)
               for (final robot in match.value.robot.entries)
                 [
                   DataItem.match(
                       context: context,
                       key: match.key,
-                      description: match.value.description,
-                      time: match.value.scheduledTime),
+                      label: match.value
+                              .getSchedule(data.event, match.key)
+                              ?.label ??
+                          match.key,
+                      time: match.value
+                          .getSchedule(data.event, match.key)
+                          ?.scheduledTime),
                   DataItem(
                       displayValue: TextButton(
                           child: Text(robot.key,

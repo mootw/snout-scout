@@ -60,13 +60,13 @@ class _AnalysisPageState extends State<AnalysisPage> {
         },
       ),
       ListTile(
-        title: const Text("Match Recordings"),
+        title: const Text("Robot Recordings"),
         leading: const Icon(Icons.table_chart),
         onTap: () {
           Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (builder) => const TableMatchRecordingsPage()));
+                  builder: (builder) => const TableRobotRecordingsPage()));
         },
       ),
       ListTile(

@@ -156,7 +156,6 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
         }
       }
     });
-
   }
 
   @override
@@ -191,7 +190,6 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
     if (getAllKnownIdentities(data.database)
             .contains(identityProvider.identity) ==
         false) {
-      // TODO allow new scout to register
       return ScoutSelectorScreen(allowBackButton: false);
     }
 
@@ -272,7 +270,7 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
               key: Key(data.event.matches.length.toString()),
               scrollPosition: nextMatch == null
                   ? null
-                  : (data.event.matches.values.toList().indexOf(nextMatch) *
+                  : (data.event.scheduleSorted.indexOf(nextMatch) *
                           matchCardHeight) -
                       (matchCardHeight * 2),
             ),

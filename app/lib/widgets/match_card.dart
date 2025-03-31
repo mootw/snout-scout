@@ -4,7 +4,8 @@ import 'package:app/widgets/timeduration.dart';
 import 'package:provider/provider.dart';
 import 'package:app/screens/match_page.dart';
 import 'package:flutter/material.dart';
-import 'package:snout_db/event/match.dart';
+import 'package:snout_db/event/match_data.dart';
+import 'package:snout_db/event/match_schedule_item.dart';
 import 'package:snout_db/snout_db.dart';
 
 const double matchCardHeight = 46;
@@ -14,10 +15,15 @@ const TextStyle whiteTextBold =
     TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12);
 
 class MatchCard extends StatelessWidget {
-  final FRCMatch match;
+  final MatchData? match;
+  final MatchScheduleItem matchSchedule;
   final int? focusTeam;
 
-  const MatchCard({super.key, required this.match, this.focusTeam});
+  const MatchCard(
+      {super.key,
+      required this.match,
+      required this.matchSchedule,
+      this.focusTeam});
 
   @override
   Widget build(BuildContext context) {
@@ -28,8 +34,7 @@ class MatchCard extends StatelessWidget {
         onTap: () => Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) =>
-                  MatchPage(matchid: snoutData.event.matchIDFromMatch(match))),
+              builder: (context) => MatchPage(matchid: matchSchedule.id)),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -37,18 +42,18 @@ class MatchCard extends StatelessWidget {
             SizedBox(
               width: 65,
               child: TimeDuration(
-                  time: match.results != null
-                      ? match.results!.time
-                      : match.scheduledTime
+                  time: match?.results != null
+                      ? match!.results!.time
+                      : matchSchedule.scheduledTime
                           .add(snoutData.event.scheduleDelay ?? Duration.zero)),
             ),
-            match.isScheduledToHaveTeam(focusTeam ?? 0)
+            matchSchedule.isScheduledToHaveTeam(focusTeam ?? 0)
                 ? SizedBox(
                     width: 19,
                     child: Icon(
                       Icons.star,
                       color: getAllianceUIColor(
-                          match.getAllianceOf(focusTeam ?? 0)),
+                          matchSchedule.getAllianceOf(focusTeam ?? 0)),
                     ),
                   )
                 : const SizedBox(
@@ -56,7 +61,7 @@ class MatchCard extends StatelessWidget {
                   ),
             SizedBox(
                 width: 110,
-                child: Text(match.description, textAlign: TextAlign.center)),
+                child: Text(matchSchedule.label, textAlign: TextAlign.center)),
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -67,16 +72,16 @@ class MatchCard extends StatelessWidget {
                   child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        for (final team in match.red)
+                        for (final team in matchSchedule.red)
                           Text("$team", style: whiteText),
                         SizedBox(
                           width: 25,
                           child: Text(
-                            match.results?.redScore != null
-                                ? match.results!.redScore.toString()
+                            match?.results?.redScore != null
+                                ? match!.results!.redScore.toString()
                                 : "-",
-                            style: match.results?.winner == Alliance.red ||
-                                    match.results?.winner == Alliance.tie
+                            style: match?.results?.winner == Alliance.red ||
+                                    match?.results?.winner == Alliance.tie
                                 ? whiteTextBold
                                 : whiteText,
                             textAlign: TextAlign.center,
@@ -91,16 +96,16 @@ class MatchCard extends StatelessWidget {
                   child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        for (final team in match.blue)
+                        for (final team in matchSchedule.blue)
                           Text("$team", style: whiteText),
                         SizedBox(
                           width: 25,
                           child: Text(
-                            match.results?.blueScore != null
-                                ? match.results!.blueScore.toString()
+                            match?.results?.blueScore != null
+                                ? match!.results!.blueScore.toString()
                                 : "-",
-                            style: match.results?.winner == Alliance.blue ||
-                                    match.results?.winner == Alliance.tie
+                            style: match?.results?.winner == Alliance.blue ||
+                                    match?.results?.winner == Alliance.tie
                                 ? whiteTextBold
                                 : whiteText,
                             textAlign: TextAlign.center,

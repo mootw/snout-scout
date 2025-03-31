@@ -12,7 +12,8 @@ import 'package:app/widgets/load_status_or_error_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
-import 'package:snout_db/event/match.dart';
+import 'package:snout_db/event/match_data.dart';
+import 'package:snout_db/event/match_schedule_item.dart';
 import 'package:snout_db/event/robotmatchresults.dart';
 import 'package:snout_db/patch.dart';
 import 'package:snout_db/snout_db.dart';
@@ -42,12 +43,13 @@ class _MatchRecorderAssistantPageState
   void initState() {
     super.initState();
     final snoutData = context.read<DataProvider>();
-    FRCMatch match = snoutData.event.matches[widget.matchid]!;
+    MatchScheduleItem matchSchedule = snoutData.event.schedule[widget.matchid]!;
 
     //Pick a recommended team that is not already being scouted
     () async {
-      final teams = {...match.red, ...match.blue};
-      for (final scoutedTeam in await _getScoutedTeams(match, teams)) {
+      final teams = {...matchSchedule.red, ...matchSchedule.blue};
+      for (final scoutedTeam in await _getScoutedTeams(
+          matchSchedule.getData(snoutData.event)!, teams)) {
         teams.remove(scoutedTeam);
       }
       setState(() {
@@ -60,7 +62,7 @@ class _MatchRecorderAssistantPageState
   }
 
   //Updates teams that are already being scouted.
-  Future<Set<int>> _getScoutedTeams(FRCMatch match, Set<int> teams) async {
+  Future<Set<int>> _getScoutedTeams(MatchData match, Set<int> teams) async {
     final alreadyScouted = <int>{};
     //Add teams that already have recordings
     for (final team in teams) {
@@ -92,12 +94,13 @@ class _MatchRecorderAssistantPageState
   @override
   Widget build(BuildContext context) {
     final snoutData = context.watch<DataProvider>();
-    FRCMatch match = snoutData.event.matches[widget.matchid]!;
-    context.read<DataProvider>().updateStatus(
-        context, "Match scouting ${match.description}: picking a team");
+    MatchScheduleItem match = snoutData.event.schedule[widget.matchid]!;
+    context
+        .read<DataProvider>()
+        .updateStatus(context, "Match scouting ${match.label}: picking a team");
     return Scaffold(
       appBar: AppBar(
-        title: Text("Recording ${match.description}"),
+        title: Text("Recording ${match.label}"),
         bottom: const LoadOrErrorStatusBar(),
       ),
       body: ListView(
@@ -233,7 +236,7 @@ class _MatchRecorderAssistantPageState
   void _recordTeam(String matchid, int team, Alliance alliance) async {
     final snoutData = context.read<DataProvider>();
     final identity = context.read<IdentityProvider>().identity;
-    FRCMatch match = snoutData.event.matches[widget.matchid]!;
+    MatchScheduleItem match = snoutData.event.schedule[widget.matchid]!;
     RobotMatchResults? result = await navigateWithEditLock<RobotMatchResults>(
         context,
         "match:$matchid:$team:timeline",
@@ -243,7 +246,7 @@ class _MatchRecorderAssistantPageState
                   builder: (context) => MatchRecorderPage(
                         team: team,
                         teamAlliance: alliance,
-                        matchDescription: match.description,
+                        matchDescription: match.label,
                       )),
             ));
 

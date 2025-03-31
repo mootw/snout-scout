@@ -219,7 +219,11 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                                     for (final match
                                         in data.event.teamRecordedMatches(team))
                                       (
-                                        label: match.value.description,
+                                        label: match.value
+                                                .getSchedule(
+                                                    data.event, match.key)
+                                                ?.label ??
+                                            match.key,
                                         path: match
                                             .value.robot[team.toString()]!
                                             .timelineInterpolatedBlueNormalized(
@@ -368,7 +372,7 @@ DataItem teamPostGameSurveyTableDisplay(
   }
 
   if (surveyItem.type == SurveyItemType.picture) {
-    return DataItem.fromText("See team page or match recordings");
+    return DataItem.fromText("See team page or Robot recordings");
   }
 
   String result = "";
@@ -381,7 +385,8 @@ DataItem teamPostGameSurveyTableDisplay(
       continue;
     }
 
-    result += '${match.value.description}: $surveyValue\n';
+    result +=
+        '${match.value.getSchedule(event, match.key)?.label}: $surveyValue\n';
   }
 
   return DataItem.fromText(result);

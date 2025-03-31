@@ -3,7 +3,7 @@ import 'dart:convert';
 
 import 'package:logging/logging.dart';
 import 'package:snout_db/event/frcevent.dart';
-import 'package:snout_db/event/match.dart';
+import 'package:snout_db/event/match_schedule_item.dart';
 import 'package:snout_db/patch.dart';
 import 'package:http/http.dart' as http;
 
@@ -127,21 +127,20 @@ Future<List<Patch>> loadScheduleFromTBA(
     }
 
     //ONLY modify matches that do not exist yet to prevent damage
-    if (eventData.matches.keys.toList().contains(key) == false) {
+    if (eventData.schedule.keys.toList().contains(key) == false) {
       Logger.root.info("match $key does not exist; adding...");
-      FRCMatch newMatch = FRCMatch(
-          description: description,
+      MatchScheduleItem newMatch = MatchScheduleItem(
+          id: key,
+          label: description,
           scheduledTime: startTime,
           blue: blue,
-          red: red,
-          results: null,
-          robot: const {});
+          red: red);
 
       Patch patch = Patch(
           identity: 'schedule autofill - $identity',
           time: DateTime.now(),
           path: Patch.buildPath([
-            'matches',
+            'schedule',
             key,
           ]),
           value: newMatch.toJson());

@@ -14,7 +14,8 @@ import 'package:app/widgets/load_status_or_error_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:snout_db/event/match.dart';
+import 'package:snout_db/event/match_data.dart';
+import 'package:snout_db/event/match_schedule_item.dart';
 import 'package:snout_db/event/matchresults.dart';
 import 'package:snout_db/patch.dart';
 import 'package:url_launcher/url_launcher_string.dart';
@@ -32,13 +33,15 @@ class _MatchPageState extends State<MatchPage> {
   @override
   Widget build(BuildContext context) {
     final snoutData = context.watch<DataProvider>();
-    FRCMatch match = snoutData.event.matches[widget.matchid]!;
+    MatchData? match = snoutData.event.matches[widget.matchid];
+    MatchScheduleItem? matchSchedule = snoutData.event.schedule[widget.matchid];
+
     context
         .read<DataProvider>()
-        .updateStatus(context, "Looking at ${match.description}");
+        .updateStatus(context, "Looking at ${matchSchedule?.label}");
     return Scaffold(
       appBar: AppBar(
-        title: Text(match.description),
+        title: Text('${matchSchedule?.label}'),
         bottom: const LoadOrErrorStatusBar(),
         actions: [
           FilledButton(
@@ -54,15 +57,15 @@ class _MatchPageState extends State<MatchPage> {
                   context,
                   MaterialPageRoute(
                       builder: (builder) => AnalysisMatchPreview(
-                          red: match.red,
-                          blue: match.blue,
-                          matchLabel: match.description,
+                          red: matchSchedule?.red ?? [],
+                          blue: matchSchedule?.blue ?? [],
+                          matchLabel: matchSchedule?.label,
                           plan: Column(children: [
                             for (final item in snoutData
                                 .event.config.matchscouting.properties) ...[
                               DynamicValueViewer(
                                   itemType: item,
-                                  value: match.properties?[item.id]),
+                                  value: match?.properties?[item.id]),
                               Container(
                                   padding: const EdgeInsets.only(right: 16),
                                   alignment: Alignment.centerRight,
@@ -94,7 +97,7 @@ class _MatchPageState extends State<MatchPage> {
         children: [
           Row(
             children: [
-              if (match.results != null)
+              if (match?.results != null)
                 Flexible(
                   child: Column(
                     children: [
@@ -107,7 +110,7 @@ class _MatchPageState extends State<MatchPage> {
                         rows: [
                           DataRow(cells: [
                             const DataCell(Text("Score")),
-                            DataCell(Text(match.results!.redScore.toString())),
+                            DataCell(Text(match!.results!.redScore.toString())),
                             DataCell(Text(match.results!.blueScore.toString())),
                           ]),
                         ],
@@ -122,7 +125,7 @@ class _MatchPageState extends State<MatchPage> {
                           final result =
                               await navigateWithEditLock<MatchResultValues>(
                                   context,
-                                  "match:${match.description}:results",
+                                  "match:${matchSchedule?.label}:results",
                                   (context) => Navigator.push(
                                       context,
                                       MaterialPageRoute(
@@ -152,16 +155,16 @@ class _MatchPageState extends State<MatchPage> {
                   children: [
                     ListTile(
                       title: const Text("Scheduled Time"),
-                      subtitle: Text(DateFormat.jm()
-                          .add_yMd()
-                          .format(match.scheduledTime.toLocal())),
+                      subtitle: Text(DateFormat.jm().add_yMd().format(
+                          matchSchedule?.scheduledTime.toLocal() ??
+                              DateTime.now())),
                     ),
-                    if (match.results != null)
+                    if (match?.results != null)
                       ListTile(
                         title: const Text("Actual Time"),
                         subtitle: Text(DateFormat.jm()
                             .add_yMd()
-                            .format(match.results!.time.toLocal())),
+                            .format(match!.results!.time.toLocal())),
                       ),
                   ],
                 ),
@@ -189,26 +192,27 @@ class _MatchPageState extends State<MatchPage> {
             ],
             rows: [
               for (final team in <int>{
-                ...match.blue,
-                ...match.red,
+                ...matchSchedule?.blue ?? [],
+                ...matchSchedule?.red ?? [],
                 //Also include all of the surrogate robots
-                ...match.robot.keys.map((e) => int.tryParse(e)).nonNulls
+                ...match?.robot.keys.map((e) => int.tryParse(e)).nonNulls ?? []
               })
                 [
                   DataItem(
                       displayValue: TextButton(
                           child: Text(
                               team.toString() +
-                                  (match.isScheduledToHaveTeam(team) == false
+                                  (matchSchedule?.isScheduledToHaveTeam(team) ==
+                                          false
                                       ? " [surrogate]"
                                       : ""),
                               style: TextStyle(
-                                  color:
-                                      match.isScheduledToHaveTeam(team) == false
-                                          ? getAllianceUIColor(match
-                                              .robot[team.toString()]!.alliance)
-                                          : getAllianceUIColor(
-                                              match.getAllianceOf(team)))),
+                                // Get the alliance color first from the match data, then the schedule
+                                color: getAllianceUIColor(match
+                                        ?.robot[team.toString()]?.alliance) ??
+                                    getAllianceUIColor(
+                                        matchSchedule?.getAllianceOf(team)),
+                              )),
                           onPressed: () => Navigator.push(
                                 context,
                                 MaterialPageRoute(
@@ -221,13 +225,13 @@ class _MatchPageState extends State<MatchPage> {
                       in snoutData.event.config.matchscouting.processes)
                     DataItem.fromErrorNumber(snoutData.event
                             .runMatchResultsProcess(
-                                item, match.robot[team.toString()], team) ??
+                                item, match?.robot[team.toString()], team) ??
                         //Missing results, this is not an error
                         (value: null, error: null)),
                   for (final item
                       in snoutData.event.config.matchscouting.survey)
                     DataItem.fromSurveyItem(
-                        match.robot[team.toString()]?.survey[item.id], item),
+                        match?.robot[team.toString()]?.survey[item.id], item),
                   DataItem.fromText(getAuditString(context
                       .watch<DataProvider>()
                       .database
@@ -237,55 +241,57 @@ class _MatchPageState extends State<MatchPage> {
             ],
           ),
           const SizedBox(height: 32),
-          FieldTimelineViewer(match: match),
+          if (match != null) FieldTimelineViewer(match: match),
           //Heatmaps for this specific match
-          Wrap(
-            spacing: 12,
-            alignment: WrapAlignment.center,
-            children: [
-              Column(
-                children: [
-                  const SizedBox(height: 16),
-                  Text("Autos", style: Theme.of(context).textTheme.titleMedium),
-                  PathsViewer(
-                    paths: [
-                      for (final robot in match.robot.entries)
-                        (
-                          label: robot.key,
-                          path: robot.value.timelineInterpolated
-                              .where((element) => element.isInAuto)
-                              .toList()
-                        )
-                    ],
-                  ),
-                ],
-              ),
-              for (final eventType
-                  in snoutData.event.config.matchscouting.events)
-                Column(children: [
-                  const SizedBox(height: 16),
-                  Text(eventType.label,
-                      style: Theme.of(context).textTheme.titleMedium),
-                  FieldHeatMap(events: [
-                    for (final robot in match.robot.values)
-                      ...robot.timeline
-                          .where((event) => event.id == eventType.id),
+          if (match != null)
+            Wrap(
+              spacing: 12,
+              alignment: WrapAlignment.center,
+              children: [
+                Column(
+                  children: [
+                    const SizedBox(height: 16),
+                    Text("Autos",
+                        style: Theme.of(context).textTheme.titleMedium),
+                    PathsViewer(
+                      paths: [
+                        for (final robot in match.robot.entries)
+                          (
+                            label: robot.key,
+                            path: robot.value.timelineInterpolated
+                                .where((element) => element.isInAuto)
+                                .toList()
+                          )
+                      ],
+                    ),
+                  ],
+                ),
+                for (final eventType
+                    in snoutData.event.config.matchscouting.events)
+                  Column(children: [
+                    const SizedBox(height: 16),
+                    Text(eventType.label,
+                        style: Theme.of(context).textTheme.titleMedium),
+                    FieldHeatMap(events: [
+                      for (final robot in match.robot.values)
+                        ...robot.timeline
+                            .where((event) => event.id == eventType.id),
+                    ]),
                   ]),
-                ]),
-              Column(
-                children: [
-                  const SizedBox(height: 16),
-                  Text("Driving Tendencies",
-                      style: Theme.of(context).textTheme.titleMedium),
-                  FieldHeatMap(events: [
-                    for (final robot in match.robot.values)
-                      ...robot.timelineInterpolated
-                          .where((event) => event.isPositionEvent)
-                  ]),
-                ],
-              ),
-            ],
-          ),
+                Column(
+                  children: [
+                    const SizedBox(height: 16),
+                    Text("Driving Tendencies",
+                        style: Theme.of(context).textTheme.titleMedium),
+                    FieldHeatMap(events: [
+                      for (final robot in match.robot.values)
+                        ...robot.timelineInterpolated
+                            .where((event) => event.isPositionEvent)
+                    ]),
+                  ],
+                ),
+              ],
+            ),
           SizedBox(height: 16),
           Column(
             children: [
@@ -300,14 +306,14 @@ class _MatchPageState extends State<MatchPage> {
                                   matchID: widget.matchid,
                                   config: snoutData
                                       .event.config.matchscouting.properties,
-                                  initialData: match.properties,
+                                  initialData: match?.properties,
                                 )));
                   },
                   child: const Text("Edit")),
               for (final item
                   in snoutData.event.config.matchscouting.properties) ...[
                 DynamicValueViewer(
-                    itemType: item, value: match.properties?[item.id]),
+                    itemType: item, value: match?.properties?[item.id]),
                 Container(
                     padding: const EdgeInsets.only(right: 16),
                     alignment: Alignment.centerRight,

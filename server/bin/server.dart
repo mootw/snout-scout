@@ -169,7 +169,7 @@ void main(List<String> args) async {
     return Response.ok("");
   });
 
-  app.put("/upload_events", (Request request) async {
+  app.put("/upload_events", (Request request) {
     // Since this edits db files, it could conflict with other writes
     return dbWriteLock.synchronized(() async {
       if ((request.headers['upload_password'] ?? '') !=
@@ -201,7 +201,7 @@ void main(List<String> args) async {
   });
 
   /// Just accept any files that are uploaded assuming the password is provided
-  app.delete("/events/<eventID>", (Request request, String eventID) async {
+  app.delete("/events/<eventID>", (Request request, String eventID) {
     eventID = Uri.decodeComponent(eventID);
     // Since this edits db files, it could conflict with other writes
     return dbWriteLock.synchronized(() async {
@@ -314,7 +314,7 @@ void main(List<String> args) async {
 
   app.put(
     "/events/<eventID>",
-    (Request request, String eventID) async {
+    (Request request, String eventID) {
       eventID = Uri.decodeComponent(eventID);
       // Require all writes to start with reading the file, only one at a time and do a full disk flush
       return dbWriteLock.synchronized(() async {

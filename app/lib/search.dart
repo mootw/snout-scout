@@ -175,23 +175,22 @@ Stream<SearchResult> _search(FRCEvent event, String query) async* {
     }
   }
 
-  for (final match in event.matches.values) {
+  for (final match in event.schedule.values) {
     if (query.isEmpty) {
       continue;
     }
-    final quality = match.description.toLowerCase().similarityTo(query);
+    final quality = match.label.toLowerCase().similarityTo(query);
     if (quality >= 0.8) {
       yield SearchResult(
           quality,
           (context) => ListTile(
-                title: Text(match.description.toString()),
+                title: Text(match.label),
                 subtitle: const Text("Match"),
                 onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (_) =>
-                            MatchPage(matchid: event.matchIDFromMatch(match))),
+                        builder: (_) => MatchPage(matchid: match.id)),
                   );
                 },
               ));
@@ -252,11 +251,11 @@ Stream<SearchResult> _search(FRCEvent event, String query) async* {
   }
 
   //Search in post match survey
-  for (final match in event.matches.values) {
+  for (final match in event.matches.entries) {
     if (query.isEmpty) {
       continue;
     }
-    for (final robot in match.robot.entries) {
+    for (final robot in match.value.robot.entries) {
       for (final value in robot.value.survey.entries) {
         final surveyItem = event.config.matchscouting.survey
             .firstWhereOrNull((element) => element.id == value.key);
@@ -274,13 +273,13 @@ Stream<SearchResult> _search(FRCEvent event, String query) async* {
               (context) => ListTile(
                     title: Text(value.value.toString()),
                     subtitle: Text(
-                        "${match.description}: ${robot.key}: ${value.key}"),
+                        "${event.schedule[match.key]?.label}: ${robot.key}: ${value.key}"),
                     onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => MatchPage(
-                                matchid: event.matchIDFromMatch(match))),
+                            builder: (context) =>
+                                MatchPage(matchid: match.key)),
                       );
                     },
                   ));

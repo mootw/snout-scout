@@ -7,7 +7,7 @@ import 'package:app/screens/match_page.dart';
 import 'package:app/widgets/timeduration.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:snout_db/event/match.dart';
+import 'package:snout_db/event/match_schedule_item.dart';
 
 class AllMatchesPage extends StatefulWidget {
   final double? scrollPosition;
@@ -32,7 +32,7 @@ class _AllMatchesPageState extends State<AllMatchesPage> {
   Widget build(BuildContext context) {
     final snoutData = context.watch<DataProvider>();
 
-    FRCMatch? teamNextMatch =
+    MatchScheduleItem? teamNextMatch =
         snoutData.event.nextMatchForTeam(snoutData.event.config.team);
     Duration? scheduleDelay = snoutData.event.scheduleDelay;
     return Column(
@@ -43,13 +43,15 @@ class _AllMatchesPageState extends State<AllMatchesPage> {
             children: [
               //Iterate through all of the matches and add them to the list
               //if a match is equal to the next match; highlight it!
-              for (final match in snoutData.event.matches.values)
+              for (final matchSchedule in snoutData.event.scheduleSorted)
                 Container(
-                    color: match == snoutData.event.nextMatch
+                    color: matchSchedule == snoutData.event.nextMatch
                         ? Theme.of(context).colorScheme.onPrimary
                         : null,
                     child: MatchCard(
-                        match: match, focusTeam: snoutData.event.config.team)),
+                        match: matchSchedule.getData(snoutData.event),
+                        matchSchedule: matchSchedule,
+                        focusTeam: snoutData.event.config.team)),
 
               Padding(
                 padding: const EdgeInsets.all(16),
@@ -60,7 +62,7 @@ class _AllMatchesPageState extends State<AllMatchesPage> {
                             context,
                             MaterialPageRoute(
                               builder: (context) => EditSchedulePage(
-                                  matches: snoutData.event.matches),
+                                  matches: snoutData.event.schedule),
                             ));
                       },
                       child: const Text("Edit Schedule")),
@@ -80,12 +82,11 @@ class _AllMatchesPageState extends State<AllMatchesPage> {
                   onPressed: () => Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => MatchPage(
-                            matchid: snoutData.event
-                                .matchIDFromMatch(teamNextMatch))),
+                        builder: (context) =>
+                            MatchPage(matchid: teamNextMatch.id)),
                   ),
                   child: Text(
-                    teamNextMatch.description,
+                    teamNextMatch.label,
                     style: TextStyle(
                         color: getAllianceUIColor(teamNextMatch
                             .getAllianceOf(snoutData.event.config.team))),

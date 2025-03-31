@@ -9,7 +9,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:simple_cluster/simple_cluster.dart';
-import 'package:snout_db/event/match.dart';
+import 'package:snout_db/event/match_data.dart';
 import 'package:snout_db/event/matchevent.dart';
 import 'package:snout_db/event/robotmatchresults.dart';
 import 'package:snout_db/snout_db.dart';
@@ -104,7 +104,7 @@ class FieldPositionSelector extends StatelessWidget {
 class FieldTimelineViewer extends StatefulWidget {
   const FieldTimelineViewer({super.key, required this.match});
 
-  final FRCMatch match;
+  final MatchData match;
 
   @override
   State<FieldTimelineViewer> createState() => _FieldTimelineViewerState();

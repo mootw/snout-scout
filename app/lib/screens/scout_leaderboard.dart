@@ -55,7 +55,7 @@ class ScoutLeaderboardPage extends StatelessWidget {
       body: ListView(
         children: [
           const Text(
-              "This is just for fun! Each normal edit is worth 1 point (pit scouting is worth 1 point per field). A edits that match 'r'\\/matches\\/.+\\/robot\\/'' are worth 5 points because match recordings take longer."),
+              "This is just for fun! Each normal edit is worth 1 point (pit scouting is worth 1 point per field). A edits that match 'r'\\/matches\\/.+\\/robot\\/'' are worth 5 points because Robot recordings take longer."),
           const SizedBox(
             height: 32,
           ),

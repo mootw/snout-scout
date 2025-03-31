@@ -1,5 +1,3 @@
-import 'dart:collection';
-
 import 'package:collection/collection.dart';
 import 'package:decimal/decimal.dart';
 import 'package:eval_ex/built_ins.dart';
@@ -10,7 +8,8 @@ import 'package:rfc_6901/rfc_6901.dart';
 import 'package:snout_db/config/eventconfig.dart';
 import 'package:snout_db/config/matchresults_process.dart';
 import 'package:snout_db/event/dynamic_property.dart';
-import 'package:snout_db/event/match.dart';
+import 'package:snout_db/event/match_data.dart';
+import 'package:snout_db/event/match_schedule_item.dart';
 import 'package:snout_db/event/matchevent.dart';
 import 'package:snout_db/event/robotmatchresults.dart';
 import 'package:snout_db/patch.dart';
@@ -26,11 +25,16 @@ class FRCEvent {
   ///List of teams in the event, ideally ordered smallest number to largest
   final List<int> teams;
 
-  // TODO store Match schedule configuration separate from the match data
-  final List<dynamic> schedule;
+  // Match schedule configuration. This is a Map Type to avoid insertion collisions.
+  // Technically a list type is more ideal, and it is expensive to remove an item
+  // but that is rarely required
+  final Map<String, MatchScheduleItem> schedule;
 
-  ///List of match results
-  final SplayTreeMap<String, FRCMatch> matches;
+  // Sorted schedule. Important for some lookups
+  List<MatchScheduleItem> get scheduleSorted => schedule.values.sorted();
+
+  /// Match Data
+  final Map<String, MatchData> matches;
 
   //Team Survey results
   final Map<String, DynamicProperties> pitscouting;
@@ -42,23 +46,15 @@ class FRCEvent {
   final Map<String, String> scoutPasswords;
 
   //Enforce that all matches are sorted
-  FRCEvent({
+  const FRCEvent({
     required this.config,
     this.teams = const [],
-    this.schedule = const [],
-    Map<String, FRCMatch> matches = const {},
+    this.schedule = const {},
+    this.matches = const {},
     this.pitscouting = const {},
     this.scoutPasswords = const {},
     this.pitmap,
-  })
-  // SplayTreeMaps for some reason cannot have 2 values with the zero difference in the comparison.
-  // Objects that are "equal" get removed. not sure why given they do have unique keys.
-  // I had to make the matches compare first based on time, and then hashCode to make it work.
-  // the error is reproducable by creating 2 matches with different IDs, but the scheduled time is the same
-  : matches = SplayTreeMap.of(
-          matches,
-          (a, b) => matches[a]!.compareTo(matches[b]!),
-        );
+  });
 
   factory FRCEvent.fromJson(Map json) => _$FRCEventFromJson(json);
   Map toJson() => _$FRCEventToJson(this);
@@ -80,32 +76,30 @@ class FRCEvent {
     return FRCEvent.fromJson(dbJson!);
   }
 
-  //Returns the id for a given match
-  String matchIDFromMatch(FRCMatch match) =>
-      matches.entries.firstWhere((element) => element.value == match).key;
-
-  /// returns matches with a specific team in them
-  List<FRCMatch> matchesWithTeam(int team) => matches.values
+  /// returns matches SCHEDULED to have a specific team in them.
+  /// this is NOT the same as teamRecordedMatches which is all matches
+  /// that are actually recorded
+  List<MatchScheduleItem> matchesWithTeam(int team) => scheduleSorted
       .where((match) => match.isScheduledToHaveTeam(team))
       .toList();
 
   //returns the match after the last match with results
-  FRCMatch? get nextMatch => matches.values
+  MatchScheduleItem? get nextMatch => scheduleSorted
       .toList()
       .reversed
-      .lastWhereOrNull((match) => match.isComplete == false);
+      .lastWhereOrNull((match) => match.isComplete(this) == false);
 
-  FRCMatch? nextMatchForTeam(int team) => matchesWithTeam(team)
+  MatchScheduleItem? nextMatchForTeam(int team) => matchesWithTeam(team)
       .reversed
-      .lastWhereOrNull((match) => match.isComplete == false);
+      .lastWhereOrNull((match) => match.isComplete(this) == false);
 
   //Calculates the schedule delay by using the delay of the last match with results actual time versus the scheduled time.
-  Duration? get scheduleDelay => matches.values
-      .lastWhereOrNull((match) => match.isComplete)
-      ?.delayFromScheduledTime;
+  Duration? get scheduleDelay => scheduleSorted
+      .lastWhereOrNull((match) => match.isComplete(this))
+      ?.delayFromScheduledTime(this);
 
   /// Returns all matches that include a recording for a specific team
-  Iterable<MapEntry<String, FRCMatch>> teamRecordedMatches(int team) => matches
+  Iterable<MapEntry<String, MatchData>> teamRecordedMatches(int team) => matches
       .entries
       .where((element) => element.value.robot.keys.contains(team.toString()));
 

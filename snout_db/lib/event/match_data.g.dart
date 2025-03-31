@@ -1,20 +1,12 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'match.dart';
+part of 'match_data.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-FRCMatch _$FRCMatchFromJson(Map json) => FRCMatch(
-      description: json['description'] as String,
-      scheduledTime: DateTime.parse(json['scheduledTime'] as String),
-      red: (json['red'] as List<dynamic>)
-          .map((e) => (e as num).toInt())
-          .toList(),
-      blue: (json['blue'] as List<dynamic>)
-          .map((e) => (e as num).toInt())
-          .toList(),
+MatchData _$MatchDataFromJson(Map json) => MatchData(
       results: json['results'] == null
           ? null
           : MatchResultValues.fromJson(json['results'] as Map),
@@ -28,11 +20,7 @@ FRCMatch _$FRCMatchFromJson(Map json) => FRCMatch(
       ),
     );
 
-Map<String, dynamic> _$FRCMatchToJson(FRCMatch instance) => <String, dynamic>{
-      'description': instance.description,
-      'scheduledTime': instance.scheduledTime.toIso8601String(),
-      'blue': instance.blue,
-      'red': instance.red,
+Map<String, dynamic> _$MatchDataToJson(MatchData instance) => <String, dynamic>{
       'results': instance.results?.toJson(),
       'properties': instance.properties,
       'robot': instance.robot.map((k, e) => MapEntry(k, e.toJson())),

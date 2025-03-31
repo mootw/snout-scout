@@ -74,12 +74,12 @@ class DataItem {
   DataItem.match(
       {required BuildContext context,
       required String key,
-      required String description,
+      required String label,
       Color? color,
       DateTime? time})
       : displayValue = TextButton(
             child: Text(
-              description,
+              label,
               style: TextStyle(color: color),
             ),
             onPressed: () => Navigator.push(
@@ -87,8 +87,8 @@ class DataItem {
                   MaterialPageRoute(
                       builder: (context) => MatchPage(matchid: key)),
                 )),
-        exportValue = description,
-        sortingValue = time ?? description.toLowerCase(),
+        exportValue = label,
+        sortingValue = time ?? label.toLowerCase(),
         numericValue = null;
 
   const DataItem(
@@ -157,6 +157,12 @@ class _DataSheetState extends State<DataSheet> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.rows.isEmpty) {
+      widget.rows.add([
+        ...List.generate(
+            widget.columns.length, (_) => DataItem.fromText("EMPTY"))
+      ]);
+    }
     if (_currentSortColumn != null) {
       widget.rows.sort((a, b) {
         final aValue = a[_currentSortColumn!].sortingValue;

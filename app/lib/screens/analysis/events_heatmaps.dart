@@ -20,11 +20,12 @@ class AnalysisEventsHeatmap extends StatelessWidget {
         Center(
           child: PathsViewer(
             paths: [
-              for (final match in data.event.matches.values)
-                for (final robot in match.robot.entries)
+              for (final match in data.event.matches.entries)
+                for (final robot in match.value.robot.entries)
                   (
-                    label: '${match.description} ${robot.key}',
-                    path: match.robot[robot.key]!.timelineInterpolated
+                    label:
+                        '${match.value.getSchedule(data.event, match.key)?.label} ${robot.key}',
+                    path: match.value.robot[robot.key]!.timelineInterpolated
                         .where((element) => element.isInAuto)
                         .toList()
                   )

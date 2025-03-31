@@ -73,8 +73,8 @@ class _AnalysisHeatMapByEventTypeState
                     ),
                     Center(
                         child: FieldHeatMap(events: [
-                      for (final match in data.event.matchesWithTeam(team))
-                        ...?match.robot[team.toString()]
+                      for (final match in data.event.teamRecordedMatches(team))
+                        ...?match.value.robot[team.toString()]
                             ?.timelineBlueNormalized(
                                 data.event.config.fieldStyle)
                             .where((event) => event.id == _selectedEvent!.id)

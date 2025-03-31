@@ -26,4 +26,4 @@ dependencies:
   web_socket_channel: ^3.0.2
 
 dev_dependencies:
-  lint: 2.3.0
+  lint: 2.8.0

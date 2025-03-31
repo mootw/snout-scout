@@ -70,7 +70,7 @@ class _ScoutSelectorScreenState extends State<ScoutSelectorScreen> {
                   MaterialPageRoute(builder: (_) => SelectDataSourceScreen())),
               child: Text("Change Source")),
         ],
-        title: Text(database.event.config.name),
+        title: Text(Uri.decodeFull(dp.dataSourceUri.toString())),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
