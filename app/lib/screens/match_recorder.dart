@@ -27,11 +27,12 @@ class MatchRecorderPage extends StatefulWidget {
   final int team;
   final Alliance teamAlliance;
 
-  const MatchRecorderPage(
-      {super.key,
-      required this.matchDescription,
-      required this.team,
-      required this.teamAlliance});
+  const MatchRecorderPage({
+    super.key,
+    required this.matchDescription,
+    required this.team,
+    required this.teamAlliance,
+  });
 
   @override
   State<MatchRecorderPage> createState() => _MatchRecorderPageState();
@@ -80,22 +81,29 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
       child: FilledButton.tonal(
         style: FilledButton.styleFrom(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          foregroundColor: (toolColor?.computeLuminance() ?? 0) < 0.5
-              ? Colors.white
-              : Colors.black,
+          foregroundColor:
+              (toolColor?.computeLuminance() ?? 0) < 0.5
+                  ? Colors.white
+                  : Colors.black,
           backgroundColor: toolColor,
         ),
-        onPressed: _mode == MatchMode.setup || _lastMoveEvent == null
-            ? null
-            : () {
-                HapticFeedback.mediumImpact();
-                setState(() {
-                  if (_mode != MatchMode.setup && _robotPosition != null) {
-                    _events.add(MatchEvent.fromEventConfig(
-                        time: _time, event: tool, position: _robotPosition!));
-                  }
-                });
-              },
+        onPressed:
+            _mode == MatchMode.setup || _lastMoveEvent == null
+                ? null
+                : () {
+                  HapticFeedback.mediumImpact();
+                  setState(() {
+                    if (_mode != MatchMode.setup && _robotPosition != null) {
+                      _events.add(
+                        MatchEvent.fromEventConfig(
+                          time: _time,
+                          event: tool,
+                          position: _robotPosition!,
+                        ),
+                      );
+                    }
+                  });
+                },
         child: Text(tool.label, textAlign: TextAlign.center),
       ),
     );
@@ -105,40 +113,45 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
     return ScrollConfiguration(
       behavior: MouseInteractableScrollBehavior(),
       child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          reverse: true,
-          child: Row(
-            children: [
-              Text(
-                "Tap to delete an event",
-                style: TextStyle(color: Theme.of(context).hintColor),
+        scrollDirection: Axis.horizontal,
+        reverse: true,
+        child: Row(
+          children: [
+            Text(
+              "Tap to delete an event",
+              style: TextStyle(color: Theme.of(context).hintColor),
+            ),
+            for (final item in _events)
+              TextButton(
+                onPressed:
+                    () => setState(() {
+                      _events.remove(item);
+                    }),
+                child: Text(
+                  '${item.time.round()}  ${item.getLabelFromConfig(context.watch<DataProvider>().event.config)}',
+                  style: TextStyle(
+                    color:
+                        item.isPositionEvent
+                            ? Theme.of(context).colorScheme.onSurface
+                            : item.getColorFromConfig(
+                                  context.watch<DataProvider>().event.config,
+                                ) !=
+                                null
+                            ? colorFromHex(
+                              item.getColorFromConfig(
+                                context.watch<DataProvider>().event.config,
+                              )!,
+                            )
+                            : null,
+                  ),
+                ),
               ),
-              for (final item in _events)
-                TextButton(
-                    onPressed: () => setState(() {
-                          _events.remove(item);
-                        }),
-                    child: Text(
-                        '${item.time.round()}  ${item.getLabelFromConfig(context.watch<DataProvider>().event.config)}',
-                        style: TextStyle(
-                            color: item.isPositionEvent
-                                ? Theme.of(context).colorScheme.onSurface
-                                : item.getColorFromConfig(context
-                                            .watch<DataProvider>()
-                                            .event
-                                            .config) !=
-                                        null
-                                    ? colorFromHex(item.getColorFromConfig(
-                                        context
-                                            .watch<DataProvider>()
-                                            .event
-                                            .config)!)
-                                    : null))),
 
-              // Text(
-              //     "Check to see the map is rotated correctly! Press 'start' when you hear the field buzzer and see the field lights. It is more important to know the location of each event rather than the position of the robot at all times. Event buttons will disable if no position has been recently input."),
-            ],
-          )),
+            // Text(
+            //     "Check to see the map is rotated correctly! Press 'start' when you hear the field buzzer and see the field lights. It is more important to know the location of each event rather than the position of the robot at all times. Event buttons will disable if no position has been recently input."),
+          ],
+        ),
+      ),
     );
   }
 
@@ -147,8 +160,10 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
     //Allow slightly wide to be considered vertical for foldable devices or near-square devices
     final isHorizontal = MediaQuery.of(context).size.aspectRatio > 1.2;
 
-    context.read<DataProvider>().updateStatus(context,
-        "Scouting team ${widget.team} in ${widget.matchDescription}\n${_time == 0 ? "Waiting to start" : "$_time seconds into the match"}");
+    context.read<DataProvider>().updateStatus(
+      context,
+      "Scouting team ${widget.team} in ${widget.matchDescription}\n${_time == 0 ? "Waiting to start" : "$_time seconds into the match"}",
+    );
 
     if (_showSurvey || _mode == MatchMode.finished) {
       return ConfirmExitDialog(
@@ -158,24 +173,29 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
             actions: [
               if (_mode != MatchMode.finished)
                 FilledButton.tonal(
-                    onPressed: () => setState(() {
-                          _showSurvey = !_showSurvey;
-                        }),
-                    child: const Text("Show Recorder")),
+                  onPressed:
+                      () => setState(() {
+                        _showSurvey = !_showSurvey;
+                      }),
+                  child: const Text("Show Recorder"),
+                ),
               IconButton(
-                  onPressed: () {
-                    if (_formKey.currentState!.validate() == false) {
-                      //Do not save with pending form errors.
-                      return;
-                    }
-                    Navigator.pop(
-                        context,
-                        RobotMatchResults(
-                            alliance: widget.teamAlliance,
-                            timeline: _events,
-                            survey: _postGameSurvey));
-                  },
-                  icon: const Icon(Icons.save)),
+                onPressed: () {
+                  if (_formKey.currentState!.validate() == false) {
+                    //Do not save with pending form errors.
+                    return;
+                  }
+                  Navigator.pop(
+                    context,
+                    RobotMatchResults(
+                      alliance: widget.teamAlliance,
+                      timeline: _events,
+                      survey: _postGameSurvey,
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.save),
+              ),
             ],
           ),
           body: Form(
@@ -184,18 +204,20 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
             child: ListView(
               shrinkWrap: true,
               children: [
-                for (final item in context
-                    .watch<DataProvider>()
-                    .event
-                    .config
-                    .matchscouting
-                    .survey)
+                for (final item
+                    in context
+                        .watch<DataProvider>()
+                        .event
+                        .config
+                        .matchscouting
+                        .survey)
                   Container(
-                      padding: const EdgeInsets.all(12),
-                      child: DynamicPropertyEditorWidget(
-                        tool: item,
-                        survey: _postGameSurvey,
-                      )),
+                    padding: const EdgeInsets.all(12),
+                    child: DynamicPropertyEditorWidget(
+                      tool: item,
+                      survey: _postGameSurvey,
+                    ),
+                  ),
               ],
             ),
           ),
@@ -210,11 +232,13 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
             title: Text("${widget.team}"),
             actions: [
               FilledButton.tonal(
-                  onPressed: () => setState(() {
-                        _showSurvey = !_showSurvey;
-                      }),
-                  child: const Text("Show Survey")),
-              _statusAndToolBar()
+                onPressed:
+                    () => setState(() {
+                      _showSurvey = !_showSurvey;
+                    }),
+                child: const Text("Show Survey"),
+              ),
+              _statusAndToolBar(),
             ],
           ),
           body: Center(
@@ -229,24 +253,32 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                       children: [
                         _getTimeline(),
                         Expanded(
-                          child: LayoutBuilder(builder: (context, constraints) {
-                            final newConstraints =
-                                constraints.tighten(height: 500);
-                            return Wrap(
-                              alignment: WrapAlignment.end,
-                              children: [
-                                for (int i = 0; i < scoutingEvents.length; i++)
-                                  SizedBox(
-                                    height: newConstraints.maxHeight /
-                                        ((scoutingEvents.length +
-                                                (scoutingEvents.length % 2)) /
-                                            2),
-                                    width: 130,
-                                    child: _getEventButton(scoutingEvents[i]),
-                                  ),
-                              ],
-                            );
-                          }),
+                          child: LayoutBuilder(
+                            builder: (context, constraints) {
+                              final newConstraints = constraints.tighten(
+                                height: 500,
+                              );
+                              return Wrap(
+                                alignment: WrapAlignment.end,
+                                children: [
+                                  for (
+                                    int i = 0;
+                                    i < scoutingEvents.length;
+                                    i++
+                                  )
+                                    SizedBox(
+                                      height:
+                                          newConstraints.maxHeight /
+                                          ((scoutingEvents.length +
+                                                  (scoutingEvents.length % 2)) /
+                                              2),
+                                      width: 130,
+                                      child: _getEventButton(scoutingEvents[i]),
+                                    ),
+                                ],
+                              );
+                            },
+                          ),
                         ),
                       ],
                     ),
@@ -258,9 +290,10 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                       child: Transform.rotate(
                         angle: _rotateField ? math.pi : 0,
                         child: FieldPositionSelector(
-                          coverAlignment: _mode != MatchMode.setup
-                              ? null
-                              : widget.teamAlliance == Alliance.red
+                          coverAlignment:
+                              _mode != MatchMode.setup
+                                  ? null
+                                  : widget.teamAlliance == Alliance.red
                                   ? -1
                                   : 1,
                           teamNumber: widget.team,
@@ -278,8 +311,12 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                                   }
                                 }
                               }
-                              _events.add(MatchEvent.robotPositionEvent(
-                                  time: _time, position: robotPosition));
+                              _events.add(
+                                MatchEvent.robotPositionEvent(
+                                  time: _time,
+                                  position: robotPosition,
+                                ),
+                              );
                             });
                           },
                         ),
@@ -300,10 +337,12 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
           title: Text("${widget.team}"),
           actions: [
             FilledButton.tonal(
-                onPressed: () => setState(() {
-                      _showSurvey = !_showSurvey;
-                    }),
-                child: const Text("Show Survey")),
+              onPressed:
+                  () => setState(() {
+                    _showSurvey = !_showSurvey;
+                  }),
+              child: const Text("Show Survey"),
+            ),
             const SizedBox(width: 32),
           ],
         ),
@@ -324,9 +363,10 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                     angle: _rotateField ? math.pi : 0,
                     child: FieldPositionSelector(
                       teamNumber: widget.team,
-                      coverAlignment: _mode != MatchMode.setup
-                          ? null
-                          : widget.teamAlliance == Alliance.red
+                      coverAlignment:
+                          _mode != MatchMode.setup
+                              ? null
+                              : widget.teamAlliance == Alliance.red
                               ? -1
                               : 1,
                       alliance: widget.teamAlliance,
@@ -343,8 +383,12 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                               }
                             }
                           }
-                          _events.add(MatchEvent.robotPositionEvent(
-                              time: _time, position: robotPosition));
+                          _events.add(
+                            MatchEvent.robotPositionEvent(
+                              time: _time,
+                              position: robotPosition,
+                            ),
+                          );
                         });
                       },
                     ),
@@ -370,10 +414,9 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
 
   Widget _statusAndToolBar() {
     Image? robotPicture;
-    final pictureData = context
-        .watch<DataProvider>()
-        .event
-        .pitscouting[widget.team.toString()]?[robotPictureReserved];
+    final pictureData =
+        context.watch<DataProvider>().event.pitscouting[widget.team
+            .toString()]?[robotPictureReserved];
     if (pictureData != null) {
       robotPicture = Image(image: snoutImageCache.getCached(pictureData));
     }
@@ -384,14 +427,16 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           IconButton(
-              tooltip: "Rotate Map",
-              onPressed: () => setState(() {
-                    _rotateField = !_rotateField;
-                    context
-                        .read<LocalConfigProvider>()
-                        .setFlipFieldImage(_rotateField);
-                  }),
-              icon: const Icon(Icons.rotate_right)),
+            tooltip: "Rotate Map",
+            onPressed:
+                () => setState(() {
+                  _rotateField = !_rotateField;
+                  context.read<LocalConfigProvider>().setFlipFieldImage(
+                    _rotateField,
+                  );
+                }),
+            icon: const Icon(Icons.rotate_right),
+          ),
           const SizedBox(width: 8),
           Text("time $_time"),
           const SizedBox(width: 8),
@@ -399,28 +444,39 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
           if (robotPicture != null)
             Center(
               child: TextButton(
-                  onPressed: () => Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => Scaffold(
-                            appBar: AppBar(),
-                            body: PhotoView(
-                              imageProvider: robotPicture!.image,
+                onPressed:
+                    () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder:
+                            (context) => Scaffold(
+                              appBar: AppBar(),
+                              body: PhotoView(
+                                imageProvider: robotPicture!.image,
+                              ),
                             ),
-                          ))),
-                  child: const Text("Robot Picture")),
+                      ),
+                    ),
+                child: const Text("Robot Picture"),
+              ),
             ),
           const SizedBox(width: 8),
           FilledButton.icon(
             icon: const Icon(Icons.arrow_forward),
-            style: _mode == MatchMode.playing
-                ? FilledButton.styleFrom(
-                    backgroundColor: Colors.red, foregroundColor: Colors.white)
-                : null,
+            style:
+                _mode == MatchMode.playing
+                    ? FilledButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      foregroundColor: Colors.white,
+                    )
+                    : null,
             onPressed: _lastMoveEvent == null ? null : _handleNextSection,
-            label: Text(_mode == MatchMode.setup
-                ? "Start"
-                : _mode == MatchMode.playing
-                    ? "End"
-                    : ""),
+            label: Text(
+              _mode == MatchMode.setup
+                  ? "Start"
+                  : _mode == MatchMode.playing
+                  ? "End"
+                  : "",
+            ),
           ),
         ],
       ),
@@ -437,10 +493,11 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
       _events = List.generate(_events.length, (index) {
         final event = _events[index];
         return MatchEvent(
-            time: ((event.time / _time) * matchLength.inSeconds).round(),
-            x: event.x,
-            y: event.y,
-            id: event.id);
+          time: ((event.time / _time) * matchLength.inSeconds).round(),
+          x: event.x,
+          y: event.y,
+          id: event.id,
+        );
       });
       _time = matchLength.inSeconds;
     }

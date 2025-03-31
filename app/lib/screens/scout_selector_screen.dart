@@ -66,9 +66,13 @@ class _ScoutSelectorScreenState extends State<ScoutSelectorScreen> {
         automaticallyImplyLeading: widget.allowBackButton,
         actions: [
           TextButton(
-              onPressed: () => Navigator.push(context,
-                  MaterialPageRoute(builder: (_) => SelectDataSourceScreen())),
-              child: Text("Change Source")),
+            onPressed:
+                () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => SelectDataSourceScreen()),
+                ),
+            child: Text("Change Source"),
+          ),
         ],
         title: Text(Uri.decodeFull(dp.dataSourceUri.toString())),
       ),
@@ -80,8 +84,9 @@ class _ScoutSelectorScreenState extends State<ScoutSelectorScreen> {
               child: const Text('Register Scout'),
               onPressed: () async {
                 final String? dialogResult = await showDialog(
-                    context: context,
-                    builder: (context) => const ScoutRegistrationScreen());
+                  context: context,
+                  builder: (context) => const ScoutRegistrationScreen(),
+                );
 
                 if (dialogResult != null) {
                   _popWithScout(dialogResult);
@@ -114,9 +119,7 @@ class _ScoutSelectorScreenState extends State<ScoutSelectorScreen> {
                 SizedBox(
                   width: 150,
                   child: TextField(
-                    decoration: const InputDecoration(
-                      hintText: 'Password',
-                    ),
+                    decoration: const InputDecoration(hintText: 'Password'),
                     obscureText: true,
                     onEditingComplete: () => attemptLogin(database),
                     controller: _scoutPassword,
@@ -135,27 +138,31 @@ class _ScoutSelectorScreenState extends State<ScoutSelectorScreen> {
                 children: [
                   for (int i = 1; i < 10; i++)
                     FilledButton.tonal(
-                        onPressed: () {
-                          _scoutPassword.text += '$i';
-                        },
-                        child: Text('$i')),
+                      onPressed: () {
+                        _scoutPassword.text += '$i';
+                      },
+                      child: Text('$i'),
+                    ),
                   // Empty spot
                   FilledButton.tonal(
-                      onPressed: () {
-                        _scoutPassword.text = '';
-                      },
-                      child: Icon(Icons.delete)),
+                    onPressed: () {
+                      _scoutPassword.text = '';
+                    },
+                    child: Icon(Icons.delete),
+                  ),
                   FilledButton.tonal(
-                      onPressed: () {
-                        _scoutPassword.text += '0';
-                      },
-                      child: Text('0')),
+                    onPressed: () {
+                      _scoutPassword.text += '0';
+                    },
+                    child: Text('0'),
+                  ),
                   FilledButton(
-                      onPressed: () => attemptLogin(database),
-                      child: Icon(Icons.check)),
+                    onPressed: () => attemptLogin(database),
+                    child: Icon(Icons.check),
+                  ),
                 ],
               ),
-            )
+            ),
           ],
         ),
       ),
@@ -164,8 +171,9 @@ class _ScoutSelectorScreenState extends State<ScoutSelectorScreen> {
 
   void attemptLogin(SnoutDB database) {
     final validPassword = argon2Verify(
-        database.event.scoutPasswords[_selectedScout]!,
-        utf8.encode(_scoutPassword.text));
+      database.event.scoutPasswords[_selectedScout]!,
+      utf8.encode(_scoutPassword.text),
+    );
 
     if (validPassword) {
       _popWithScout(_selectedScout!);
@@ -200,9 +208,7 @@ class _ScoutRegistrationScreenState extends State<ScoutRegistrationScreen> {
   Widget build(BuildContext context) {
     final dataProvider = context.read<DataProvider>();
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Register New Scout'),
-      ),
+      appBar: AppBar(title: const Text('Register New Scout')),
       body: Form(
         autovalidateMode: AutovalidateMode.onUserInteraction,
         key: _formKey,
@@ -212,15 +218,14 @@ class _ScoutRegistrationScreenState extends State<ScoutRegistrationScreen> {
               padding: const EdgeInsets.all(16.0),
               child: TextFormField(
                 onChanged: (_) => setState(() {}),
-                decoration: const InputDecoration(
-                  hintText: 'Scout Name',
-                ),
+                decoration: const InputDecoration(hintText: 'Scout Name'),
                 validator: (input) {
                   if ((input?.runes.length ?? 0) < 3) {
                     return 'Name must be >= 3 characters';
                   }
-                  if (getAllKnownIdentities(dataProvider.database)
-                      .contains(input)) {
+                  if (getAllKnownIdentities(
+                    dataProvider.database,
+                  ).contains(input)) {
                     return 'Name must be unique';
                   }
                   return null;
@@ -234,65 +239,69 @@ class _ScoutRegistrationScreenState extends State<ScoutRegistrationScreen> {
               padding: const EdgeInsets.all(16.0),
               child: TextFormField(
                 onChanged: (_) => setState(() {}),
-                decoration: const InputDecoration(
-                  hintText: 'Password',
-                ),
+                decoration: const InputDecoration(hintText: 'Password'),
                 obscureText: true,
-                validator: (input) => (input?.runes.length ?? 0) == 4 &&
-                        int.tryParse(input ?? '') != null
-                    ? null
-                    : 'Invalid Password. requires exactly 4 digits',
+                validator:
+                    (input) =>
+                        (input?.runes.length ?? 0) == 4 &&
+                                int.tryParse(input ?? '') != null
+                            ? null
+                            : 'Invalid Password. requires exactly 4 digits',
                 controller: _scoutPassword,
               ),
             ),
             Center(
-              child: _isLoading
-                  ? CircularProgressIndicator()
-                  : FilledButton(
-                      onPressed: _formKey.currentState?.validate() == true
-                          ? () async {
-                              setState(() {
-                                _isLoading = true;
-                              });
-                              await Future.delayed(Duration.zero);
-                              final random = math.Random.secure();
-                              final salt = [
-                                for (int i = 0; i < 16; i++) random.nextInt(256)
-                              ];
+              child:
+                  _isLoading
+                      ? CircularProgressIndicator()
+                      : FilledButton(
+                        onPressed:
+                            _formKey.currentState?.validate() == true
+                                ? () async {
+                                  setState(() {
+                                    _isLoading = true;
+                                  });
+                                  await Future.delayed(Duration.zero);
+                                  final random = math.Random.secure();
+                                  final salt = [
+                                    for (int i = 0; i < 16; i++)
+                                      random.nextInt(256),
+                                  ];
 
-                              final password = argon2id(
-                                  utf8.encode(_scoutPassword.text), salt,
-                                  hashLength: 16,
-                                  security: Argon2Security.little);
+                                  final password = argon2id(
+                                    utf8.encode(_scoutPassword.text),
+                                    salt,
+                                    hashLength: 16,
+                                    security: Argon2Security.little,
+                                  );
 
-                              // Create a patch that adds this scout
-                              String identity = _scoutNameText.text;
+                                  // Create a patch that adds this scout
+                                  String identity = _scoutNameText.text;
 
-                              Patch patch = Patch(
-                                  identity: identity,
-                                  time: DateTime.now(),
-                                  path: Patch.buildPath([
-                                    'scoutPasswords',
-                                    identity,
-                                  ]),
-                                  value: password.encoded());
+                                  Patch patch = Patch(
+                                    identity: identity,
+                                    time: DateTime.now(),
+                                    path: Patch.buildPath([
+                                      'scoutPasswords',
+                                      identity,
+                                    ]),
+                                    value: password.encoded(),
+                                  );
 
-                              await dataProvider.newTransaction(patch);
+                                  await dataProvider.newTransaction(patch);
 
-                              setState(() {
-                                _isLoading = false;
-                              });
-                              if (mounted) {
-                                Navigator.pop(context, _scoutNameText.text);
-                              }
-                            }
-                          : null,
-                      child: const Text('Register Scout'),
-                    ),
+                                  setState(() {
+                                    _isLoading = false;
+                                  });
+                                  if (mounted) {
+                                    Navigator.pop(context, _scoutNameText.text);
+                                  }
+                                }
+                                : null,
+                        child: const Text('Register Scout'),
+                      ),
             ),
-            const SizedBox(
-              height: 16,
-            ),
+            const SizedBox(height: 16),
           ],
         ),
       ),

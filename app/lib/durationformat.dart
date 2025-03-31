@@ -26,7 +26,7 @@ String formatDuration(Duration duration) {
 
 String offsetDurationInMins(Duration duration) {
   // Positive delay means it is behind.
-  if(duration.abs() < Duration(minutes: 2)) {
+  if (duration.abs() < Duration(minutes: 2)) {
     return 'on time';
   }
   return '${duration.abs().inMinutes} mins ${duration.isNegative ? 'ahead' : 'behind'}';

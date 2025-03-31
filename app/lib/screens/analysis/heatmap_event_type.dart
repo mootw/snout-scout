@@ -21,22 +21,21 @@ class _AnalysisHeatMapByEventTypeState
   void initState() {
     super.initState();
     //select the first event type if it is exists
-    _selectedEvent = context
-        .read<DataProvider>()
-        .event
-        .config
-        .matchscouting
-        .events
-        .firstOrNull;
+    _selectedEvent =
+        context
+            .read<DataProvider>()
+            .event
+            .config
+            .matchscouting
+            .events
+            .firstOrNull;
   }
 
   @override
   Widget build(BuildContext context) {
     final data = context.watch<DataProvider>();
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Heatmap By Event Type"),
-      ),
+      appBar: AppBar(title: const Text("Heatmap By Event Type")),
       body: Column(
         children: [
           DropdownButton<MatchEventConfig>(
@@ -47,14 +46,17 @@ class _AnalysisHeatMapByEventTypeState
                 _selectedEvent = value!;
               });
             },
-            items: data.event.config.matchscouting.events
-                .map<DropdownMenuItem<MatchEventConfig>>(
-                    (MatchEventConfig value) {
-              return DropdownMenuItem<MatchEventConfig>(
-                value: value,
-                child: Text(value.label),
-              );
-            }).toList(),
+            items:
+                data.event.config.matchscouting.events
+                    .map<DropdownMenuItem<MatchEventConfig>>((
+                      MatchEventConfig value,
+                    ) {
+                      return DropdownMenuItem<MatchEventConfig>(
+                        value: value,
+                        child: Text(value.label),
+                      );
+                    })
+                    .toList(),
           ),
           if (_selectedEvent != null)
             Expanded(
@@ -64,21 +66,33 @@ class _AnalysisHeatMapByEventTypeState
                     const SizedBox(height: 16),
                     Center(
                       child: TextButton(
-                          onPressed: () => Navigator.push(
+                        onPressed:
+                            () => Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) =>
-                                      TeamViewPage(teamNumber: team))),
-                          child: Text(team.toString())),
+                                builder:
+                                    (context) => TeamViewPage(teamNumber: team),
+                              ),
+                            ),
+                        child: Text(team.toString()),
+                      ),
                     ),
                     Center(
-                        child: FieldHeatMap(events: [
-                      for (final match in data.event.teamRecordedMatches(team))
-                        ...?match.value.robot[team.toString()]
-                            ?.timelineBlueNormalized(
-                                data.event.config.fieldStyle)
-                            .where((event) => event.id == _selectedEvent!.id)
-                    ])),
+                      child: FieldHeatMap(
+                        events: [
+                          for (final match in data.event.teamRecordedMatches(
+                            team,
+                          ))
+                            ...?match.value.robot[team.toString()]
+                                ?.timelineBlueNormalized(
+                                  data.event.config.fieldStyle,
+                                )
+                                .where(
+                                  (event) => event.id == _selectedEvent!.id,
+                                ),
+                        ],
+                      ),
+                    ),
                   ],
                 ],
               ),

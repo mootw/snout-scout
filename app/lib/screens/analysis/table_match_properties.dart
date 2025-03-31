@@ -20,8 +20,9 @@ class TableMatchProperties extends StatelessWidget {
     final allMatchData = {
       for (final matchId in allMatchIds)
         (data.event.schedule[matchId], data.event.matches[matchId], matchId),
-    }..sorted((a, b) =>
-        a.$1 == null || b.$1 == null ? 0 : a.$1?.compareTo(b.$1!) ?? 0);
+    }..sorted(
+      (a, b) => a.$1 == null || b.$1 == null ? 0 : a.$1?.compareTo(b.$1!) ?? 0,
+    );
 
     return Scaffold(
       appBar: AppBar(),
@@ -38,10 +39,11 @@ class TableMatchProperties extends StatelessWidget {
             for (final match in allMatchData)
               [
                 DataItem.match(
-                    context: context,
-                    key: match.$3,
-                    label: match.$1?.label ?? match.$3,
-                    time: match.$1?.scheduledTime),
+                  context: context,
+                  key: match.$3,
+                  label: match.$1?.label ?? match.$3,
+                  time: match.$1?.scheduledTime,
+                ),
                 for (final item in data.event.config.matchscouting.properties)
                   DataItem.fromSurveyItem(match.$2?.properties?[item.id], item),
               ],

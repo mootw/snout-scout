@@ -14,28 +14,33 @@ class LoadOrErrorStatusBar extends StatelessWidget
 
     if (data.failedPatches.isNotEmpty) {
       return InkWell(
-        onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const FailedPatchStorage(),
-            )),
+        onTap:
+            () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const FailedPatchStorage(),
+              ),
+            ),
         child: Container(
-            alignment: Alignment.center,
-            width: double.infinity,
-            height: 28,
-            color: Colors.orange,
-            child: Text(
-                "Tap to see ${data.failedPatches.length} failed patch(es)!")),
+          alignment: Alignment.center,
+          width: double.infinity,
+          height: 28,
+          color: Colors.orange,
+          child: Text(
+            "Tap to see ${data.failedPatches.length} failed patch(es)!",
+          ),
+        ),
       );
     }
 
     if (data.isDataSourceUriRemote && data.connected == false) {
       return Container(
-          alignment: Alignment.center,
-          width: double.infinity,
-          height: 20,
-          color: Theme.of(context).colorScheme.errorContainer,
-          child: const Text("No Connection"));
+        alignment: Alignment.center,
+        width: double.infinity,
+        height: 20,
+        color: Theme.of(context).colorScheme.errorContainer,
+        child: const Text("No Connection"),
+      );
     }
 
     return StreamBuilder<int>(

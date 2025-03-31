@@ -45,7 +45,7 @@ class _SelectDataSourceScreenState extends State<SelectDataSourceScreen> {
     await for (final item in remoteDBPath.list()) {
       items.add((
         Uri.decodeFull(utf8.decode(base64Decode(item.path.split('/').last))),
-        item.path
+        item.path,
       ));
     }
     if (context.mounted) {
@@ -73,9 +73,7 @@ class _SelectDataSourceScreenState extends State<SelectDataSourceScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Data Selection"),
-      ),
+      appBar: AppBar(title: const Text("Data Selection")),
       body: ListView(
         children: [
           /// DEMO Data (generate mocked data?! could use real randomized data)
@@ -91,8 +89,9 @@ class _SelectDataSourceScreenState extends State<SelectDataSourceScreen> {
             title: const Text("New Local Database"),
             onTap: () async {
               final String? scout = await showDialog(
-                  context: context,
-                  builder: (context) => const ScoutRegistrationScreen());
+                context: context,
+                builder: (context) => const ScoutRegistrationScreen(),
+              );
 
               if (context.mounted && scout != null) {
                 final value = await createNewEvent(context);
@@ -103,15 +102,19 @@ class _SelectDataSourceScreenState extends State<SelectDataSourceScreen> {
                 if (context.mounted) {
                   FRCEvent event = FRCEvent.fromJson(json.decode(value));
                   Patch p = Patch(
-                      identity: scout,
-                      time: DateTime.now(),
-                      path: Patch.buildPath([""]),
-                      value: event.toJson());
+                    identity: scout,
+                    time: DateTime.now(),
+                    path: Patch.buildPath([""]),
+                    value: event.toJson(),
+                  );
 
                   final sourceUri = Uri.parse(
-                      '${localSnoutDBPath.path}/${event.config.name}.snoutdb');
+                    '${localSnoutDBPath.path}/${event.config.name}.snoutdb',
+                  );
                   await writeLocalDiskDatabase(
-                      SnoutDB(patches: [p]), sourceUri);
+                    SnoutDB(patches: [p]),
+                    sourceUri,
+                  );
 
                   if (context.mounted) {
                     await SnoutScoutApp.getState(context)?.setSource(sourceUri);
@@ -127,7 +130,8 @@ class _SelectDataSourceScreenState extends State<SelectDataSourceScreen> {
             leading: const Icon(Icons.file_open),
             title: const Text("Load From Device"),
             subtitle: const Text(
-                "It will override any local databases with the same name."),
+              "It will override any local databases with the same name.",
+            ),
             onTap: () async {
               final future = () async {
                 try {
@@ -136,7 +140,8 @@ class _SelectDataSourceScreenState extends State<SelectDataSourceScreen> {
                     extensions: ['snoutdb'],
                   );
                   final XFile? selectedFile = await openFile(
-                      acceptedTypeGroups: <XTypeGroup>[typeGroup]);
+                    acceptedTypeGroups: <XTypeGroup>[typeGroup],
+                  );
 
                   if (selectedFile == null) {
                     return;
@@ -144,8 +149,9 @@ class _SelectDataSourceScreenState extends State<SelectDataSourceScreen> {
 
                   final fileContent = await selectedFile.readAsBytes();
 
-                  final localFile =
-                      fs.file('${localSnoutDBPath.path}/${selectedFile.name}');
+                  final localFile = fs.file(
+                    '${localSnoutDBPath.path}/${selectedFile.name}',
+                  );
                   if (await localFile.exists() == false) {
                     await localFile.create(recursive: true);
                   }
@@ -173,18 +179,20 @@ class _SelectDataSourceScreenState extends State<SelectDataSourceScreen> {
             subtitle: const Text("Connect to remote server"),
             onTap: () async {
               final result = await showStringInputDialog(
-                  context,
-                  "Server",
-                  kDebugMode
-                      ? 'http://127.0.0.1:6749'
-                      : 'https://myserver.com');
+                context,
+                "Server",
+                kDebugMode ? 'http://127.0.0.1:6749' : 'https://myserver.com',
+              );
 
               if (context.mounted && result != null) {
                 final eventFile = await Navigator.push<Uri>(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) =>
-                            SnoutServerPage(serverUri: Uri.parse(result))));
+                  context,
+                  MaterialPageRoute(
+                    builder:
+                        (context) =>
+                            SnoutServerPage(serverUri: Uri.parse(result)),
+                  ),
+                );
 
                 if (context.mounted && eventFile != null) {
                   await SnoutScoutApp.getState(context)?.setSource(eventFile);
@@ -197,26 +205,26 @@ class _SelectDataSourceScreenState extends State<SelectDataSourceScreen> {
           ),
           const Divider(),
 
-          const ListTile(
-            title: Text('Databases'),
-          ),
+          const ListTile(title: Text('Databases')),
 
           for (final item in _localDatabases)
             ListTile(
               title: Text(item),
               onTap: () async {
-                await SnoutScoutApp.getState(context)
-                    ?.setSource(Uri.parse(item));
+                await SnoutScoutApp.getState(
+                  context,
+                )?.setSource(Uri.parse(item));
                 if (context.mounted && Navigator.canPop(context)) {
                   Navigator.pop(context);
                 }
               },
               trailing: IconButton(
-                  onPressed: () async {
-                    await fs.file(item).delete();
-                    updateLocalDbs();
-                  },
-                  icon: const Icon(Icons.delete)),
+                onPressed: () async {
+                  await fs.file(item).delete();
+                  updateLocalDbs();
+                },
+                icon: const Icon(Icons.delete),
+              ),
             ),
 
           // The servers and local implementations are different due to how
@@ -225,22 +233,27 @@ class _SelectDataSourceScreenState extends State<SelectDataSourceScreen> {
             ListTile(
               title: Text(item.$1),
               leading: IconButton(
-                  onPressed: () => Share.share(
-                      'https://snout-scout.web.app/#/${Uri.encodeComponent(item.$1)}'),
-                  icon: const Icon(Icons.share)),
+                onPressed:
+                    () => Share.share(
+                      'https://snout-scout.web.app/#/${Uri.encodeComponent(item.$1)}',
+                    ),
+                icon: const Icon(Icons.share),
+              ),
               onTap: () async {
-                await SnoutScoutApp.getState(context)
-                    ?.setSource(Uri.parse(item.$1));
+                await SnoutScoutApp.getState(
+                  context,
+                )?.setSource(Uri.parse(item.$1));
                 if (context.mounted && Navigator.canPop(context)) {
                   Navigator.pop(context);
                 }
               },
               trailing: IconButton(
-                  onPressed: () async {
-                    await fs.file(item.$2).delete();
-                    updateServerList();
-                  },
-                  icon: const Icon(Icons.delete)),
+                onPressed: () async {
+                  await fs.file(item.$2).delete();
+                  updateServerList();
+                },
+                icon: const Icon(Icons.delete),
+              ),
             ),
         ],
       ),
@@ -307,7 +320,9 @@ class _SnoutServerPageState extends State<SnoutServerPage> {
         title: Text(widget.serverUri.toString()),
         actions: [
           IconButton(
-              onPressed: () => updateEvents(), icon: const Icon(Icons.refresh)),
+            onPressed: () => updateEvents(),
+            icon: const Icon(Icons.refresh),
+          ),
         ],
       ),
       body: ListView(
@@ -324,66 +339,80 @@ class _SnoutServerPageState extends State<SnoutServerPage> {
                     TextEditingController passwordTextController =
                         TextEditingController();
                     await showDialog(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                              content: TextField(
-                                controller: passwordTextController,
-                                decoration: const InputDecoration(
-                                    hintText: "Upload Password"),
+                      context: context,
+                      builder:
+                          (context) => AlertDialog(
+                            content: TextField(
+                              controller: passwordTextController,
+                              decoration: const InputDecoration(
+                                hintText: "Upload Password",
                               ),
-                              actions: [
-                                TextButton(
-                                    onPressed: () => Navigator.pop(context),
-                                    child: const Text("Cancel")),
-                                TextButton(
-                                    onPressed: () async {
-                                      final response = await http.delete(
-                                          getEventPath(event),
-                                          headers: {
-                                            'upload_password':
-                                                passwordTextController.text,
-                                          });
-
-                                      if (!context.mounted) {
-                                        return;
-                                      }
-
-                                      if (response.statusCode == 200) {
-                                        Navigator.pop(context);
-                                        showDialog(
-                                            context: context,
-                                            builder: (context) => AlertDialog(
-                                                  title: const Text(
-                                                      "Delete Success!"),
-                                                  actions: [
-                                                    TextButton(
-                                                        onPressed: () =>
-                                                            Navigator.pop(
-                                                                context),
-                                                        child: const Text("Ok"))
-                                                  ],
-                                                ));
-                                      } else {
-                                        showDialog(
-                                            context: context,
-                                            builder: (context) => AlertDialog(
-                                                  title: Text(
-                                                      "Faied to delete ${response.statusCode} ${response.body}"),
-                                                  actions: [
-                                                    TextButton(
-                                                        onPressed: () =>
-                                                            Navigator.pop(
-                                                                context),
-                                                        child: const Text("Ok"))
-                                                  ],
-                                                ));
-                                      }
-
-                                      updateEvents();
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text("Cancel"),
+                              ),
+                              TextButton(
+                                onPressed: () async {
+                                  final response = await http.delete(
+                                    getEventPath(event),
+                                    headers: {
+                                      'upload_password':
+                                          passwordTextController.text,
                                     },
-                                    child: const Text("Delete Event"))
-                              ],
-                            ));
+                                  );
+
+                                  if (!context.mounted) {
+                                    return;
+                                  }
+
+                                  if (response.statusCode == 200) {
+                                    Navigator.pop(context);
+                                    showDialog(
+                                      context: context,
+                                      builder:
+                                          (context) => AlertDialog(
+                                            title: const Text(
+                                              "Delete Success!",
+                                            ),
+                                            actions: [
+                                              TextButton(
+                                                onPressed:
+                                                    () =>
+                                                        Navigator.pop(context),
+                                                child: const Text("Ok"),
+                                              ),
+                                            ],
+                                          ),
+                                    );
+                                  } else {
+                                    showDialog(
+                                      context: context,
+                                      builder:
+                                          (context) => AlertDialog(
+                                            title: Text(
+                                              "Faied to delete ${response.statusCode} ${response.body}",
+                                            ),
+                                            actions: [
+                                              TextButton(
+                                                onPressed:
+                                                    () =>
+                                                        Navigator.pop(context),
+                                                child: const Text("Ok"),
+                                              ),
+                                            ],
+                                          ),
+                                    );
+                                  }
+
+                                  updateEvents();
+                                },
+                                child: const Text("Delete Event"),
+                              ),
+                            ],
+                          ),
+                    );
                   },
                 ),
               ),
@@ -395,93 +424,110 @@ class _SnoutServerPageState extends State<SnoutServerPage> {
                 TextEditingController passwordTextController =
                     TextEditingController();
                 await showDialog(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                          content: TextField(
-                            controller: passwordTextController,
-                            decoration: const InputDecoration(
-                                hintText: "Upload Password"),
+                  context: context,
+                  builder:
+                      (context) => AlertDialog(
+                        content: TextField(
+                          controller: passwordTextController,
+                          decoration: const InputDecoration(
+                            hintText: "Upload Password",
                           ),
-                          actions: [
-                            TextButton(
-                                onPressed: () => Navigator.pop(context),
-                                child: const Text("Cancel")),
-                            TextButton(
-                                onPressed: () async {
-                                  const XTypeGroup typeGroup = XTypeGroup(
-                                    label: 'Snout DB',
-                                    extensions: <String>['snoutdb'],
-                                  );
-                                  final XFile? file = await openFile(
-                                      acceptedTypeGroups: <XTypeGroup>[
-                                        typeGroup
-                                      ]);
-                                  if (!context.mounted) {
-                                    return;
-                                  }
-                                  if (file == null) {
-                                    showDialog(
-                                        context: context,
-                                        builder: (context) => AlertDialog(
-                                              title: const Text(
-                                                  "No File Selected!"),
-                                              actions: [
-                                                TextButton(
-                                                    onPressed: () =>
-                                                        Navigator.pop(context),
-                                                    child: const Text("Ok"))
-                                              ],
-                                            ));
-                                    return;
-                                  }
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text("Cancel"),
+                          ),
+                          TextButton(
+                            onPressed: () async {
+                              const XTypeGroup typeGroup = XTypeGroup(
+                                label: 'Snout DB',
+                                extensions: <String>['snoutdb'],
+                              );
+                              final XFile? file = await openFile(
+                                acceptedTypeGroups: <XTypeGroup>[typeGroup],
+                              );
+                              if (!context.mounted) {
+                                return;
+                              }
+                              if (file == null) {
+                                showDialog(
+                                  context: context,
+                                  builder:
+                                      (context) => AlertDialog(
+                                        title: const Text("No File Selected!"),
+                                        actions: [
+                                          TextButton(
+                                            onPressed:
+                                                () => Navigator.pop(context),
+                                            child: const Text("Ok"),
+                                          ),
+                                        ],
+                                      ),
+                                );
+                                return;
+                              }
 
-                                  final request = http.MultipartRequest(
-                                      "PUT",
-                                      widget.serverUri
-                                          .replace(path: "/upload_events"));
-                                  request.headers['upload_password'] =
-                                      passwordTextController.text;
-                                  request.files.add(
-                                      http.MultipartFile.fromBytes(
-                                          file.name, await file.readAsBytes()));
-                                  final response = await request.send();
-                                  if (!context.mounted) {
-                                    return;
-                                  }
-                                  if (response.statusCode == 200) {
-                                    Navigator.pop(context);
-                                    showDialog(
-                                        context: context,
-                                        builder: (context) => AlertDialog(
-                                              title:
-                                                  const Text("Upload Success!"),
-                                              actions: [
-                                                TextButton(
-                                                    onPressed: () =>
-                                                        Navigator.pop(context),
-                                                    child: const Text("Ok"))
-                                              ],
-                                            ));
-                                  } else {
-                                    showDialog(
-                                        context: context,
-                                        builder: (context) => AlertDialog(
-                                              title: Text(
-                                                  "Faied to upload ${response.statusCode}"),
-                                              actions: [
-                                                TextButton(
-                                                    onPressed: () =>
-                                                        Navigator.pop(context),
-                                                    child: const Text("Ok"))
-                                              ],
-                                            ));
-                                  }
+                              final request = http.MultipartRequest(
+                                "PUT",
+                                widget.serverUri.replace(
+                                  path: "/upload_events",
+                                ),
+                              );
+                              request.headers['upload_password'] =
+                                  passwordTextController.text;
+                              request.files.add(
+                                http.MultipartFile.fromBytes(
+                                  file.name,
+                                  await file.readAsBytes(),
+                                ),
+                              );
+                              final response = await request.send();
+                              if (!context.mounted) {
+                                return;
+                              }
+                              if (response.statusCode == 200) {
+                                Navigator.pop(context);
+                                showDialog(
+                                  context: context,
+                                  builder:
+                                      (context) => AlertDialog(
+                                        title: const Text("Upload Success!"),
+                                        actions: [
+                                          TextButton(
+                                            onPressed:
+                                                () => Navigator.pop(context),
+                                            child: const Text("Ok"),
+                                          ),
+                                        ],
+                                      ),
+                                );
+                              } else {
+                                showDialog(
+                                  context: context,
+                                  builder:
+                                      (context) => AlertDialog(
+                                        title: Text(
+                                          "Faied to upload ${response.statusCode}",
+                                        ),
+                                        actions: [
+                                          TextButton(
+                                            onPressed:
+                                                () => Navigator.pop(context),
+                                            child: const Text("Ok"),
+                                          ),
+                                        ],
+                                      ),
+                                );
+                              }
 
-                                  updateEvents();
-                                },
-                                child: const Text("Select File"))
-                          ],
-                        ));
+                              updateEvents();
+                            },
+                            child: const Text("Select File"),
+                          ),
+                        ],
+                      ),
+                );
               },
             ),
         ],
@@ -491,10 +537,15 @@ class _SnoutServerPageState extends State<SnoutServerPage> {
 }
 
 Future<String?> createNewEvent(BuildContext context) async {
-  return await Navigator.of(context).push(MaterialPageRoute(
-      builder: (context) =>
-          JSONEditor(source: emptyNewEvent, validate: FRCEvent.fromJson)));
+  return await Navigator.of(context).push(
+    MaterialPageRoute(
+      builder:
+          (context) =>
+              JSONEditor(source: emptyNewEvent, validate: FRCEvent.fromJson),
+    ),
+  );
 }
 
 FRCEvent get emptyNewEvent => FRCEvent(
-    config: const EventConfig(name: 'Event Name', team: 6749, fieldImage: ''));
+  config: const EventConfig(name: 'Event Name', team: 6749, fieldImage: ''),
+);

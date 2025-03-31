@@ -22,13 +22,14 @@ class _BoxPlotAnalysisState extends State<BoxPlotAnalysis> {
   void initState() {
     super.initState();
     //Automatically select the first process by default if it exists (it might be null!)
-    _selectedProcess = context
-        .read<DataProvider>()
-        .event
-        .config
-        .matchscouting
-        .processes
-        .firstOrNull;
+    _selectedProcess =
+        context
+            .read<DataProvider>()
+            .event
+            .config
+            .matchscouting
+            .processes
+            .firstOrNull;
   }
 
   @override
@@ -42,11 +43,14 @@ class _BoxPlotAnalysisState extends State<BoxPlotAnalysis> {
           MapEntry(team, [
             for (final match in data.event.teamRecordedMatches(team))
               data.event
-                      .runMatchResultsProcess(_selectedProcess!,
-                          match.value.robot[team.toString()], team)
+                      .runMatchResultsProcess(
+                        _selectedProcess!,
+                        match.value.robot[team.toString()],
+                        team,
+                      )
                       ?.value ??
-                  0
-          ])
+                  0,
+          ]),
       ]);
     }
 
@@ -58,34 +62,43 @@ class _BoxPlotAnalysisState extends State<BoxPlotAnalysis> {
     }
 
     //Calculate the min and max values in the set
-    num min = teamValues?.values.fold(
-            0,
-            (previousValue, element) => element.isEmpty
-                ? (previousValue ?? 0)
-                : previousValue! < element.min
-                    ? previousValue
-                    : element.min) ??
+    num min =
+        teamValues?.values.fold(
+          0,
+          (previousValue, element) =>
+              element.isEmpty
+                  ? (previousValue ?? 0)
+                  : previousValue! < element.min
+                  ? previousValue
+                  : element.min,
+        ) ??
         0;
 
-    num max = teamValues?.values.fold(
-            0,
-            (previousValue, element) => element.isEmpty
-                ? (previousValue ?? 0)
-                : previousValue! > element.max
-                    ? previousValue
-                    : element.max) ??
+    num max =
+        teamValues?.values.fold(
+          0,
+          (previousValue, element) =>
+              element.isEmpty
+                  ? (previousValue ?? 0)
+                  : previousValue! > element.max
+                  ? previousValue
+                  : element.max,
+        ) ??
         0;
 
     //Sort them by the average
     SplayTreeMap<int, List<num>>? valuesSorted;
     if (teamValues != null) {
-      valuesSorted =
-          SplayTreeMap<int, List<num>>.from(teamValues, (key1, key2) {
+      valuesSorted = SplayTreeMap<int, List<num>>.from(teamValues, (
+        key1,
+        key2,
+      ) {
         final a = teamValues?[key2];
         final b = teamValues?[key1];
         return Comparable.compare(
-            a?.isEmpty ?? true ? double.negativeInfinity : a!.average,
-            b?.isEmpty ?? true ? double.negativeInfinity : b!.average);
+          a?.isEmpty ?? true ? double.negativeInfinity : a!.average,
+          b?.isEmpty ?? true ? double.negativeInfinity : b!.average,
+        );
       });
     }
 
@@ -101,33 +114,42 @@ class _BoxPlotAnalysisState extends State<BoxPlotAnalysis> {
                 _selectedProcess = value!;
               });
             },
-            items: data.event.config.matchscouting.processes
-                .map<DropdownMenuItem<MatchResultsProcess>>(
-                    (MatchResultsProcess value) {
-              return DropdownMenuItem<MatchResultsProcess>(
-                value: value,
-                child: Text(value.label),
-              );
-            }).toList(),
+            items:
+                data.event.config.matchscouting.processes
+                    .map<DropdownMenuItem<MatchResultsProcess>>((
+                      MatchResultsProcess value,
+                    ) {
+                      return DropdownMenuItem<MatchResultsProcess>(
+                        value: value,
+                        child: Text(value.label),
+                      );
+                    })
+                    .toList(),
           ),
           if (teamValues == null) const Text("Select a process to see a plot"),
           if (valuesSorted != null)
-            Row(children: [
-              const SizedBox(width: 100, child: Center(child: Text("Team"))),
-              Expanded(
+            Row(
+              children: [
+                const SizedBox(width: 100, child: Center(child: Text("Team"))),
+                Expanded(
                   child: CustomPaint(
-                      painter: BoxPlotLabelPainter(
-                          BoxPlot(values: const [], min: min, max: max),
-                          MediaQuery.of(context).size.height))),
-              const SizedBox(width: 32),
-            ]),
+                    painter: BoxPlotLabelPainter(
+                      BoxPlot(values: const [], min: min, max: max),
+                      MediaQuery.of(context).size.height,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 32),
+              ],
+            ),
           Expanded(
             child: ListView(
               children: [
                 if (valuesSorted != null)
                   for (final entry in valuesSorted.entries)
-                    Row(children: [
-                      SizedBox(
+                    Row(
+                      children: [
+                        SizedBox(
                           width: 100,
                           child: TextButton(
                             child: Text(entry.key.toString()),
@@ -136,16 +158,24 @@ class _BoxPlotAnalysisState extends State<BoxPlotAnalysis> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) =>
-                                        TeamViewPage(teamNumber: entry.key)),
+                                  builder:
+                                      (context) =>
+                                          TeamViewPage(teamNumber: entry.key),
+                                ),
                               );
                             },
-                          )),
-                      Expanded(
-                          child:
-                              BoxPlot(max: max, min: min, values: entry.value)),
-                      const SizedBox(width: 32),
-                    ]),
+                          ),
+                        ),
+                        Expanded(
+                          child: BoxPlot(
+                            max: max,
+                            min: min,
+                            values: entry.value,
+                          ),
+                        ),
+                        const SizedBox(width: 32),
+                      ],
+                    ),
               ],
             ),
           ),

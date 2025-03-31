@@ -10,9 +10,7 @@ class ScoutStatusPage extends StatelessWidget {
     final scoutStatus = context.watch<DataProvider>().scoutStatus;
     context.read<DataProvider>().updateStatus(context, "Watching Scouts");
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Live Scout Status"),
-      ),
+      appBar: AppBar(title: const Text("Live Scout Status")),
       body: ListView(
         children: [
           for (final scout in scoutStatus)
@@ -20,7 +18,8 @@ class ScoutStatusPage extends StatelessWidget {
               title: Text(scout.identity),
               subtitle: Text(scout.status),
               trailing: Text(
-                  "${DateTime.now().difference(scout.time).inMinutes} min(s) ago"),
+                "${DateTime.now().difference(scout.time).inMinutes} min(s) ago",
+              ),
             ),
           if (scoutStatus.isEmpty) const Text("No active scouts"),
         ],

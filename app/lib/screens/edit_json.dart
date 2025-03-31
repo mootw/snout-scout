@@ -21,8 +21,9 @@ class _JSONEditorState extends State<JSONEditor> {
   @override
   void initState() {
     super.initState();
-    _controller.text =
-        const JsonEncoder.withIndent("    ").convert(widget.source);
+    _controller.text = const JsonEncoder.withIndent(
+      "    ",
+    ).convert(widget.source);
   }
 
   @override
@@ -33,12 +34,14 @@ class _JSONEditorState extends State<JSONEditor> {
           title: const Text("Edit"),
           actions: [
             IconButton(
-                onPressed: _error != ""
-                    ? null
-                    : () {
+              onPressed:
+                  _error != ""
+                      ? null
+                      : () {
                         Navigator.of(context).pop(_controller.text);
                       },
-                icon: const Icon(Icons.save))
+              icon: const Icon(Icons.save),
+            ),
           ],
         ),
         body: Column(
@@ -62,8 +65,10 @@ class _JSONEditorState extends State<JSONEditor> {
                 },
               ),
             ),
-            Text(_error,
-                style: TextStyle(color: Theme.of(context).colorScheme.error)),
+            Text(
+              _error,
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
           ],
         ),
       ),

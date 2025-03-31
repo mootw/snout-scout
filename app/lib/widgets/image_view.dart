@@ -12,14 +12,18 @@ class ImageViewer extends StatelessWidget {
     return InkWell(
       child: child,
       onTap: () {
-        Navigator.of(context).push(MaterialPageRoute(
-            builder: (context) => Scaffold(
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder:
+                (context) => Scaffold(
                   appBar: AppBar(),
                   body: PhotoView(
                     filterQuality: FilterQuality.medium,
                     imageProvider: child.image,
                   ),
-                )));
+                ),
+          ),
+        );
       },
     );
   }

@@ -65,7 +65,7 @@ class _PostGameRatioChartState extends State<PostGameRatioChart> {
         } else {
           valueKeys[item] = (
             count: valueKeys[item]!.count + 1,
-            teams: [...valueKeys[item]!.teams, robot.key]
+            teams: [...valueKeys[item]!.teams, robot.key],
           );
         }
       }
@@ -74,38 +74,47 @@ class _PostGameRatioChartState extends State<PostGameRatioChart> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(widget.surveyItem.label,
-            style: Theme.of(context).textTheme.titleMedium),
+        Text(
+          widget.surveyItem.label,
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
         SizedBox(
           height: 250,
           width: 250,
-          child: PieChart(PieChartData(
+          child: PieChart(
+            PieChartData(
               pieTouchData: PieTouchData(
                 touchCallback: (FlTouchEvent event, pieTouchResponse) {
                   setState(() {
                     _selectedIndex =
                         pieTouchResponse?.touchedSection?.touchedSectionIndex ??
-                            _selectedIndex;
+                        _selectedIndex;
 
                     if (event is FlTapUpEvent && _selectedIndex != -1) {
                       //TODO this is so incredibly jank there is a weird timing issue where it gets modified randomly...
                       int asdf = _selectedIndex;
                       Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => Scaffold(
-                              appBar: AppBar(
+                        context,
+                        MaterialPageRoute(
+                          builder:
+                              (context) => Scaffold(
+                                appBar: AppBar(
                                   title: Text(
-                                      '${widget.surveyItem.label}:  ${valueKeys.entries.toList()[asdf].key}')),
-                              body: TeamGridList(
-                                  teamFilter: valueKeys.entries
-                                      .toList()[asdf]
-                                      .value
-                                      .teams
-                                      .map<int>((e) => int.parse(e))
-                                      .toList()),
-                            ),
-                          ));
+                                    '${widget.surveyItem.label}:  ${valueKeys.entries.toList()[asdf].key}',
+                                  ),
+                                ),
+                                body: TeamGridList(
+                                  teamFilter:
+                                      valueKeys.entries
+                                          .toList()[asdf]
+                                          .value
+                                          .teams
+                                          .map<int>((e) => int.parse(e))
+                                          .toList(),
+                                ),
+                              ),
+                        ),
+                      );
                     }
                     if (!event.isInterestedForInteractions ||
                         pieTouchResponse == null ||
@@ -123,11 +132,15 @@ class _PostGameRatioChartState extends State<PostGameRatioChart> {
                     radius: 40,
                     // Shorten the text to 30 "characters"
                     title: valueKeys.entries.toList()[i].key.substring(
-                        0, min(valueKeys.entries.toList()[i].key.length, 30)),
+                      0,
+                      min(valueKeys.entries.toList()[i].key.length, 30),
+                    ),
                     value: valueKeys.entries.toList()[i].value.count.toDouble(),
                     color: getColorFromIndex(i),
                   ),
-              ])),
+              ],
+            ),
+          ),
         ),
       ],
     );

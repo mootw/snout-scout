@@ -81,9 +81,11 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
       setState(() {
         _loading = true;
       });
-      _subscription?.onDone(() => setState(() {
-            _loading = false;
-          }));
+      _subscription?.onDone(
+        () => setState(() {
+          _loading = false;
+        }),
+      );
     }
   }
 
@@ -103,13 +105,18 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
       children: [
         if (_loading) const LinearProgressIndicator(),
         Expanded(
-          child: ListView(cacheExtent: 10000, children: [
-            if (!_loading && _results.isEmpty)
-              ListTile(
+          child: ListView(
+            cacheExtent: 10000,
+            children: [
+              if (!_loading && _results.isEmpty)
+                ListTile(
                   title: Text(
-                      'No Results. Try a different query like: "broke", "fast", or "disabled"')),
-            for (final result in _results) result.builder(context),
-          ]),
+                    'No Results. Try a different query like: "broke", "fast", or "disabled"',
+                  ),
+                ),
+              for (final result in _results) result.builder(context),
+            ],
+          ),
         ),
       ],
     );
@@ -143,9 +150,10 @@ Stream<SearchResult> _search(FRCEvent event, String query) async* {
       continue;
     }
 
-    final quality = team.toString().startsWith(query)
-        ? 1
-        : (team.toString().contains(query) ? 0.9 : -1);
+    final quality =
+        team.toString().startsWith(query)
+            ? 1
+            : (team.toString().contains(query) ? 0.9 : -1);
     if (quality >= 0) {
       //Load the robot picture to show in the search if it is available
       Widget? robotPicture;
@@ -153,25 +161,27 @@ Stream<SearchResult> _search(FRCEvent event, String query) async* {
           event.pitscouting[team.toString()]?[robotPictureReserved];
       if (pictureData != null) {
         robotPicture = AspectRatio(
-            aspectRatio: 1,
-            child: Image(
-                image: snoutImageCache.getCached(pictureData),
-                fit: BoxFit.cover));
+          aspectRatio: 1,
+          child: Image(
+            image: snoutImageCache.getCached(pictureData),
+            fit: BoxFit.cover,
+          ),
+        );
       }
       yield SearchResult(
-          quality.toDouble(),
-          (context) => ListTile(
-                leading: robotPicture,
-                title: Text(team.toString()),
-                subtitle: const Text("Team"),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (_) => TeamViewPage(teamNumber: team)),
-                  );
-                },
-              ));
+        quality.toDouble(),
+        (context) => ListTile(
+          leading: robotPicture,
+          title: Text(team.toString()),
+          subtitle: const Text("Team"),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => TeamViewPage(teamNumber: team)),
+            );
+          },
+        ),
+      );
     }
   }
 
@@ -182,18 +192,18 @@ Stream<SearchResult> _search(FRCEvent event, String query) async* {
     final quality = match.label.toLowerCase().similarityTo(query);
     if (quality >= 0.8) {
       yield SearchResult(
-          quality,
-          (context) => ListTile(
-                title: Text(match.label),
-                subtitle: const Text("Match"),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (_) => MatchPage(matchid: match.id)),
-                  );
-                },
-              ));
+        quality,
+        (context) => ListTile(
+          title: Text(match.label),
+          subtitle: const Text("Match"),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => MatchPage(matchid: match.id)),
+            );
+          },
+        ),
+      );
     }
   }
 
@@ -208,8 +218,9 @@ Stream<SearchResult> _search(FRCEvent event, String query) async* {
     }
 
     for (final item in pitScouting.entries) {
-      final surveyItem = event.config.pitscouting
-          .firstWhereOrNull((element) => element.id == item.key);
+      final surveyItem = event.config.pitscouting.firstWhereOrNull(
+        (element) => element.id == item.key,
+      );
       if (surveyItem == null) {
         continue;
       }
@@ -217,8 +228,10 @@ Stream<SearchResult> _search(FRCEvent event, String query) async* {
         //Do not include image data.
         continue;
       }
-      final quality =
-          _fuzzyMatchSentence(item.value.toString().toLowerCase(), query);
+      final quality = _fuzzyMatchSentence(
+        item.value.toString().toLowerCase(),
+        query,
+      );
       if (quality >= threshold) {
         //Load the robot picture to show in the search if it is available
         Widget? robotPicture;
@@ -226,26 +239,30 @@ Stream<SearchResult> _search(FRCEvent event, String query) async* {
             event.pitscouting[team.toString()]?[robotPictureReserved];
         if (pictureData != null) {
           robotPicture = AspectRatio(
-              aspectRatio: 1,
-              child: Image(
-                  image: snoutImageCache.getCached(pictureData),
-                  fit: BoxFit.cover));
+            aspectRatio: 1,
+            child: Image(
+              image: snoutImageCache.getCached(pictureData),
+              fit: BoxFit.cover,
+            ),
+          );
         }
 
         yield SearchResult(
-            quality,
-            (context) => ListTile(
-                  leading: robotPicture,
-                  title: Text('${item.value}'),
-                  subtitle: Text("${team.toString()}: ${surveyItem.id}"),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (_) => TeamViewPage(teamNumber: team)),
-                    );
-                  },
-                ));
+          quality,
+          (context) => ListTile(
+            leading: robotPicture,
+            title: Text('${item.value}'),
+            subtitle: Text("${team.toString()}: ${surveyItem.id}"),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => TeamViewPage(teamNumber: team),
+                ),
+              );
+            },
+          ),
+        );
       }
     }
   }
@@ -257,32 +274,37 @@ Stream<SearchResult> _search(FRCEvent event, String query) async* {
     }
     for (final robot in match.value.robot.entries) {
       for (final value in robot.value.survey.entries) {
-        final surveyItem = event.config.matchscouting.survey
-            .firstWhereOrNull((element) => element.id == value.key);
+        final surveyItem = event.config.matchscouting.survey.firstWhereOrNull(
+          (element) => element.id == value.key,
+        );
         if (surveyItem?.type == SurveyItemType.picture) {
           //Do not include image data.
           continue;
         }
 
-        final quality =
-            _fuzzyMatchSentence(value.value.toString().toLowerCase(), query);
+        final quality = _fuzzyMatchSentence(
+          value.value.toString().toLowerCase(),
+          query,
+        );
 
         if (quality >= threshold) {
           yield SearchResult(
-              quality,
-              (context) => ListTile(
-                    title: Text(value.value.toString()),
-                    subtitle: Text(
-                        "${event.schedule[match.key]?.label}: ${robot.key}: ${value.key}"),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) =>
-                                MatchPage(matchid: match.key)),
-                      );
-                    },
-                  ));
+            quality,
+            (context) => ListTile(
+              title: Text(value.value.toString()),
+              subtitle: Text(
+                "${event.schedule[match.key]?.label}: ${robot.key}: ${value.key}",
+              ),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => MatchPage(matchid: match.key),
+                  ),
+                );
+              },
+            ),
+          );
         }
       }
     }

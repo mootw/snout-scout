@@ -14,8 +14,12 @@ class PitScoutTeamPage extends StatefulWidget {
   final List<SurveyItem> config;
   final DynamicProperties? initialData;
 
-  const PitScoutTeamPage(
-      {super.key, required this.team, required this.config, this.initialData});
+  const PitScoutTeamPage({
+    super.key,
+    required this.team,
+    required this.config,
+    this.initialData,
+  });
 
   @override
   State<PitScoutTeamPage> createState() => _PitScoutTeamPageState();
@@ -37,9 +41,10 @@ class _PitScoutTeamPageState extends State<PitScoutTeamPage> {
 
   @override
   Widget build(BuildContext context) {
-    context
-        .read<DataProvider>()
-        .updateStatus(context, "Scouting team ${widget.team}");
+    context.read<DataProvider>().updateStatus(
+      context,
+      "Scouting team ${widget.team}",
+    );
     return ConfirmExitDialog(
       child: Scaffold(
         appBar: AppBar(
@@ -47,36 +52,43 @@ class _PitScoutTeamPageState extends State<PitScoutTeamPage> {
           bottom: const LoadOrErrorStatusBar(),
           actions: [
             IconButton(
-                onPressed: () async {
-                  if (_formKey.currentState!.validate() == false) {
-                    //There are form errors, do nothing here.
-                    return;
-                  }
+              onPressed: () async {
+                if (_formKey.currentState!.validate() == false) {
+                  //There are form errors, do nothing here.
+                  return;
+                }
 
-                  final snoutData = context.read<DataProvider>();
-                  final identity = context.read<IdentityProvider>().identity;
+                final snoutData = context.read<DataProvider>();
+                final identity = context.read<IdentityProvider>().identity;
 
-                  //New map instance to avoid messing up the UI
-                  final onlyChanges = Map.of(_surveyItems)
-                      .entries
-                      .where((entry) =>
-                          widget.initialData?[entry.key] != entry.value)
-                      .toList();
-                  for (final item in onlyChanges) {
-                    Patch patch = Patch(
-                        identity: identity,
-                        time: DateTime.now(),
-                        path: Patch.buildPath(
-                            ['pitscouting', widget.team.toString(), item.key]),
-                        value: item.value);
-                    //Save the scouting results to the server!!
-                    await snoutData.newTransaction(patch);
-                  }
-                  if (context.mounted) {
-                    Navigator.of(context).pop(true);
-                  }
-                },
-                icon: const Icon(Icons.save))
+                //New map instance to avoid messing up the UI
+                final onlyChanges =
+                    Map.of(_surveyItems).entries
+                        .where(
+                          (entry) =>
+                              widget.initialData?[entry.key] != entry.value,
+                        )
+                        .toList();
+                for (final item in onlyChanges) {
+                  Patch patch = Patch(
+                    identity: identity,
+                    time: DateTime.now(),
+                    path: Patch.buildPath([
+                      'pitscouting',
+                      widget.team.toString(),
+                      item.key,
+                    ]),
+                    value: item.value,
+                  );
+                  //Save the scouting results to the server!!
+                  await snoutData.newTransaction(patch);
+                }
+                if (context.mounted) {
+                  Navigator.of(context).pop(true);
+                }
+              },
+              icon: const Icon(Icons.save),
+            ),
           ],
         ),
         body: Form(
@@ -86,12 +98,13 @@ class _PitScoutTeamPageState extends State<PitScoutTeamPage> {
             children: [
               for (final item in widget.config)
                 Container(
-                    padding: const EdgeInsets.all(12),
-                    child: DynamicPropertyEditorWidget(
-                      initialData: widget.initialData,
-                      tool: item,
-                      survey: _surveyItems,
-                    )),
+                  padding: const EdgeInsets.all(12),
+                  child: DynamicPropertyEditorWidget(
+                    initialData: widget.initialData,
+                    tool: item,
+                    survey: _surveyItems,
+                  ),
+                ),
             ],
           ),
         ),

@@ -36,20 +36,22 @@ class DataProvider extends ChangeNotifier {
   //Initialize the database as empty
   //this value should get quickly overwritten
   //i just dont like this being nullable is all.
-  SnoutDB _database = SnoutDB(patches: [
-    Patch(
-      /// Trick to get around the temporary database lol
-      /// This is super duper uber cursed. Basically
-      /// It is this to show a "loading..." chip in the UI
-      /// because right now the app loads the database after
-      /// displaying the dialog for selecting the scout
-      /// when it should really load the database before that...
-      identity: 'Loading...',
-      path: Patch.buildPath(['']),
-      time: DateTime.now(),
-      value: emptyNewEvent.toJson(),
-    )
-  ]);
+  SnoutDB _database = SnoutDB(
+    patches: [
+      Patch(
+        /// Trick to get around the temporary database lol
+        /// This is super duper uber cursed. Basically
+        /// It is this to show a "loading..." chip in the UI
+        /// because right now the app loads the database after
+        /// displaying the dialog for selecting the scout
+        /// when it should really load the database before that...
+        identity: 'Loading...',
+        path: Patch.buildPath(['']),
+        time: DateTime.now(),
+        value: emptyNewEvent.toJson(),
+      ),
+    ],
+  );
 
   set database(SnoutDB newDatabase) {
     _database = newDatabase;
@@ -108,11 +110,13 @@ class DataProvider extends ChangeNotifier {
 
     if (_channel != null && newStatus != _oldStatus) {
       //channel is still open
-      _channel?.sink.add(json.encode({
-        "type": SocketMessageType.scoutStatusUpdate,
-        "identity": identity,
-        "value": newStatus,
-      }));
+      _channel?.sink.add(
+        json.encode({
+          "type": SocketMessageType.scoutStatusUpdate,
+          "identity": identity,
+          "value": newStatus,
+        }),
+      );
       _oldStatus = newStatus;
     }
   }
@@ -164,42 +168,51 @@ class DataProvider extends ChangeNotifier {
       //and the database is ONLY based on patches.
       final newData = await apiClient.get(path);
 
-      final List<Patch> patches = (json.decode(newData.body) as List)
-          .map((e) => Patch.fromJson(e as Map))
-          .toList();
+      final List<Patch> patches =
+          (json.decode(newData.body) as List)
+              .map((e) => Patch.fromJson(e as Map))
+              .toList();
       final decodedDatabase = SnoutDB(patches: patches);
       database = decodedDatabase;
-      await storeText(storageKey,
-          json.encode(decodedDatabase.patches.map((e) => e.toJson()).toList()));
+      await storeText(
+        storageKey,
+        json.encode(decodedDatabase.patches.map((e) => e.toJson()).toList()),
+      );
       notifyListeners();
       return;
     }
 
     //Decode as list of patches
-    final patches = List.from(json.decode(diskData) as List)
-        .map((x) => Patch.fromJson(x))
-        .toList();
+    final patches =
+        List.from(
+          json.decode(diskData) as List,
+        ).map((x) => Patch.fromJson(x)).toList();
     final diskDatabase = SnoutDB(patches: patches);
 
     //Assign to local database so even when it fails to load, we still have
     //the latest disk database
     database = diskDatabase;
-    Uri diffPath =
-        Uri.parse('${Uri.decodeFull(dataSourceUri.toString())}/patchDiff');
-    final diffResult = await apiClient.get(diffPath, headers: {
-      "head": diskDatabase.patches.length.toString(),
-    });
+    Uri diffPath = Uri.parse(
+      '${Uri.decodeFull(dataSourceUri.toString())}/patchDiff',
+    );
+    final diffResult = await apiClient.get(
+      diffPath,
+      headers: {"head": diskDatabase.patches.length.toString()},
+    );
 
-    List<Patch> diffPatches = (json.decode(diffResult.body) as List<dynamic>)
-        .map((e) => Patch.fromJson(e as Map))
-        .toList();
+    List<Patch> diffPatches =
+        (json.decode(diffResult.body) as List<dynamic>)
+            .map((e) => Patch.fromJson(e as Map))
+            .toList();
 
     if (diffPatches.isNotEmpty) {
       // update local with new patches ONLY if it is not empty
       // since instantiating a SnoutDB is SLOW
       database = SnoutDB(patches: [...diskDatabase.patches, ...diffPatches]);
-      await storeText(storageKey,
-          json.encode(database.patches.map((e) => e.toJson()).toList()));
+      await storeText(
+        storageKey,
+        json.encode(database.patches.map((e) => e.toJson()).toList()),
+      );
     }
 
     notifyListeners();
@@ -264,8 +277,11 @@ class DataProvider extends ChangeNotifier {
     // right now there is no REASON to send data that frequently. There is a ping option in the IO implementation of the lib
     // but since this is primarily a web app we cant use that.
 
-    _channel = WebSocketChannel.connect(Uri.parse(
-        '${dataSourceUri.toString().startsWith("https") ? "wss" : "ws"}://${dataSourceUri.host}:${dataSourceUri.port}/listen/${dataSourceUri.pathSegments.last}'));
+    _channel = WebSocketChannel.connect(
+      Uri.parse(
+        '${dataSourceUri.toString().startsWith("https") ? "wss" : "ws"}://${dataSourceUri.host}:${dataSourceUri.port}/listen/${dataSourceUri.pathSegments.last}',
+      ),
+    );
 
     _channel!.ready.then((_) {
       if (connected == false) {
@@ -279,77 +295,85 @@ class DataProvider extends ChangeNotifier {
       notifyListeners();
     });
 
-    _subscription = _channel!.stream.listen((event) async {
-      // ignore: avoid_print
-      print("new socket message: $event");
+    _subscription = _channel!.stream.listen(
+      (event) async {
+        // ignore: avoid_print
+        print("new socket message: $event");
 
-      try {
-        final decoded = json.decode(event);
+        try {
+          final decoded = json.decode(event);
 
-        switch (decoded['type'] as String?) {
-          case SocketMessageType.scoutStatus:
-            final list = decoded['value'] as List;
+          switch (decoded['type'] as String?) {
+            case SocketMessageType.scoutStatus:
+              final list = decoded['value'] as List;
 
-            scoutStatus.clear();
-            for (final item in list) {
-              scoutStatus.add((
-                identity: item['identity'],
-                status: item['status'],
-                time: DateTime.parse(item['time']),
-              ));
-            }
+              scoutStatus.clear();
+              for (final item in list) {
+                scoutStatus.add((
+                  identity: item['identity'],
+                  status: item['status'],
+                  time: DateTime.parse(item['time']),
+                ));
+              }
 
-            break;
-          case SocketMessageType.newPatch:
+              break;
+            case SocketMessageType.newPatch:
 
-            //apply patch to local state BUT do not save it to
-            //disk because it is AMBIGUOUS what the local state is
-            // This is due to time of arrival and whatnot...
-            final patch = Patch.fromJson(decoded['patch']);
+              //apply patch to local state BUT do not save it to
+              //disk because it is AMBIGUOUS what the local state is
+              // This is due to time of arrival and whatnot...
+              final patch = Patch.fromJson(decoded['patch']);
 
-            //TODO do not send patches over the websocket connection, this is potentially SLOW
-            // instead just send a small bit of text signifying that a patch has been uploaded, and then
-            // use the standard routine to get the data.
+              //TODO do not send patches over the websocket connection, this is potentially SLOW
+              // instead just send a small bit of text signifying that a patch has been uploaded, and then
+              // use the standard routine to get the data.
 
-            //Do not add a patch that exists already
-            //TODO make the server not send the patch back to the client that sent it, duh
-            if (database.patches.any((item) =>
-                    json.encode(item.toJson()) ==
-                    json.encode(patch.toJson())) ==
-                false) {
-              database.addPatch(patch);
-            }
-            break;
-          default:
-            Logger.root
-                .warning("unknown socket message: $event", StackTrace.current);
-            break;
+              //Do not add a patch that exists already
+              //TODO make the server not send the patch back to the client that sent it, duh
+              if (database.patches.any(
+                    (item) =>
+                        json.encode(item.toJson()) ==
+                        json.encode(patch.toJson()),
+                  ) ==
+                  false) {
+                database.addPatch(patch);
+              }
+              break;
+            default:
+              Logger.root.warning(
+                "unknown socket message: $event",
+                StackTrace.current,
+              );
+              break;
+          }
+        } catch (e, s) {
+          Logger.root.severe("socket parse error", e, s);
         }
-      } catch (e, s) {
-        Logger.root.severe("socket parse error", e, s);
-      }
 
-      notifyListeners();
-    }, onDone: () {
-      connected = false;
-      notifyListeners();
+        notifyListeners();
+      },
+      onDone: () {
+        connected = false;
+        notifyListeners();
 
-      _channel?.sink.close();
-      //Re-attempt a connection after some time
-      Timer(const Duration(seconds: 3), () {
-        if (connected == false) {
-          _initializeLiveServerPatches();
-        }
-      });
-    }, onError: (e) {
-      //Dont try and reconnect on an error
-      Logger.root.warning("DB Listener Error", e);
+        _channel?.sink.close();
+        //Re-attempt a connection after some time
+        Timer(const Duration(seconds: 3), () {
+          if (connected == false) {
+            _initializeLiveServerPatches();
+          }
+        });
+      },
+      onError: (e) {
+        //Dont try and reconnect on an error
+        Logger.root.warning("DB Listener Error", e);
 
-      _channel?.sink.close();
-      _subscription?.cancel();
-      connected = false;
-      notifyListeners();
-    });
+        _channel?.sink.close();
+        _subscription?.cancel();
+        connected = false;
+        notifyListeners();
+      },
+    );
   }
 
   @override

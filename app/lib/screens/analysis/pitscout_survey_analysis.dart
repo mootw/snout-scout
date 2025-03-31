@@ -23,8 +23,9 @@ class AnalysisPitScouting extends StatelessWidget {
             runSpacing: 42,
             alignment: WrapAlignment.center,
             children: [
-              for (final surveyItem in data.event.config.pitscouting
-                  .where((element) => element.type != SurveyItemType.picture))
+              for (final surveyItem in data.event.config.pitscouting.where(
+                (element) => element.type != SurveyItemType.picture,
+              ))
                 SurveyItemRatioChart(surveyItem: surveyItem),
             ],
           ),
@@ -71,12 +72,15 @@ class _SurveyItemRatioChartState extends State<SurveyItemRatioChart> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(widget.surveyItem.label,
-            style: Theme.of(context).textTheme.titleMedium),
+        Text(
+          widget.surveyItem.label,
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
         SizedBox(
           height: 250,
           width: 250,
-          child: PieChart(PieChartData(
+          child: PieChart(
+            PieChartData(
               pieTouchData: PieTouchData(
                 touchCallback: (FlTouchEvent event, pieTouchResponse) {
                   setState(() {
@@ -91,20 +95,26 @@ class _SurveyItemRatioChartState extends State<SurveyItemRatioChart> {
 
                     if (event is FlTapUpEvent && _selectedIndex != -1) {
                       Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => Scaffold(
-                              appBar: AppBar(
+                        context,
+                        MaterialPageRoute(
+                          builder:
+                              (context) => Scaffold(
+                                appBar: AppBar(
                                   title: Text(
-                                      '${widget.surveyItem.label}: ${valueKeys.entries.toList()[_selectedIndex].key}')),
-                              body: TeamGridList(
-                                  teamFilter: valueKeys.entries
-                                      .toList()[_selectedIndex]
-                                      .value
-                                      .map((e) => int.parse(e))
-                                      .toList()),
-                            ),
-                          ));
+                                    '${widget.surveyItem.label}: ${valueKeys.entries.toList()[_selectedIndex].key}',
+                                  ),
+                                ),
+                                body: TeamGridList(
+                                  teamFilter:
+                                      valueKeys.entries
+                                          .toList()[_selectedIndex]
+                                          .value
+                                          .map((e) => int.parse(e))
+                                          .toList(),
+                                ),
+                              ),
+                        ),
+                      );
                     }
                   });
                 },
@@ -115,12 +125,16 @@ class _SurveyItemRatioChartState extends State<SurveyItemRatioChart> {
                     radius: _selectedIndex == i ? 45 : 40,
                     // Shorten the text to 30 "characters"
                     title: valueKeys.entries.toList()[i].key.substring(
-                        0, min(valueKeys.entries.toList()[i].key.length, 30)),
+                      0,
+                      min(valueKeys.entries.toList()[i].key.length, 30),
+                    ),
                     value:
                         valueKeys.entries.toList()[i].value.length.toDouble(),
                     color: getColorFromIndex(i),
                   ),
-              ])),
+              ],
+            ),
+          ),
         ),
       ],
     );

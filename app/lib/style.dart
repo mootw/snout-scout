@@ -17,22 +17,31 @@ bool isLargeDevice(BuildContext context) =>
 
 //Theme data
 const primaryColor = Color.fromARGB(255, 49, 219, 43);
-final darkScheme =
-    ColorScheme.fromSeed(seedColor: primaryColor, brightness: Brightness.dark);
-ThemeData defaultTheme =
-    ThemeData.from(colorScheme: darkScheme, useMaterial3: true);
+final darkScheme = ColorScheme.fromSeed(
+  seedColor: primaryColor,
+  brightness: Brightness.dark,
+);
+ThemeData defaultTheme = ThemeData.from(
+  colorScheme: darkScheme,
+  useMaterial3: true,
+);
 
 const warningColor = Colors.yellow;
 
 /// Returns a UI color for a given alliance. If null, it returns null
-Color? getAllianceUIColor(Alliance? alliance) => alliance == null
-    ? null
-    : (alliance == Alliance.red ? Colors.red : Colors.blue);
+Color? getAllianceUIColor(Alliance? alliance) =>
+    alliance == null
+        ? null
+        : (alliance == Alliance.red ? Colors.red : Colors.blue);
 
 /// Generates a 'random' color from an index
 Color getColorFromIndex(int index) =>
-    HSVColor.fromAHSV(1, (100 + (index * pi * 10000)) % 360, 0.8, 0.7)
-        .toColor();
+    HSVColor.fromAHSV(
+      1,
+      (100 + (index * pi * 10000)) % 360,
+      0.8,
+      0.7,
+    ).toColor();
 
 Color colorFromHex(String hexString) {
   final hexCode = hexString.replaceAll('#', '');
@@ -40,28 +49,30 @@ Color colorFromHex(String hexString) {
 }
 
 Future<String?> showStringInputDialog(
-    BuildContext context, String label, String currentValue) async {
+  BuildContext context,
+  String label,
+  String currentValue,
+) async {
   final myController = TextEditingController(text: currentValue);
   return await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(label),
-          content: TextField(
-            controller: myController,
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text(label),
+        content: TextField(controller: myController),
+        actions: [
+          TextButton(
+            child: const Text('Cancel'),
+            onPressed: () => Navigator.of(context).pop(null),
           ),
-          actions: [
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () => Navigator.of(context).pop(null),
-            ),
-            TextButton(
-              child: const Text('Save'),
-              onPressed: () => Navigator.of(context).pop(myController.text),
-            ),
-          ],
-        );
-      });
+          TextButton(
+            child: const Text('Save'),
+            onPressed: () => Navigator.of(context).pop(myController.text),
+          ),
+        ],
+      );
+    },
+  );
 }
 
 /// standard size for images stored in snout scout
@@ -76,41 +87,51 @@ const double largeImageSize = defaultImageSize * 1.5;
 
 /// convenient dialog that will prompt the user to take a new image
 /// or select it from their device storage
-Future<Uint8List?> pickOrTakeImageDialog(BuildContext context,
-    [double imageSize = defaultImageSize]) async {
+Future<Uint8List?> pickOrTakeImageDialog(
+  BuildContext context, [
+  double imageSize = defaultImageSize,
+]) async {
   ImageSource? result = await showDialog(
-      context: context,
-      builder: (dialogContext) => SimpleDialog(
-            children: [
-              SimpleDialogOption(
-                  onPressed: () =>
-                      Navigator.of(dialogContext).pop(ImageSource.camera),
-                  child: const ListTile(
-                    leading: Icon(Icons.camera_alt),
-                    title: Text("Camera"),
-                  )),
-              SimpleDialogOption(
-                  onPressed: () =>
-                      Navigator.of(dialogContext).pop(ImageSource.gallery),
-                  child: const ListTile(
-                    leading: Icon(Icons.image),
-                    title: Text("Gallery"),
-                  )),
-              SimpleDialogOption(
-                  onPressed: () => Navigator.of(dialogContext).pop(null),
-                  child: const ListTile(
-                    leading: Icon(Icons.close),
-                    title: Text("Cancel"),
-                  )),
-            ],
-          ));
+    context: context,
+    builder:
+        (dialogContext) => SimpleDialog(
+          children: [
+            SimpleDialogOption(
+              onPressed:
+                  () => Navigator.of(dialogContext).pop(ImageSource.camera),
+              child: const ListTile(
+                leading: Icon(Icons.camera_alt),
+                title: Text("Camera"),
+              ),
+            ),
+            SimpleDialogOption(
+              onPressed:
+                  () => Navigator.of(dialogContext).pop(ImageSource.gallery),
+              child: const ListTile(
+                leading: Icon(Icons.image),
+                title: Text("Gallery"),
+              ),
+            ),
+            SimpleDialogOption(
+              onPressed: () => Navigator.of(dialogContext).pop(null),
+              child: const ListTile(
+                leading: Icon(Icons.close),
+                title: Text("Cancel"),
+              ),
+            ),
+          ],
+        ),
+  );
 
   if (result == null) {
     return null;
   }
 
-  final XFile? photo = await ImagePicker()
-      .pickImage(source: result, maxWidth: imageSize, maxHeight: imageSize);
+  final XFile? photo = await ImagePicker().pickImage(
+    source: result,
+    maxWidth: imageSize,
+    maxHeight: imageSize,
+  );
 
   if (photo == null) {
     return null;
@@ -136,13 +157,15 @@ Future<Uint8List?> pickOrTakeImageDialog(BuildContext context,
   // https://github.com/yekeskin/flutter_avif/issues/39#issuecomment-1858844793
   // https://web.dev/articles/compress-images-avif
   // https://github.com/yekeskin/flutter_avif/issues/70
-  final avifFile = await encodeAvif(await photo.readAsBytes(),
-      // 0 (slowest/highest quality) - 10 (fastest/lowest quality)
-      speed: 6,
-      // 0 (lossless) - 63 (lowest quality)
-      maxQuantizer: 36,
-      minQuantizer: 28,
-      maxQuantizerAlpha: 36,
-      minQuantizerAlpha: 28);
+  final avifFile = await encodeAvif(
+    await photo.readAsBytes(),
+    // 0 (slowest/highest quality) - 10 (fastest/lowest quality)
+    speed: 6,
+    // 0 (lossless) - 63 (lowest quality)
+    maxQuantizer: 36,
+    minQuantizer: 28,
+    maxQuantizerAlpha: 36,
+    minQuantizerAlpha: 28,
+  );
   return avifFile;
 }

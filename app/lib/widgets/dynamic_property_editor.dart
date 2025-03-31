@@ -15,8 +15,12 @@ class DynamicPropertyEditorWidget extends StatefulWidget {
   final DynamicProperties survey;
   final DynamicProperties? initialData;
 
-  const DynamicPropertyEditorWidget(
-      {super.key, required this.tool, required this.survey, this.initialData});
+  const DynamicPropertyEditorWidget({
+    super.key,
+    required this.tool,
+    required this.survey,
+    this.initialData,
+  });
 
   @override
   State<DynamicPropertyEditorWidget> createState() =>
@@ -47,136 +51,145 @@ class _DynamicPropertyEditorWidgetState
       children: [
         if (_value != _initialValue)
           IconButton(
-              onPressed: () => setState(() {
-                    _value = _initialValue;
-                    if (widget.tool.type == SurveyItemType.text ||
-                        widget.tool.type == SurveyItemType.number) {
-                      _myController.text =
-                          _initialValue ?? ""; // _initialValue can be null!
-                    }
-                  }),
-              icon: const Icon(Icons.restore)),
+            onPressed:
+                () => setState(() {
+                  _value = _initialValue;
+                  if (widget.tool.type == SurveyItemType.text ||
+                      widget.tool.type == SurveyItemType.number) {
+                    _myController.text =
+                        _initialValue ?? ""; // _initialValue can be null!
+                  }
+                }),
+            icon: const Icon(Icons.restore),
+          ),
         Expanded(
           child: switch (widget.tool.type) {
             SurveyItemType.text => TextFormField(
-                controller: _myController,
-                onChanged: (text) {
-                  setState(() {
-                    _value = text;
-                    //TO prevent previously filled but now unfilled data from showing as empty.
-                    if (text == "") {
-                      _value = null;
-                    }
-                  });
-                },
-                minLines: 1,
-                maxLines: 8,
-                decoration: InputDecoration(
-                  label: Text(widget.tool.label),
-                  border: const OutlineInputBorder(),
-                ),
-              ),
-            SurveyItemType.number => TextFormField(
-                //Numbers or no value only
-                validator: (value) {
-                  if (value == null || value == "") {
-                    //No value is fine
-                    return null;
+              controller: _myController,
+              onChanged: (text) {
+                setState(() {
+                  _value = text;
+                  //TO prevent previously filled but now unfilled data from showing as empty.
+                  if (text == "") {
+                    _value = null;
                   }
-                  //Check if number
-                  return num.tryParse(value) != null
-                      ? null
-                      : "Value must be a number";
-                },
-                controller: _myController,
-                onChanged: (text) {
+                });
+              },
+              minLines: 1,
+              maxLines: 8,
+              decoration: InputDecoration(
+                label: Text(widget.tool.label),
+                border: const OutlineInputBorder(),
+              ),
+            ),
+            SurveyItemType.number => TextFormField(
+              //Numbers or no value only
+              validator: (value) {
+                if (value == null || value == "") {
+                  //No value is fine
+                  return null;
+                }
+                //Check if number
+                return num.tryParse(value) != null
+                    ? null
+                    : "Value must be a number";
+              },
+              controller: _myController,
+              onChanged: (text) {
+                setState(() {
+                  if (text == "") {
+                    //Empty input should be null
+                    _value = null;
+                  }
+                  _value = num.tryParse(text);
+                });
+              },
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+                signed: true,
+              ),
+              decoration: InputDecoration(
+                label: Text(widget.tool.label),
+                border: const OutlineInputBorder(),
+              ),
+            ),
+            SurveyItemType.selector => ListTile(
+              title: Text(widget.tool.label),
+              subtitle: DropdownButton<String>(
+                value: _value,
+                icon: const Icon(Icons.arrow_downward),
+                onChanged: (String? newValue) {
                   setState(() {
-                    if (text == "") {
-                      //Empty input should be null
-                      _value = null;
-                    }
-                    _value = num.tryParse(text);
+                    _value = newValue;
                   });
                 },
-                keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true, signed: true),
-                decoration: InputDecoration(
-                  label: Text(widget.tool.label),
-                  border: const OutlineInputBorder(),
-                ),
+                //Insert empty value here as an option
+                items:
+                    [
+                      null,
+                      ...widget.tool.options!,
+                    ].map<DropdownMenuItem<String>>((String? value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value ?? ""),
+                      );
+                    }).toList(),
               ),
-            SurveyItemType.selector => ListTile(
-                title: Text(widget.tool.label),
-                subtitle: DropdownButton<String>(
-                  value: _value,
-                  icon: const Icon(Icons.arrow_downward),
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      _value = newValue;
-                    });
-                  },
-                  //Insert empty value here as an option
-                  items: [null, ...widget.tool.options!]
-                      .map<DropdownMenuItem<String>>((String? value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value ?? ""),
-                    );
-                  }).toList(),
-                ),
-              ),
+            ),
             SurveyItemType.toggle => ListTile(
-                title: Text(widget.tool.label),
-                subtitle: SegmentedButton<bool?>(
-                  showSelectedIcon: false,
-                  segments: const <ButtonSegment<bool?>>[
-                    ButtonSegment<bool?>(
-                        value: false,
-                        // label: Text('false'),
-                        icon: Icon(Icons.cancel, color: Colors.redAccent)),
-                    ButtonSegment<bool?>(
-                      value: null,
-                      // label: Text('unknown'),
-                      icon: Icon(Icons.question_mark),
-                    ),
-                    ButtonSegment<bool?>(
-                        value: true,
-                        // label: Text('true'),
-                        icon: Icon(Icons.check_circle,
-                            color: Colors.greenAccent)),
-                  ],
-                  selected: {_value},
-                  onSelectionChanged: (Set<bool?> newValue) {
-                    setState(() {
-                      _value = newValue.first;
-                    });
-                  },
-                ),
+              title: Text(widget.tool.label),
+              subtitle: SegmentedButton<bool?>(
+                showSelectedIcon: false,
+                segments: const <ButtonSegment<bool?>>[
+                  ButtonSegment<bool?>(
+                    value: false,
+                    // label: Text('false'),
+                    icon: Icon(Icons.cancel, color: Colors.redAccent),
+                  ),
+                  ButtonSegment<bool?>(
+                    value: null,
+                    // label: Text('unknown'),
+                    icon: Icon(Icons.question_mark),
+                  ),
+                  ButtonSegment<bool?>(
+                    value: true,
+                    // label: Text('true'),
+                    icon: Icon(Icons.check_circle, color: Colors.greenAccent),
+                  ),
+                ],
+                selected: {_value},
+                onSelectionChanged: (Set<bool?> newValue) {
+                  setState(() {
+                    _value = newValue.first;
+                  });
+                },
               ),
+            ),
             SurveyItemType.picture => ListTile(
-                leading: IconButton(
-                    icon: const Icon(Icons.camera_alt),
-                    onPressed: () async {
-                      try {
-                        final bytes = await pickOrTakeImageDialog(context);
-                        if (bytes != null) {
-                          setState(() {
-                            _value = base64Encode(bytes);
-                          });
-                        }
-                      } catch (e, s) {
-                        Logger.root
-                            .severe("Error taking image from device", e, s);
-                      }
-                    }),
-                title: Text(widget.tool.label),
-                subtitle: _value == null
-                    ? const Text("No Image")
-                    : Image(
+              leading: IconButton(
+                icon: const Icon(Icons.camera_alt),
+                onPressed: () async {
+                  try {
+                    final bytes = await pickOrTakeImageDialog(context);
+                    if (bytes != null) {
+                      setState(() {
+                        _value = base64Encode(bytes);
+                      });
+                    }
+                  } catch (e, s) {
+                    Logger.root.severe("Error taking image from device", e, s);
+                  }
+                },
+              ),
+              title: Text(widget.tool.label),
+              subtitle:
+                  _value == null
+                      ? const Text("No Image")
+                      : Image(
                         image: snoutImageCache.getCached(_value),
                         fit: BoxFit.contain,
                       ),
-              ),
+            ),
           },
         ),
         Padding(
@@ -200,18 +213,23 @@ class SurveyItemDocs extends StatelessWidget {
       return const SizedBox();
     }
     return IconButton.filledTonal(
-        iconSize: 16,
-        visualDensity: VisualDensity.compact,
-        onPressed: () => showDialog(
+      iconSize: 16,
+      visualDensity: VisualDensity.compact,
+      onPressed:
+          () => showDialog(
             context: context,
-            builder: (context) => AlertDialog(
+            builder:
+                (context) => AlertDialog(
                   content: MarkdownText(data: tool.docs),
                   actions: [
                     TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text('Ok'))
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Ok'),
+                    ),
                   ],
-                )),
-        icon: const Icon(Icons.question_mark));
+                ),
+          ),
+      icon: const Icon(Icons.question_mark),
+    );
   }
 }

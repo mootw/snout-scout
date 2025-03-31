@@ -14,17 +14,22 @@ class EditAudit extends StatelessWidget {
   Widget build(BuildContext context) {
     final item = context.watch<DataProvider>().database.getLastPatchFor(path);
     return InkWell(
-      onTap: () => Navigator.push(context,
-          MaterialPageRoute(builder: (_) => PatchHistoryPage(filter: path))),
-      child: Text(getAuditString(item) ?? '',
-          style: Theme.of(context)
-              .textTheme
-              .bodySmall!
-              .copyWith(color: Theme.of(context).hintColor)),
+      onTap:
+          () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => PatchHistoryPage(filter: path)),
+          ),
+      child: Text(
+        getAuditString(item) ?? '',
+        style: Theme.of(
+          context,
+        ).textTheme.bodySmall!.copyWith(color: Theme.of(context).hintColor),
+      ),
     );
   }
 }
 
-String? getAuditString(Patch? item) => item == null
-    ? null
-    : '${item.identity} - ${DateFormat.jm().add_yMd().format(item.time)}';
+String? getAuditString(Patch? item) =>
+    item == null
+        ? null
+        : '${item.identity} - ${DateFormat.jm().add_yMd().format(item.time)}';

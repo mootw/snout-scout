@@ -10,7 +10,7 @@ import 'package:http/http.dart' as http;
 final tbaApiClient = http.Client();
 
 Future<({DateTime startTime, int blueScore, int redScore})>
-    getMatchResultsDataFromTBA(FRCEvent eventData, String matchID) async {
+getMatchResultsDataFromTBA(FRCEvent eventData, String matchID) async {
   if (eventData.config.tbaEventId == null) {
     throw Exception("TBA event ID cannot be null in the config!");
   }
@@ -20,10 +20,9 @@ Future<({DateTime startTime, int blueScore, int redScore})>
 
   //Get playoff level matches
   final apiData = await tbaApiClient.get(
-      Uri.parse("https://www.thebluealliance.com/api/v3/match/$matchID"),
-      headers: {
-        'X-TBA-Auth-Key': eventData.config.tbaSecretKey!,
-      });
+    Uri.parse("https://www.thebluealliance.com/api/v3/match/$matchID"),
+    headers: {'X-TBA-Auth-Key': eventData.config.tbaSecretKey!},
+  );
 
   final data = json.decode(apiData.body);
 
@@ -44,21 +43,21 @@ Future<List<int>> getTeamListForEventTBA(FRCEvent eventData) async {
 
   //Get playoff level matches
   final apiData = await tbaApiClient.get(
-      Uri.parse(
-          "https://www.thebluealliance.com/api/v3/event/${eventData.config.tbaEventId}/teams/simple"),
-      headers: {
-        'X-TBA-Auth-Key': eventData.config.tbaSecretKey!,
-      });
+    Uri.parse(
+      "https://www.thebluealliance.com/api/v3/event/${eventData.config.tbaEventId}/teams/simple",
+    ),
+    headers: {'X-TBA-Auth-Key': eventData.config.tbaSecretKey!},
+  );
 
   final teams = json.decode(apiData.body);
 
-  return [
-    for (final team in teams) team['team_number'],
-  ];
+  return [for (final team in teams) team['team_number']];
 }
 
 Future<List<Patch>> loadScheduleFromTBA(
-    FRCEvent eventData, String identity) async {
+  FRCEvent eventData,
+  String identity,
+) async {
   if (eventData.config.tbaEventId == null) {
     throw Exception("TBA event ID cannot be null in the config!");
   }
@@ -68,11 +67,11 @@ Future<List<Patch>> loadScheduleFromTBA(
 
   //Get playoff level matches
   final apiData = await tbaApiClient.get(
-      Uri.parse(
-          "https://www.thebluealliance.com/api/v3/event/${eventData.config.tbaEventId}/matches"),
-      headers: {
-        'X-TBA-Auth-Key': eventData.config.tbaSecretKey!,
-      });
+    Uri.parse(
+      "https://www.thebluealliance.com/api/v3/event/${eventData.config.tbaEventId}/matches",
+    ),
+    headers: {'X-TBA-Auth-Key': eventData.config.tbaSecretKey!},
+  );
 
   //Alright I THINK the timezone for the iso string is the one local to the event, but this would be chaotic
   //(and not to the ISO8601 standard since it should show timezone offset meaning the actual time is WRONG)
@@ -84,8 +83,10 @@ Future<List<Patch>> loadScheduleFromTBA(
 
   for (final match in matches) {
     String key = match['key'];
-    DateTime startTime =
-        DateTime.fromMillisecondsSinceEpoch(match['time'] * 1000, isUtc: true);
+    DateTime startTime = DateTime.fromMillisecondsSinceEpoch(
+      match['time'] * 1000,
+      isUtc: true,
+    );
 
     //"red": {
     //   "dq_team_keys": [],
@@ -130,20 +131,19 @@ Future<List<Patch>> loadScheduleFromTBA(
     if (eventData.schedule.keys.toList().contains(key) == false) {
       Logger.root.info("match $key does not exist; adding...");
       MatchScheduleItem newMatch = MatchScheduleItem(
-          id: key,
-          label: description,
-          scheduledTime: startTime,
-          blue: blue,
-          red: red);
+        id: key,
+        label: description,
+        scheduledTime: startTime,
+        blue: blue,
+        red: red,
+      );
 
       Patch patch = Patch(
-          identity: 'schedule autofill - $identity',
-          time: DateTime.now(),
-          path: Patch.buildPath([
-            'schedule',
-            key,
-          ]),
-          value: newMatch.toJson());
+        identity: 'schedule autofill - $identity',
+        time: DateTime.now(),
+        path: Patch.buildPath(['schedule', key]),
+        value: newMatch.toJson(),
+      );
 
       patches.add(patch);
     }

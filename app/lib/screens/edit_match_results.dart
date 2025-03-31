@@ -13,11 +13,12 @@ class EditMatchResults extends StatefulWidget {
   final MatchResultValues? results;
   final String matchID; // used for tba autofill.
 
-  const EditMatchResults(
-      {super.key,
-      required this.config,
-      required this.results,
-      required this.matchID});
+  const EditMatchResults({
+    super.key,
+    required this.config,
+    required this.results,
+    required this.matchID,
+  });
 
   @override
   State<EditMatchResults> createState() => _EditMatchResultsState();
@@ -43,10 +44,12 @@ class _EditMatchResultsState extends State<EditMatchResults> {
       _matchEndTime = DateTime.now();
     }
 
-    _redScore =
-        TextEditingController(text: widget.results?.redScore.toString());
-    _blueScore =
-        TextEditingController(text: widget.results?.blueScore.toString());
+    _redScore = TextEditingController(
+      text: widget.results?.redScore.toString(),
+    );
+    _blueScore = TextEditingController(
+      text: widget.results?.blueScore.toString(),
+    );
   }
 
   @override
@@ -56,53 +59,63 @@ class _EditMatchResultsState extends State<EditMatchResults> {
         appBar: AppBar(
           actions: [
             TextButton(
-                onPressed: () async {
-                  setState(() {
-                    _isAutofillThinking = true;
-                  });
-                  try {
-                    final result = await getMatchResultsDataFromTBA(
-                        context.read<DataProvider>().event, widget.matchID);
-                    _redScore.text = result.redScore.toString();
-                    _blueScore.text = result.blueScore.toString();
-                    _matchEndTime = result.startTime.add(matchLength);
+              onPressed: () async {
+                setState(() {
+                  _isAutofillThinking = true;
+                });
+                try {
+                  final result = await getMatchResultsDataFromTBA(
+                    context.read<DataProvider>().event,
+                    widget.matchID,
+                  );
+                  _redScore.text = result.redScore.toString();
+                  _blueScore.text = result.blueScore.toString();
+                  _matchEndTime = result.startTime.add(matchLength);
 
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
                         content: Text('Match data has been filled in'),
                         duration: Duration(seconds: 4),
-                      ));
-                    }
-                  } catch (e, s) {
-                    Logger.root
-                        .severe("error autofilling ${widget.matchID}", e, s);
-
-                    setState(() {
-                      _isAutofillThinking = false;
-                    });
+                      ),
+                    );
                   }
+                } catch (e, s) {
+                  Logger.root.severe(
+                    "error autofilling ${widget.matchID}",
+                    e,
+                    s,
+                  );
 
                   setState(() {
                     _isAutofillThinking = false;
                   });
-                },
-                child: _isAutofillThinking
-                    ? const CircularProgressIndicator()
-                    : const Text("AutoFill TBA")),
+                }
+
+                setState(() {
+                  _isAutofillThinking = false;
+                });
+              },
+              child:
+                  _isAutofillThinking
+                      ? const CircularProgressIndicator()
+                      : const Text("AutoFill TBA"),
+            ),
             IconButton(
-                onPressed: () {
-                  if (_form.currentState?.validate() ?? false) {
-                    //Input is valid
-                    //Construct match results object
-                    MatchResultValues results = MatchResultValues(
-                      time: _matchEndTime.subtract(matchLength),
-                      redScore: int.parse(_redScore.text),
-                      blueScore: int.parse(_blueScore.text),
-                    );
-                    Navigator.pop(context, results);
-                  }
-                },
-                icon: const Icon(Icons.save)),
+              onPressed: () {
+                if (_form.currentState?.validate() ?? false) {
+                  //Input is valid
+                  //Construct match results object
+                  MatchResultValues results = MatchResultValues(
+                    time: _matchEndTime.subtract(matchLength),
+                    redScore: int.parse(_redScore.text),
+                    blueScore: int.parse(_blueScore.text),
+                  );
+                  Navigator.pop(context, results);
+                }
+              },
+              icon: const Icon(Icons.save),
+            ),
           ],
           title: const Text("Edit Results"),
         ),
@@ -118,28 +131,37 @@ class _EditMatchResultsState extends State<EditMatchResults> {
                   icon: const Icon(Icons.edit),
                   onPressed: () async {
                     DateTime? d = await showDatePicker(
-                        context: context,
-                        firstDate: DateTime(1992),
-                        lastDate: DateTime.now(),
-                        initialDate: _matchEndTime);
+                      context: context,
+                      firstDate: DateTime(1992),
+                      lastDate: DateTime.now(),
+                      initialDate: _matchEndTime,
+                    );
                     if (d != null) {
-                      _matchEndTime = DateTime(d.year, d.month, d.day,
-                          _matchEndTime.hour, _matchEndTime.minute);
+                      _matchEndTime = DateTime(
+                        d.year,
+                        d.month,
+                        d.day,
+                        _matchEndTime.hour,
+                        _matchEndTime.minute,
+                      );
                     }
 
                     if (context.mounted) {
                       TimeOfDay? time = await showTimePicker(
-                          context: context,
-                          initialTime: TimeOfDay(
-                              hour: _matchEndTime.hour,
-                              minute: _matchEndTime.minute));
+                        context: context,
+                        initialTime: TimeOfDay(
+                          hour: _matchEndTime.hour,
+                          minute: _matchEndTime.minute,
+                        ),
+                      );
                       if (time != null) {
                         _matchEndTime = DateTime(
-                            _matchEndTime.year,
-                            _matchEndTime.month,
-                            _matchEndTime.day,
-                            time.hour,
-                            time.minute);
+                          _matchEndTime.year,
+                          _matchEndTime.month,
+                          _matchEndTime.day,
+                          time.hour,
+                          time.minute,
+                        );
                       }
                       setState(() {});
                     }
@@ -156,14 +178,18 @@ class _EditMatchResultsState extends State<EditMatchResults> {
                   DataRow(
                     cells: [
                       const DataCell(Text("Score")),
-                      DataCell(TextFormField(
-                        controller: _redScore,
-                        validator: _checkIsNumber,
-                      )),
-                      DataCell(TextFormField(
-                        controller: _blueScore,
-                        validator: _checkIsNumber,
-                      )),
+                      DataCell(
+                        TextFormField(
+                          controller: _redScore,
+                          validator: _checkIsNumber,
+                        ),
+                      ),
+                      DataCell(
+                        TextFormField(
+                          controller: _blueScore,
+                          validator: _checkIsNumber,
+                        ),
+                      ),
                     ],
                   ),
                 ],

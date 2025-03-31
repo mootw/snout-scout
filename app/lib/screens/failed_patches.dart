@@ -25,60 +25,75 @@ class _FailedPatchStorageState extends State<FailedPatchStorage> {
         bottom: const LoadOrErrorStatusBar(),
         actions: [
           IconButton(
-              color: Colors.red,
-              onPressed: () => showDialog(
+            color: Colors.red,
+            onPressed:
+                () => showDialog(
                   context: context,
-                  builder: (context) => AlertDialog(
+                  builder:
+                      (context) => AlertDialog(
                         title: const Text(
-                            "Are you sure you want to delete ALL failed patches?"),
+                          "Are you sure you want to delete ALL failed patches?",
+                        ),
                         actions: [
                           TextButton(
-                              onPressed: () => Navigator.pop(context),
-                              child: const Text("Cancel")),
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text("Cancel"),
+                          ),
                           FilledButton.tonal(
-                              style: FilledButton.styleFrom(
-                                  backgroundColor: Theme.of(context)
-                                      .colorScheme
-                                      .errorContainer),
-                              onPressed: () async {
-                                await serverConnection.clearFailedPatches();
-                                if (context.mounted) {
-                                  Navigator.pop(context);
-                                }
-                              },
-                              child: const Text("Delete")),
+                            style: FilledButton.styleFrom(
+                              backgroundColor:
+                                  Theme.of(context).colorScheme.errorContainer,
+                            ),
+                            onPressed: () async {
+                              await serverConnection.clearFailedPatches();
+                              if (context.mounted) {
+                                Navigator.pop(context);
+                              }
+                            },
+                            child: const Text("Delete"),
+                          ),
                         ],
-                      )),
-              icon: const Icon(Icons.delete)),
+                      ),
+                ),
+            icon: const Icon(Icons.delete),
+          ),
         ],
       ),
       body: ListView(
         children: [
           for (final patch in serverConnection.failedPatches.reversed)
             ListTile(
-              onTap: () => showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                        title: const Text("Patch Data"),
-                        content: SelectableText(patch),
-                      )),
+              onTap:
+                  () => showDialog(
+                    context: context,
+                    builder:
+                        (context) => AlertDialog(
+                          title: const Text("Patch Data"),
+                          content: SelectableText(patch),
+                        ),
+                  ),
               tileColor: Colors.red,
-              title: Text(DateFormat.yMMMMEEEEd()
-                  .add_Hms()
-                  .format(Patch.fromJson(json.decode(patch)).time)),
-              subtitle:
-                  Text(Patch.fromJson(json.decode(patch)).path.toString()),
+              title: Text(
+                DateFormat.yMMMMEEEEd().add_Hms().format(
+                  Patch.fromJson(json.decode(patch)).time,
+                ),
+              ),
+              subtitle: Text(
+                Patch.fromJson(json.decode(patch)).path.toString(),
+              ),
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   IconButton(
-                      onPressed: () async {
-                        //wtf is this
-                        await snoutData
-                            .newTransaction(Patch.fromJson(json.decode(patch)));
-                        setState(() {});
-                      },
-                      icon: const Icon(Icons.refresh)),
+                    onPressed: () async {
+                      //wtf is this
+                      await snoutData.newTransaction(
+                        Patch.fromJson(json.decode(patch)),
+                      );
+                      setState(() {});
+                    },
+                    icon: const Icon(Icons.refresh),
+                  ),
                 ],
               ),
             ),

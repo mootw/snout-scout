@@ -28,8 +28,9 @@ class _EditMarkdownPageState extends State<EditMarkdownPage> {
           title: const Text("Edit Markdown"),
           actions: [
             IconButton(
-                onPressed: () => Navigator.pop(context, _controller.text),
-                icon: const Icon(Icons.save))
+              onPressed: () => Navigator.pop(context, _controller.text),
+              icon: const Icon(Icons.save),
+            ),
           ],
         ),
         body: Column(

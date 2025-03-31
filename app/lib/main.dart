@@ -42,7 +42,8 @@ void main() async {
     // these logs to a file so they can be pulled later!
     // ignore: avoid_print
     print(
-        '${record.level.name}: ${record.time}: ${record.message}\n${record.error}\n${record.stackTrace}');
+      '${record.level.name}: ${record.time}: ${record.message}\n${record.error}\n${record.stackTrace}',
+    );
   });
 
   final prefs = await SharedPreferences.getInstance();
@@ -87,37 +88,42 @@ class SnoutScoutAppState extends State<SnoutScoutApp> {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-        providers: [
-          ChangeNotifierProvider<IdentityProvider>(
-              create: (_) => IdentityProvider()),
-          ChangeNotifierProvider<LocalConfigProvider>(
-              create: (_) => LocalConfigProvider()),
-          // TODO make this a separate widget or something, right now i dont think they get closed out.
-          if (_dataSource != null)
-            ChangeNotifierProvider<DataProvider>(
-                key: Key(_dataSource.toString()),
-                create: (_) => DataProvider(_dataSource!)),
-        ],
-        child: MaterialApp(
-          title: 'Snout Scout',
-          onGenerateRoute: (settings) {
-            final name = settings.name;
-            if (name != null) {
-              final uri = Uri.tryParse(Uri.decodeComponent(name.substring(1)));
-              if (uri != null) {
-                setSource(uri);
-                setState(() {
-                  _dataSource = uri;
-                });
-              }
+      providers: [
+        ChangeNotifierProvider<IdentityProvider>(
+          create: (_) => IdentityProvider(),
+        ),
+        ChangeNotifierProvider<LocalConfigProvider>(
+          create: (_) => LocalConfigProvider(),
+        ),
+        // TODO make this a separate widget or something, right now i dont think they get closed out.
+        if (_dataSource != null)
+          ChangeNotifierProvider<DataProvider>(
+            key: Key(_dataSource.toString()),
+            create: (_) => DataProvider(_dataSource!),
+          ),
+      ],
+      child: MaterialApp(
+        title: 'Snout Scout',
+        onGenerateRoute: (settings) {
+          final name = settings.name;
+          if (name != null) {
+            final uri = Uri.tryParse(Uri.decodeComponent(name.substring(1)));
+            if (uri != null) {
+              setSource(uri);
+              setState(() {
+                _dataSource = uri;
+              });
             }
-            return null;
-          },
-          theme: defaultTheme,
-          home: _dataSource != null
-              ? const DatabaseBrowserScreen()
-              : const SelectDataSourceScreen(),
-        ));
+          }
+          return null;
+        },
+        theme: defaultTheme,
+        home:
+            _dataSource != null
+                ? const DatabaseBrowserScreen()
+                : const SelectDataSourceScreen(),
+      ),
+    );
   }
 }
 
@@ -139,20 +145,27 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
     Logger.root.onRecord.listen((record) {
       if (record.level >= Level.SEVERE) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text(record.message),
-            duration: const Duration(seconds: 8),
-            action: SnackBarAction(
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(record.message),
+              duration: const Duration(seconds: 8),
+              action: SnackBarAction(
                 label: "Details",
-                onPressed: () => showDialog(
-                    context: context,
-                    builder: (dialogContext) => AlertDialog(
-                          content: SingleChildScrollView(
-                            child: SelectableText(
-                                "${record.message}\n${record.error}\n${record.object}\n${record.stackTrace}"),
+                onPressed:
+                    () => showDialog(
+                      context: context,
+                      builder:
+                          (dialogContext) => AlertDialog(
+                            content: SingleChildScrollView(
+                              child: SelectableText(
+                                "${record.message}\n${record.error}\n${record.object}\n${record.stackTrace}",
+                              ),
+                            ),
                           ),
-                        ))),
-          ));
+                    ),
+              ),
+            ),
+          );
         }
       }
     });
@@ -174,34 +187,37 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
       return Scaffold(
         appBar: AppBar(
           title: Text(
-              "Loading ${Uri.decodeFull(serverConnection.dataSourceUri.toString())}"),
+            "Loading ${Uri.decodeFull(serverConnection.dataSourceUri.toString())}",
+          ),
           bottom: LoadOrErrorStatusBar(),
         ),
         body: TextButton(
-            onPressed: () => Navigator.push(
+          onPressed:
+              () => Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => const SelectDataSourceScreen(),
-                )),
-            child: Text("Change Source")),
+                ),
+              ),
+          child: Text("Change Source"),
+        ),
       );
     }
 
-    if (getAllKnownIdentities(data.database)
-            .contains(identityProvider.identity) ==
+    if (getAllKnownIdentities(
+          data.database,
+        ).contains(identityProvider.identity) ==
         false) {
       return ScoutSelectorScreen(allowBackButton: false);
     }
 
-    data.updateStatus(
-        context,
-        switch (_currentPageIndex) {
-          (0) => "Checking out the Schedule",
-          (1) => "Looking at the Teams",
-          (2) => "Analyzing the numbers",
-          (3) => "Reading Docs",
-          _ => "In the matrix (Some home page this is a bug)",
-        });
+    data.updateStatus(context, switch (_currentPageIndex) {
+      (0) => "Checking out the Schedule",
+      (1) => "Looking at the Teams",
+      (2) => "Analyzing the numbers",
+      (3) => "Reading Docs",
+      _ => "In the matrix (Some home page this is a bug)",
+    });
 
     final nextMatch = data.event.nextMatch;
 
@@ -214,22 +230,26 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
         title: Text(data.event.config.name),
         actions: [
           IconButton(
-              onPressed: () =>
-                  showSearch(context: context, delegate: SnoutScoutSearch()),
-              icon: const Icon(Icons.search)),
+            onPressed:
+                () =>
+                    showSearch(context: context, delegate: SnoutScoutSearch()),
+            icon: const Icon(Icons.search),
+          ),
           Padding(
             padding: const EdgeInsets.only(left: 8, right: 8),
             child: FilledButton(
-                onPressed: () {
-                  editIdentityFunction(context: context);
-                },
-                child: Text(identityProvider.identity)),
+              onPressed: () {
+                editIdentityFunction(context: context);
+              },
+              child: Text(identityProvider.identity),
+            ),
           ),
         ],
       ),
-      body: Row(children: [
-        if (largeDevice)
-          NavigationRail(
+      body: Row(
+        children: [
+          if (largeDevice)
+            NavigationRail(
               backgroundColor:
                   Theme.of(context).bottomNavigationBarTheme.backgroundColor,
               labelType: NavigationRailLabelType.all,
@@ -260,94 +280,111 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
                   label: Text('Docs'),
                 ),
               ],
-              selectedIndex: _currentPageIndex),
-        Expanded(
-          child: [
-            AllMatchesPage(
-              // 10/10 hack to make the widget re-scroll to the correct spot on load
-              // this will force it to scroll whenever the matches length changes
-              // we could add another value here to make it scroll on other changes too
-              key: Key(data.event.matches.length.toString()),
-              scrollPosition: nextMatch == null
-                  ? null
-                  : (data.event.scheduleSorted.indexOf(nextMatch) *
-                          matchCardHeight) -
-                      (matchCardHeight * 2),
+              selectedIndex: _currentPageIndex,
             ),
-            const TeamGridList(showEditButton: true),
-            const AnalysisPage(),
-            const DocumentationScreen(),
-          ][_currentPageIndex],
-        ),
-      ]),
+          Expanded(
+            child:
+                [
+                  AllMatchesPage(
+                    // 10/10 hack to make the widget re-scroll to the correct spot on load
+                    // this will force it to scroll whenever the matches length changes
+                    // we could add another value here to make it scroll on other changes too
+                    key: Key(data.event.matches.length.toString()),
+                    scrollPosition:
+                        nextMatch == null
+                            ? null
+                            : (data.event.scheduleSorted.indexOf(nextMatch) *
+                                    matchCardHeight) -
+                                (matchCardHeight * 2),
+                  ),
+                  const TeamGridList(showEditButton: true),
+                  const AnalysisPage(),
+                  const DocumentationScreen(),
+                ][_currentPageIndex],
+          ),
+        ],
+      ),
       drawer: Drawer(
-        child: ListView(children: [
-          ListTile(
-            title: const Text("Data Source"),
-            subtitle:
-                Text(Uri.decodeFull(serverConnection.dataSourceUri.toString())),
-            onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const SelectDataSourceScreen(),
-                )),
-          ),
-          const Divider(),
-          ListTile(
-            title: const Text("Scout Status"),
-            trailing: const Icon(Icons.people),
-            subtitle: Text('${data.scoutStatus.length.toString()} scouts'),
-            onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const ScoutStatusPage(),
-                )),
-          ),
-          ListTile(
-            title: const Text("Scouting Leaderboard"),
-            trailing: const Icon(Icons.leaderboard),
-            onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const ScoutLeaderboardPage(),
-                )),
-          ),
-          const Divider(),
-          ListTile(
-            title: const Text("Ledger"),
-            trailing: const Icon(Icons.receipt_long),
-            subtitle:
-                Text('${data.database.patches.length.toString()} transactions'),
-            onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const PatchHistoryPage(),
-                )),
-          ),
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: FilledButton(
+        child: ListView(
+          children: [
+            ListTile(
+              title: const Text("Data Source"),
+              subtitle: Text(
+                Uri.decodeFull(serverConnection.dataSourceUri.toString()),
+              ),
+              onTap:
+                  () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const SelectDataSourceScreen(),
+                    ),
+                  ),
+            ),
+            const Divider(),
+            ListTile(
+              title: const Text("Scout Status"),
+              trailing: const Icon(Icons.people),
+              subtitle: Text('${data.scoutStatus.length.toString()} scouts'),
+              onTap:
+                  () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const ScoutStatusPage(),
+                    ),
+                  ),
+            ),
+            ListTile(
+              title: const Text("Scouting Leaderboard"),
+              trailing: const Icon(Icons.leaderboard),
+              onTap:
+                  () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const ScoutLeaderboardPage(),
+                    ),
+                  ),
+            ),
+            const Divider(),
+            ListTile(
+              title: const Text("Ledger"),
+              trailing: const Icon(Icons.receipt_long),
+              subtitle: Text(
+                '${data.database.patches.length.toString()} transactions',
+              ),
+              onTap:
+                  () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const PatchHistoryPage(),
+                    ),
+                  ),
+            ),
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: FilledButton(
                   onPressed: () {
                     final data = context.read<DataProvider>().database;
-                    final stream =
-                        Stream.fromIterable(utf8.encode(json.encode(data)));
+                    final stream = Stream.fromIterable(
+                      utf8.encode(json.encode(data)),
+                    );
                     download(stream, '${data.event.config.name}.snoutdb');
                   },
-                  child: const Text("Download DB as File")),
+                  child: const Text("Download DB as File"),
+                ),
+              ),
             ),
-          ),
-          const Divider(),
-          ListTile(
-            title: const Text("Event Config"),
-            subtitle: Text(data.event.config.name),
-            leading: const Icon(Icons.edit),
-            onTap: () async {
-              final identity = context.read<IdentityProvider>().identity;
+            const Divider(),
+            ListTile(
+              title: const Text("Event Config"),
+              subtitle: Text(data.event.config.name),
+              leading: const Icon(Icons.edit),
+              onTap: () async {
+                final identity = context.read<IdentityProvider>().identity;
 
-              final config = context.read<DataProvider>().event.config;
+                final config = context.read<DataProvider>().event.config;
 
-              final removeImage = EventConfig(
+                final removeImage = EventConfig(
                   name: config.name,
                   team: config.team,
                   fieldImage:
@@ -357,20 +394,23 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
                   matchscouting: config.matchscouting,
                   pitscouting: config.pitscouting,
                   tbaEventId: config.tbaEventId,
-                  tbaSecretKey: config.tbaSecretKey);
+                  tbaSecretKey: config.tbaSecretKey,
+                );
 
-              final result = await Navigator.push(
+                final result = await Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => JSONEditor(
-                      validate: EventConfig.fromJson,
-                      source: removeImage,
-                    ),
-                  ));
+                    builder:
+                        (context) => JSONEditor(
+                          validate: EventConfig.fromJson,
+                          source: removeImage,
+                        ),
+                  ),
+                );
 
-              if (result != null) {
-                final modAsConfig = EventConfig.fromJson(jsonDecode(result));
-                final reAppendedConfig = EventConfig(
+                if (result != null) {
+                  final modAsConfig = EventConfig.fromJson(jsonDecode(result));
+                  final reAppendedConfig = EventConfig(
                     name: modAsConfig.name,
                     team: modAsConfig.team,
                     fieldImage: config.fieldImage,
@@ -379,144 +419,160 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
                     matchscouting: modAsConfig.matchscouting,
                     pitscouting: modAsConfig.pitscouting,
                     tbaEventId: modAsConfig.tbaEventId,
-                    tbaSecretKey: modAsConfig.tbaSecretKey);
+                    tbaSecretKey: modAsConfig.tbaSecretKey,
+                  );
 
-                Patch patch = Patch(
+                  Patch patch = Patch(
                     identity: identity,
                     time: DateTime.now(),
                     path: Patch.buildPath(['config']),
-                    value: reAppendedConfig.toJson());
-                //Save the scouting results to the server!!
+                    value: reAppendedConfig.toJson(),
+                  );
+                  //Save the scouting results to the server!!
 
-                await data.newTransaction(patch);
-              }
-            },
-          ),
-          ListTile(
-            title: const Text("Edit Docs"),
-            leading: const Icon(Icons.book),
-            onTap: () async {
-              final identity = context.read<IdentityProvider>().identity;
-              final dataProvider = context.read<DataProvider>();
-              final result = await Navigator.push(
+                  await data.newTransaction(patch);
+                }
+              },
+            ),
+            ListTile(
+              title: const Text("Edit Docs"),
+              leading: const Icon(Icons.book),
+              onTap: () async {
+                final identity = context.read<IdentityProvider>().identity;
+                final dataProvider = context.read<DataProvider>();
+                final result = await Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => EditMarkdownPage(
-                          source: dataProvider.event.config.docs)));
-              if (result != null) {
-                Patch patch = Patch(
+                    builder:
+                        (context) => EditMarkdownPage(
+                          source: dataProvider.event.config.docs,
+                        ),
+                  ),
+                );
+                if (result != null) {
+                  Patch patch = Patch(
                     identity: identity,
                     time: DateTime.now(),
                     path: Patch.buildPath(['config', 'docs']),
-                    value: result);
-                //Save the scouting results to the server!!
-                await dataProvider.newTransaction(patch);
-              }
-            },
-          ),
-          ListTile(
-            title: const Text(
-                "Set Field Image (2:1 ratio, blue alliance left, scoring table bottom)"),
-            leading: const Icon(Icons.map),
-            onTap: () async {
-              final identity = context.read<IdentityProvider>().identity;
-              final dataProvider = context.read<DataProvider>();
-              String result;
-              try {
-                final bytes =
-                    await pickOrTakeImageDialog(context, largeImageSize);
-                if (bytes != null) {
-                  result = base64Encode(bytes);
-                  Patch patch = Patch(
+                    value: result,
+                  );
+                  //Save the scouting results to the server!!
+                  await dataProvider.newTransaction(patch);
+                }
+              },
+            ),
+            ListTile(
+              title: const Text(
+                "Set Field Image (2:1 ratio, blue alliance left, scoring table bottom)",
+              ),
+              leading: const Icon(Icons.map),
+              onTap: () async {
+                final identity = context.read<IdentityProvider>().identity;
+                final dataProvider = context.read<DataProvider>();
+                String result;
+                try {
+                  final bytes = await pickOrTakeImageDialog(
+                    context,
+                    largeImageSize,
+                  );
+                  if (bytes != null) {
+                    result = base64Encode(bytes);
+                    Patch patch = Patch(
                       identity: identity,
                       time: DateTime.now(),
                       path: Patch.buildPath(['config', 'fieldImage']),
-                      value: result);
-                  //Save the scouting results to the server!!
-                  await dataProvider.newTransaction(patch);
+                      value: result,
+                    );
+                    //Save the scouting results to the server!!
+                    await dataProvider.newTransaction(patch);
+                  }
+                } catch (e, s) {
+                  Logger.root.severe("Error taking image from device", e, s);
                 }
-              } catch (e, s) {
-                Logger.root.severe("Error taking image from device", e, s);
-              }
-            },
-          ),
-          ListTile(
-            title: const Text("Set Pit Map Image"),
-            leading: const Icon(Icons.camera_alt),
-            onTap: () async {
-              final identity = context.read<IdentityProvider>().identity;
-              final dataProvider = context.read<DataProvider>();
+              },
+            ),
+            ListTile(
+              title: const Text("Set Pit Map Image"),
+              leading: const Icon(Icons.camera_alt),
+              onTap: () async {
+                final identity = context.read<IdentityProvider>().identity;
+                final dataProvider = context.read<DataProvider>();
 
-              String result;
-              try {
-                // FOR THE PIT MAP ALLOW FOR resolution higher than the standard scouting
-                // image. This is because the pitmap might contain super small text
-                final bytes =
-                    await pickOrTakeImageDialog(context, largeImageSize);
-                if (bytes != null) {
-                  result = base64Encode(bytes);
-                  Patch patch = Patch(
+                String result;
+                try {
+                  // FOR THE PIT MAP ALLOW FOR resolution higher than the standard scouting
+                  // image. This is because the pitmap might contain super small text
+                  final bytes = await pickOrTakeImageDialog(
+                    context,
+                    largeImageSize,
+                  );
+                  if (bytes != null) {
+                    result = base64Encode(bytes);
+                    Patch patch = Patch(
                       identity: identity,
                       time: DateTime.now(),
                       path: Patch.buildPath(['pitmap']),
-                      value: result);
-                  //Save the scouting results to the server!!
-                  await dataProvider.newTransaction(patch);
-                }
-              } catch (e, s) {
-                Logger.root.severe("Error taking image from device", e, s);
-              }
-            },
-          ),
-          ListTile(
-            title: const Text("App Version"),
-            subtitle: FutureBuilder<PackageInfo>(
-              future: PackageInfo.fromPlatform(),
-              builder: (context, snapshot) {
-                switch (snapshot.connectionState) {
-                  case ConnectionState.done:
-                    return Text(snapshot.data?.version ?? "unknown");
-                  default:
-                    return const SizedBox();
+                      value: result,
+                    );
+                    //Save the scouting results to the server!!
+                    await dataProvider.newTransaction(patch);
+                  }
+                } catch (e, s) {
+                  Logger.root.severe("Error taking image from device", e, s);
                 }
               },
             ),
-            trailing: Text('Runtime: ${kIsWasm ? 'WASM' : 'JS'}'),
-          ),
-        ]),
+            ListTile(
+              title: const Text("App Version"),
+              subtitle: FutureBuilder<PackageInfo>(
+                future: PackageInfo.fromPlatform(),
+                builder: (context, snapshot) {
+                  switch (snapshot.connectionState) {
+                    case ConnectionState.done:
+                      return Text(snapshot.data?.version ?? "unknown");
+                    default:
+                      return const SizedBox();
+                  }
+                },
+              ),
+              trailing: Text('Runtime: ${kIsWasm ? 'WASM' : 'JS'}'),
+            ),
+          ],
+        ),
       ),
-      bottomNavigationBar: largeDevice
-          ? null
-          : NavigationBar(
-              onDestinationSelected: (int index) {
-                setState(() {
-                  _currentPageIndex = index;
-                });
-              },
-              selectedIndex: _currentPageIndex,
-              destinations: const [
-                NavigationDestination(
-                  selectedIcon: Icon(Icons.calendar_today),
-                  icon: Icon(Icons.calendar_today_outlined),
-                  label: 'Schedule',
-                ),
-                NavigationDestination(
-                  selectedIcon: Icon(Icons.people),
-                  icon: Icon(Icons.people_alt_outlined),
-                  label: 'Teams',
-                ),
-                NavigationDestination(
-                  selectedIcon: Icon(Icons.analytics),
-                  icon: Icon(Icons.analytics_outlined),
-                  label: 'Analysis',
-                ),
-                NavigationDestination(
-                  selectedIcon: Icon(Icons.book),
-                  icon: Icon(Icons.book_outlined),
-                  label: 'Docs',
-                ),
-              ],
-            ),
+      bottomNavigationBar:
+          largeDevice
+              ? null
+              : NavigationBar(
+                onDestinationSelected: (int index) {
+                  setState(() {
+                    _currentPageIndex = index;
+                  });
+                },
+                selectedIndex: _currentPageIndex,
+                destinations: const [
+                  NavigationDestination(
+                    selectedIcon: Icon(Icons.calendar_today),
+                    icon: Icon(Icons.calendar_today_outlined),
+                    label: 'Schedule',
+                  ),
+                  NavigationDestination(
+                    selectedIcon: Icon(Icons.people),
+                    icon: Icon(Icons.people_alt_outlined),
+                    label: 'Teams',
+                  ),
+                  NavigationDestination(
+                    selectedIcon: Icon(Icons.analytics),
+                    icon: Icon(Icons.analytics_outlined),
+                    label: 'Analysis',
+                  ),
+                  NavigationDestination(
+                    selectedIcon: Icon(Icons.book),
+                    icon: Icon(Icons.book_outlined),
+                    label: 'Docs',
+                  ),
+                ],
+              ),
     );
   }
 }
@@ -530,9 +586,14 @@ class ScoutSelectorScreenWrapper extends StatelessWidget {
   }
 }
 
-Future editIdentityFunction(
-    {required BuildContext context, bool allowBackButton = true}) async {
-  await Navigator.of(context).push(MaterialPageRoute(
-      builder: (context) =>
-          ScoutSelectorScreen(allowBackButton: allowBackButton)));
+Future editIdentityFunction({
+  required BuildContext context,
+  bool allowBackButton = true,
+}) async {
+  await Navigator.of(context).push(
+    MaterialPageRoute(
+      builder:
+          (context) => ScoutSelectorScreen(allowBackButton: allowBackButton),
+    ),
+  );
 }

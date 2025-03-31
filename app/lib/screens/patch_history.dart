@@ -33,70 +33,76 @@ class _PatchHistoryPageState extends State<PatchHistoryPage> {
 
     final search = _controller.text;
 
-    final filteredPatches = patches.where((patch) {
-      if (search == "") {
-        //empty search means all results
-        //and im too lazy to create a separate code path
-        return true;
-      }
-      if (patch.identity.contains(search)) {
-        return true;
-      }
-      if (patch.path.contains(search)) {
-        return true;
-      }
+    final filteredPatches =
+        patches.where((patch) {
+          if (search == "") {
+            //empty search means all results
+            //and im too lazy to create a separate code path
+            return true;
+          }
+          if (patch.identity.contains(search)) {
+            return true;
+          }
+          if (patch.path.contains(search)) {
+            return true;
+          }
 
-      return false;
-    }).toList();
+          return false;
+        }).toList();
 
     return Scaffold(
       appBar: AppBar(
         title: TextField(
           controller: _controller,
-          onChanged: (_) => setState(() {
-            //I KNOW THIS IS BAD PRACTICE
-            //I ALSO DONT CARE TO FIX IT
-          }),
-          decoration: const InputDecoration(
-            hintText: 'Ledger Filter',
-          ),
+          onChanged:
+              (_) => setState(() {
+                //I KNOW THIS IS BAD PRACTICE
+                //I ALSO DONT CARE TO FIX IT
+              }),
+          decoration: const InputDecoration(hintText: 'Ledger Filter'),
         ),
       ),
       body: ListView.builder(
-          itemCount: filteredPatches.length,
-          itemBuilder: (context, index) {
-            final patch = filteredPatches[index];
-            return ListTile(
-              title:
-                  Text('${filteredPatches.length - index}: ${patch.identity}'),
-              onTap: () => showDialog(
+        itemCount: filteredPatches.length,
+        itemBuilder: (context, index) {
+          final patch = filteredPatches[index];
+          return ListTile(
+            title: Text('${filteredPatches.length - index}: ${patch.identity}'),
+            onTap:
+                () => showDialog(
                   context: context,
-                  builder: (_) => AlertDialog(
+                  builder:
+                      (_) => AlertDialog(
                         actions: [
                           TextButton(
-                              onPressed: () => Navigator.pop(context),
-                              child: const Text("Close")),
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text("Close"),
+                          ),
                           TextButton(
-                              onPressed: () {
-                                final newPatchToApply = Patch(
-                                  identity: patch.identity,
-                                  path: patch.path,
-                                  time: DateTime.now(),
-                                  value: patch.value,
-                                );
-                                final snoutData = context.read<DataProvider>();
-                                snoutData.newTransaction(newPatchToApply);
-                                Navigator.pop(context);
-                              },
-                              child: const Text("Re-Submit Patch As NEW")),
+                            onPressed: () {
+                              final newPatchToApply = Patch(
+                                identity: patch.identity,
+                                path: patch.path,
+                                time: DateTime.now(),
+                                value: patch.value,
+                              );
+                              final snoutData = context.read<DataProvider>();
+                              snoutData.newTransaction(newPatchToApply);
+                              Navigator.pop(context);
+                            },
+                            child: const Text("Re-Submit Patch As NEW"),
+                          ),
                         ],
                         content: SingleChildScrollView(
-                            child: SelectableText(json.encode(patch))),
-                      )),
-              subtitle: Text(patch.path),
-              trailing: Text(DateFormat.jms().add_yMd().format(patch.time)),
-            );
-          }),
+                          child: SelectableText(json.encode(patch)),
+                        ),
+                      ),
+                ),
+            subtitle: Text(patch.path),
+            trailing: Text(DateFormat.jms().add_yMd().format(patch.time)),
+          );
+        },
+      ),
     );
   }
 }

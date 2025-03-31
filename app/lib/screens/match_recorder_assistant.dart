@@ -49,7 +49,9 @@ class _MatchRecorderAssistantPageState
     () async {
       final teams = {...matchSchedule.red, ...matchSchedule.blue};
       for (final scoutedTeam in await _getScoutedTeams(
-          matchSchedule.getData(snoutData.event)!, teams)) {
+        matchSchedule.getData(snoutData.event)!,
+        teams,
+      )) {
         teams.remove(scoutedTeam);
       }
       setState(() {
@@ -73,15 +75,19 @@ class _MatchRecorderAssistantPageState
     //all calls will occur at the same time.
     List<Future> futures = [];
     for (final team in teams) {
-      futures.add(apiClient
-          .get(context.read<DataProvider>().dataSourceUri.resolve("/edit_lock"),
-              headers: {"key": "match:${widget.matchid}:$team:timeline"})
-          .timeout(const Duration(seconds: 1))
-          .then((isLocked) {
-            if (isLocked.body == "true") {
-              alreadyScouted.add(team);
-            }
-          }));
+      futures.add(
+        apiClient
+            .get(
+              context.read<DataProvider>().dataSourceUri.resolve("/edit_lock"),
+              headers: {"key": "match:${widget.matchid}:$team:timeline"},
+            )
+            .timeout(const Duration(seconds: 1))
+            .then((isLocked) {
+              if (isLocked.body == "true") {
+                alreadyScouted.add(team);
+              }
+            }),
+      );
     }
     try {
       await Future.wait(futures);
@@ -95,9 +101,10 @@ class _MatchRecorderAssistantPageState
   Widget build(BuildContext context) {
     final snoutData = context.watch<DataProvider>();
     MatchScheduleItem match = snoutData.event.schedule[widget.matchid]!;
-    context
-        .read<DataProvider>()
-        .updateStatus(context, "Match scouting ${match.label}: picking a team");
+    context.read<DataProvider>().updateStatus(
+      context,
+      "Match scouting ${match.label}: picking a team",
+    );
     return Scaffold(
       appBar: AppBar(
         title: Text("Recording ${match.label}"),
@@ -112,12 +119,17 @@ class _MatchRecorderAssistantPageState
                   children: [
                     for (final team in match.blue)
                       _getTeamTile(
-                          team: team,
-                          isRecommended: _recommended == team,
-                          onTap: () => _recordTeam(
-                              widget.matchid, team, match.getAllianceOf(team)),
-                          subtitle: "Blue ${match.blue.indexOf(team) + 1}",
-                          subtitleColor: Colors.blue),
+                        team: team,
+                        isRecommended: _recommended == team,
+                        onTap:
+                            () => _recordTeam(
+                              widget.matchid,
+                              team,
+                              match.getAllianceOf(team),
+                            ),
+                        subtitle: "Blue ${match.blue.indexOf(team) + 1}",
+                        subtitleColor: Colors.blue,
+                      ),
                   ],
                 ),
               ),
@@ -126,49 +138,59 @@ class _MatchRecorderAssistantPageState
                   children: [
                     for (final team in match.red)
                       _getTeamTile(
-                          team: team,
-                          isRecommended: _recommended == team,
-                          onTap: () => _recordTeam(
-                              widget.matchid, team, match.getAllianceOf(team)),
-                          subtitle: "Red ${match.red.indexOf(team) + 1}",
-                          subtitleColor: Colors.red),
+                        team: team,
+                        isRecommended: _recommended == team,
+                        onTap:
+                            () => _recordTeam(
+                              widget.matchid,
+                              team,
+                              match.getAllianceOf(team),
+                            ),
+                        subtitle: "Red ${match.red.indexOf(team) + 1}",
+                        subtitleColor: Colors.red,
+                      ),
                   ],
                 ),
               ),
             ],
           ),
           const Divider(),
-          Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-            Flexible(
-              child: TextField(
-                decoration: const InputDecoration(
-                  hintText: 'Wrong team?',
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Flexible(
+                child: TextField(
+                  decoration: const InputDecoration(hintText: 'Wrong team?'),
+                  autocorrect: false,
+                  keyboardType: TextInputType.number,
+                  controller: _textController,
                 ),
-                autocorrect: false,
-                keyboardType: TextInputType.number,
-                controller: _textController,
               ),
-            ),
-            Flexible(
-              child: DropdownButton<Alliance>(
-                value: _alliance,
-                onChanged: (Alliance? value) {
-                  setState(() {
-                    _alliance = value!;
-                  });
-                },
-                items: [Alliance.blue, Alliance.red]
-                    .map<DropdownMenuItem<Alliance>>((Alliance value) {
-                  return DropdownMenuItem<Alliance>(
-                    value: value,
-                    child: Text(value.toString(),
-                        style: TextStyle(color: getAllianceUIColor(value))),
-                  );
-                }).toList(),
+              Flexible(
+                child: DropdownButton<Alliance>(
+                  value: _alliance,
+                  onChanged: (Alliance? value) {
+                    setState(() {
+                      _alliance = value!;
+                    });
+                  },
+                  items:
+                      [
+                        Alliance.blue,
+                        Alliance.red,
+                      ].map<DropdownMenuItem<Alliance>>((Alliance value) {
+                        return DropdownMenuItem<Alliance>(
+                          value: value,
+                          child: Text(
+                            value.toString(),
+                            style: TextStyle(color: getAllianceUIColor(value)),
+                          ),
+                        );
+                      }).toList(),
+                ),
               ),
-            ),
-            Flexible(
-              child: FilledButton.tonal(
+              Flexible(
+                child: FilledButton.tonal(
                   onPressed: () async {
                     int team = int.parse(_textController.text);
                     _recordTeam(widget.matchid, team, _alliance);
@@ -176,9 +198,11 @@ class _MatchRecorderAssistantPageState
                   child: const Text(
                     "Record Substitution",
                     textAlign: TextAlign.center,
-                  )),
-            ),
-          ]),
+                  ),
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: 32),
         ],
       ),
@@ -186,49 +210,54 @@ class _MatchRecorderAssistantPageState
   }
 
   //Emulate the list tile but support a larger icon
-  Widget _getTeamTile(
-      {required int team,
-      required bool isRecommended,
-      required String subtitle,
-      required GestureTapCallback onTap,
-      required Color subtitleColor}) {
+  Widget _getTeamTile({
+    required int team,
+    required bool isRecommended,
+    required String subtitle,
+    required GestureTapCallback onTap,
+    required Color subtitleColor,
+  }) {
     final snoutData = context.watch<DataProvider>();
     Widget? image;
     final data =
         snoutData.event.pitscouting[team.toString()]?[robotPictureReserved];
     if (data != null) {
       image = AspectRatio(
-          aspectRatio: 1,
-          child:
-              Image(image: snoutImageCache.getCached(data), fit: BoxFit.cover));
+        aspectRatio: 1,
+        child: Image(image: snoutImageCache.getCached(data), fit: BoxFit.cover),
+      );
     }
 
     return InkWell(
       onTap: onTap,
       child: Container(
         color: isRecommended ? Theme.of(context).colorScheme.onPrimary : null,
-        child: Row(children: [
-          SizedBox(
+        child: Row(
+          children: [
+            SizedBox(
               height: 128,
               width: 128,
               child: Padding(
                 padding: const EdgeInsets.all(8),
                 child: Center(child: image ?? const Text("No Image")),
-              )),
-          const SizedBox(width: 8),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (isRecommended) const Text("Recommended"),
-              Text("$team", style: Theme.of(context).textTheme.bodyLarge),
-              Text(subtitle,
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodyMedium
-                      ?.copyWith(color: subtitleColor)),
-            ],
-          )
-        ]),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (isRecommended) const Text("Recommended"),
+                Text("$team", style: Theme.of(context).textTheme.bodyLarge),
+                Text(
+                  subtitle,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(color: subtitleColor),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -238,24 +267,28 @@ class _MatchRecorderAssistantPageState
     final identity = context.read<IdentityProvider>().identity;
     MatchScheduleItem match = snoutData.event.schedule[widget.matchid]!;
     RobotMatchResults? result = await navigateWithEditLock<RobotMatchResults>(
+      context,
+      "match:$matchid:$team:timeline",
+      (context) => Navigator.pushReplacement(
         context,
-        "match:$matchid:$team:timeline",
-        (context) => Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => MatchRecorderPage(
-                        team: team,
-                        teamAlliance: alliance,
-                        matchDescription: match.label,
-                      )),
-            ));
+        MaterialPageRoute(
+          builder:
+              (context) => MatchRecorderPage(
+                team: team,
+                teamAlliance: alliance,
+                matchDescription: match.label,
+              ),
+        ),
+      ),
+    );
 
     if (result != null) {
       Patch patch = Patch(
-          identity: identity,
-          time: DateTime.now(),
-          path: Patch.buildPath(['matches', matchid, 'robot', team.toString()]),
-          value: result.toJson());
+        identity: identity,
+        time: DateTime.now(),
+        path: Patch.buildPath(['matches', matchid, 'robot', team.toString()]),
+        value: result.toJson(),
+      );
 
       await snoutData.newTransaction(patch);
     }

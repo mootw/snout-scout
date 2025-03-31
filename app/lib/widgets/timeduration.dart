@@ -5,8 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class TimeDuration extends StatefulWidget {
-  const TimeDuration(
-      {super.key, required this.time, this.displayDurationDefault = false});
+  const TimeDuration({
+    super.key,
+    required this.time,
+    this.displayDurationDefault = false,
+  });
 
   final DateTime time;
   final bool displayDurationDefault;
@@ -47,9 +50,6 @@ class _TimeDurationState extends State<TimeDuration> {
       secondaryText = formatDuration(widget.time.difference(DateTime.now()));
     }
 
-    return Tooltip(
-      message: secondaryText,
-      child: Text(primaryText),
-    );
+    return Tooltip(message: secondaryText, child: Text(primaryText));
   }
 }

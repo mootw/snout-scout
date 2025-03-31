@@ -3,7 +3,8 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
 ({num min, num lower, num median, num upper, num max}) getQuartiles(
-    List<num> numbers) {
+  List<num> numbers,
+) {
   assert(numbers.isNotEmpty);
   final nums = numbers.toList();
   nums.sort();
@@ -30,7 +31,7 @@ import 'package:flutter/material.dart';
     lower: getPart(0.25),
     median: median,
     upper: getPart(0.75),
-    max: nums.last
+    max: nums.last,
   );
 }
 
@@ -41,14 +42,16 @@ class BoxPlot extends StatelessWidget {
 
   final List<num> values;
 
-  const BoxPlot(
-      {super.key, required this.values, required this.min, required this.max});
+  const BoxPlot({
+    super.key,
+    required this.values,
+    required this.min,
+    required this.max,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(
-      painter: BoxPlotPainter(this),
-    );
+    return CustomPaint(painter: BoxPlotPainter(this));
   }
 }
 
@@ -78,40 +81,59 @@ class BoxPlotPainter extends CustomPainter {
     final quartiles = getQuartiles(boxPlotData.values);
 
     //Median
-    canvas.drawLine(getOffset(size, quartiles.median) + Offset(0, plotHeight),
-        getOffset(size, quartiles.median) + Offset(0, -plotHeight), p);
+    canvas.drawLine(
+      getOffset(size, quartiles.median) + Offset(0, plotHeight),
+      getOffset(size, quartiles.median) + Offset(0, -plotHeight),
+      p,
+    );
 
     //1st and 3rd quartile
     canvas.drawRRect(
-        RRect.fromLTRBR(
-            getPercent(quartiles.lower) * size.width,
-            (size.height / 2) + plotHeight,
-            getPercent(quartiles.upper) * size.width,
-            (size.height / 2) - plotHeight,
-            Radius.zero),
-        p);
+      RRect.fromLTRBR(
+        getPercent(quartiles.lower) * size.width,
+        (size.height / 2) + plotHeight,
+        getPercent(quartiles.upper) * size.width,
+        (size.height / 2) - plotHeight,
+        Radius.zero,
+      ),
+      p,
+    );
 
     final iqr = quartiles.upper - quartiles.lower;
 
-    final maxWithinIQR = boxPlotData.values
-        .lastWhereOrNull((element) => element <= quartiles.upper + (iqr * 1.5));
+    final maxWithinIQR = boxPlotData.values.lastWhereOrNull(
+      (element) => element <= quartiles.upper + (iqr * 1.5),
+    );
     final minWithinIQR = boxPlotData.values.firstWhereOrNull(
-        (element) => element >= quartiles.lower - (iqr * 1.5));
+      (element) => element >= quartiles.lower - (iqr * 1.5),
+    );
 
     //Top IQR
     if (maxWithinIQR != null) {
       canvas.drawLine(
-          getOffset(size, quartiles.upper), getOffset(size, maxWithinIQR), p);
-      canvas.drawLine(getOffset(size, maxWithinIQR) + Offset(0, plotHeight / 2),
-          getOffset(size, maxWithinIQR) + Offset(0, -plotHeight / 2), p);
+        getOffset(size, quartiles.upper),
+        getOffset(size, maxWithinIQR),
+        p,
+      );
+      canvas.drawLine(
+        getOffset(size, maxWithinIQR) + Offset(0, plotHeight / 2),
+        getOffset(size, maxWithinIQR) + Offset(0, -plotHeight / 2),
+        p,
+      );
     }
 
     //bot IQR
     if (minWithinIQR != null) {
       canvas.drawLine(
-          getOffset(size, quartiles.lower), getOffset(size, minWithinIQR), p);
-      canvas.drawLine(getOffset(size, minWithinIQR) + Offset(0, plotHeight / 2),
-          getOffset(size, minWithinIQR) + Offset(0, -plotHeight / 2), p);
+        getOffset(size, quartiles.lower),
+        getOffset(size, minWithinIQR),
+        p,
+      );
+      canvas.drawLine(
+        getOffset(size, minWithinIQR) + Offset(0, plotHeight / 2),
+        getOffset(size, minWithinIQR) + Offset(0, -plotHeight / 2),
+        p,
+      );
     }
 
     //Outliers
@@ -162,16 +184,20 @@ class BoxPlotLabelPainter extends CustomPainter {
 
       //Just draw the whole thing down the entire display height height
       canvas.drawLine(
-          getOffset(size, value) + Offset(0, plotHeight + screenHeight),
-          getOffset(size, value) + Offset(0, -plotHeight),
-          p);
+        getOffset(size, value) + Offset(0, plotHeight + screenHeight),
+        getOffset(size, value) + Offset(0, -plotHeight),
+        p,
+      );
 
       TextSpan span = TextSpan(
-          style: const TextStyle(color: Colors.white), text: numDisplay(value));
+        style: const TextStyle(color: Colors.white),
+        text: numDisplay(value),
+      );
       TextPainter tp = TextPainter(
-          text: span,
-          textAlign: TextAlign.end,
-          textDirection: TextDirection.ltr);
+        text: span,
+        textAlign: TextAlign.end,
+        textDirection: TextDirection.ltr,
+      );
       tp.layout();
       tp.paint(canvas, getOffset(size, value) + Offset(4, -plotHeight));
     }

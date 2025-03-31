@@ -15,18 +15,17 @@ class _DebugFieldPositionState extends State<DebugFieldPosition> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(_selected.toString()),
-      ),
+      appBar: AppBar(title: Text(_selected.toString())),
       body: FieldPositionSelector(
-          onTap: (pos) {
-            setState(() {
-              _selected = pos;
-            });
-          },
-          robotPosition: _selected,
-          alliance: Alliance.tie,
-          teamNumber: 0),
+        onTap: (pos) {
+          setState(() {
+            _selected = pos;
+          });
+        },
+        robotPosition: _selected,
+        alliance: Alliance.tie,
+        teamNumber: 0,
+      ),
     );
   }
 }

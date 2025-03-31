@@ -35,19 +35,23 @@ class _TeamViewPageState extends State<TeamViewPage> {
   Widget build(BuildContext context) {
     final data = context.watch<DataProvider>();
 
-    context
-        .read<DataProvider>()
-        .updateStatus(context, "Checking out team ${widget.teamNumber}");
+    context.read<DataProvider>().updateStatus(
+      context,
+      "Checking out team ${widget.teamNumber}",
+    );
 
     String? teamName =
         data.event.pitscouting[widget.teamNumber.toString()]?[teamNameReserved];
-    String? robotPicture = data.event.pitscouting[widget.teamNumber.toString()]
-        ?[robotPictureReserved];
-    String? teamNotes = data.event.pitscouting[widget.teamNumber.toString()]
-        ?[teamNotesReserved];
+    String? robotPicture =
+        data.event.pitscouting[widget.teamNumber
+            .toString()]?[robotPictureReserved];
+    String? teamNotes =
+        data.event.pitscouting[widget.teamNumber
+            .toString()]?[teamNotesReserved];
 
-    MatchScheduleItem? teamNextMatch =
-        data.event.nextMatchForTeam(widget.teamNumber);
+    MatchScheduleItem? teamNextMatch = data.event.nextMatchForTeam(
+      widget.teamNumber,
+    );
     Duration? scheduleDelay = data.event.scheduleDelay;
 
     final matchIds = {
@@ -56,312 +60,386 @@ class _TeamViewPageState extends State<TeamViewPage> {
     };
 
     return Scaffold(
-        appBar: AppBar(
-          actions: [
-            TextButton(
-                onPressed: () async {
-                  await navigateWithEditLock(
-                      context,
-                      "scoutteam:${widget.teamNumber}",
-                      (context) => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) => PitScoutTeamPage(
-                                    team: widget.teamNumber,
-                                    config: data.event.config.pitscouting,
-                                    initialData: data.event.pitscouting[
-                                        widget.teamNumber.toString()])),
-                          ));
-                },
-                child: const Text("Scout"))
-          ],
-          title: Text(
-              "Team ${widget.teamNumber}${teamName == null ? '' : ': $teamName'}"),
+      appBar: AppBar(
+        actions: [
+          TextButton(
+            onPressed: () async {
+              await navigateWithEditLock(
+                context,
+                "scoutteam:${widget.teamNumber}",
+                (context) => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder:
+                        (_) => PitScoutTeamPage(
+                          team: widget.teamNumber,
+                          config: data.event.config.pitscouting,
+                          initialData:
+                              data.event.pitscouting[widget.teamNumber
+                                  .toString()],
+                        ),
+                  ),
+                ),
+              );
+            },
+            child: const Text("Scout"),
+          ),
+        ],
+        title: Text(
+          "Team ${widget.teamNumber}${teamName == null ? '' : ': $teamName'}",
         ),
-        body: ListView(
-          cacheExtent: 5000,
-          children: [
-            Row(
-              children: [
-                if (robotPicture != null)
-                  SizedBox(
-                    width: 240,
-                    height: 240,
-                    child: AspectRatio(
-                      aspectRatio: 1,
-                      child: ImageViewer(
-                        child: Image(
-                          image: snoutImageCache.getCached(robotPicture),
-                          fit: BoxFit.cover,
+      ),
+      body: ListView(
+        cacheExtent: 5000,
+        children: [
+          Row(
+            children: [
+              if (robotPicture != null)
+                SizedBox(
+                  width: 240,
+                  height: 240,
+                  child: AspectRatio(
+                    aspectRatio: 1,
+                    child: ImageViewer(
+                      child: Image(
+                        image: snoutImageCache.getCached(robotPicture),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                ),
+              if (robotPicture == null)
+                const Text("No $robotPictureReserved :("),
+              Flexible(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      Text(teamNotes ?? "No $teamNotesReserved value"),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          teamNextMatch != null && scheduleDelay != null
+              ? Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text("next match"),
+                  TextButton(
+                    onPressed:
+                        () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder:
+                                (context) =>
+                                    MatchPage(matchid: teamNextMatch.id),
+                          ),
+                        ),
+                    child: Text(
+                      teamNextMatch.label,
+                      style: TextStyle(
+                        color: getAllianceUIColor(
+                          teamNextMatch.getAllianceOf(widget.teamNumber),
                         ),
                       ),
                     ),
                   ),
-                if (robotPicture == null)
-                  const Text("No $robotPictureReserved :("),
-                Flexible(
-                  child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        children: [
-                          Text(teamNotes ?? "No $teamNotesReserved value"),
-                        ],
-                      )),
+                  TimeDuration(
+                    time: teamNextMatch.scheduledTime.add(scheduleDelay),
+                    displayDurationDefault: true,
+                  ),
+                ],
+              )
+              : const Center(child: Text('No upcoming matches')),
+          const Divider(),
+          DataSheet(
+            title: 'Matches',
+            //Data is a list of rows and columns
+            columns: [
+              DataItemWithHints(DataItem.fromText("Match")),
+              for (final item in data.event.config.matchscouting.processes)
+                DataItemWithHints(
+                  DataItem.fromText(item.label),
+                  largerIsBetter: item.isLargerBetter,
                 ),
-              ],
-            ),
-            teamNextMatch != null && scheduleDelay != null
-                ? Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text("next match"),
-                      TextButton(
-                        onPressed: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) =>
-                                  MatchPage(matchid: teamNextMatch.id)),
+              for (final pitSurvey in data.event.config.matchscouting.survey)
+                DataItemWithHints(DataItem.fromText(pitSurvey.label)),
+              DataItemWithHints(DataItem.fromText("Scout")),
+            ],
+            rows: [
+              //Show ALL matches the team is scheduled for ALONG with all matches they played regardless of it it is scheduled sorted
+              for (final match in {
+                for (final matchId in matchIds)
+                  (
+                    data.event.schedule[matchId],
+                    data.event.matches[matchId],
+                    matchId,
+                  ),
+              }.sorted(
+                (a, b) =>
+                    a.$1 == null || b.$1 == null
+                        ? 0
+                        : a.$1?.compareTo(b.$1!) ?? 0,
+              ))
+                [
+                  DataItem.match(
+                    context: context,
+                    label: match.$1?.label ?? match.$3,
+                    key: match.$3,
+                    time: match.$1?.scheduledTime,
+                    color:
+                        getAllianceUIColor(
+                          match
+                              .$2
+                              ?.robot[widget.teamNumber.toString()]
+                              ?.alliance,
+                        ) ??
+                        getAllianceUIColor(
+                          match.$1?.getAllianceOf(widget.teamNumber),
                         ),
-                        child: Text(
-                          teamNextMatch.label,
-                          style: TextStyle(
-                              color: getAllianceUIColor(teamNextMatch
-                                  .getAllianceOf(widget.teamNumber))),
-                        ),
-                      ),
-                      TimeDuration(
-                          time: teamNextMatch.scheduledTime.add(scheduleDelay),
-                          displayDurationDefault: true),
-                    ],
-                  )
-                : const Center(child: Text('No upcoming matches')),
-            const Divider(),
-            DataSheet(
-              title: 'Matches',
-              //Data is a list of rows and columns
-              columns: [
-                DataItemWithHints(DataItem.fromText("Match")),
-                for (final item in data.event.config.matchscouting.processes)
-                  DataItemWithHints(DataItem.fromText(item.label),
-                      largerIsBetter: item.isLargerBetter),
-                for (final pitSurvey in data.event.config.matchscouting.survey)
-                  DataItemWithHints(DataItem.fromText(pitSurvey.label)),
-                DataItemWithHints(DataItem.fromText("Scout")),
-              ],
-              rows: [
-                //Show ALL matches the team is scheduled for ALONG with all matches they played regardless of it it is scheduled sorted
-                for (final match in {
-                  for (final matchId in matchIds)
-                    (
-                      data.event.schedule[matchId],
-                      data.event.matches[matchId],
-                      matchId
+                  ),
+                  for (final item in data.event.config.matchscouting.processes)
+                    DataItem.fromErrorNumber(
+                      data.event.runMatchResultsProcess(
+                            item,
+                            match.$2?.robot[widget.teamNumber.toString()],
+                            widget.teamNumber,
+                          ) ??
+                          (value: null, error: null),
                     ),
-                }.sorted((a, b) => a.$1 == null || b.$1 == null
-                    ? 0
-                    : a.$1?.compareTo(b.$1!) ?? 0))
-                  [
-                    DataItem.match(
-                        context: context,
-                        label: match.$1?.label ?? match.$3,
-                        key: match.$3,
-                        time: match.$1?.scheduledTime,
-                        color: getAllianceUIColor(match
-                                .$2
-                                ?.robot[widget.teamNumber.toString()]
-                                ?.alliance) ??
-                            getAllianceUIColor(
-                                match.$1?.getAllianceOf(widget.teamNumber))),
-                    for (final item
-                        in data.event.config.matchscouting.processes)
-                      DataItem.fromErrorNumber(data.event
-                              .runMatchResultsProcess(
-                                  item,
-                                  match.$2?.robot[widget.teamNumber.toString()],
-                                  widget.teamNumber) ??
-                          (value: null, error: null)),
-                    for (final pitSurvey
-                        in data.event.config.matchscouting.survey)
-                      DataItem.fromSurveyItem(
-                          match.$2?.robot[widget.teamNumber.toString()]
-                              ?.survey[pitSurvey.id],
-                          pitSurvey),
-                    DataItem.fromText(getAuditString(context
-                        .watch<DataProvider>()
-                        .database
-                        .getLastPatchFor(Patch.buildPath([
+                  for (final pitSurvey
+                      in data.event.config.matchscouting.survey)
+                    DataItem.fromSurveyItem(
+                      match
+                          .$2
+                          ?.robot[widget.teamNumber.toString()]
+                          ?.survey[pitSurvey.id],
+                      pitSurvey,
+                    ),
+                  DataItem.fromText(
+                    getAuditString(
+                      context.watch<DataProvider>().database.getLastPatchFor(
+                        Patch.buildPath([
                           'matches',
                           match.$3,
                           'robot',
-                          '${widget.teamNumber}'
-                        ])))),
-                  ],
-              ],
-            ),
-            const Divider(),
-            Wrap(
-              spacing: 12,
-              alignment: WrapAlignment.center,
-              children: [
-                Column(
-                  children: [
-                    const SizedBox(height: 16),
-                    Text("Autos",
-                        style: Theme.of(context).textTheme.titleMedium),
-                    PathsViewer(
-                      // Make it larger since its the team page so BIG
-                      size: 600,
-                      paths: [
-                        for (final match in data.event
-                            .teamRecordedMatches(widget.teamNumber))
-                          (
-                            label: match.value
-                                    .getSchedule(data.event, match.key)
-                                    ?.label ??
-                                match.key,
-                            path: match
-                                .value.robot[widget.teamNumber.toString()]!
-                                .timelineInterpolatedBlueNormalized(
-                                    data.event.config.fieldStyle)
-                                .where((element) => element.isInAuto)
-                                .toList()
-                          )
-                      ],
+                          '${widget.teamNumber}',
+                        ]),
+                      ),
                     ),
-                    Column(
-                      children: [
-                        const SizedBox(height: 16),
-                        Text("Autos Heatmap",
-                            style: Theme.of(context).textTheme.titleMedium),
-                        FieldHeatMap(
-                          events: [
-                            for (final match in data.event
-                                .teamRecordedMatches(widget.teamNumber))
-                              ...match
-                                  .value.robot[widget.teamNumber.toString()]!
+                  ),
+                ],
+            ],
+          ),
+          const Divider(),
+          Wrap(
+            spacing: 12,
+            alignment: WrapAlignment.center,
+            children: [
+              Column(
+                children: [
+                  const SizedBox(height: 16),
+                  Text("Autos", style: Theme.of(context).textTheme.titleMedium),
+                  PathsViewer(
+                    // Make it larger since its the team page so BIG
+                    size: 600,
+                    paths: [
+                      for (final match in data.event.teamRecordedMatches(
+                        widget.teamNumber,
+                      ))
+                        (
+                          label:
+                              match.value
+                                  .getSchedule(data.event, match.key)
+                                  ?.label ??
+                              match.key,
+                          path:
+                              match.value.robot[widget.teamNumber.toString()]!
                                   .timelineInterpolatedBlueNormalized(
-                                      data.event.config.fieldStyle)
+                                    data.event.config.fieldStyle,
+                                  )
                                   .where((element) => element.isInAuto)
-                          ],
+                                  .toList(),
                         ),
+                    ],
+                  ),
+                  Column(
+                    children: [
+                      const SizedBox(height: 16),
+                      Text(
+                        "Autos Heatmap",
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      FieldHeatMap(
+                        events: [
+                          for (final match in data.event.teamRecordedMatches(
+                            widget.teamNumber,
+                          ))
+                            ...match.value.robot[widget.teamNumber.toString()]!
+                                .timelineInterpolatedBlueNormalized(
+                                  data.event.config.fieldStyle,
+                                )
+                                .where((element) => element.isInAuto),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              const Divider(height: 32),
+              DataSheet(
+                title: 'Metrics',
+                //Data is a list of rows and columns
+                columns: [
+                  DataItemWithHints(DataItem.fromText("Metric")),
+                  for (final event in data.event.config.matchscouting.events)
+                    DataItemWithHints(
+                      DataItem.fromText(event.label),
+                      largerIsBetter: event.isLargerBetter,
+                    ),
+                ],
+                rows: [
+                  [
+                    DataItem.fromText("Total"),
+                    for (final event in data.event.config.matchscouting.events)
+                      DataItem.fromNumber(
+                        data.event.teamAverageMetric(
+                          widget.teamNumber,
+                          event.id,
+                        ),
+                      ),
+                  ],
+                  [
+                    DataItem.fromText("Auto"),
+                    for (final eventType
+                        in data.event.config.matchscouting.events)
+                      DataItem.fromNumber(
+                        data.event.teamAverageMetric(
+                          widget.teamNumber,
+                          eventType.id,
+                          (event) => event.isInAuto,
+                        ),
+                      ),
+                  ],
+                  [
+                    DataItem.fromText("Teleop"),
+                    for (final eventType
+                        in data.event.config.matchscouting.events)
+                      DataItem.fromNumber(
+                        data.event.teamAverageMetric(
+                          widget.teamNumber,
+                          eventType.id,
+                          (event) => !event.isInAuto,
+                        ),
+                      ),
+                  ],
+                ],
+              ),
+              const Divider(),
+              Column(
+                children: [
+                  const SizedBox(height: 16),
+                  Text(
+                    "Starting Positions",
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  FieldHeatMap(
+                    events:
+                        [
+                          for (final match in data.event.teamRecordedMatches(
+                            widget.teamNumber,
+                          ))
+                            match.value.robot[widget.teamNumber.toString()]!
+                                .timelineInterpolatedBlueNormalized(
+                                  data.event.config.fieldStyle,
+                                )
+                                .where((element) => element.isPositionEvent)
+                                .first,
+                        ].nonNulls.toList(),
+                  ),
+                ],
+              ),
+              for (final eventType in data.event.config.matchscouting.events)
+                Column(
+                  children: [
+                    const SizedBox(height: 16),
+                    Text(
+                      eventType.label,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    FieldHeatMap(
+                      events: [
+                        for (final match in data.event.teamRecordedMatches(
+                          widget.teamNumber,
+                        ))
+                          ...?match.value.robot[widget.teamNumber.toString()]
+                              ?.timelineBlueNormalized(
+                                data.event.config.fieldStyle,
+                              )
+                              .where((event) => event.id == eventType.id),
                       ],
                     ),
                   ],
                 ),
-                const Divider(height: 32),
-                DataSheet(
-                  title: 'Metrics',
-                  //Data is a list of rows and columns
-                  columns: [
-                    DataItemWithHints(DataItem.fromText("Metric")),
-                    for (final event in data.event.config.matchscouting.events)
-                      DataItemWithHints(DataItem.fromText(event.label),
-                          largerIsBetter: event.isLargerBetter),
-                  ],
-                  rows: [
-                    [
-                      DataItem.fromText("Total"),
-                      for (final event
-                          in data.event.config.matchscouting.events)
-                        DataItem.fromNumber(data.event
-                            .teamAverageMetric(widget.teamNumber, event.id)),
-                    ],
-                    [
-                      DataItem.fromText("Auto"),
-                      for (final eventType
-                          in data.event.config.matchscouting.events)
-                        DataItem.fromNumber(data.event.teamAverageMetric(
+              Column(
+                children: [
+                  const SizedBox(height: 16),
+                  Text(
+                    "Ending Positions",
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  FieldHeatMap(
+                    events:
+                        [
+                          for (final match in data.event.teamRecordedMatches(
                             widget.teamNumber,
-                            eventType.id,
-                            (event) => event.isInAuto)),
-                    ],
-                    [
-                      DataItem.fromText("Teleop"),
-                      for (final eventType
-                          in data.event.config.matchscouting.events)
-                        DataItem.fromNumber(data.event.teamAverageMetric(
-                            widget.teamNumber,
-                            eventType.id,
-                            (event) => !event.isInAuto)),
-                    ]
-                  ],
-                ),
-                const Divider(),
-                Column(
-                  children: [
-                    const SizedBox(height: 16),
-                    Text("Starting Positions",
-                        style: Theme.of(context).textTheme.titleMedium),
-                    FieldHeatMap(
-                      events: [
-                        for (final match in data.event
-                            .teamRecordedMatches(widget.teamNumber))
-                          match.value.robot[widget.teamNumber.toString()]!
-                              .timelineInterpolatedBlueNormalized(
-                                  data.event.config.fieldStyle)
-                              .where((element) => element.isPositionEvent)
-                              .first
-                      ].nonNulls.toList(),
-                    ),
-                  ],
-                ),
-                for (final eventType in data.event.config.matchscouting.events)
-                  Column(children: [
-                    const SizedBox(height: 16),
-                    Text(eventType.label,
-                        style: Theme.of(context).textTheme.titleMedium),
-                    FieldHeatMap(events: [
-                      for (final match
-                          in data.event.teamRecordedMatches(widget.teamNumber))
-                        ...?match.value.robot[widget.teamNumber.toString()]
-                            ?.timelineBlueNormalized(
-                                data.event.config.fieldStyle)
-                            .where((event) => event.id == eventType.id)
-                    ]),
-                  ]),
-                Column(
-                  children: [
-                    const SizedBox(height: 16),
-                    Text("Ending Positions",
-                        style: Theme.of(context).textTheme.titleMedium),
-                    FieldHeatMap(
-                      events: [
-                        for (final match in data.event
-                            .teamRecordedMatches(widget.teamNumber))
-                          match.value.robot[widget.teamNumber.toString()]!
-                              .timelineInterpolatedBlueNormalized(
-                                  data.event.config.fieldStyle)
-                              .where((element) => element.isPositionEvent)
-                              .last
-                      ].nonNulls.toList(),
-                    ),
-                  ],
-                ),
-                Column(
-                  children: [
-                    const SizedBox(height: 16),
-                    Text("Driving Tendencies",
-                        style: Theme.of(context).textTheme.titleMedium),
-                    FieldHeatMap(events: [
-                      for (final match
-                          in data.event.teamRecordedMatches(widget.teamNumber))
+                          ))
+                            match.value.robot[widget.teamNumber.toString()]!
+                                .timelineInterpolatedBlueNormalized(
+                                  data.event.config.fieldStyle,
+                                )
+                                .where((element) => element.isPositionEvent)
+                                .last,
+                        ].nonNulls.toList(),
+                  ),
+                ],
+              ),
+              Column(
+                children: [
+                  const SizedBox(height: 16),
+                  Text(
+                    "Driving Tendencies",
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  FieldHeatMap(
+                    events: [
+                      for (final match in data.event.teamRecordedMatches(
+                        widget.teamNumber,
+                      ))
                         ...?match.value.robot[widget.teamNumber.toString()]
                             ?.timelineInterpolatedBlueNormalized(
-                                data.event.config.fieldStyle)
-                            .where((event) => event.isPositionEvent)
-                    ]),
-                  ],
-                ),
-              ],
+                              data.event.config.fieldStyle,
+                            )
+                            .where((event) => event.isPositionEvent),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const Divider(height: 32),
+          Center(
+            child: Text(
+              "Scouting",
+              style: Theme.of(context).textTheme.titleLarge,
             ),
-            const Divider(height: 32),
-            Center(
-                child: Text("Scouting",
-                    style: Theme.of(context).textTheme.titleLarge)),
-            ScoutingResultsViewer(
-                teamNumber: widget.teamNumber, snoutData: data),
-          ],
-        ));
+          ),
+          ScoutingResultsViewer(teamNumber: widget.teamNumber, snoutData: data),
+        ],
+      ),
+    );
   }
 }
 
@@ -369,8 +447,11 @@ class ScoutingResultsViewer extends StatelessWidget {
   final int teamNumber;
   final DataProvider snoutData;
 
-  const ScoutingResultsViewer(
-      {super.key, required this.teamNumber, required this.snoutData});
+  const ScoutingResultsViewer({
+    super.key,
+    required this.teamNumber,
+    required this.snoutData,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -383,12 +464,13 @@ class ScoutingResultsViewer extends StatelessWidget {
         for (final item in snoutData.event.config.pitscouting) ...[
           DynamicValueViewer(itemType: item, value: data[item.id]),
           Container(
-              padding: const EdgeInsets.only(right: 16),
-              alignment: Alignment.centerRight,
-              child: EditAudit(
-                  path: Patch.buildPath(
-                      ['pitscouting', '$teamNumber', item.id]))),
-        ]
+            padding: const EdgeInsets.only(right: 16),
+            alignment: Alignment.centerRight,
+            child: EditAudit(
+              path: Patch.buildPath(['pitscouting', '$teamNumber', item.id]),
+            ),
+          ),
+        ],
       ],
     );
   }
@@ -398,18 +480,18 @@ class DynamicValueViewer extends StatelessWidget {
   final SurveyItem itemType;
   final dynamic value;
 
-  const DynamicValueViewer(
-      {super.key, required this.itemType, required this.value});
+  const DynamicValueViewer({
+    super.key,
+    required this.itemType,
+    required this.value,
+  });
 
   @override
   Widget build(BuildContext context) {
     if (value == null) {
       return ListTile(
         title: Text(itemType.label),
-        subtitle: const Text(
-          "NOT SET",
-          style: TextStyle(color: warningColor),
-        ),
+        subtitle: const Text("NOT SET", style: TextStyle(color: warningColor)),
       );
     }
 

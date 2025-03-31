@@ -23,54 +23,77 @@ class TableRobotRecordingsPage extends StatelessWidget {
             DataItemWithHints(DataItem.fromText("Match")),
             DataItemWithHints(DataItem.fromText("Team")),
             for (final item in data.event.config.matchscouting.processes)
-              DataItemWithHints(DataItem.fromText(item.label),
-                  largerIsBetter: item.isLargerBetter),
+              DataItemWithHints(
+                DataItem.fromText(item.label),
+                largerIsBetter: item.isLargerBetter,
+              ),
             for (final item in data.event.config.matchscouting.survey)
               DataItemWithHints(DataItem.fromText(item.label)),
-            DataItemWithHints(DataItem.fromText("Scout"))
+            DataItemWithHints(DataItem.fromText("Scout")),
           ],
           rows: [
             for (final match in data.event.matches.entries)
               for (final robot in match.value.robot.entries)
                 [
                   DataItem.match(
-                      context: context,
-                      key: match.key,
-                      label: match.value
-                              .getSchedule(data.event, match.key)
-                              ?.label ??
-                          match.key,
-                      time: match.value
-                          .getSchedule(data.event, match.key)
-                          ?.scheduledTime),
+                    context: context,
+                    key: match.key,
+                    label:
+                        match.value.getSchedule(data.event, match.key)?.label ??
+                        match.key,
+                    time:
+                        match.value
+                            .getSchedule(data.event, match.key)
+                            ?.scheduledTime,
+                  ),
                   DataItem(
-                      displayValue: TextButton(
-                          child: Text(robot.key,
-                              style: TextStyle(
-                                  color: getAllianceUIColor(
-                                      robot.value.alliance))),
-                          onPressed: () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => TeamViewPage(
-                                        teamNumber: int.parse(robot.key))),
-                              )),
-                      exportValue: robot.key,
-                      sortingValue: robot.key),
+                    displayValue: TextButton(
+                      child: Text(
+                        robot.key,
+                        style: TextStyle(
+                          color: getAllianceUIColor(robot.value.alliance),
+                        ),
+                      ),
+                      onPressed:
+                          () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (context) => TeamViewPage(
+                                    teamNumber: int.parse(robot.key),
+                                  ),
+                            ),
+                          ),
+                    ),
+                    exportValue: robot.key,
+                    sortingValue: robot.key,
+                  ),
                   for (final item in data.event.config.matchscouting.processes)
-                    DataItem.fromErrorNumber(data.event.runMatchResultsProcess(
+                    DataItem.fromErrorNumber(
+                      data.event.runMatchResultsProcess(
                             item,
                             match.value.robot[robot.key],
-                            int.tryParse(robot.key) ?? 0) ??
-                        (value: null, error: "Missing Results")),
+                            int.tryParse(robot.key) ?? 0,
+                          ) ??
+                          (value: null, error: "Missing Results"),
+                    ),
                   for (final item in data.event.config.matchscouting.survey)
                     DataItem.fromSurveyItem(
-                        match.value.robot[robot.key]?.survey[item.id], item),
-                  DataItem.fromText(getAuditString(context
-                      .watch<DataProvider>()
-                      .database
-                      .getLastPatchFor(Patch.buildPath(
-                          ['matches', match.key, 'robot', robot.key])))),
+                      match.value.robot[robot.key]?.survey[item.id],
+                      item,
+                    ),
+                  DataItem.fromText(
+                    getAuditString(
+                      context.watch<DataProvider>().database.getLastPatchFor(
+                        Patch.buildPath([
+                          'matches',
+                          match.key,
+                          'robot',
+                          robot.key,
+                        ]),
+                      ),
+                    ),
+                  ),
                 ],
           ],
         ),

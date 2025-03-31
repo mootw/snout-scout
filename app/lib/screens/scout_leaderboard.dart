@@ -35,11 +35,7 @@ class ScoutLeaderboardPage extends StatelessWidget {
 
     List<({String identity, int score, int edits})> sorted = [
       for (final scout in scores.entries)
-        (
-          identity: scout.key,
-          score: scout.value,
-          edits: edits[scout.key]!,
-        ),
+        (identity: scout.key, score: scout.value, edits: edits[scout.key]!),
     ];
 
     sorted.sort((k1, k2) => k2.score.compareTo(k1.score));
@@ -49,16 +45,13 @@ class ScoutLeaderboardPage extends StatelessWidget {
     const height = 400.0;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Leaderboard"),
-      ),
+      appBar: AppBar(title: const Text("Leaderboard")),
       body: ListView(
         children: [
           const Text(
-              "This is just for fun! Each normal edit is worth 1 point (pit scouting is worth 1 point per field). A edits that match 'r'\\/matches\\/.+\\/robot\\/'' are worth 5 points because Robot recordings take longer."),
-          const SizedBox(
-            height: 32,
+            "This is just for fun! Each normal edit is worth 1 point (pit scouting is worth 1 point per field). A edits that match 'r'\\/matches\\/.+\\/robot\\/'' are worth 5 points because Robot recordings take longer.",
           ),
+          const SizedBox(height: 32),
           SizedBox(
             height: height + 40,
             child: ScrollConfiguration(
@@ -66,9 +59,7 @@ class ScoutLeaderboardPage extends StatelessWidget {
               child: ListView(
                 scrollDirection: Axis.horizontal,
                 children: [
-                  const SizedBox(
-                    width: 24,
-                  ),
+                  const SizedBox(width: 24),
                   for (final (idx, item) in sorted.indexed) ...[
                     Column(
                       mainAxisAlignment: MainAxisAlignment.end,
@@ -98,29 +89,21 @@ class ScoutLeaderboardPage extends StatelessWidget {
                               ],
                             ),
                           ],
-                        )
+                        ),
                       ],
                     ),
                     const VerticalDivider(width: 4),
-                  ]
+                  ],
                 ],
               ),
             ),
           ),
           ListTile(
-            leading: Container(
-              height: 32,
-              width: 32,
-              color: Colors.red,
-            ),
+            leading: Container(height: 32, width: 32, color: Colors.red),
             title: const Text("Score"),
           ),
           ListTile(
-            leading: Container(
-              height: 32,
-              width: 32,
-              color: Colors.blue,
-            ),
+            leading: Container(height: 32, width: 32, color: Colors.blue),
             title: const Text("Edits"),
           ),
         ],

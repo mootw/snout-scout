@@ -16,11 +16,12 @@ class EditMatchPropertiesPage extends StatefulWidget {
   final List<SurveyItem> config;
   final DynamicProperties? initialData;
 
-  const EditMatchPropertiesPage(
-      {super.key,
-      required this.matchID,
-      required this.config,
-      this.initialData});
+  const EditMatchPropertiesPage({
+    super.key,
+    required this.matchID,
+    required this.config,
+    this.initialData,
+  });
 
   @override
   State<EditMatchPropertiesPage> createState() =>
@@ -43,9 +44,10 @@ class _EditMatchPropertiesPageState extends State<EditMatchPropertiesPage> {
 
   @override
   Widget build(BuildContext context) {
-    context
-        .read<DataProvider>()
-        .updateStatus(context, "Editing Match Properties");
+    context.read<DataProvider>().updateStatus(
+      context,
+      "Editing Match Properties",
+    );
     return ConfirmExitDialog(
       child: Scaffold(
         appBar: AppBar(
@@ -53,38 +55,41 @@ class _EditMatchPropertiesPageState extends State<EditMatchPropertiesPage> {
           bottom: const LoadOrErrorStatusBar(),
           actions: [
             IconButton(
-                onPressed: () async {
-                  if (_formKey.currentState!.validate() == false) {
-                    //There are form errors, do nothing here.
-                    return;
-                  }
+              onPressed: () async {
+                if (_formKey.currentState!.validate() == false) {
+                  //There are form errors, do nothing here.
+                  return;
+                }
 
-                  final snoutData = context.read<DataProvider>();
-                  final identity = context.read<IdentityProvider>().identity;
+                final snoutData = context.read<DataProvider>();
+                final identity = context.read<IdentityProvider>().identity;
 
-                  //New map instance to avoid messing up the UI
-                  final onlyChanges = Map.of(_items);
-                  onlyChanges.removeWhere(
-                      (key, value) => widget.initialData?[key] == value);
-                  for (final item in onlyChanges.entries) {
-                    Patch patch = Patch(
-                        identity: identity,
-                        time: DateTime.now(),
-                        path: Patch.buildPath([
-                          'matches',
-                          widget.matchID,
-                          "properties",
-                          item.key
-                        ]),
-                        value: item.value);
-                    //Save the scouting results to the server!!
-                    await snoutData.newTransaction(patch);
-                  }
-                  if (context.mounted) {
-                    Navigator.of(context).pop(true);
-                  }
-                },
-                icon: const Icon(Icons.save))
+                //New map instance to avoid messing up the UI
+                final onlyChanges = Map.of(_items);
+                onlyChanges.removeWhere(
+                  (key, value) => widget.initialData?[key] == value,
+                );
+                for (final item in onlyChanges.entries) {
+                  Patch patch = Patch(
+                    identity: identity,
+                    time: DateTime.now(),
+                    path: Patch.buildPath([
+                      'matches',
+                      widget.matchID,
+                      "properties",
+                      item.key,
+                    ]),
+                    value: item.value,
+                  );
+                  //Save the scouting results to the server!!
+                  await snoutData.newTransaction(patch);
+                }
+                if (context.mounted) {
+                  Navigator.of(context).pop(true);
+                }
+              },
+              icon: const Icon(Icons.save),
+            ),
           ],
         ),
         body: Form(
@@ -94,11 +99,12 @@ class _EditMatchPropertiesPageState extends State<EditMatchPropertiesPage> {
             children: [
               for (final item in widget.config)
                 Container(
-                    padding: const EdgeInsets.all(12),
-                    child: DynamicPropertyEditorWidget(
-                      tool: item,
-                      survey: _items,
-                    )),
+                  padding: const EdgeInsets.all(12),
+                  child: DynamicPropertyEditorWidget(
+                    tool: item,
+                    survey: _items,
+                  ),
+                ),
             ],
           ),
         ),

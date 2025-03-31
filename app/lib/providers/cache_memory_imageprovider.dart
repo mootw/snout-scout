@@ -14,11 +14,13 @@ class CacheMemoryImageProvider extends ImageProvider<CacheMemoryImageProvider> {
   final String tag;
 
   CacheMemoryImageProvider(this.imageDataStringBase64)
-      : tag = imageDataStringBase64.substring(0, 64);
+    : tag = imageDataStringBase64.substring(0, 64);
 
   @override
   ImageStreamCompleter loadImage(
-      CacheMemoryImageProvider key, ImageDecoderCallback decode) {
+    CacheMemoryImageProvider key,
+    ImageDecoderCallback decode,
+  ) {
     return MultiFrameImageStreamCompleter(
       codec: _loadAsync(decode),
       scale: 1.0,
@@ -52,7 +54,8 @@ class CacheMemoryImageProvider extends ImageProvider<CacheMemoryImageProvider> {
   @override
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType) return false;
-    bool res = other is CacheMemoryImageProvider &&
+    bool res =
+        other is CacheMemoryImageProvider &&
         other.imageDataStringBase64 == imageDataStringBase64;
     return res;
   }

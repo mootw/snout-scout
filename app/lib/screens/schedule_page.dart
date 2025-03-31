@@ -24,16 +24,18 @@ class _AllMatchesPageState extends State<AllMatchesPage> {
   @override
   void initState() {
     super.initState();
-    _controller =
-        ScrollController(initialScrollOffset: widget.scrollPosition ?? 0);
+    _controller = ScrollController(
+      initialScrollOffset: widget.scrollPosition ?? 0,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final snoutData = context.watch<DataProvider>();
 
-    MatchScheduleItem? teamNextMatch =
-        snoutData.event.nextMatchForTeam(snoutData.event.config.team);
+    MatchScheduleItem? teamNextMatch = snoutData.event.nextMatchForTeam(
+      snoutData.event.config.team,
+    );
     Duration? scheduleDelay = snoutData.event.scheduleDelay;
     return Column(
       children: [
@@ -45,27 +47,34 @@ class _AllMatchesPageState extends State<AllMatchesPage> {
               //if a match is equal to the next match; highlight it!
               for (final matchSchedule in snoutData.event.scheduleSorted)
                 Container(
-                    color: matchSchedule == snoutData.event.nextMatch
-                        ? Theme.of(context).colorScheme.onPrimary
-                        : null,
-                    child: MatchCard(
-                        match: matchSchedule.getData(snoutData.event),
-                        matchSchedule: matchSchedule,
-                        focusTeam: snoutData.event.config.team)),
+                  color:
+                      matchSchedule == snoutData.event.nextMatch
+                          ? Theme.of(context).colorScheme.onPrimary
+                          : null,
+                  child: MatchCard(
+                    match: matchSchedule.getData(snoutData.event),
+                    matchSchedule: matchSchedule,
+                    focusTeam: snoutData.event.config.team,
+                  ),
+                ),
 
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: Center(
                   child: FilledButton.tonal(
-                      onPressed: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => EditSchedulePage(
-                                  matches: snoutData.event.schedule),
-                            ));
-                      },
-                      child: const Text("Edit Schedule")),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder:
+                              (context) => EditSchedulePage(
+                                matches: snoutData.event.schedule,
+                              ),
+                        ),
+                      );
+                    },
+                    child: const Text("Edit Schedule"),
+                  ),
                 ),
               ),
             ],
@@ -79,25 +88,32 @@ class _AllMatchesPageState extends State<AllMatchesPage> {
               children: [
                 Text("Schedule ${offsetDurationInMins(scheduleDelay)}"),
                 TextButton(
-                  onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) =>
-                            MatchPage(matchid: teamNextMatch.id)),
-                  ),
+                  onPressed:
+                      () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder:
+                              (context) => MatchPage(matchid: teamNextMatch.id),
+                        ),
+                      ),
                   child: Text(
                     teamNextMatch.label,
                     style: TextStyle(
-                        color: getAllianceUIColor(teamNextMatch
-                            .getAllianceOf(snoutData.event.config.team))),
+                      color: getAllianceUIColor(
+                        teamNextMatch.getAllianceOf(
+                          snoutData.event.config.team,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
                 TimeDuration(
-                    time: teamNextMatch.scheduledTime.add(scheduleDelay),
-                    displayDurationDefault: true),
+                  time: teamNextMatch.scheduledTime.add(scheduleDelay),
+                  displayDurationDefault: true,
+                ),
               ],
             ),
-          )
+          ),
       ],
     );
   }

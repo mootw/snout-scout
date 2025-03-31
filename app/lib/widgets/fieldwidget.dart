@@ -25,13 +25,14 @@ const double smallFieldSize = 255;
 
 /// used on the scouting pages
 class FieldPositionSelector extends StatelessWidget {
-  const FieldPositionSelector(
-      {super.key,
-      required this.onTap,
-      required this.robotPosition,
-      required this.alliance,
-      required this.teamNumber,
-      this.coverAlignment});
+  const FieldPositionSelector({
+    super.key,
+    required this.onTap,
+    required this.robotPosition,
+    required this.alliance,
+    required this.teamNumber,
+    this.coverAlignment,
+  });
 
   final Function(FieldPosition) onTap;
   final FieldPosition? robotPosition;
@@ -47,55 +48,67 @@ class FieldPositionSelector extends StatelessWidget {
     //weird visuals since none of this is really the best way to do it.
     return AspectRatio(
       aspectRatio: 1 / mapRatio,
-      child: LayoutBuilder(builder: (context, constraints) {
-        return GestureDetector(
-          onTapDown: (details) {
-            onTap(FieldPosition(
-                (details.localPosition.dx / constraints.maxWidth * 2) - 1,
-                ((1 -
-                            details.localPosition.dy /
-                                (constraints.maxWidth * mapRatio)) *
-                        2) -
-                    1));
-          },
-          child: FieldMap(
-            children: [
-              if (coverAlignment != null)
-                Align(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return GestureDetector(
+            onTapDown: (details) {
+              onTap(
+                FieldPosition(
+                  (details.localPosition.dx / constraints.maxWidth * 2) - 1,
+                  ((1 -
+                              details.localPosition.dy /
+                                  (constraints.maxWidth * mapRatio)) *
+                          2) -
+                      1,
+                ),
+              );
+            },
+            child: FieldMap(
+              children: [
+                if (coverAlignment != null)
+                  Align(
                     alignment: Alignment(coverAlignment!, 0),
                     child: Container(
-                        width: constraints.maxWidth / 2,
-                        height: double.infinity,
-                        color: Colors.black54)),
-              if (robotPosition != null)
-                Container(
+                      width: constraints.maxWidth / 2,
+                      height: double.infinity,
+                      color: Colors.black54,
+                    ),
+                  ),
+                if (robotPosition != null)
+                  Container(
                     alignment: Alignment(
-                        robotPosition!.x *
-                            (1 +
-                                ((robotFieldProportion * constraints.maxWidth) /
-                                    constraints.maxWidth)),
-                        -robotPosition!.y *
-                            (1 +
-                                //Use 1/mapratio for the height since we are ONLY using the width constraint
-                                //IDK it seems to work here, not sure why it isn't a problem elseware.
-                                (((1 / mapRatio) *
-                                        robotFieldProportion *
-                                        constraints.maxWidth) /
-                                    constraints.maxWidth))),
+                      robotPosition!.x *
+                          (1 +
+                              ((robotFieldProportion * constraints.maxWidth) /
+                                  constraints.maxWidth)),
+                      -robotPosition!.y *
+                          (1 +
+                              //Use 1/mapratio for the height since we are ONLY using the width constraint
+                              //IDK it seems to work here, not sure why it isn't a problem elseware.
+                              (((1 / mapRatio) *
+                                      robotFieldProportion *
+                                      constraints.maxWidth) /
+                                  constraints.maxWidth)),
+                    ),
                     child: Container(
-                        alignment: Alignment.center,
-                        width: robotFieldProportion * constraints.maxWidth,
-                        height: robotFieldProportion * constraints.maxWidth,
-                        color: getAllianceUIColor(alliance),
-                        child: Text(teamNumber.toString(),
-                            style: TextStyle(
-                                fontSize: 0.3 *
-                                    (constraints.maxWidth /
-                                        fieldWidthMeters))))),
-            ],
-          ),
-        );
-      }),
+                      alignment: Alignment.center,
+                      width: robotFieldProportion * constraints.maxWidth,
+                      height: robotFieldProportion * constraints.maxWidth,
+                      color: getAllianceUIColor(alliance),
+                      child: Text(
+                        teamNumber.toString(),
+                        style: TextStyle(
+                          fontSize:
+                              0.3 * (constraints.maxWidth / fieldWidthMeters),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 }
@@ -136,24 +149,28 @@ class _FieldTimelineViewerState extends State<FieldTimelineViewer> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        FieldMap(children: [
-          for (final robot in widget.match.robot.entries)
-            RobotMapEventView(
+        FieldMap(
+          children: [
+            for (final robot in widget.match.robot.entries)
+              RobotMapEventView(
                 time: _animationTime,
                 robotRecording: robot.value,
                 team: robot.key,
-                isAnimating: _isPlaying),
-        ]),
+                isAnimating: _isPlaying,
+              ),
+          ],
+        ),
         // TODO in depth timeline here???? like robot: event
         Row(
           children: [
             IconButton(
-                icon: Icon(_isPlaying ? Icons.pause : Icons.play_arrow),
-                onPressed: () {
-                  setState(() {
-                    _isPlaying = !_isPlaying;
-                  });
-                }),
+              icon: Icon(_isPlaying ? Icons.pause : Icons.play_arrow),
+              onPressed: () {
+                setState(() {
+                  _isPlaying = !_isPlaying;
+                });
+              },
+            ),
             Expanded(
               child: Slider(
                 min: 0,
@@ -169,11 +186,12 @@ class _FieldTimelineViewerState extends State<FieldTimelineViewer> {
               ),
             ),
             SizedBox(
-                width: 32,
-                child: Text(
-                  _animationTime.toString(),
-                  textAlign: TextAlign.center,
-                )),
+              width: 32,
+              child: Text(
+                _animationTime.toString(),
+                textAlign: TextAlign.center,
+              ),
+            ),
           ],
         ),
       ],
@@ -182,12 +200,13 @@ class _FieldTimelineViewerState extends State<FieldTimelineViewer> {
 }
 
 class RobotMapEventView extends StatelessWidget {
-  const RobotMapEventView(
-      {super.key,
-      required this.isAnimating,
-      required this.time,
-      required this.robotRecording,
-      required this.team});
+  const RobotMapEventView({
+    super.key,
+    required this.isAnimating,
+    required this.time,
+    required this.robotRecording,
+    required this.team,
+  });
 
   final bool isAnimating;
   final int time;
@@ -197,56 +216,68 @@ class RobotMapEventView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final posEvent = robotRecording.timelineInterpolated.lastWhereOrNull(
-        (event) => event.time <= time && event.isPositionEvent);
+      (event) => event.time <= time && event.isPositionEvent,
+    );
     if (posEvent == null) {
       //A position event is required to show the robot on the timeline
       return const SizedBox();
     }
     FieldPosition robotPosition = posEvent.position;
 
-    final allRecentEvents = robotRecording.timelineInterpolated.where((event) =>
-        event.time >= time &&
-        event.time < time + 2 &&
-        event.isPositionEvent == false);
+    final allRecentEvents = robotRecording.timelineInterpolated.where(
+      (event) =>
+          event.time >= time &&
+          event.time < time + 2 &&
+          event.isPositionEvent == false,
+    );
 
     return LayoutBuilder(
-        key: Key(team),
-        builder: (context, constraints) {
-          return Stack(children: [
+      key: Key(team),
+      builder: (context, constraints) {
+        return Stack(
+          children: [
             AnimatedAlign(
-              duration: isAnimating
-                  ? const Duration(milliseconds: 1000)
-                  : const Duration(milliseconds: 100),
+              duration:
+                  isAnimating
+                      ? const Duration(milliseconds: 1000)
+                      : const Duration(milliseconds: 100),
               alignment: Alignment(
-                  robotPosition.x *
-                      (1 +
-                          ((robotFieldProportion * constraints.maxWidth) /
-                              constraints.maxWidth)),
-                  -robotPosition.y *
-                      (1 +
-                          ((robotFieldProportion * constraints.maxWidth) /
-                              constraints.maxHeight))),
+                robotPosition.x *
+                    (1 +
+                        ((robotFieldProportion * constraints.maxWidth) /
+                            constraints.maxWidth)),
+                -robotPosition.y *
+                    (1 +
+                        ((robotFieldProportion * constraints.maxWidth) /
+                            constraints.maxHeight)),
+              ),
               child: Container(
                 alignment: Alignment.center,
                 width: robotFieldProportion * constraints.maxWidth,
                 height: robotFieldProportion * constraints.maxWidth,
                 color: getAllianceUIColor(robotRecording.alliance),
-                child: Text(team,
-                    style: TextStyle(
-                        fontSize:
-                            0.3 * (constraints.maxWidth / fieldWidthMeters))),
+                child: Text(
+                  team,
+                  style: TextStyle(
+                    fontSize: 0.3 * (constraints.maxWidth / fieldWidthMeters),
+                  ),
+                ),
               ),
             ),
             for (final event in allRecentEvents)
               Align(
                 alignment: Alignment(event.position.x, -event.position.y),
                 child: Text(
-                    event.getLabelFromConfig(
-                        context.watch<DataProvider>().event.config),
-                    style: const TextStyle(backgroundColor: Colors.black)),
+                  event.getLabelFromConfig(
+                    context.watch<DataProvider>().event.config,
+                  ),
+                  style: const TextStyle(backgroundColor: Colors.black),
+                ),
               ),
-          ]);
-        });
+          ],
+        );
+      },
+    );
   }
 }
 
@@ -254,8 +285,11 @@ class FieldHeatMap extends StatelessWidget {
   final List<MatchEvent> events;
   final double size;
 
-  const FieldHeatMap(
-      {super.key, required this.events, this.size = smallFieldSize});
+  const FieldHeatMap({
+    super.key,
+    required this.events,
+    this.size = smallFieldSize,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -266,10 +300,7 @@ class FieldHeatMap extends StatelessWidget {
           //size: size,
           children: [
             Container(color: Colors.black12),
-            CustomPaint(
-              size: Size.infinite,
-              painter: HeatMap(events: events),
-            )
+            CustomPaint(size: Size.infinite, painter: HeatMap(events: events)),
           ],
         ),
       ),
@@ -281,8 +312,11 @@ class FullScreenFieldSelector extends StatelessWidget {
   final Widget child;
   final Widget? showAbove;
 
-  const FullScreenFieldSelector(
-      {super.key, required this.child, this.showAbove});
+  const FullScreenFieldSelector({
+    super.key,
+    required this.child,
+    this.showAbove,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -292,16 +326,15 @@ class FullScreenFieldSelector extends StatelessWidget {
           InkWell(
             child: child,
             onTap: () {
-              Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => Scaffold(
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder:
+                      (context) => Scaffold(
                         appBar: AppBar(),
-                        body: Stack(
-                          children: [
-                            child,
-                            showAbove!,
-                          ],
-                        ),
-                      )));
+                        body: Stack(children: [child, showAbove!]),
+                      ),
+                ),
+              );
             },
           ),
           showAbove!,
@@ -311,11 +344,11 @@ class FullScreenFieldSelector extends StatelessWidget {
     return InkWell(
       child: child,
       onTap: () {
-        Navigator.of(context).push(MaterialPageRoute(
-            builder: (context) => Scaffold(
-                  appBar: AppBar(),
-                  body: child,
-                )));
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => Scaffold(appBar: AppBar(), body: child),
+          ),
+        );
       },
     );
   }
@@ -327,12 +360,13 @@ class PathsViewer extends StatefulWidget {
   final bool useRedNormalized;
   final double size;
 
-  const PathsViewer(
-      {super.key,
-      required this.paths,
-      this.size = largeFieldSize,
-      this.emphasizeStartPoint = true,
-      this.useRedNormalized = true});
+  const PathsViewer({
+    super.key,
+    required this.paths,
+    this.size = largeFieldSize,
+    this.emphasizeStartPoint = true,
+    this.useRedNormalized = true,
+  });
 
   @override
   State<PathsViewer> createState() => _PathsViewerState();
@@ -354,102 +388,131 @@ class _PathsViewerState extends State<PathsViewer> {
 
     return ConstrainedBox(
       constraints: BoxConstraints.loose(Size(widget.size, double.infinity)),
-      child: Column(children: [
-        ConstrainedBox(
-          constraints: BoxConstraints.loose(Size(widget.size, widget.size / 2)),
-          child: FullScreenFieldSelector(
-            showAbove: null,
-            child: FieldMap(children: [
-              Container(color: Colors.black12),
-              for (final path in filteredPaths) ...[
-                CustomPaint(
-                  size: Size.infinite,
-                  painter: MapLine(
-                      emphasizeStartPoint: widget.emphasizeStartPoint,
-                      color: getColorFromIndex(filteredPaths.indexOf(path)),
-                      events: path.path),
-                ),
-              ],
-              // Event Labels
-              if (viewMode == 1)
-                Stack(children: [
-                  for (final path in filteredPaths)
-                    for (final event
-                        in path.path.where((event) => !event.isPositionEvent))
-                      Align(
-                        alignment:
-                            Alignment(event.position.x, -event.position.y),
-                        child: Text(
-                            event.getLabelFromConfig(
-                                context.watch<DataProvider>().event.config),
-                            style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 10,
-                                backgroundColor: Colors.black26)),
+      child: Column(
+        children: [
+          ConstrainedBox(
+            constraints: BoxConstraints.loose(
+              Size(widget.size, widget.size / 2),
+            ),
+            child: FullScreenFieldSelector(
+              showAbove: null,
+              child: FieldMap(
+                children: [
+                  Container(color: Colors.black12),
+                  for (final path in filteredPaths) ...[
+                    CustomPaint(
+                      size: Size.infinite,
+                      painter: MapLine(
+                        emphasizeStartPoint: widget.emphasizeStartPoint,
+                        color: getColorFromIndex(filteredPaths.indexOf(path)),
+                        events: path.path,
                       ),
-                ]),
+                    ),
+                  ],
+                  // Event Labels
+                  if (viewMode == 1)
+                    Stack(
+                      children: [
+                        for (final path in filteredPaths)
+                          for (final event in path.path.where(
+                            (event) => !event.isPositionEvent,
+                          ))
+                            Align(
+                              alignment: Alignment(
+                                event.position.x,
+                                -event.position.y,
+                              ),
+                              child: Text(
+                                event.getLabelFromConfig(
+                                  context.watch<DataProvider>().event.config,
+                                ),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  backgroundColor: Colors.black26,
+                                ),
+                              ),
+                            ),
+                      ],
+                    ),
 
-              if (viewMode == 2)
-                Align(
-                  alignment: Alignment.topRight,
-                  child: SingleChildScrollView(
-                    child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          for (final path in filteredPaths)
-                            for (final event in path.path
-                                .where((event) => !event.isPositionEvent))
-                              Text(
+                  if (viewMode == 2)
+                    Align(
+                      alignment: Alignment.topRight,
+                      child: SingleChildScrollView(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            for (final path in filteredPaths)
+                              for (final event in path.path.where(
+                                (event) => !event.isPositionEvent,
+                              ))
+                                Text(
                                   '${event.time} ${event.getLabelFromConfig(context.watch<DataProvider>().event.config)}',
                                   style: TextStyle(
-                                      color: getColorFromIndex(
-                                          filteredPaths.indexOf(path)),
-                                      backgroundColor: Colors.black26)),
-                        ]),
-                  ),
-                ),
-            ]),
-          ),
-        ),
-        Align(
-          alignment: Alignment.bottomLeft,
-          child: Container(
-            color: Colors.black87,
-            height: 32,
-            child: ListView(scrollDirection: Axis.horizontal, children: [
-              TextButton(
-                child: Text("M$viewMode"),
-                onPressed: () => setState(() {
-                  setState(() {
-                    if (viewMode == 0) {
-                      viewMode = 1;
-                    } else if (viewMode == 1) {
-                      viewMode = 2;
-                    } else {
-                      viewMode = 0;
-                    }
-                  });
-                }),
+                                    color: getColorFromIndex(
+                                      filteredPaths.indexOf(path),
+                                    ),
+                                    backgroundColor: Colors.black26,
+                                  ),
+                                ),
+                          ],
+                        ),
+                      ),
+                    ),
+                ],
               ),
-              TextButton(
-                  onPressed: () => setState(() {
-                        filterIndex = -1;
-                      }),
-                  child: const Text("All")),
-              for (final (idx, item) in widget.paths.indexed)
-                TextButton(
-                    onPressed: () => setState(() {
-                          filterIndex = idx;
-                        }),
-                    child: Text(
-                      item.label,
-                      style: TextStyle(
-                          color: getColorFromIndex(widget.paths.indexOf(item))),
-                    )),
-            ]),
+            ),
           ),
-        ),
-      ]),
+          Align(
+            alignment: Alignment.bottomLeft,
+            child: Container(
+              color: Colors.black87,
+              height: 32,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                children: [
+                  TextButton(
+                    child: Text("M$viewMode"),
+                    onPressed:
+                        () => setState(() {
+                          setState(() {
+                            if (viewMode == 0) {
+                              viewMode = 1;
+                            } else if (viewMode == 1) {
+                              viewMode = 2;
+                            } else {
+                              viewMode = 0;
+                            }
+                          });
+                        }),
+                  ),
+                  TextButton(
+                    onPressed:
+                        () => setState(() {
+                          filterIndex = -1;
+                        }),
+                    child: const Text("All"),
+                  ),
+                  for (final (idx, item) in widget.paths.indexed)
+                    TextButton(
+                      onPressed:
+                          () => setState(() {
+                            filterIndex = idx;
+                          }),
+                      child: Text(
+                        item.label,
+                        style: TextStyle(
+                          color: getColorFromIndex(widget.paths.indexOf(item)),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -468,11 +531,12 @@ class HeatMap extends CustomPainter {
     );
 
     List<List<double>> ls = List.generate(
-        events.length,
-        (index) => [
-              ((events[index].position.x + 1) / 2) * size.width,
-              (1 - ((events[index].position.y + 1) / 2)) * size.height
-            ]);
+      events.length,
+      (index) => [
+        ((events[index].position.x + 1) / 2) * size.width,
+        (1 - ((events[index].position.y + 1) / 2)) * size.height,
+      ],
+    );
 
     final result = dbscan.run(ls);
     //Sort so the smallest render first
@@ -480,25 +544,33 @@ class HeatMap extends CustomPainter {
 
     //Max group length with a minimum of 4 (to prevent single elements from being red hot)
     int maxGroupLength = result.fold(
-        0, (previousValue, element) => math.max(previousValue, element.length));
+      0,
+      (previousValue, element) => math.max(previousValue, element.length),
+    );
 
     for (final group in result) {
       //group contains the index of each element in that group
 
       Paint p = Paint();
-      p.maskFilter =
-          MaskFilter.blur(BlurStyle.normal, math.sqrt(group.length * 0.1) + 1);
+      p.maskFilter = MaskFilter.blur(
+        BlurStyle.normal,
+        math.sqrt(group.length * 0.1) + 1,
+      );
       //Make the intensity of each dot based on the amount of events within its approximate area
 
-      p.color = HSVColor.fromAHSV(
-              math.min(1, math.max(((group.length + 1) / maxGroupLength), 0.3)),
-              100,
-              1,
-              1)
-          .toColor();
+      p.color =
+          HSVColor.fromAHSV(
+            math.min(1, math.max(((group.length + 1) / maxGroupLength), 0.3)),
+            100,
+            1,
+            1,
+          ).toColor();
       //Draw more and more green circles with increasing opacity
-      canvas.drawCircle(Offset(ls[group[0]][0], ls[group[0]][1]),
-          4 + math.sqrt(group.length * 0.5), p);
+      canvas.drawCircle(
+        Offset(ls[group[0]][0], ls[group[0]][1]),
+        4 + math.sqrt(group.length * 0.5),
+        p,
+      );
     }
   }
 
@@ -513,10 +585,11 @@ class MapLine extends CustomPainter {
   List<MatchEvent> events;
   bool emphasizeStartPoint;
 
-  MapLine(
-      {required this.events,
-      required this.emphasizeStartPoint,
-      this.color = Colors.green});
+  MapLine({
+    required this.events,
+    required this.emphasizeStartPoint,
+    this.color = Colors.green,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -554,7 +627,7 @@ class MapLine extends CustomPainter {
   getFieldPosition(MatchEvent event, Size renderSize) {
     return [
       ((event.position.x + 1) / 2) * renderSize.width,
-      (1 - ((event.position.y + 1) / 2)) * renderSize.height
+      (1 - ((event.position.y + 1) / 2)) * renderSize.height,
     ];
   }
 
@@ -577,12 +650,7 @@ class FieldMap extends StatelessWidget {
       constraints: BoxConstraints.loose(Size(size, size / 2)),
       child: AspectRatio(
         aspectRatio: 1 / mapRatio,
-        child: Stack(
-          children: [
-            const FieldImage(),
-            ...children,
-          ],
-        ),
+        child: Stack(children: [const FieldImage(), ...children]),
       ),
     );
   }
@@ -594,8 +662,9 @@ class FieldImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Image(
-      image: snoutImageCache
-          .getCached(context.watch<DataProvider>().event.config.fieldImage),
+      image: snoutImageCache.getCached(
+        context.watch<DataProvider>().event.config.fieldImage,
+      ),
       fit: BoxFit.contain,
       width: 2000,
     );

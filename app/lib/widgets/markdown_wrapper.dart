@@ -11,8 +11,9 @@ class MarkdownText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MarkdownBody(
-        data: data,
-        onTapLink: (text, href, title) =>
-            href != null ? launchUrlString(href) : null);
+      data: data,
+      onTapLink:
+          (text, href, title) => href != null ? launchUrlString(href) : null,
+    );
   }
 }

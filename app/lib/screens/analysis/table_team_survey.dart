@@ -13,30 +13,39 @@ class TableTeamPitSurvey extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(),
       body: SingleChildScrollView(
-        child: DataSheet(title: 'Team Survey', columns: [
-          DataItemWithHints(DataItem.fromText("Team")),
-          for (final pitSurvey in data.event.config.pitscouting)
-            DataItemWithHints(DataItem.fromText(pitSurvey.label)),
-        ], rows: [
-          for (final team in data.event.teams)
-            [
-              DataItem(
+        child: DataSheet(
+          title: 'Team Survey',
+          columns: [
+            DataItemWithHints(DataItem.fromText("Team")),
+            for (final pitSurvey in data.event.config.pitscouting)
+              DataItemWithHints(DataItem.fromText(pitSurvey.label)),
+          ],
+          rows: [
+            for (final team in data.event.teams)
+              [
+                DataItem(
                   displayValue: TextButton(
-                      child: Text(team.toString()),
-                      onPressed: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    TeamViewPage(teamNumber: team)),
-                          )),
+                    child: Text(team.toString()),
+                    onPressed:
+                        () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder:
+                                (context) => TeamViewPage(teamNumber: team),
+                          ),
+                        ),
+                  ),
                   exportValue: team.toString(),
-                  sortingValue: team),
-              for (final surveyItem in data.event.config.pitscouting)
-                DataItem.fromSurveyItem(
+                  sortingValue: team,
+                ),
+                for (final surveyItem in data.event.config.pitscouting)
+                  DataItem.fromSurveyItem(
                     data.event.pitscouting[team.toString()]?[surveyItem.id],
-                    surveyItem)
-            ]
-        ]),
+                    surveyItem,
+                  ),
+              ],
+          ],
+        ),
       ),
     );
   }

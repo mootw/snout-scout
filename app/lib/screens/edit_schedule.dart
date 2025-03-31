@@ -35,131 +35,152 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
               List<Patch> patch;
               try {
                 patch = await loadScheduleFromTBA(
-                    snoutData.event, context.read<IdentityProvider>().identity);
+                  snoutData.event,
+                  context.read<IdentityProvider>().identity,
+                );
               } catch (e) {
                 if (context.mounted) {
                   showDialog(
-                      context: context,
-                      builder: (context) {
-                        return AlertDialog(
-                          title: const Text("Error Getting From TBA"),
-                          content: Text(e.toString()),
-                        );
-                      });
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        title: const Text("Error Getting From TBA"),
+                        content: Text(e.toString()),
+                      );
+                    },
+                  );
                 }
                 return;
               }
 
               if (context.mounted) {
                 showDialog(
-                    context: context,
-                    builder: (context) {
-                      return AlertDialog(
-                        title: const Text("data"),
-                        content: SingleChildScrollView(
-                            child: Text(json.encode(patch))),
-                        actions: [
-                          TextButton(
-                              onPressed: () async {
-                                for (var p in patch) {
-                                  await snoutData.newTransaction(p);
-                                }
-                                if (context.mounted) {
-                                  Navigator.pop(context);
-                                }
-                              },
-                              child: const Text(
-                                  "Apply (Wait for dialog to close after pressing ik its jank)"))
-                        ],
-                      );
-                    });
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      title: const Text("data"),
+                      content: SingleChildScrollView(
+                        child: Text(json.encode(patch)),
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () async {
+                            for (var p in patch) {
+                              await snoutData.newTransaction(p);
+                            }
+                            if (context.mounted) {
+                              Navigator.pop(context);
+                            }
+                          },
+                          child: const Text(
+                            "Apply (Wait for dialog to close after pressing ik its jank)",
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                );
               }
             },
           ),
         ],
       ),
-      body: ListView(children: [
-        Center(
-          child: FilledButton(
+      body: ListView(
+        children: [
+          Center(
+            child: FilledButton(
               onPressed: () async {
                 MatchScheduleItem match = MatchScheduleItem(
-                    id: "",
-                    label: "",
-                    scheduledTime: DateTime.now(),
-                    blue: const [],
-                    red: const []);
+                  id: "",
+                  label: "",
+                  scheduledTime: DateTime.now(),
+                  blue: const [],
+                  red: const [],
+                );
 
                 await editMatch(match, snoutData, null);
               },
-              child: const Text("Add Match")),
-        ),
-        for (final match in snoutData.event.schedule.entries)
-          ListTile(
-            title: Text(match.value.label),
-            subtitle: Text(match.key),
-            onTap: () => editMatch(match.value, snoutData, match.key),
-            trailing: IconButton(
-              icon: const Icon(Icons.delete),
-              onPressed: () async {
-                final identity = context.read<IdentityProvider>().identity;
-                final result = await showDialog(
+              child: const Text("Add Match"),
+            ),
+          ),
+          for (final match in snoutData.event.schedule.entries)
+            ListTile(
+              title: Text(match.value.label),
+              subtitle: Text(match.key),
+              onTap: () => editMatch(match.value, snoutData, match.key),
+              trailing: IconButton(
+                icon: const Icon(Icons.delete),
+                onPressed: () async {
+                  final identity = context.read<IdentityProvider>().identity;
+                  final result = await showDialog(
                     context: context,
-                    builder: (context) => AlertDialog(
+                    builder:
+                        (context) => AlertDialog(
                           title: Text(
-                              "Are you sure you want to delete ${match.value.label}?"),
+                            "Are you sure you want to delete ${match.value.label}?",
+                          ),
                           actions: [
                             TextButton(
-                                child: const Text("No"),
-                                onPressed: () =>
-                                    Navigator.of(context).pop(false)),
+                              child: const Text("No"),
+                              onPressed: () => Navigator.of(context).pop(false),
+                            ),
                             TextButton(
                               child: const Text("Yes"),
                               onPressed: () => Navigator.of(context).pop(true),
-                            )
+                            ),
                           ],
-                        ));
-                if (result == true) {
-                  final matchesWithRemoved =
-                      Map<String, MatchScheduleItem>.from(
-                          snoutData.event.schedule);
-                  matchesWithRemoved.remove(match.key);
+                        ),
+                  );
+                  if (result == true) {
+                    final matchesWithRemoved =
+                        Map<String, MatchScheduleItem>.from(
+                          snoutData.event.schedule,
+                        );
+                    matchesWithRemoved.remove(match.key);
 
-                  Patch patch = Patch(
+                    Patch patch = Patch(
                       identity: identity,
                       time: DateTime.now(),
-                      path: Patch.buildPath([
-                        'schedule',
-                      ]),
+                      path: Patch.buildPath(['schedule']),
                       // convert to json first
-                      value: matchesWithRemoved
-                          .map((key, value) => MapEntry(key, value.toJson())));
-                  await snoutData.newTransaction(patch);
-                }
-              },
+                      value: matchesWithRemoved.map(
+                        (key, value) => MapEntry(key, value.toJson()),
+                      ),
+                    );
+                    await snoutData.newTransaction(patch);
+                  }
+                },
+              ),
             ),
-          ),
-      ]),
+        ],
+      ),
     );
   }
 
   Future editMatch(
-      MatchScheduleItem match, DataProvider data, String? matchID) async {
+    MatchScheduleItem match,
+    DataProvider data,
+    String? matchID,
+  ) async {
     final identity = context.read<IdentityProvider>().identity;
-    String? result = await Navigator.of(context).push(MaterialPageRoute(
-        builder: (context) =>
-            JSONEditor(source: match, validate: MatchScheduleItem.fromJson)));
+    String? result = await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder:
+            (context) =>
+                JSONEditor(source: match, validate: MatchScheduleItem.fromJson),
+      ),
+    );
 
     if (result != null) {
-      MatchScheduleItem resultMatch =
-          MatchScheduleItem.fromJson(json.decode(result));
+      MatchScheduleItem resultMatch = MatchScheduleItem.fromJson(
+        json.decode(result),
+      );
       Patch patch = Patch(
-          identity: identity,
-          time: DateTime.now(),
-          path: Patch.buildPath([
-            'schedule',
-            matchID ?? resultMatch.label,
-          ]),
-          value: resultMatch.toJson());
+        identity: identity,
+        time: DateTime.now(),
+        path: Patch.buildPath(['schedule', matchID ?? resultMatch.label]),
+        value: resultMatch.toJson(),
+      );
       await data.newTransaction(patch);
     }
   }
@@ -182,10 +203,11 @@ class EditMatchDetailsState extends State<EditMatchDetails> {
       title: const Text("Match"),
       actions: [
         TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(widget.match);
-            },
-            child: const Text("Save"))
+          onPressed: () {
+            Navigator.of(context).pop(widget.match);
+          },
+          child: const Text("Save"),
+        ),
       ],
     );
   }
