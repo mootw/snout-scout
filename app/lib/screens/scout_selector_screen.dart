@@ -77,60 +77,64 @@ class _ScoutSelectorScreenState extends State<ScoutSelectorScreen> {
         title: Text(Uri.decodeFull(dp.dataSourceUri.toString())),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.only(left: 12, right: 12, bottom: 8),
         child: Column(
           children: [
-            FilledButton.tonal(
-              child: const Text('Register Scout'),
-              onPressed: () async {
-                final String? dialogResult = await showDialog(
-                  context: context,
-                  builder: (context) => const ScoutRegistrationScreen(),
-                );
-
-                if (dialogResult != null) {
-                  _popWithScout(dialogResult);
-                }
-              },
-            ),
-            Expanded(child: SizedBox()),
-            SizedBox(
-              width: 800,
-              child: Wrap(
-                spacing: 4,
-                runSpacing: 4,
-                children: [
-                  for (final identity in allKnownIdentities)
-                    ChoiceChip(
-                      selected: _selectedScout == identity,
-                      label: Text(identity),
-                      onSelected: (_) {
-                        setState(() {
-                          _selectedScout = identity;
-                        });
+            Expanded(
+              child: SingleChildScrollView(
+                child: Wrap(
+                  clipBehavior: Clip.hardEdge,
+                  spacing: 4,
+                  runSpacing: 4,
+                  children: [
+                    for (final identity in allKnownIdentities)
+                      ChoiceChip(
+                        visualDensity: VisualDensity.compact,
+                        selected: _selectedScout == identity,
+                        label: Text(identity),
+                        onSelected: (_) {
+                          setState(() {
+                            _selectedScout = identity;
+                          });
+                        },
+                      ),
+                    ActionChip(
+                      visualDensity: VisualDensity.compact,
+                      label: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [Icon(Icons.add, size: 16), Text('Register')],
+                      ),
+                      onPressed: () async {
+                        final String? dialogResult = await showDialog(
+                          context: context,
+                          builder: (context) => const ScoutRegistrationScreen(),
+                        );
+                
+                        if (dialogResult != null) {
+                          _popWithScout(dialogResult);
+                        }
                       },
                     ),
-                ],
+                  ],
+                ),
               ),
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SizedBox(
-                  width: 150,
-                  child: TextField(
-                    decoration: const InputDecoration(hintText: 'Password'),
-                    obscureText: true,
-                    onEditingComplete: () => attemptLogin(database),
-                    controller: _scoutPassword,
-                  ),
+
+            Center(
+              child: SizedBox(
+                width: 150,
+                child: TextField(
+                  decoration: const InputDecoration(hintText: 'Password'),
+                  obscureText: true,
+                  onEditingComplete: () => attemptLogin(database),
+                  controller: _scoutPassword,
                 ),
-              ],
+              ),
             ),
             SizedBox(height: 16),
             SizedBox(
-              width: 220,
-              height: 300,
+              width: 200,
+              height: 270,
               child: GridView.count(
                 mainAxisSpacing: 8,
                 crossAxisSpacing: 8,
@@ -148,7 +152,7 @@ class _ScoutSelectorScreenState extends State<ScoutSelectorScreen> {
                     onPressed: () {
                       _scoutPassword.text = '';
                     },
-                    child: Icon(Icons.delete),
+                    child: Icon(Icons.delete, size: 16),
                   ),
                   FilledButton.tonal(
                     onPressed: () {
@@ -158,7 +162,7 @@ class _ScoutSelectorScreenState extends State<ScoutSelectorScreen> {
                   ),
                   FilledButton(
                     onPressed: () => attemptLogin(database),
-                    child: Icon(Icons.check),
+                    child: Icon(Icons.check, size: 16),
                   ),
                 ],
               ),
