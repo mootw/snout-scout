@@ -26,7 +26,7 @@ class ScoutLeaderboardPage extends StatelessWidget {
 
       int addValue = 1;
       if (expression.hasMatch(patch.path)) {
-        addValue = 5;
+        addValue = 10;
       }
 
       edits[patch.identity] = edits[patch.identity]! + 1;
