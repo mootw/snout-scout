@@ -108,8 +108,9 @@ class DataProvider extends ChangeNotifier {
     }
     final identity = context.read<IdentityProvider>().identity;
 
-    if (_channel != null && newStatus != _oldStatus) {
+    if (_channel != null && _channel?.closeCode != null && newStatus != _oldStatus) {
       //channel is still open
+      
       _channel?.sink.add(
         json.encode({
           "type": SocketMessageType.scoutStatusUpdate,

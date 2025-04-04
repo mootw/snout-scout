@@ -316,7 +316,7 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                                               (element) =>
                                                   element.isPositionEvent,
                                             )
-                                            .first,
+                                            .firstOrNull,
                                     ].nonNulls.toList(),
                               ),
                             ],
@@ -381,7 +381,7 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                                               (element) =>
                                                   element.isPositionEvent,
                                             )
-                                            .last,
+                                            .lastOrNull,
                                     ].nonNulls.toList(),
                               ),
                             ],

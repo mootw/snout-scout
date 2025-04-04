@@ -97,10 +97,7 @@ class FieldPositionSelector extends StatelessWidget {
                       color: getAllianceUIColor(alliance),
                       child: Text(
                         teamNumber.toString(),
-                        style: TextStyle(
-                          fontSize:
-                              0.3 * (constraints.maxWidth / fieldWidthMeters),
-                        ),
+                        style: TextStyle(fontSize: 10),
                       ),
                     ),
                   ),
@@ -256,12 +253,7 @@ class RobotMapEventView extends StatelessWidget {
                 width: robotFieldProportion * constraints.maxWidth,
                 height: robotFieldProportion * constraints.maxWidth,
                 color: getAllianceUIColor(robotRecording.alliance),
-                child: Text(
-                  team,
-                  style: TextStyle(
-                    fontSize: 0.3 * (constraints.maxWidth / fieldWidthMeters),
-                  ),
-                ),
+                child: Text(team, style: TextStyle(fontSize: 10)),
               ),
             ),
             for (final event in allRecentEvents)

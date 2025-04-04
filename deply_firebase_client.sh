@@ -1,3 +1,3 @@
 set -e
-(cd app && flutter build web --wasm)
+(cd app && flutter build web --no-web-resources-cdn)
 firebase deploy --only hosting

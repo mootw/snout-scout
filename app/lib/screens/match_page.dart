@@ -18,7 +18,6 @@ import 'package:snout_db/event/match_data.dart';
 import 'package:snout_db/event/match_schedule_item.dart';
 import 'package:snout_db/event/matchresults.dart';
 import 'package:snout_db/patch.dart';
-import 'package:snout_db/snout_db.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class MatchPage extends StatefulWidget {

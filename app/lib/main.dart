@@ -35,6 +35,11 @@ const String defaultSourceKey = 'default_source_uri';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  FlutterError.onError = (details) {
+    FlutterError.presentError(details);
+    print(details.stack);
+  };
+
   Logger.root.onRecord.listen((record) {
     // For now logging will always print to console,
     // since the app is open source we're ok with that..
