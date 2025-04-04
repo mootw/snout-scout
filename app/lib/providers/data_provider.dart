@@ -166,7 +166,7 @@ class DataProvider extends ChangeNotifier {
     if (diskData == null) {
       //Load the changest only, since it is more bandwidth efficient
       //and the database is ONLY based on patches.
-      final newData = await apiClient.get(path);
+      final newData = await apiClient.get(path).timeout(Duration(seconds: 15));
 
       final List<Patch> patches =
           (json.decode(newData.body) as List)
@@ -198,7 +198,7 @@ class DataProvider extends ChangeNotifier {
     final diffResult = await apiClient.get(
       diffPath,
       headers: {"head": diskDatabase.patches.length.toString()},
-    );
+    ).timeout(Duration(seconds: 15));
 
     List<Patch> diffPatches =
         (json.decode(diffResult.body) as List<dynamic>)
@@ -224,7 +224,7 @@ class DataProvider extends ChangeNotifier {
     try {
       final res = await apiClient
           .put(dataSourceUri, body: json.encode(patch))
-          .timeout(Duration(seconds: 20));
+          .timeout(Duration(seconds: 15));
       if (res.statusCode == 200) {
         //Remove it from the failed patches if it exists there
         if (failedPatches.contains(json.encode(patch))) {

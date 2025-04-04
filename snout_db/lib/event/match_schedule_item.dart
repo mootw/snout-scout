@@ -60,7 +60,7 @@ class MatchScheduleItem implements Comparable<MatchScheduleItem> {
       event.matches[id]?.results?.time.difference(scheduledTime);
 
   /// is true when the match has match results, which means the match is complete
-  bool isComplete(FRCEvent event) => getData(event) != null;
+  bool isComplete(FRCEvent event) => getData(event)?.results != null;
 
   MatchData? getData(FRCEvent event) => event.matches[id];
 }

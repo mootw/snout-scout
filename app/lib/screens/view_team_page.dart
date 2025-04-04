@@ -357,7 +357,7 @@ class _TeamViewPageState extends State<TeamViewPage> {
                                   data.event.config.fieldStyle,
                                 )
                                 .where((element) => element.isPositionEvent)
-                                .first,
+                                .firstOrNull,
                         ].nonNulls.toList(),
                   ),
                 ],
@@ -402,7 +402,7 @@ class _TeamViewPageState extends State<TeamViewPage> {
                                   data.event.config.fieldStyle,
                                 )
                                 .where((element) => element.isPositionEvent)
-                                .last,
+                                .lastOrNull,
                         ].nonNulls.toList(),
                   ),
                 ],
