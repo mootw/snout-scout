@@ -1,6 +1,7 @@
 import 'package:app/providers/data_provider.dart';
 import 'package:app/style.dart';
 import 'package:app/widgets/timeduration.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:app/screens/match_page.dart';
 import 'package:flutter/material.dart';
@@ -32,6 +33,14 @@ class MatchCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final snoutData = context.watch<DataProvider>();
+
+    final matchTime =
+        match?.results != null
+            ? match!.results!.time
+            : matchSchedule.scheduledTime.add(
+              snoutData.event.scheduleDelay ?? Duration.zero,
+            );
+
     return SizedBox(
       height: matchCardHeight,
       child: InkWell(
@@ -47,13 +56,11 @@ class MatchCard extends StatelessWidget {
           children: [
             SizedBox(
               width: 65,
-              child: TimeDuration(
-                time:
-                    match?.results != null
-                        ? match!.results!.time
-                        : matchSchedule.scheduledTime.add(
-                          snoutData.event.scheduleDelay ?? Duration.zero,
-                        ),
+              child: Column(
+                children: [
+                  TimeDuration(time: matchTime),
+                  Text(DateFormat.E().format(matchTime.toLocal())),
+                ],
               ),
             ),
             matchSchedule.isScheduledToHaveTeam(focusTeam ?? 0)

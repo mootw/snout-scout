@@ -235,7 +235,7 @@ class _ScoutRegistrationScreenState extends State<ScoutRegistrationScreen> {
                   return null;
                 },
                 maxLines: 1,
-                maxLength: 20,
+                maxLength: 16,
                 controller: _scoutNameText,
               ),
             ),
