@@ -108,9 +108,15 @@ class DataProvider extends ChangeNotifier {
     }
     final identity = context.read<IdentityProvider>().identity;
 
-    if (_channel != null && _channel?.closeCode != null && newStatus != _oldStatus) {
+    //TODO handle this better, the connected == true is to avoid a weird state issue
+    // and clearly i don't need to check more than 1 maybe 2 items to ensure my sink
+    // is safe to send on.
+    if (connected == true &&
+        _channel != null &&
+        _channel?.closeCode != null &&
+        newStatus != _oldStatus) {
       //channel is still open
-      
+
       _channel?.sink.add(
         json.encode({
           "type": SocketMessageType.scoutStatusUpdate,
@@ -196,10 +202,12 @@ class DataProvider extends ChangeNotifier {
     Uri diffPath = Uri.parse(
       '${Uri.decodeFull(dataSourceUri.toString())}/patchDiff',
     );
-    final diffResult = await apiClient.get(
-      diffPath,
-      headers: {"head": diskDatabase.patches.length.toString()},
-    ).timeout(Duration(seconds: 15));
+    final diffResult = await apiClient
+        .get(
+          diffPath,
+          headers: {"head": diskDatabase.patches.length.toString()},
+        )
+        .timeout(Duration(seconds: 15));
 
     List<Patch> diffPatches =
         (json.decode(diffResult.body) as List<dynamic>)

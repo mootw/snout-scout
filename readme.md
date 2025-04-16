@@ -6,13 +6,16 @@
 [matchresultprocess](matchresultprocess.md)
 
 # About
+
+Snout Scout is designed to make data work for you! Created and maintained by team a 6749 alumni, it is a source available all-in-one scouting solution that easily works for any year's game with just a json config file!
+
+
 ## Design Goals:
 - make scouting have real time impact for match planning with automated digests.
 - game agnostic; the app is fully configurable using a json file.
 - device agnostic; PWA first with native apps for all platforms via Flutter
 - all data processing is done on client for FULL offline support
-- export data into multiple formats like csv and json
-- data is stored heavily normalized with minimal duplication or referencing
+- easy export of data into multiple formats like csv and json
 - responsive in low bandwidth scenarios and provide reliable low latency sync to origin
 - origin handles authentication/autorizaton (TBD) and as the source of truth
 - Connect to the TBA API to autofill data like event schedules and match results (including support for year specific data mapping).
@@ -24,10 +27,9 @@
 - data anywhere. A client device can load and edit scouting data from a server or local disk for the highest possible flexibility.
 
 ## Snout-scout is NOT designed to:
-- track standings or scores directly (official scores are linked if TBA event key is provided)
+- track official standings or scores directly (official scores are linked if TBA event key is provided)
 - analyse multiple events at once (multiple events can be queried at the server level)
 - retain compatibility with previous year data (there is no obligation for backwards compatibility)
-- sync data between multiple clients peer-to-peer due to requiring human interaction to sync on modern smartphones without dedicated hardware and software and thus have high latency for changes to propagate (>1hr).
 - have **extensive** security controls. an authenticated user is assumed to be non-malicious and trusted, there is not validation of timestamps, IDs, or other information sent from clients (This is out of scope for now).
 
 
@@ -36,7 +38,7 @@
 - All devices have an internet connection to an origin server
 - Devices can sync anywhere
 - Latency is determined by the reliability of internet at competition
-- Devices with no mobile data coverage need to use a hotspot connection or only sync when wifi is avaiable (this could be as infrequent as once per day).
+- Devices with no mobile data coverage need to use a hotspot connection or only sync when internet is avaiable (this could be infrequent).
 - NOTE: A hotspot device can be used to proxy the internet connection into a local area network to get results similar to Origin at Event.
 
 ## Origin at Event
@@ -63,7 +65,7 @@ for a 40 team 80 match event:
 - use gzip and other web compression technology
 - dont complicate the schema by simplifying key names to "save bandwidth", or reduce normalization for a "micro-optimization".
 - the schema should be as humanly readable as possible (and easy work with)
-- connection speed will increase over time and there is minimal need to optimize data loading other than chunking each change (splitting assets away to load optimistically; this creates a more ambiguous state)
+- there is minimal need to optimize data loading other than chunking each change (splitting assets away to load optimistically; this creates a more ambiguous state. this may change in the future)
 
 
 # how TBA is used
@@ -76,7 +78,7 @@ eventually might have access policies or potentially gets distributed outside of
 this could cause a secret leak; however, i am also lazy and do not want to implement a
 spearate channel to distribute the secret to client devices, ideally the server distributes
 the tba api key (the server cannot proxy because the client must be able to do all functions without a server).
-
+encryption may be used in the future
 
 # Example images (as of Feb 2024)
 
