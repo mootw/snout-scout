@@ -4,6 +4,7 @@ import 'package:app/providers/data_provider.dart';
 import 'package:app/widgets/datasheet.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:snout_db/patch.dart';
 
 //TODO improve this page to make it less jank
 class ScoutLeaderboardPage extends StatelessWidget {
@@ -13,19 +14,31 @@ class ScoutLeaderboardPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final data = context.watch<DataProvider>().database.patches;
 
-    final expression = RegExp(r'\/matches\/.+\/robot\/');
+    final matchesExpression = RegExp(r'\/matches\/.+\/robot\/');
 
     Map<String, int> scores = SplayTreeMap<String, int>();
     Map<String, int> edits = SplayTreeMap<String, int>();
 
-    for (final patch in data) {
+    final Set<String> unique = {};
+    final List<Patch> deDuplicated = [];
+    for(final patch in data) {
+      if(unique.contains(patch.path) == false) {
+        deDuplicated.add(patch);
+      }
+      unique.add(patch.path);
+    }
+
+
+    for (final patch in deDuplicated) {
+
+
       if (scores[patch.identity] == null) {
         scores[patch.identity] = 0;
         edits[patch.identity] = 0;
       }
 
       int addValue = 1;
-      if (expression.hasMatch(patch.path)) {
+      if (matchesExpression.hasMatch(patch.path)) {
         addValue = 10;
       }
 
