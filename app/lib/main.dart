@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:app/data_submit_login.dart';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/providers/local_config_provider.dart';
 import 'package:app/screens/edit_markdown.dart';
@@ -209,13 +210,6 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
       );
     }
 
-    if (getAllKnownIdentities(
-          data.database,
-        ).contains(identityProvider.identity) ==
-        false) {
-      return ScoutSelectorScreen(allowBackButton: false);
-    }
-
     data.updateStatus(context, switch (_currentPageIndex) {
       (0) => "Checking out the Schedule",
       (1) => "Looking at the Teams",
@@ -234,19 +228,15 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
         titleSpacing: 0,
         title: Text(data.event.config.name),
         actions: [
-          IconButton(
-            onPressed:
-                () =>
-                    showSearch(context: context, delegate: SnoutScoutSearch()),
-            icon: const Icon(Icons.search),
-          ),
           Padding(
             padding: const EdgeInsets.only(left: 8, right: 8),
-            child: FilledButton(
-              onPressed: () {
-                editIdentityFunction(context: context);
-              },
-              child: Text(identityProvider.identity),
+            child: IconButton(
+              onPressed:
+                  () => showSearch(
+                    context: context,
+                    delegate: SnoutScoutSearch(),
+                  ),
+              icon: const Icon(Icons.search),
             ),
           ),
         ],
@@ -434,8 +424,9 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
                     value: reAppendedConfig.toJson(),
                   );
                   //Save the scouting results to the server!!
-
-                  await data.newTransaction(patch);
+                  if (context.mounted) {
+                    await submitData(context, patch);
+                  }
                 }
               },
             ),
@@ -462,7 +453,9 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
                     value: result,
                   );
                   //Save the scouting results to the server!!
-                  await dataProvider.newTransaction(patch);
+                  if (context.mounted) {
+                    await submitData(context, patch);
+                  }
                 }
               },
             ),
@@ -473,7 +466,6 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
               leading: const Icon(Icons.map),
               onTap: () async {
                 final identity = context.read<IdentityProvider>().identity;
-                final dataProvider = context.read<DataProvider>();
                 String result;
                 try {
                   final bytes = await pickOrTakeImageDialog(
@@ -489,7 +481,9 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
                       value: result,
                     );
                     //Save the scouting results to the server!!
-                    await dataProvider.newTransaction(patch);
+                    if (context.mounted) {
+                      await submitData(context, patch);
+                    }
                   }
                 } catch (e, s) {
                   Logger.root.severe("Error taking image from device", e, s);
@@ -501,7 +495,6 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
               leading: const Icon(Icons.camera_alt),
               onTap: () async {
                 final identity = context.read<IdentityProvider>().identity;
-                final dataProvider = context.read<DataProvider>();
 
                 String result;
                 try {
@@ -520,7 +513,9 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
                       value: result,
                     );
                     //Save the scouting results to the server!!
-                    await dataProvider.newTransaction(patch);
+                    if (context.mounted) {
+                      await submitData(context, patch);
+                    }
                   }
                 } catch (e, s) {
                   Logger.root.severe("Error taking image from device", e, s);
@@ -598,7 +593,8 @@ Future editIdentityFunction({
   await Navigator.of(context).push(
     MaterialPageRoute(
       builder:
-          (context) => ScoutSelectorScreen(allowBackButton: allowBackButton),
+          (context) =>
+              ScoutAuthorizationDialog(allowBackButton: allowBackButton),
     ),
   );
 }

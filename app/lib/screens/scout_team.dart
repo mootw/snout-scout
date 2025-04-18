@@ -1,3 +1,4 @@
+import 'package:app/data_submit_login.dart';
 import 'package:app/providers/identity_provider.dart';
 import 'package:app/widgets/confirm_exit_dialog.dart';
 import 'package:app/providers/data_provider.dart';
@@ -58,7 +59,6 @@ class _PitScoutTeamPageState extends State<PitScoutTeamPage> {
                   return;
                 }
 
-                final snoutData = context.read<DataProvider>();
                 final identity = context.read<IdentityProvider>().identity;
 
                 //New map instance to avoid messing up the UI
@@ -81,10 +81,7 @@ class _PitScoutTeamPageState extends State<PitScoutTeamPage> {
                     value: item.value,
                   );
                   //Save the scouting results to the server!!
-                  await snoutData.newTransaction(patch);
-                }
-                if (context.mounted) {
-                  Navigator.of(context).pop(true);
+                  await submitData(context, patch);
                 }
               },
               icon: const Icon(Icons.save),

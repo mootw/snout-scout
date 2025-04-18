@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:app/api.dart';
+import 'package:app/data_submit_login.dart';
 import 'package:app/edit_lock.dart';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/services/snout_image_cache.dart';
@@ -269,7 +270,7 @@ class _MatchRecorderAssistantPageState
     RobotMatchResults? result = await navigateWithEditLock<RobotMatchResults>(
       context,
       "match:$matchid:$team:timeline",
-      (context) => Navigator.pushReplacement(
+      (context) => Navigator.push(
         context,
         MaterialPageRoute(
           builder:
@@ -282,7 +283,7 @@ class _MatchRecorderAssistantPageState
       ),
     );
 
-    if (result != null) {
+    if (result != null && mounted) {
       Patch patch = Patch(
         identity: identity,
         time: DateTime.now(),
@@ -290,7 +291,7 @@ class _MatchRecorderAssistantPageState
         value: result.toJson(),
       );
 
-      await snoutData.newTransaction(patch);
+      await submitData(context, patch);
     }
   }
 }

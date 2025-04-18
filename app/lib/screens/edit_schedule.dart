@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:app/data_submit_login.dart';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/providers/identity_provider.dart';
 import 'package:app/screens/edit_json.dart';
@@ -147,7 +148,9 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
                         (key, value) => MapEntry(key, value.toJson()),
                       ),
                     );
-                    await snoutData.newTransaction(patch);
+                    if(context.mounted) {
+                      await submitData(context, patch);
+                    }
                   }
                 },
               ),
@@ -181,7 +184,9 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
         path: Patch.buildPath(['schedule', matchID ?? resultMatch.label]),
         value: resultMatch.toJson(),
       );
-      await data.newTransaction(patch);
+      if(mounted && context.mounted) {
+        await submitData(context, patch);
+      }
     }
   }
 }

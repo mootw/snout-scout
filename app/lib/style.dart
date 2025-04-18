@@ -16,7 +16,7 @@ bool isLargeDevice(BuildContext context) =>
     MediaQuery.of(context).size.width > 600;
 
 //Theme data
-const primaryColor = Color.fromARGB(255, 49, 219, 43);
+const primaryColor = Color.fromARGB(255, 6, 98, 3);
 final darkScheme = ColorScheme.fromSeed(
   seedColor: primaryColor,
   brightness: Brightness.dark,

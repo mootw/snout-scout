@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:app/data_submit_login.dart';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/providers/identity_provider.dart';
 import 'package:app/screens/select_data_source.dart';
@@ -15,16 +16,16 @@ import 'dart:math' as math;
 List<String> getAllKnownIdentities(SnoutDB database) =>
     database.event.scoutPasswords.keys.toList();
 
-class ScoutSelectorScreen extends StatefulWidget {
-  const ScoutSelectorScreen({super.key, required this.allowBackButton});
+class ScoutAuthorizationDialog extends StatefulWidget {
+  const ScoutAuthorizationDialog({super.key, required this.allowBackButton});
 
   final bool allowBackButton;
 
   @override
-  State<ScoutSelectorScreen> createState() => _ScoutSelectorScreenState();
+  State<ScoutAuthorizationDialog> createState() => _ScoutAuthorizationDialogState();
 }
 
-class _ScoutSelectorScreenState extends State<ScoutSelectorScreen> {
+class _ScoutAuthorizationDialogState extends State<ScoutAuthorizationDialog> {
   String? _selectedScout;
   final _scoutPassword = TextEditingController();
 
@@ -292,12 +293,14 @@ class _ScoutRegistrationScreenState extends State<ScoutRegistrationScreen> {
                                     value: password.encoded(),
                                   );
 
-                                  await dataProvider.newTransaction(patch);
+                                  if(context.mounted) {
+                                    await submitData(context, patch);
+                                  }
 
                                   setState(() {
                                     _isLoading = false;
                                   });
-                                  if (mounted) {
+                                  if (mounted && context.mounted) {
                                     Navigator.pop(context, _scoutNameText.text);
                                   }
                                 }

@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:app/data_submit_login.dart';
 import 'package:app/providers/data_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -79,16 +80,20 @@ class _PatchHistoryPageState extends State<PatchHistoryPage> {
                             child: const Text("Close"),
                           ),
                           TextButton(
-                            onPressed: () {
+                            onPressed: () async {
                               final newPatchToApply = Patch(
                                 identity: patch.identity,
                                 path: patch.path,
                                 time: DateTime.now(),
                                 value: patch.value,
                               );
-                              final snoutData = context.read<DataProvider>();
-                              snoutData.newTransaction(newPatchToApply);
-                              Navigator.pop(context);
+                              if (context.mounted) {
+                                await submitData(context, newPatchToApply);
+
+                                if (context.mounted) {
+                                  Navigator.pop(context);
+                                }
+                              }
                             },
                             child: const Text("Re-Submit Patch As NEW"),
                           ),

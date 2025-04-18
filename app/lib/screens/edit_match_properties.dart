@@ -1,3 +1,4 @@
+import 'package:app/data_submit_login.dart';
 import 'package:app/providers/identity_provider.dart';
 import 'package:app/widgets/confirm_exit_dialog.dart';
 import 'package:app/providers/data_provider.dart';
@@ -82,7 +83,9 @@ class _EditMatchPropertiesPageState extends State<EditMatchPropertiesPage> {
                     value: item.value,
                   );
                   //Save the scouting results to the server!!
-                  await snoutData.newTransaction(patch);
+                  if(context.mounted) {
+                    await submitData(context, patch);
+                  }
                 }
                 if (context.mounted) {
                   Navigator.of(context).pop(true);

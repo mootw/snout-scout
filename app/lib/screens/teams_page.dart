@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:app/data_submit_login.dart';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/providers/identity_provider.dart';
 import 'package:app/screens/edit_json.dart';
@@ -76,9 +77,7 @@ class _TeamGridListState extends State<TeamGridList> {
                                           value: json.decode(result),
                                         );
                                         //Save the scouting results to the server!!
-                                        await context
-                                            .read<DataProvider>()
-                                            .newTransaction(patch);
+                                        await submitData(context, patch);
                                       }
                                     },
                                     child: const Text("Manual"),
@@ -139,9 +138,7 @@ class _TeamGridListState extends State<TeamGridList> {
                                           value: json.decode(result),
                                         );
                                         //Save the scouting results to the server!!
-                                        await context
-                                            .read<DataProvider>()
-                                            .newTransaction(patch);
+                                        await submitData(context, patch);
                                       }
                                     },
                                     child: const Text("TBA AutoFill"),
