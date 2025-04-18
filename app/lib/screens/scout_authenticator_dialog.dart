@@ -60,7 +60,9 @@ class _ScoutAuthorizationDialogState extends State<ScoutAuthorizationDialog> {
     final dp = context.watch<DataProvider>();
     final database = dp.database;
 
+
     final allKnownIdentities = getAllKnownIdentities(database);
+    print(allKnownIdentities);
 
     return Scaffold(
       appBar: AppBar(
@@ -294,7 +296,8 @@ class _ScoutRegistrationScreenState extends State<ScoutRegistrationScreen> {
                                   );
 
                                   if(context.mounted) {
-                                    await submitData(context, patch);
+                                    // Scout does not need auth from another scout to register
+                                    await context.read<DataProvider>().newTransaction(patch);
                                   }
 
                                   setState(() {

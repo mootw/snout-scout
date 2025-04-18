@@ -102,10 +102,6 @@ class _MatchRecorderAssistantPageState
   Widget build(BuildContext context) {
     final snoutData = context.watch<DataProvider>();
     MatchScheduleItem match = snoutData.event.schedule[widget.matchid]!;
-    context.read<DataProvider>().updateStatus(
-      context,
-      "Match scouting ${match.label}: picking a team",
-    );
     return Scaffold(
       appBar: AppBar(
         title: Text("Recording ${match.label}"),
@@ -292,6 +288,9 @@ class _MatchRecorderAssistantPageState
       );
 
       await submitData(context, patch);
+      if(mounted) {
+        Navigator.pop(context);
+      }
     }
   }
 }

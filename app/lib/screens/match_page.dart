@@ -36,11 +36,6 @@ class _MatchPageState extends State<MatchPage> {
     final snoutData = context.watch<DataProvider>();
     MatchData? match = snoutData.event.matches[widget.matchid];
     MatchScheduleItem? matchSchedule = snoutData.event.schedule[widget.matchid];
-
-    context.read<DataProvider>().updateStatus(
-      context,
-      "Looking at ${matchSchedule?.label}",
-    );
     return Scaffold(
       appBar: AppBar(
         title: Text(matchSchedule?.label ?? widget.matchid),

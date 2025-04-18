@@ -1,7 +1,6 @@
 import 'package:app/data_submit_login.dart';
 import 'package:app/providers/identity_provider.dart';
 import 'package:app/widgets/confirm_exit_dialog.dart';
-import 'package:app/providers/data_provider.dart';
 import 'package:app/widgets/dynamic_property_editor.dart';
 import 'package:app/widgets/load_status_or_error_bar.dart';
 import 'package:flutter/material.dart';
@@ -45,10 +44,6 @@ class _EditMatchPropertiesPageState extends State<EditMatchPropertiesPage> {
 
   @override
   Widget build(BuildContext context) {
-    context.read<DataProvider>().updateStatus(
-      context,
-      "Editing Match Properties ${widget.matchID}",
-    );
     return ConfirmExitDialog(
       child: Scaffold(
         appBar: AppBar(
@@ -61,8 +56,6 @@ class _EditMatchPropertiesPageState extends State<EditMatchPropertiesPage> {
                   //There are form errors, do nothing here.
                   return;
                 }
-
-                final snoutData = context.read<DataProvider>();
                 final identity = context.read<IdentityProvider>().identity;
 
                 //New map instance to avoid messing up the UI
@@ -86,9 +79,6 @@ class _EditMatchPropertiesPageState extends State<EditMatchPropertiesPage> {
                   if(context.mounted) {
                     await submitData(context, patch);
                   }
-                }
-                if (context.mounted) {
-                  Navigator.of(context).pop(true);
                 }
               },
               icon: const Icon(Icons.save),

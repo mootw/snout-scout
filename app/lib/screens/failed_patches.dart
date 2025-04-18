@@ -18,7 +18,6 @@ class FailedPatchStorage extends StatefulWidget {
 class _FailedPatchStorageState extends State<FailedPatchStorage> {
   @override
   Widget build(BuildContext context) {
-    final snoutData = context.watch<DataProvider>();
     final serverConnection = context.watch<DataProvider>();
     return Scaffold(
       appBar: AppBar(

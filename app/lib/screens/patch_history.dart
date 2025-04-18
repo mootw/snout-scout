@@ -89,10 +89,6 @@ class _PatchHistoryPageState extends State<PatchHistoryPage> {
                               );
                               if (context.mounted) {
                                 await submitData(context, newPatchToApply);
-
-                                if (context.mounted) {
-                                  Navigator.pop(context);
-                                }
                               }
                             },
                             child: const Text("Re-Submit Patch As NEW"),

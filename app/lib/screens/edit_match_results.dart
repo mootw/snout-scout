@@ -171,8 +171,8 @@ class _EditMatchResultsState extends State<EditMatchResults> {
               DataTable(
                 columns: const [
                   DataColumn(label: Text("Results")),
-                  DataColumn(label: Text("Red")),
                   DataColumn(label: Text("Blue")),
+                  DataColumn(label: Text("Red")),
                 ],
                 rows: [
                   DataRow(
@@ -180,13 +180,13 @@ class _EditMatchResultsState extends State<EditMatchResults> {
                       const DataCell(Text("Score")),
                       DataCell(
                         TextFormField(
-                          controller: _redScore,
+                          controller: _blueScore,
                           validator: _checkIsNumber,
                         ),
                       ),
                       DataCell(
                         TextFormField(
-                          controller: _blueScore,
+                          controller: _redScore,
                           validator: _checkIsNumber,
                         ),
                       ),

@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:app/main.dart';
 import 'package:app/providers/data_provider.dart';
-import 'package:app/screens/scout_selector_screen.dart';
+import 'package:app/screens/scout_authenticator_dialog.dart';
 import 'package:app/services/data_service.dart';
 import 'package:app/style.dart';
 import 'package:app/providers/loading_status_service.dart';

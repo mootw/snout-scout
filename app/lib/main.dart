@@ -5,7 +5,7 @@ import 'package:app/data_submit_login.dart';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/providers/local_config_provider.dart';
 import 'package:app/screens/edit_markdown.dart';
-import 'package:app/screens/scout_selector_screen.dart';
+import 'package:app/screens/scout_authenticator_dialog.dart';
 import 'package:app/screens/scout_status.dart';
 import 'package:app/style.dart';
 import 'package:app/providers/identity_provider.dart';
@@ -38,6 +38,7 @@ void main() async {
 
   FlutterError.onError = (details) {
     FlutterError.presentError(details);
+    // ignore: avoid_print
     print(details.stack);
   };
 
@@ -186,7 +187,6 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
   @override
   Widget build(BuildContext context) {
     final data = context.watch<DataProvider>();
-    final identityProvider = context.watch<IdentityProvider>();
     final serverConnection = context.watch<DataProvider>();
 
     if (data.isInitialLoad == false) {
@@ -209,14 +209,6 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
         ),
       );
     }
-
-    data.updateStatus(context, switch (_currentPageIndex) {
-      (0) => "Checking out the Schedule",
-      (1) => "Looking at the Teams",
-      (2) => "Analyzing the numbers",
-      (3) => "Reading Docs",
-      _ => "In the matrix (Some home page this is a bug)",
-    });
 
     final nextMatch = data.event.nextMatch;
 
@@ -319,7 +311,9 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
             ListTile(
               title: const Text("Scout Status"),
               trailing: const Icon(Icons.people),
-              subtitle: Text('${data.scoutStatus.length.toString()} scouts'),
+              subtitle: Text(
+                '${getScoutStatus(data).length.toString()} scouts',
+              ),
               onTap:
                   () => Navigator.push(
                     context,

@@ -1,7 +1,6 @@
 import 'package:app/data_submit_login.dart';
 import 'package:app/providers/identity_provider.dart';
 import 'package:app/widgets/confirm_exit_dialog.dart';
-import 'package:app/providers/data_provider.dart';
 import 'package:app/widgets/dynamic_property_editor.dart';
 import 'package:app/widgets/load_status_or_error_bar.dart';
 import 'package:flutter/material.dart';
@@ -42,10 +41,6 @@ class _PitScoutTeamPageState extends State<PitScoutTeamPage> {
 
   @override
   Widget build(BuildContext context) {
-    context.read<DataProvider>().updateStatus(
-      context,
-      "Scouting team ${widget.team}",
-    );
     return ConfirmExitDialog(
       child: Scaffold(
         appBar: AppBar(
@@ -82,6 +77,9 @@ class _PitScoutTeamPageState extends State<PitScoutTeamPage> {
                   );
                   //Save the scouting results to the server!!
                   await submitData(context, patch);
+                  if(context.mounted) {
+                    Navigator.pop(context);
+                  }
                 }
               },
               icon: const Icon(Icons.save),

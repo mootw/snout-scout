@@ -160,11 +160,6 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
     //Allow slightly wide to be considered vertical for foldable devices or near-square devices
     final isHorizontal = MediaQuery.of(context).size.aspectRatio > 1.2;
 
-    context.read<DataProvider>().updateStatus(
-      context,
-      "Scouting team ${widget.team} in ${widget.matchDescription}\n${_time == 0 ? "Waiting to start" : "$_time seconds into the match"}",
-    );
-
     if (_showSurvey || _mode == MatchMode.finished) {
       return ConfirmExitDialog(
         child: Scaffold(
