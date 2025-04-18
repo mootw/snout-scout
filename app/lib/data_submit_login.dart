@@ -8,7 +8,6 @@ import 'package:snout_db/patch.dart';
 
 Future submitData(BuildContext context, Patch patch) async {
 
-
   final login = await showDialog(
         context: context,
         builder:
@@ -16,6 +15,9 @@ Future submitData(BuildContext context, Patch patch) async {
               child: ScoutAuthorizationDialog(allowBackButton: true),
             ),
       );
+      if(context.mounted && Navigator.canPop(context)) {
+        Navigator.pop(context);
+      }
 
       if (login != null && context.mounted) {
         final dataProvider = context.read<DataProvider>();
