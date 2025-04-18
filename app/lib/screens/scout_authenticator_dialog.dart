@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:app/data_submit_login.dart';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/providers/identity_provider.dart';
 import 'package:app/screens/select_data_source.dart';
