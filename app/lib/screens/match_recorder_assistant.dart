@@ -39,29 +39,55 @@ class _MatchRecorderAssistantPageState
   final TextEditingController _textController = TextEditingController();
   Alliance _alliance = Alliance.blue;
   int? _recommended;
+  Set<int> _alreadyScoutedTeams = {};
+
+  late Timer _checkScoutedTeams;
+
+  @override
+  void dispose() {
+    _checkScoutedTeams.cancel();
+    super.dispose();
+  }
 
   @override
   void initState() {
     super.initState();
+
+    _checkScoutedTeams = Timer.periodic(
+      Duration(seconds: 4),
+      (_) => _pickRecommendedTeams(),
+    );
+    _pickRecommendedTeams();
+  }
+
+  Future _pickRecommendedTeams() async {
     final snoutData = context.read<DataProvider>();
     MatchScheduleItem matchSchedule = snoutData.event.schedule[widget.matchid]!;
-
     //Pick a recommended team that is not already being scouted
-    () async {
-      final teams = {...matchSchedule.red, ...matchSchedule.blue};
-      for (final scoutedTeam in await _getScoutedTeams(
-        matchSchedule.getData(snoutData.event),
-        teams,
-      )) {
-        teams.remove(scoutedTeam);
-      }
-      setState(() {
-        final list = (teams.toList()..shuffle());
+    final teams = {...matchSchedule.red, ...matchSchedule.blue};
+    final scoutedTeams = await _getScoutedTeams(
+      matchSchedule.getData(snoutData.event),
+      teams,
+    );
+    final availableTeams = teams.difference(scoutedTeams);
+    final list = (availableTeams.toList()..shuffle());
+    setState(() {
+      if (_recommended == null) {
         if (list.isNotEmpty) {
           _recommended = list.first;
         }
-      });
-    }();
+      } else {
+        if (list.contains(_recommended) == false) {
+          // We need to pick a new recommended, because the list changed
+          // to not include the last recommended value
+          if (list.isNotEmpty) {
+            _recommended = list.first;
+          }
+        }
+      }
+
+      _alreadyScoutedTeams = scoutedTeams;
+    });
   }
 
   //Updates teams that are already being scouted.
@@ -225,10 +251,20 @@ class _MatchRecorderAssistantPageState
       );
     }
 
+    int numRecordings = snoutData.event.teamRecordedMatches(team).length;
+    bool inInMatchWithOurTeam = snoutData.event
+        .matchesWithTeam(snoutData.event.config.team)
+        .any((match) => match.isScheduledToHaveTeam(team));
+
     return InkWell(
       onTap: onTap,
       child: Container(
-        color: isRecommended ? Theme.of(context).colorScheme.onPrimary : null,
+        color:
+            _alreadyScoutedTeams.contains(team)
+                ? Colors.deepOrange.withAlpha(40)
+                : (isRecommended
+                    ? Theme.of(context).colorScheme.onPrimary
+                    : null),
         child: Row(
           children: [
             SizedBox(
@@ -251,6 +287,8 @@ class _MatchRecorderAssistantPageState
                     context,
                   ).textTheme.bodyMedium?.copyWith(color: subtitleColor),
                 ),
+                Text("$numRecordings recording(s)"),
+                if (inInMatchWithOurTeam) Text("alliance member in schedule"),
               ],
             ),
           ],
@@ -288,7 +326,7 @@ class _MatchRecorderAssistantPageState
       );
 
       await submitData(context, patch);
-      if(mounted) {
+      if (mounted) {
         Navigator.pop(context);
       }
     }
