@@ -4,9 +4,9 @@ import 'dart:convert';
 import 'package:app/data_submit_login.dart';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/providers/local_config_provider.dart';
+import 'package:app/screens/dashboard.dart';
 import 'package:app/screens/edit_markdown.dart';
 import 'package:app/screens/scout_authenticator_dialog.dart';
-import 'package:app/screens/scout_status.dart';
 import 'package:app/style.dart';
 import 'package:app/providers/identity_provider.dart';
 import 'package:app/screens/analysis.dart';
@@ -247,6 +247,11 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
               },
               destinations: const [
                 NavigationRailDestination(
+                    selectedIcon: Icon(Icons.dashboard),
+                    icon: Icon(Icons.dashboard_outlined),
+                    label: Text('Dashboard'),
+                  ),
+                NavigationRailDestination(
                   selectedIcon: Icon(Icons.calendar_today),
                   icon: Icon(Icons.calendar_today_outlined),
                   label: Text('Schedule'),
@@ -261,17 +266,13 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
                   icon: Icon(Icons.analytics_outlined),
                   label: Text('Analysis'),
                 ),
-                NavigationRailDestination(
-                  selectedIcon: Icon(Icons.book),
-                  icon: Icon(Icons.book_outlined),
-                  label: Text('Docs'),
-                ),
               ],
               selectedIndex: _currentPageIndex,
             ),
           Expanded(
             child:
                 [
+                  DashboardPage(),
                   AllMatchesPage(
                     // 10/10 hack to make the widget re-scroll to the correct spot on load
                     // this will force it to scroll whenever the matches length changes
@@ -286,7 +287,6 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
                   ),
                   const TeamGridList(showEditButton: true),
                   const AnalysisPage(),
-                  const DocumentationScreen(),
                 ][_currentPageIndex],
           ),
         ],
@@ -309,16 +309,13 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
             ),
             const Divider(),
             ListTile(
-              title: const Text("Scout Status"),
-              trailing: const Icon(Icons.people),
-              subtitle: Text(
-                '${getScoutStatus(data).length.toString()} scouts',
-              ),
+              title: const Text("Documentation"),
+              trailing: const Icon(Icons.book),
               onTap:
                   () => Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const ScoutStatusPage(),
+                      builder: (context) => const DocumentationScreen(),
                     ),
                   ),
             ),
@@ -546,6 +543,11 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
                 selectedIndex: _currentPageIndex,
                 destinations: const [
                   NavigationDestination(
+                    selectedIcon: Icon(Icons.dashboard),
+                    icon: Icon(Icons.dashboard_outlined),
+                    label: 'Dashboard',
+                  ),
+                  NavigationDestination(
                     selectedIcon: Icon(Icons.calendar_today),
                     icon: Icon(Icons.calendar_today_outlined),
                     label: 'Schedule',
@@ -559,11 +561,6 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
                     selectedIcon: Icon(Icons.analytics),
                     icon: Icon(Icons.analytics_outlined),
                     label: 'Analysis',
-                  ),
-                  NavigationDestination(
-                    selectedIcon: Icon(Icons.book),
-                    icon: Icon(Icons.book_outlined),
-                    label: 'Docs',
                   ),
                 ],
               ),

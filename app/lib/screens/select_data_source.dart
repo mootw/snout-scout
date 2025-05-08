@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:app/main.dart';
 import 'package:app/providers/data_provider.dart';
@@ -13,6 +14,8 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:snout_db/event/frcevent.dart';
+import 'package:snout_db/event/match_data.dart';
+import 'package:snout_db/event/match_schedule_item.dart';
 import 'package:snout_db/patch.dart';
 import 'package:snout_db/snout_db.dart';
 
@@ -81,7 +84,49 @@ class _SelectDataSourceScreenState extends State<SelectDataSourceScreen> {
             leading: const Icon(Icons.phone_android),
             title: const Text("DEMO"),
             subtitle: const Text("Loads demo data!"),
-            onTap: () => {},
+            onTap: () {
+              final random = Random(1);
+
+              final teams = [
+                for (int i = 0; i < 43; i++) random.nextInt(12000),
+              ];
+
+              final scouts = [
+                "albert",
+                "iassac",
+                "archimedes",
+                "ada",
+                "bohr",
+                "faraday",
+                "galileo",
+                "tesla",
+              ];
+
+              final startTime = DateTime.now().subtract(Duration(hours: 4));
+              final matchInterval = 8;
+              final matches = [
+                for (int i = 1; i < 86; i++)
+                  MatchScheduleItem(
+                    id: "qm_$i",
+                    label: "Quals $i",
+                    scheduledTime: startTime.add(
+                      Duration(minutes: i * matchInterval),
+                    ),
+                    blue: [
+                      teams[random.nextInt(teams.length)],
+                      teams[random.nextInt(teams.length)],
+                      teams[random.nextInt(teams.length)],
+                    ],
+                    red: [
+                      teams[random.nextInt(teams.length)],
+                      teams[random.nextInt(teams.length)],
+                      teams[random.nextInt(teams.length)],
+                    ],
+                  ),
+              ];
+
+              
+            },
           ),
 
           ListTile(

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class IdentityProvider extends ChangeNotifier {
-  String identity = "unkown";
+  String identity = 'unknown';
 
   IdentityProvider();
 

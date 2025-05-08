@@ -157,8 +157,8 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
 
   @override
   Widget build(BuildContext context) {
-    //Allow slightly wide to be considered vertical for foldable devices or near-square devices
-    final isHorizontal = MediaQuery.of(context).size.aspectRatio > 1.2;
+
+    final isHorizontal = isWideScreen(context);
 
     if (_showSurvey || _mode == MatchMode.finished) {
       return ConfirmExitDialog(

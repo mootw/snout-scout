@@ -133,51 +133,42 @@ class _MatchRecorderAssistantPageState
         title: Text("Recording ${match.label}"),
         bottom: const LoadOrErrorStatusBar(),
       ),
-      body: ListView(
+      body: Column(
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  children: [
-                    for (final team in match.blue)
-                      _getTeamTile(
-                        team: team,
-                        isRecommended: _recommended == team,
-                        onTap:
-                            () => _recordTeam(
-                              widget.matchid,
-                              team,
-                              match.getAllianceOf(team),
-                            ),
-                        subtitle: "Blue ${match.blue.indexOf(team) + 1}",
-                        subtitleColor: Colors.blue,
-                      ),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: Column(
-                  children: [
-                    for (final team in match.red)
-                      _getTeamTile(
-                        team: team,
-                        isRecommended: _recommended == team,
-                        onTap:
-                            () => _recordTeam(
-                              widget.matchid,
-                              team,
-                              match.getAllianceOf(team),
-                            ),
-                        subtitle: "Red ${match.red.indexOf(team) + 1}",
-                        subtitleColor: Colors.red,
-                      ),
-                  ],
-                ),
-              ),
-            ],
+          Expanded(
+            child: ListView(
+              scrollDirection: isWideScreen(context) ? Axis.horizontal : Axis.vertical,
+              children: [
+                for (final team in match.blue)
+                  _getTeamTile(
+                    team: team,
+                    isRecommended: _recommended == team,
+                    onTap:
+                        () => _recordTeam(
+                          widget.matchid,
+                          team,
+                          match.getAllianceOf(team),
+                        ),
+                    subtitle: "Blue ${match.blue.indexOf(team) + 1}",
+                    subtitleColor: Colors.blue,
+                  ),
+                for (final team in match.red)
+                  _getTeamTile(
+                    team: team,
+                    isRecommended: _recommended == team,
+                    onTap:
+                        () => _recordTeam(
+                          widget.matchid,
+                          team,
+                          match.getAllianceOf(team),
+                        ),
+                    subtitle: "Red ${match.red.indexOf(team) + 1}",
+                    subtitleColor: Colors.red,
+                  ),
+              ],
+            ),
           ),
-          const Divider(),
+          const Divider(height: 0),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -226,7 +217,6 @@ class _MatchRecorderAssistantPageState
               ),
             ],
           ),
-          const SizedBox(height: 32),
         ],
       ),
     );
@@ -261,15 +251,15 @@ class _MatchRecorderAssistantPageState
       child: Container(
         color:
             _alreadyScoutedTeams.contains(team)
-                ? Colors.deepOrange.withAlpha(40)
+                ? Colors.blueGrey.withAlpha(70)
                 : (isRecommended
                     ? Theme.of(context).colorScheme.onPrimary
                     : null),
         child: Row(
           children: [
             SizedBox(
-              height: 128,
-              width: 128,
+              height: 140,
+              width: 140,
               child: Padding(
                 padding: const EdgeInsets.all(8),
                 child: Center(child: image ?? const Text("No Image")),
@@ -278,6 +268,7 @@ class _MatchRecorderAssistantPageState
             const SizedBox(width: 8),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 if (isRecommended) const Text("Recommended"),
                 Text("$team", style: Theme.of(context).textTheme.bodyLarge),
@@ -288,7 +279,7 @@ class _MatchRecorderAssistantPageState
                   ).textTheme.bodyMedium?.copyWith(color: subtitleColor),
                 ),
                 Text("$numRecordings recording(s)"),
-                if (inInMatchWithOurTeam) Text("alliance member in schedule"),
+                if (inInMatchWithOurTeam) Text("alliance member"),
               ],
             ),
           ],

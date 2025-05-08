@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:app/providers/data_provider.dart';
 import 'package:app/providers/identity_provider.dart';
-import 'package:app/screens/select_data_source.dart';
 import 'package:flutter/material.dart';
 import 'package:hashlib/hashlib.dart';
 import 'package:provider/provider.dart';
@@ -59,23 +58,11 @@ class _ScoutAuthorizationDialogState extends State<ScoutAuthorizationDialog> {
     final dp = context.watch<DataProvider>();
     final database = dp.database;
 
-
     final allKnownIdentities = getAllKnownIdentities(database);
-    print(allKnownIdentities);
 
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: widget.allowBackButton,
-        actions: [
-          TextButton(
-            onPressed:
-                () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => SelectDataSourceScreen()),
-                ),
-            child: Text("Change Source"),
-          ),
-        ],
         title: Text(Uri.decodeFull(dp.dataSourceUri.toString())),
       ),
       body: Padding(

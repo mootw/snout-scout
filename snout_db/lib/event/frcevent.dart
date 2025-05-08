@@ -103,9 +103,25 @@ class FRCEvent {
       .lastWhereOrNull((match) => match.isComplete(this) == false);
 
   //Calculates the schedule delay by using the delay of the last match with results actual time versus the scheduled time.
-  Duration? get scheduleDelay => scheduleSorted
-      .lastWhereOrNull((match) => match.isComplete(this))
-      ?.delayFromScheduledTime(this);
+  Duration? get scheduleDelay {
+    final nextMatch =
+        scheduleSorted.lastWhereOrNull((match) => match.isComplete(this));
+
+    final matchAfterNext = nextMatch == null
+        ? null
+        : scheduleSorted.firstWhereOrNull(
+            (match) => match.scheduledTime.isAfter(nextMatch.scheduledTime));
+
+    if (nextMatch != null &&
+        matchAfterNext != null &&
+        matchAfterNext.scheduledTime.difference(nextMatch.scheduledTime) >
+            const Duration(minutes: 40)) {
+      // Assume no schedule delay between matches that have a large time difference (new days and lunch break)
+      return Duration.zero;
+    }
+
+    return nextMatch?.delayFromScheduledTime(this);
+  }
 
   /// Returns all matches that include a recording for a specific team
   Iterable<MapEntry<String, MatchData>> teamRecordedMatches(int team) => matches

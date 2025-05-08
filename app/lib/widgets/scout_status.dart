@@ -4,22 +4,20 @@ import 'package:provider/provider.dart';
 
 
 Map<String, dynamic> getScoutStatus (DataProvider provider) {
-  final recentEvents = provider.database.patches.where((patch) => patch.time.isAfter(DateTime.now().subtract(Duration(minutes: 10))));
+  final recentEvents = provider.database.patches.where((patch) => patch.time.isAfter(DateTime.now().subtract(Duration(minutes: 15))));
   final eventsMap = Map.fromEntries([...recentEvents.map((e) => MapEntry(e.identity, (e.time, e.path)))]);
   return eventsMap;
 }
 
-class ScoutStatusPage extends StatelessWidget {
-  const ScoutStatusPage({super.key});
+class ScoutStatus extends StatelessWidget {
+  const ScoutStatus({super.key});
 
   @override
   Widget build(BuildContext context) {
 
     final scoutStatus = getScoutStatus(context.watch<DataProvider>());
 
-    return Scaffold(
-      appBar: AppBar(title: const Text("Live Scout Status")),
-      body: ListView(
+    return Column(
         children: [
           for (final scout in scoutStatus.entries)
             ListTile(
@@ -31,7 +29,6 @@ class ScoutStatusPage extends StatelessWidget {
             ),
           if (scoutStatus.isEmpty) const Text("No active scouts"),
         ],
-      ),
-    );
+      );
   }
 }

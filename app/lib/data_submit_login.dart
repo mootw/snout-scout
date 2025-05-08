@@ -1,4 +1,5 @@
 import 'package:app/providers/data_provider.dart';
+import 'package:app/providers/identity_provider.dart';
 import 'package:app/screens/scout_authenticator_dialog.dart';
 import 'package:app/widgets/confirm_exit_dialog.dart';
 import 'package:flutter/material.dart';
@@ -16,8 +17,11 @@ Future submitData(BuildContext context, Patch patch) async {
   );
 
   if (login != null && context.mounted) {
+    // Update the current login
+    context.read<IdentityProvider>().setIdentity(login);
     final newPatch = Patch(
-      identity: patch.identity,
+      // Force the identity for the patch to be the login user!
+      identity: login,
       path: patch.path,
       time: patch.time,
       value: patch.value,
