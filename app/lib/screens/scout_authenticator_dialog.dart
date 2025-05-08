@@ -282,6 +282,7 @@ class _ScoutRegistrationScreenState extends State<ScoutRegistrationScreen> {
                                   );
 
                                   if(context.mounted) {
+                                    // TODO this is bugged when creating a new event. It will register with whatever db is open, not the new database
                                     // Scout does not need auth from another scout to register
                                     await context.read<DataProvider>().newTransaction(patch);
                                   }

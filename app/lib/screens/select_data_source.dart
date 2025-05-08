@@ -133,12 +133,8 @@ class _SelectDataSourceScreenState extends State<SelectDataSourceScreen> {
             leading: const Icon(Icons.create_new_folder),
             title: const Text("New Local Database"),
             onTap: () async {
-              final String? scout = await showDialog(
-                context: context,
-                builder: (context) => const ScoutRegistrationScreen(),
-              );
 
-              if (context.mounted && scout != null) {
+              if (context.mounted) {
                 final value = await createNewEvent(context);
                 if (value == null) {
                   return;
@@ -147,7 +143,7 @@ class _SelectDataSourceScreenState extends State<SelectDataSourceScreen> {
                 if (context.mounted) {
                   FRCEvent event = FRCEvent.fromJson(json.decode(value));
                   Patch p = Patch(
-                    identity: scout,
+                    identity: "",
                     time: DateTime.now(),
                     path: Patch.buildPath([""]),
                     value: event.toJson(),
