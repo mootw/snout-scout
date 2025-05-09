@@ -1,8 +1,8 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:app/main.dart';
 import 'package:app/providers/data_provider.dart';
-import 'package:app/screens/scout_selector_screen.dart';
 import 'package:app/services/data_service.dart';
 import 'package:app/style.dart';
 import 'package:app/providers/loading_status_service.dart';
@@ -13,6 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:snout_db/event/frcevent.dart';
+import 'package:snout_db/event/match_schedule_item.dart';
 import 'package:snout_db/patch.dart';
 import 'package:snout_db/snout_db.dart';
 
@@ -81,19 +82,74 @@ class _SelectDataSourceScreenState extends State<SelectDataSourceScreen> {
             leading: const Icon(Icons.phone_android),
             title: const Text("DEMO"),
             subtitle: const Text("Loads demo data!"),
-            onTap: () => {},
+            onTap: () async {
+              final random = Random(1);
+
+              final teams = [
+                for (int i = 0; i < 43; i++) random.nextInt(12000),
+              ];
+
+              final scouts = [
+                "albert",
+                "iassac",
+                "archimedes",
+                "ada",
+                "bohr",
+                "faraday",
+                "galileo",
+                "tesla",
+              ];
+
+              final startTime = DateTime.now().subtract(Duration(hours: 4));
+              final matchInterval = 8;
+              final matches = [
+                for (int i = 1; i < 86; i++)
+                  MatchScheduleItem(
+                    id: "qm_$i",
+                    label: "Quals $i",
+                    scheduledTime: startTime.add(
+                      Duration(minutes: i * matchInterval),
+                    ),
+                    blue: [
+                      teams[random.nextInt(teams.length)],
+                      teams[random.nextInt(teams.length)],
+                      teams[random.nextInt(teams.length)],
+                    ],
+                    red: [
+                      teams[random.nextInt(teams.length)],
+                      teams[random.nextInt(teams.length)],
+                      teams[random.nextInt(teams.length)],
+                    ],
+                  ),
+              ];
+
+              Patch initialPatch = Patch(
+                identity: '',
+                time: startTime,
+                path: Patch.buildPath(['']),
+                value: emptyNewEvent.toJson(),
+              );
+
+              Patch teamsPatch = Patch.teams(startTime, teams);
+
+              Patch schedule = Patch.schedule(startTime, matches);
+
+              final sourceUri = Uri.parse(
+                '${localSnoutDBPath.path}/sample.snoutdb',
+              );
+              await writeLocalDiskDatabase(
+                SnoutDB(patches: [initialPatch, teamsPatch, schedule]),
+                sourceUri,
+              );
+              updateLocalDbs();
+            },
           ),
 
           ListTile(
             leading: const Icon(Icons.create_new_folder),
             title: const Text("New Local Database"),
             onTap: () async {
-              final String? scout = await showDialog(
-                context: context,
-                builder: (context) => const ScoutRegistrationScreen(),
-              );
-
-              if (context.mounted && scout != null) {
+              if (context.mounted) {
                 final value = await createNewEvent(context);
                 if (value == null) {
                   return;
@@ -102,7 +158,7 @@ class _SelectDataSourceScreenState extends State<SelectDataSourceScreen> {
                 if (context.mounted) {
                   FRCEvent event = FRCEvent.fromJson(json.decode(value));
                   Patch p = Patch(
-                    identity: scout,
+                    identity: "",
                     time: DateTime.now(),
                     path: Patch.buildPath([""]),
                     value: event.toJson(),

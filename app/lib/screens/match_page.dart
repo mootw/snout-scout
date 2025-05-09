@@ -1,3 +1,4 @@
+import 'package:app/data_submit_login.dart';
 import 'package:app/providers/identity_provider.dart';
 import 'package:app/screens/edit_match_properties.dart';
 import 'package:app/widgets/datasheet.dart';
@@ -35,11 +36,6 @@ class _MatchPageState extends State<MatchPage> {
     final snoutData = context.watch<DataProvider>();
     MatchData? match = snoutData.event.matches[widget.matchid];
     MatchScheduleItem? matchSchedule = snoutData.event.schedule[widget.matchid];
-
-    context.read<DataProvider>().updateStatus(
-      context,
-      "Looking at ${matchSchedule?.label}",
-    );
     return Scaffold(
       appBar: AppBar(
         title: Text(matchSchedule?.label ?? widget.matchid),
@@ -421,8 +417,9 @@ class _MatchPageState extends State<MatchPage> {
                               ]),
                               value: result.toJson(),
                             );
-
-                            await snoutData.newTransaction(patch);
+                            if(mounted && context.mounted) {
+                              await submitData(context, patch);
+                            }
                           }
                         }
 }

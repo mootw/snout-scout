@@ -15,8 +15,12 @@ const double minimumWidth = 355;
 bool isLargeDevice(BuildContext context) =>
     MediaQuery.of(context).size.width > 600;
 
+// Allow slightly wide to be considered vertical for foldable devices or near-square devices
+bool isWideScreen(BuildContext context) =>
+    MediaQuery.of(context).size.aspectRatio > 1.2;
+
 //Theme data
-const primaryColor = Color.fromARGB(255, 49, 219, 43);
+const primaryColor = Color.fromARGB(255, 6, 98, 3);
 final darkScheme = ColorScheme.fromSeed(
   seedColor: primaryColor,
   brightness: Brightness.dark,

@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:app/data_submit_login.dart';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/widgets/load_status_or_error_bar.dart';
 import 'package:flutter/material.dart';
@@ -17,7 +18,6 @@ class FailedPatchStorage extends StatefulWidget {
 class _FailedPatchStorageState extends State<FailedPatchStorage> {
   @override
   Widget build(BuildContext context) {
-    final snoutData = context.watch<DataProvider>();
     final serverConnection = context.watch<DataProvider>();
     return Scaffold(
       appBar: AppBar(
@@ -87,9 +87,12 @@ class _FailedPatchStorageState extends State<FailedPatchStorage> {
                   IconButton(
                     onPressed: () async {
                       //wtf is this
-                      await snoutData.newTransaction(
-                        Patch.fromJson(json.decode(patch)),
-                      );
+                      if (context.mounted) {
+                        await submitData(
+                          context,
+                          Patch.fromJson(json.decode(patch)),
+                        );
+                      }
                       setState(() {});
                     },
                     icon: const Icon(Icons.refresh),

@@ -1,11 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:app/data_submit_login.dart';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/providers/local_config_provider.dart';
+import 'package:app/screens/dashboard.dart';
 import 'package:app/screens/edit_markdown.dart';
-import 'package:app/screens/scout_selector_screen.dart';
-import 'package:app/screens/scout_status.dart';
+import 'package:app/screens/scout_authenticator_dialog.dart';
 import 'package:app/style.dart';
 import 'package:app/providers/identity_provider.dart';
 import 'package:app/screens/analysis.dart';
@@ -37,6 +38,7 @@ void main() async {
 
   FlutterError.onError = (details) {
     FlutterError.presentError(details);
+    // ignore: avoid_print
     print(details.stack);
   };
 
@@ -185,7 +187,6 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
   @override
   Widget build(BuildContext context) {
     final data = context.watch<DataProvider>();
-    final identityProvider = context.watch<IdentityProvider>();
     final serverConnection = context.watch<DataProvider>();
 
     if (data.isInitialLoad == false) {
@@ -209,21 +210,6 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
       );
     }
 
-    if (getAllKnownIdentities(
-          data.database,
-        ).contains(identityProvider.identity) ==
-        false) {
-      return ScoutSelectorScreen(allowBackButton: false);
-    }
-
-    data.updateStatus(context, switch (_currentPageIndex) {
-      (0) => "Checking out the Schedule",
-      (1) => "Looking at the Teams",
-      (2) => "Analyzing the numbers",
-      (3) => "Reading Docs",
-      _ => "In the matrix (Some home page this is a bug)",
-    });
-
     final nextMatch = data.event.nextMatch;
 
     final largeDevice = isLargeDevice(context);
@@ -234,19 +220,15 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
         titleSpacing: 0,
         title: Text(data.event.config.name),
         actions: [
-          IconButton(
-            onPressed:
-                () =>
-                    showSearch(context: context, delegate: SnoutScoutSearch()),
-            icon: const Icon(Icons.search),
-          ),
           Padding(
             padding: const EdgeInsets.only(left: 8, right: 8),
-            child: FilledButton(
-              onPressed: () {
-                editIdentityFunction(context: context);
-              },
-              child: Text(identityProvider.identity),
+            child: IconButton(
+              onPressed:
+                  () => showSearch(
+                    context: context,
+                    delegate: SnoutScoutSearch(),
+                  ),
+              icon: const Icon(Icons.search),
             ),
           ),
         ],
@@ -265,6 +247,11 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
               },
               destinations: const [
                 NavigationRailDestination(
+                    selectedIcon: Icon(Icons.dashboard),
+                    icon: Icon(Icons.dashboard_outlined),
+                    label: Text('Dashboard'),
+                  ),
+                NavigationRailDestination(
                   selectedIcon: Icon(Icons.calendar_today),
                   icon: Icon(Icons.calendar_today_outlined),
                   label: Text('Schedule'),
@@ -279,17 +266,13 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
                   icon: Icon(Icons.analytics_outlined),
                   label: Text('Analysis'),
                 ),
-                NavigationRailDestination(
-                  selectedIcon: Icon(Icons.book),
-                  icon: Icon(Icons.book_outlined),
-                  label: Text('Docs'),
-                ),
               ],
               selectedIndex: _currentPageIndex,
             ),
           Expanded(
             child:
                 [
+                  DashboardPage(),
                   AllMatchesPage(
                     // 10/10 hack to make the widget re-scroll to the correct spot on load
                     // this will force it to scroll whenever the matches length changes
@@ -304,7 +287,6 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
                   ),
                   const TeamGridList(showEditButton: true),
                   const AnalysisPage(),
-                  const DocumentationScreen(),
                 ][_currentPageIndex],
           ),
         ],
@@ -327,14 +309,13 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
             ),
             const Divider(),
             ListTile(
-              title: const Text("Scout Status"),
-              trailing: const Icon(Icons.people),
-              subtitle: Text('${data.scoutStatus.length.toString()} scouts'),
+              title: const Text("Documentation"),
+              trailing: const Icon(Icons.book),
               onTap:
                   () => Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const ScoutStatusPage(),
+                      builder: (context) => const DocumentationScreen(),
                     ),
                   ),
             ),
@@ -434,8 +415,9 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
                     value: reAppendedConfig.toJson(),
                   );
                   //Save the scouting results to the server!!
-
-                  await data.newTransaction(patch);
+                  if (context.mounted) {
+                    await submitData(context, patch);
+                  }
                 }
               },
             ),
@@ -462,7 +444,9 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
                     value: result,
                   );
                   //Save the scouting results to the server!!
-                  await dataProvider.newTransaction(patch);
+                  if (context.mounted) {
+                    await submitData(context, patch);
+                  }
                 }
               },
             ),
@@ -473,7 +457,6 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
               leading: const Icon(Icons.map),
               onTap: () async {
                 final identity = context.read<IdentityProvider>().identity;
-                final dataProvider = context.read<DataProvider>();
                 String result;
                 try {
                   final bytes = await pickOrTakeImageDialog(
@@ -489,7 +472,9 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
                       value: result,
                     );
                     //Save the scouting results to the server!!
-                    await dataProvider.newTransaction(patch);
+                    if (context.mounted) {
+                      await submitData(context, patch);
+                    }
                   }
                 } catch (e, s) {
                   Logger.root.severe("Error taking image from device", e, s);
@@ -501,7 +486,6 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
               leading: const Icon(Icons.camera_alt),
               onTap: () async {
                 final identity = context.read<IdentityProvider>().identity;
-                final dataProvider = context.read<DataProvider>();
 
                 String result;
                 try {
@@ -520,7 +504,9 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
                       value: result,
                     );
                     //Save the scouting results to the server!!
-                    await dataProvider.newTransaction(patch);
+                    if (context.mounted) {
+                      await submitData(context, patch);
+                    }
                   }
                 } catch (e, s) {
                   Logger.root.severe("Error taking image from device", e, s);
@@ -557,6 +543,11 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
                 selectedIndex: _currentPageIndex,
                 destinations: const [
                   NavigationDestination(
+                    selectedIcon: Icon(Icons.dashboard),
+                    icon: Icon(Icons.dashboard_outlined),
+                    label: 'Dashboard',
+                  ),
+                  NavigationDestination(
                     selectedIcon: Icon(Icons.calendar_today),
                     icon: Icon(Icons.calendar_today_outlined),
                     label: 'Schedule',
@@ -570,11 +561,6 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
                     selectedIcon: Icon(Icons.analytics),
                     icon: Icon(Icons.analytics_outlined),
                     label: 'Analysis',
-                  ),
-                  NavigationDestination(
-                    selectedIcon: Icon(Icons.book),
-                    icon: Icon(Icons.book_outlined),
-                    label: 'Docs',
                   ),
                 ],
               ),
@@ -598,7 +584,8 @@ Future editIdentityFunction({
   await Navigator.of(context).push(
     MaterialPageRoute(
       builder:
-          (context) => ScoutSelectorScreen(allowBackButton: allowBackButton),
+          (context) =>
+              ScoutAuthorizationDialog(allowBackButton: allowBackButton),
     ),
   );
 }

@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:app/providers/data_provider.dart';
 import 'package:app/providers/identity_provider.dart';
-import 'package:app/screens/select_data_source.dart';
 import 'package:flutter/material.dart';
 import 'package:hashlib/hashlib.dart';
 import 'package:provider/provider.dart';
@@ -15,16 +14,16 @@ import 'dart:math' as math;
 List<String> getAllKnownIdentities(SnoutDB database) =>
     database.event.scoutPasswords.keys.toList();
 
-class ScoutSelectorScreen extends StatefulWidget {
-  const ScoutSelectorScreen({super.key, required this.allowBackButton});
+class ScoutAuthorizationDialog extends StatefulWidget {
+  const ScoutAuthorizationDialog({super.key, required this.allowBackButton});
 
   final bool allowBackButton;
 
   @override
-  State<ScoutSelectorScreen> createState() => _ScoutSelectorScreenState();
+  State<ScoutAuthorizationDialog> createState() => _ScoutAuthorizationDialogState();
 }
 
-class _ScoutSelectorScreenState extends State<ScoutSelectorScreen> {
+class _ScoutAuthorizationDialogState extends State<ScoutAuthorizationDialog> {
   String? _selectedScout;
   final _scoutPassword = TextEditingController();
 
@@ -64,16 +63,6 @@ class _ScoutSelectorScreenState extends State<ScoutSelectorScreen> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: widget.allowBackButton,
-        actions: [
-          TextButton(
-            onPressed:
-                () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => SelectDataSourceScreen()),
-                ),
-            child: Text("Change Source"),
-          ),
-        ],
         title: Text(Uri.decodeFull(dp.dataSourceUri.toString())),
       ),
       body: Padding(
@@ -292,12 +281,16 @@ class _ScoutRegistrationScreenState extends State<ScoutRegistrationScreen> {
                                     value: password.encoded(),
                                   );
 
-                                  await dataProvider.newTransaction(patch);
+                                  if(context.mounted) {
+                                    // TODO this is bugged when creating a new event. It will register with whatever db is open, not the new database
+                                    // Scout does not need auth from another scout to register
+                                    await context.read<DataProvider>().newTransaction(patch);
+                                  }
 
                                   setState(() {
                                     _isLoading = false;
                                   });
-                                  if (mounted) {
+                                  if (mounted && context.mounted) {
                                     Navigator.pop(context, _scoutNameText.text);
                                   }
                                 }

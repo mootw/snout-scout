@@ -2,13 +2,11 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:app/api.dart';
-import 'package:app/providers/identity_provider.dart';
 import 'package:app/providers/loading_status_service.dart';
 import 'package:app/screens/select_data_source.dart';
 import 'package:app/services/data_service.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:provider/provider.dart';
 import 'package:server/socket_messages.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:snout_db/db.dart';
@@ -97,35 +95,6 @@ class DataProvider extends ChangeNotifier {
     }();
     loadingService.addFuture(future);
     return future;
-  }
-
-  String? _oldStatus;
-
-  /// Used to update the server with this scouts status (what they are doing right now) in text form
-  void updateStatus(BuildContext context, String newStatus) {
-    if (ModalRoute.of(context)?.isCurrent == false) {
-      return;
-    }
-    final identity = context.read<IdentityProvider>().identity;
-
-    //TODO handle this better, the connected == true is to avoid a weird state issue
-    // and clearly i don't need to check more than 1 maybe 2 items to ensure my sink
-    // is safe to send on.
-    if (connected == true &&
-        _channel != null &&
-        _channel?.closeCode != null &&
-        newStatus != _oldStatus) {
-      //channel is still open
-
-      _channel?.sink.add(
-        json.encode({
-          "type": SocketMessageType.scoutStatusUpdate,
-          "identity": identity,
-          "value": newStatus,
-        }),
-      );
-      _oldStatus = newStatus;
-    }
   }
 
   //Writes a patch to local disk and submits it to the server.

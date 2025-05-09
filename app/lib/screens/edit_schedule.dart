@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:app/data_submit_login.dart';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/providers/identity_provider.dart';
 import 'package:app/screens/edit_json.dart';
@@ -111,7 +112,6 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
               trailing: IconButton(
                 icon: const Icon(Icons.delete),
                 onPressed: () async {
-                  final identity = context.read<IdentityProvider>().identity;
                   final result = await showDialog(
                     context: context,
                     builder:
@@ -138,16 +138,13 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
                         );
                     matchesWithRemoved.remove(match.key);
 
-                    Patch patch = Patch(
-                      identity: identity,
-                      time: DateTime.now(),
-                      path: Patch.buildPath(['schedule']),
-                      // convert to json first
-                      value: matchesWithRemoved.map(
-                        (key, value) => MapEntry(key, value.toJson()),
-                      ),
+                    Patch patch = Patch.schedule(
+                      DateTime.now(),
+                      matchesWithRemoved.entries.map((e) => e.value).toList(),
                     );
-                    await snoutData.newTransaction(patch);
+                    if (context.mounted) {
+                      await submitData(context, patch);
+                    }
                   }
                 },
               ),
@@ -181,7 +178,9 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
         path: Patch.buildPath(['schedule', matchID ?? resultMatch.label]),
         value: resultMatch.toJson(),
       );
-      await data.newTransaction(patch);
+      if (mounted && context.mounted) {
+        await submitData(context, patch);
+      }
     }
   }
 }

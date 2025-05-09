@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:app/api.dart';
+import 'package:app/data_submit_login.dart';
 import 'package:app/edit_lock.dart';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/services/snout_image_cache.dart';
@@ -38,29 +39,55 @@ class _MatchRecorderAssistantPageState
   final TextEditingController _textController = TextEditingController();
   Alliance _alliance = Alliance.blue;
   int? _recommended;
+  Set<int> _alreadyScoutedTeams = {};
+
+  late Timer _checkScoutedTeams;
+
+  @override
+  void dispose() {
+    _checkScoutedTeams.cancel();
+    super.dispose();
+  }
 
   @override
   void initState() {
     super.initState();
+
+    _checkScoutedTeams = Timer.periodic(
+      Duration(seconds: 4),
+      (_) => _pickRecommendedTeams(),
+    );
+    _pickRecommendedTeams();
+  }
+
+  Future _pickRecommendedTeams() async {
     final snoutData = context.read<DataProvider>();
     MatchScheduleItem matchSchedule = snoutData.event.schedule[widget.matchid]!;
-
     //Pick a recommended team that is not already being scouted
-    () async {
-      final teams = {...matchSchedule.red, ...matchSchedule.blue};
-      for (final scoutedTeam in await _getScoutedTeams(
-        matchSchedule.getData(snoutData.event),
-        teams,
-      )) {
-        teams.remove(scoutedTeam);
-      }
-      setState(() {
-        final list = (teams.toList()..shuffle());
+    final teams = {...matchSchedule.red, ...matchSchedule.blue};
+    final scoutedTeams = await _getScoutedTeams(
+      matchSchedule.getData(snoutData.event),
+      teams,
+    );
+    final availableTeams = teams.difference(scoutedTeams);
+    final list = (availableTeams.toList()..shuffle());
+    setState(() {
+      if (_recommended == null) {
         if (list.isNotEmpty) {
           _recommended = list.first;
         }
-      });
-    }();
+      } else {
+        if (list.contains(_recommended) == false) {
+          // We need to pick a new recommended, because the list changed
+          // to not include the last recommended value
+          if (list.isNotEmpty) {
+            _recommended = list.first;
+          }
+        }
+      }
+
+      _alreadyScoutedTeams = scoutedTeams;
+    });
   }
 
   //Updates teams that are already being scouted.
@@ -101,60 +128,47 @@ class _MatchRecorderAssistantPageState
   Widget build(BuildContext context) {
     final snoutData = context.watch<DataProvider>();
     MatchScheduleItem match = snoutData.event.schedule[widget.matchid]!;
-    context.read<DataProvider>().updateStatus(
-      context,
-      "Match scouting ${match.label}: picking a team",
-    );
     return Scaffold(
       appBar: AppBar(
         title: Text("Recording ${match.label}"),
         bottom: const LoadOrErrorStatusBar(),
       ),
-      body: ListView(
+      body: Column(
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  children: [
-                    for (final team in match.blue)
-                      _getTeamTile(
-                        team: team,
-                        isRecommended: _recommended == team,
-                        onTap:
-                            () => _recordTeam(
-                              widget.matchid,
-                              team,
-                              match.getAllianceOf(team),
-                            ),
-                        subtitle: "Blue ${match.blue.indexOf(team) + 1}",
-                        subtitleColor: Colors.blue,
-                      ),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: Column(
-                  children: [
-                    for (final team in match.red)
-                      _getTeamTile(
-                        team: team,
-                        isRecommended: _recommended == team,
-                        onTap:
-                            () => _recordTeam(
-                              widget.matchid,
-                              team,
-                              match.getAllianceOf(team),
-                            ),
-                        subtitle: "Red ${match.red.indexOf(team) + 1}",
-                        subtitleColor: Colors.red,
-                      ),
-                  ],
-                ),
-              ),
-            ],
+          Expanded(
+            child: ListView(
+              scrollDirection: isWideScreen(context) ? Axis.horizontal : Axis.vertical,
+              children: [
+                for (final team in match.blue)
+                  _getTeamTile(
+                    team: team,
+                    isRecommended: _recommended == team,
+                    onTap:
+                        () => _recordTeam(
+                          widget.matchid,
+                          team,
+                          match.getAllianceOf(team),
+                        ),
+                    subtitle: "Blue ${match.blue.indexOf(team) + 1}",
+                    subtitleColor: Colors.blue,
+                  ),
+                for (final team in match.red)
+                  _getTeamTile(
+                    team: team,
+                    isRecommended: _recommended == team,
+                    onTap:
+                        () => _recordTeam(
+                          widget.matchid,
+                          team,
+                          match.getAllianceOf(team),
+                        ),
+                    subtitle: "Red ${match.red.indexOf(team) + 1}",
+                    subtitleColor: Colors.red,
+                  ),
+              ],
+            ),
           ),
-          const Divider(),
+          const Divider(height: 0),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -203,7 +217,6 @@ class _MatchRecorderAssistantPageState
               ),
             ],
           ),
-          const SizedBox(height: 32),
         ],
       ),
     );
@@ -228,15 +241,25 @@ class _MatchRecorderAssistantPageState
       );
     }
 
+    int numRecordings = snoutData.event.teamRecordedMatches(team).length;
+    bool inInMatchWithOurTeam = snoutData.event
+        .matchesWithTeam(snoutData.event.config.team)
+        .any((match) => match.isScheduledToHaveTeam(team));
+
     return InkWell(
       onTap: onTap,
       child: Container(
-        color: isRecommended ? Theme.of(context).colorScheme.onPrimary : null,
+        color:
+            _alreadyScoutedTeams.contains(team)
+                ? Colors.blueGrey.withAlpha(70)
+                : (isRecommended
+                    ? Theme.of(context).colorScheme.onPrimary
+                    : null),
         child: Row(
           children: [
             SizedBox(
-              height: 128,
-              width: 128,
+              height: 140,
+              width: 140,
               child: Padding(
                 padding: const EdgeInsets.all(8),
                 child: Center(child: image ?? const Text("No Image")),
@@ -245,6 +268,7 @@ class _MatchRecorderAssistantPageState
             const SizedBox(width: 8),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 if (isRecommended) const Text("Recommended"),
                 Text("$team", style: Theme.of(context).textTheme.bodyLarge),
@@ -254,6 +278,8 @@ class _MatchRecorderAssistantPageState
                     context,
                   ).textTheme.bodyMedium?.copyWith(color: subtitleColor),
                 ),
+                Text("$numRecordings recording(s)"),
+                if (inInMatchWithOurTeam) Text("alliance member"),
               ],
             ),
           ],
@@ -269,7 +295,7 @@ class _MatchRecorderAssistantPageState
     RobotMatchResults? result = await navigateWithEditLock<RobotMatchResults>(
       context,
       "match:$matchid:$team:timeline",
-      (context) => Navigator.pushReplacement(
+      (context) => Navigator.push(
         context,
         MaterialPageRoute(
           builder:
@@ -282,7 +308,7 @@ class _MatchRecorderAssistantPageState
       ),
     );
 
-    if (result != null) {
+    if (result != null && mounted) {
       Patch patch = Patch(
         identity: identity,
         time: DateTime.now(),
@@ -290,7 +316,10 @@ class _MatchRecorderAssistantPageState
         value: result.toJson(),
       );
 
-      await snoutData.newTransaction(patch);
+      await submitData(context, patch);
+      if (mounted) {
+        Navigator.pop(context);
+      }
     }
   }
 }
