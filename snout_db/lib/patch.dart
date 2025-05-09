@@ -4,6 +4,7 @@ import 'package:json_annotation/json_annotation.dart';
 import 'package:meta/meta.dart';
 import 'package:rfc_6901/rfc_6901.dart';
 import 'package:snout_db/event/frcevent.dart';
+import 'package:snout_db/event/match_schedule_item.dart';
 
 part 'patch.g.dart';
 
@@ -62,4 +63,28 @@ class Patch {
 
   @override
   String toString() => toJson().toString();
+
+
+  factory Patch.teams(DateTime time, List<int> teams) {
+    return Patch(
+        identity: '', time: time, path: buildPath(['teams']), value: teams);
+  }
+
+  factory Patch.schedule(DateTime time, List<MatchScheduleItem> matches) {
+    return Patch(
+      identity: '',
+      time: time,
+      path: buildPath(['schedule']),
+      value: Map.fromEntries(matches.map((value) => MapEntry(value.id, value.toJson()))),
+    );
+  }
+
+  factory Patch.scheduleItem(DateTime time, MatchScheduleItem match) {
+    return Patch(
+      identity: '',
+      time: time,
+      path: buildPath(['schedule', match.id]),
+      value: match.toJson(),
+    );
+  }
 }

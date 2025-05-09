@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:app/data_submit_login.dart';
 import 'package:app/providers/data_provider.dart';
-import 'package:app/providers/identity_provider.dart';
 import 'package:app/screens/edit_json.dart';
 import 'package:app/screens/view_team_page.dart';
 import 'package:app/services/snout_image_cache.dart';
@@ -67,14 +66,9 @@ class _TeamGridListState extends State<TeamGridList> {
                                       );
 
                                       if (result != null && context.mounted) {
-                                        Patch patch = Patch(
-                                          identity:
-                                              context
-                                                  .read<IdentityProvider>()
-                                                  .identity,
-                                          time: DateTime.now(),
-                                          path: Patch.buildPath(['teams']),
-                                          value: json.decode(result),
+                                        Patch patch = Patch.teams(
+                                          DateTime.now(),
+                                          json.decode(result),
                                         );
                                         //Save the scouting results to the server!!
                                         await submitData(context, patch);
@@ -128,14 +122,9 @@ class _TeamGridListState extends State<TeamGridList> {
                                       );
 
                                       if (result != null && context.mounted) {
-                                        Patch patch = Patch(
-                                          identity:
-                                              context
-                                                  .read<IdentityProvider>()
-                                                  .identity,
-                                          time: DateTime.now(),
-                                          path: Patch.buildPath(['teams']),
-                                          value: json.decode(result),
+                                        Patch patch = Patch.teams(
+                                          DateTime.now(),
+                                          json.decode(result),
                                         );
                                         //Save the scouting results to the server!!
                                         await submitData(context, patch);

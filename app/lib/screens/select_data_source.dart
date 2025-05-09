@@ -3,7 +3,6 @@ import 'dart:math';
 
 import 'package:app/main.dart';
 import 'package:app/providers/data_provider.dart';
-import 'package:app/screens/scout_authenticator_dialog.dart';
 import 'package:app/services/data_service.dart';
 import 'package:app/style.dart';
 import 'package:app/providers/loading_status_service.dart';
@@ -14,7 +13,6 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:snout_db/event/frcevent.dart';
-import 'package:snout_db/event/match_data.dart';
 import 'package:snout_db/event/match_schedule_item.dart';
 import 'package:snout_db/patch.dart';
 import 'package:snout_db/snout_db.dart';
@@ -84,7 +82,7 @@ class _SelectDataSourceScreenState extends State<SelectDataSourceScreen> {
             leading: const Icon(Icons.phone_android),
             title: const Text("DEMO"),
             subtitle: const Text("Loads demo data!"),
-            onTap: () {
+            onTap: () async {
               final random = Random(1);
 
               final teams = [
@@ -125,7 +123,25 @@ class _SelectDataSourceScreenState extends State<SelectDataSourceScreen> {
                   ),
               ];
 
-              
+              Patch initialPatch = Patch(
+                identity: '',
+                time: startTime,
+                path: Patch.buildPath(['']),
+                value: emptyNewEvent.toJson(),
+              );
+
+              Patch teamsPatch = Patch.teams(startTime, teams);
+
+              Patch schedule = Patch.schedule(startTime, matches);
+
+              final sourceUri = Uri.parse(
+                '${localSnoutDBPath.path}/sample.snoutdb',
+              );
+              await writeLocalDiskDatabase(
+                SnoutDB(patches: [initialPatch, teamsPatch, schedule]),
+                sourceUri,
+              );
+              updateLocalDbs();
             },
           ),
 
@@ -133,7 +149,6 @@ class _SelectDataSourceScreenState extends State<SelectDataSourceScreen> {
             leading: const Icon(Icons.create_new_folder),
             title: const Text("New Local Database"),
             onTap: () async {
-
               if (context.mounted) {
                 final value = await createNewEvent(context);
                 if (value == null) {

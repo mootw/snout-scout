@@ -47,7 +47,16 @@ class _DashboardPageState extends State<DashboardPage> {
         // Lowest to highest
         .sorted((a, b) => a.value.compareTo(b.value));
 
-    final teamsWithInsufficientMatchRecordings = numberOfRecordedMatchesByTeam.where((entry) => entry.value < snoutData.event.matchesWithTeam(entry.key).length * 0.5);
+    final teamsWithInsufficientMatchRecordings = numberOfRecordedMatchesByTeam
+        .where(
+          (entry) =>
+              entry.value <
+              snoutData.event
+                      .matchesWithTeam(entry.key)
+                      .where((match) => match.isComplete(snoutData.event))
+                      .length *
+                  0.5,
+        );
 
     final numberOfPitScoutingItemsByTeam = snoutData.event.pitscouting.entries
         .map((e) => MapEntry(e.key, e.value.length))
@@ -110,8 +119,10 @@ class _DashboardPageState extends State<DashboardPage> {
           ),
         ),
 
-        Text("Team with insufficient pit scouting information (${teamsWithInsufficientPitData.length}/${snoutData.event.teams.length})"),
-        if(teamsWithInsufficientPitData.isEmpty)
+        Text(
+          "Team with insufficient pit scouting information (${teamsWithInsufficientPitData.length}/${snoutData.event.teams.length})",
+        ),
+        if (teamsWithInsufficientPitData.isEmpty)
           Text("All teams are sufficient :)"),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
@@ -124,8 +135,10 @@ class _DashboardPageState extends State<DashboardPage> {
           ),
         ),
 
-        Text("Teams with insufficient match recordings (${teamsWithInsufficientMatchRecordings.length}/${snoutData.event.teams.length})"),
-        if(teamsWithInsufficientMatchRecordings.isEmpty)
+        Text(
+          "Teams with insufficient match recordings (${teamsWithInsufficientMatchRecordings.length}/${snoutData.event.teams.length})",
+        ),
+        if (teamsWithInsufficientMatchRecordings.isEmpty)
           Text("All teams are sufficient :)"),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
