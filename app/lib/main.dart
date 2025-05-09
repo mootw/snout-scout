@@ -15,7 +15,6 @@ import 'package:app/screens/documentation_page.dart';
 import 'package:app/screens/edit_json.dart';
 import 'package:app/screens/patch_history.dart';
 import 'package:app/screens/schedule_page.dart';
-import 'package:app/screens/scout_leaderboard.dart';
 import 'package:app/screens/teams_page.dart';
 import 'package:app/search.dart';
 import 'package:app/widgets/load_status_or_error_bar.dart';
@@ -316,17 +315,6 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
                     context,
                     MaterialPageRoute(
                       builder: (context) => const DocumentationScreen(),
-                    ),
-                  ),
-            ),
-            ListTile(
-              title: const Text("Scouting Leaderboard"),
-              trailing: const Icon(Icons.leaderboard),
-              onTap:
-                  () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const ScoutLeaderboardPage(),
                     ),
                   ),
             ),

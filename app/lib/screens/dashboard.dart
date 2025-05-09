@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:app/durationformat.dart';
 import 'package:app/providers/data_provider.dart';
+import 'package:app/screens/scout_leaderboard.dart';
 import 'package:app/screens/teams_page.dart';
 import 'package:app/widgets/match_card.dart';
 import 'package:app/widgets/scout_status.dart';
@@ -17,6 +20,23 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> {
+
+  late Timer _updateTimer;
+
+  @override void initState() {
+    _updateTimer = Timer.periodic(Duration(seconds: 5), (_) => setState(() {
+      // TODO actually make the home page update nicely on its own. This is mostly for any counters and timers.
+    }));
+    super.initState();
+  }
+
+  @override
+  void dispose () {
+    _updateTimer.cancel();
+    super.dispose();
+  }
+
+
   @override
   Widget build(BuildContext context) {
     final snoutData = context.watch<DataProvider>();
@@ -157,6 +177,7 @@ class _DashboardPageState extends State<DashboardPage> {
         const ScoutStatus(),
 
         Text("Leaderboard"),
+        ScoutLeaderboard(),
 
         const SizedBox(height: 16),
       ],

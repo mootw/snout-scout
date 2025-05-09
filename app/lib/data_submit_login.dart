@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:snout_db/patch.dart';
 
-Future submitData(BuildContext context, Patch patch) async {
+Future submitMultiplePatches(BuildContext context, List<Patch> patches) async {
   //TODO make this flash and only pushReplacement the route at the save button, then show leaderboard while saving
   final login = await showDialog(
     context: context,
@@ -18,16 +18,19 @@ Future submitData(BuildContext context, Patch patch) async {
 
   if (login != null && context.mounted) {
     // Update the current login
-    context.read<IdentityProvider>().setIdentity(login);
-    final newPatch = Patch(
-      // Force the identity for the patch to be the login user!
-      identity: login,
-      path: patch.path,
-      time: patch.time,
-      value: patch.value,
-    );
     final dataProvider = context.read<DataProvider>();
-    await dataProvider.newTransaction(newPatch);
+    context.read<IdentityProvider>().setIdentity(login);
+
+    for (final patch in patches) {
+      final newPatch = Patch(
+        // Force the identity for the patch to be the login user!
+        identity: login,
+        path: patch.path,
+        time: patch.time,
+        value: patch.value,
+      );
+      await dataProvider.newTransaction(newPatch);
+    }
     // if (context.mounted) {
     //   Navigator.push(
     //     context,
@@ -36,6 +39,8 @@ Future submitData(BuildContext context, Patch patch) async {
     // }
   }
 }
+
+Future submitData(BuildContext context, Patch patch) async => submitMultiplePatches(context, [patch]);
 
 class HoldScreen extends StatelessWidget {
   const HoldScreen({super.key});

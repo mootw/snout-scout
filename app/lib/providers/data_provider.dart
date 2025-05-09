@@ -13,6 +13,7 @@ import 'package:snout_db/db.dart';
 import 'package:snout_db/event/frcevent.dart';
 import 'package:snout_db/patch.dart';
 import 'package:snout_db/snout_db.dart';
+import 'package:synchronized/synchronized.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 /// saves the data into storage
@@ -28,6 +29,8 @@ Future writeLocalDiskDatabase(SnoutDB db, Uri path) async {
 class DataProvider extends ChangeNotifier {
   final Uri dataSourceUri;
 
+  final loadingLock = Lock();
+
   // Disgusting way to handle paths but it works so whatever
   bool get isDataSourceUriRemote => dataSourceUri.toString().startsWith('http');
 
@@ -37,13 +40,7 @@ class DataProvider extends ChangeNotifier {
   SnoutDB _database = SnoutDB(
     patches: [
       Patch(
-        /// Trick to get around the temporary database lol
-        /// This is super duper uber cursed. Basically
-        /// It is this to show a "loading..." chip in the UI
-        /// because right now the app loads the database after
-        /// displaying the dialog for selecting the scout
-        /// when it should really load the database before that...
-        identity: 'Loading...',
+        identity: '',
         path: Patch.buildPath(['']),
         time: DateTime.now(),
         value: emptyNewEvent.toJson(),
@@ -88,7 +85,7 @@ class DataProvider extends ChangeNotifier {
   Future _loadSelectedDataSource() {
     final future = () async {
       if (isDataSourceUriRemote) {
-        await _getDatabaseFromServer();
+        await _getDatabaseFromServer(dataSourceUri);
       } else {
         await _loadLocalDBData();
       }
@@ -126,72 +123,86 @@ class DataProvider extends ChangeNotifier {
 
   bool connected = true;
 
-  List<({String identity, String status, DateTime time})> scoutStatus = [];
-
   //this will load the entire database if it has
   //not been loaded yet, OR it will load only
   //the changes that have been made since it's
   //last download.
-  Future _getDatabaseFromServer() async {
-    final storageKey = base64UrlEncode(utf8.encode(dataSourceUri.toString()));
+  Future _getDatabaseFromServer(Uri source) async {
+    // We cannot have multiple instances of this method running at the same time, because right now
+    // only the length of the ledger is the only way to check the state, rather than using
+    // blockchain tech to properly link the list and maintain state like it really should
 
-    final diskData = await readText(storageKey);
+    await loadingLock.synchronized(() async {
+      final storageKey = base64UrlEncode(utf8.encode(source.toString()));
 
-    Uri path = Uri.parse('${Uri.decodeFull(dataSourceUri.toString())}/patches');
+      final diskData = await readText(storageKey);
 
-    if (diskData == null) {
+      Uri path = Uri.parse('${Uri.decodeFull(source.toString())}/patches');
+
+      if (diskData == null) {
+        final newData = await apiClient
+            .get(path)
+            .timeout(Duration(seconds: 30));
+
+        final List<Patch> patches =
+            (json.decode(newData.body) as List)
+                .map((e) => Patch.fromJson(e as Map))
+                .toList();
+        final decodedDatabase = SnoutDB(patches: patches);
+        database = decodedDatabase;
+        await storeText(
+          storageKey,
+          json.encode(decodedDatabase.patches.map((e) => e.toJson()).toList()),
+        );
+        notifyListeners();
+        return;
+      }
+
+      //Decode as list of patches
+      final patches =
+          List.from(
+            json.decode(diskData) as List,
+          ).map((x) => Patch.fromJson(x)).toList();
+      final diskDatabase = SnoutDB(patches: patches);
+
+      //Assign to local database so even when it fails to load, we still have
+      //the latest disk database
+      database = diskDatabase;
+
       //Load the changest only, since it is more bandwidth efficient
       //and the database is ONLY based on patches.
-      final newData = await apiClient.get(path).timeout(Duration(seconds: 15));
+      final headOriginResult = await apiClient
+          .get(Uri.parse('${Uri.decodeFull(source.toString())}/head'))
+          .timeout(Duration(seconds: 10));
 
-      final List<Patch> patches =
-          (json.decode(newData.body) as List)
-              .map((e) => Patch.fromJson(e as Map))
-              .toList();
-      final decodedDatabase = SnoutDB(patches: patches);
-      database = decodedDatabase;
-      await storeText(
-        storageKey,
-        json.encode(decodedDatabase.patches.map((e) => e.toJson()).toList()),
-      );
-      notifyListeners();
-      return;
-    }
+      final headOrigin = jsonDecode(headOriginResult.body) as int;
 
-    //Decode as list of patches
-    final patches =
-        List.from(
-          json.decode(diskData) as List,
-        ).map((x) => Patch.fromJson(x)).toList();
-    final diskDatabase = SnoutDB(patches: patches);
+      final headLocal = database.patches.length;
+      List<Patch> diffPatches = [];
+      if (headOrigin > headLocal) {
+        // There are new patches, download them.
+        for (int i = headLocal; i < headOrigin; i++) {
+          final patchResult = await apiClient
+              .get(
+                Uri.parse(
+                  '${Uri.decodeFull(source.toString())}/patches/$i',
+                ),
+              ).timeout(Duration(seconds: 10));
+          diffPatches.add(Patch.fromJson(json.decode(patchResult.body)));
+        }
 
-    //Assign to local database so even when it fails to load, we still have
-    //the latest disk database
-    database = diskDatabase;
-    Uri diffPath = Uri.parse(
-      '${Uri.decodeFull(dataSourceUri.toString())}/patchDiff',
-    );
-    final diffResult = await apiClient
-        .get(
-          diffPath,
-          headers: {"head": diskDatabase.patches.length.toString()},
-        )
-        .timeout(Duration(seconds: 15));
+        for (final patch in diffPatches) {
+          // Add new patches to the database
+          database.addPatch(patch);
+        }
 
-    List<Patch> diffPatches =
-        (json.decode(diffResult.body) as List<dynamic>)
-            .map((e) => Patch.fromJson(e as Map))
-            .toList();
-
-    if (diffPatches.isNotEmpty) {
-      // update local with new patches ONLY if it is not empty
-      // since instantiating a SnoutDB is SLOW
-      database = SnoutDB(patches: [...diskDatabase.patches, ...diffPatches]);
-      await storeText(
-        storageKey,
-        json.encode(database.patches.map((e) => e.toJson()).toList()),
-      );
-    }
+        // Save new database!
+        await storeText(
+          storageKey,
+          json.encode(database.patches.map((e) => e.toJson()).toList()),
+        );
+      }
+    });
 
     notifyListeners();
   }
@@ -267,7 +278,7 @@ class DataProvider extends ChangeNotifier {
         //Since the db is syncronized before creating this object
         //we can assume that connection exists for the first reconnect
         //thus connected = true by default
-        _getDatabaseFromServer();
+        _getDatabaseFromServer(dataSourceUri);
       }
       connected = true;
       notifyListeners();
@@ -275,6 +286,14 @@ class DataProvider extends ChangeNotifier {
 
     _subscription = _channel!.stream.listen(
       (event) async {
+        if(event == "PING") {
+          _channel?.sink.add("PONG");
+          return;
+        }
+        if(event == "PONG") {
+          // Ignore pong
+          return;
+        }
         // ignore: avoid_print
         print("new socket message: $event");
 
@@ -282,40 +301,9 @@ class DataProvider extends ChangeNotifier {
           final decoded = json.decode(event);
 
           switch (decoded['type'] as String?) {
-            case SocketMessageType.scoutStatus:
-              final list = decoded['value'] as List;
-
-              scoutStatus.clear();
-              for (final item in list) {
-                scoutStatus.add((
-                  identity: item['identity'],
-                  status: item['status'],
-                  time: DateTime.parse(item['time']),
-                ));
-              }
-
-              break;
-            case SocketMessageType.newPatch:
-
-              //apply patch to local state BUT do not save it to
-              //disk because it is AMBIGUOUS what the local state is
-              // This is due to time of arrival and whatnot...
-              final patch = Patch.fromJson(decoded['patch']);
-
-              //TODO do not send patches over the websocket connection, this is potentially SLOW
-              // instead just send a small bit of text signifying that a patch has been uploaded, and then
-              // use the standard routine to get the data.
-
-              //Do not add a patch that exists already
-              //TODO make the server not send the patch back to the client that sent it, duh
-              if (database.patches.any(
-                    (item) =>
-                        json.encode(item.toJson()) ==
-                        json.encode(patch.toJson()),
-                  ) ==
-                  false) {
-                database.addPatch(patch);
-              }
+            case SocketMessageType.newPatchId:
+              // There is a new patch, we don't care about actual head value, we will just call the normal loading routine
+              _getDatabaseFromServer(dataSourceUri);
               break;
             default:
               Logger.root.warning(

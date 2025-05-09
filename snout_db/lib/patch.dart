@@ -64,10 +64,13 @@ class Patch {
   @override
   String toString() => toJson().toString();
 
-
   factory Patch.teams(DateTime time, List<int> teams) {
     return Patch(
-        identity: '', time: time, path: buildPath(['teams']), value: teams);
+      identity: '',
+      time: time,
+      path: buildPath(['teams']),
+      value: teams,
+    );
   }
 
   factory Patch.schedule(DateTime time, List<MatchScheduleItem> matches) {
@@ -75,7 +78,9 @@ class Patch {
       identity: '',
       time: time,
       path: buildPath(['schedule']),
-      value: Map.fromEntries(matches.map((value) => MapEntry(value.id, value.toJson()))),
+      value: Map.fromEntries(
+        matches.map((value) => MapEntry(value.id, value.toJson())),
+      ),
     );
   }
 
@@ -85,6 +90,15 @@ class Patch {
       time: time,
       path: buildPath(['schedule', match.id]),
       value: match.toJson(),
+    );
+  }
+
+   factory Patch.teamData(DateTime time, int team, String key, dynamic value) {
+    return Patch(
+      identity: '',
+      time: time,
+      path: buildPath(['pitscouting', team.toString(), key]),
+      value: value,
     );
   }
 }

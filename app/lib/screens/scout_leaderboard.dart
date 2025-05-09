@@ -6,9 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:snout_db/patch.dart';
 
-//TODO improve this page to make it less jank
-class ScoutLeaderboardPage extends StatelessWidget {
-  const ScoutLeaderboardPage({super.key});
+class ScoutLeaderboard extends StatelessWidget {
+  const ScoutLeaderboard({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -57,9 +56,7 @@ class ScoutLeaderboardPage extends StatelessWidget {
 
     const height = 400.0;
 
-    return Scaffold(
-      appBar: AppBar(title: const Text("Leaderboard")),
-      body: ListView(
+    return Column(
         children: [
           const Text(
             "This is just for fun! Each normal edit is worth 1 point (pit scouting is worth 1 point per field). A edits that match 'r'\\/matches\\/.+\\/robot\\/'' are worth 5 points because Robot recordings take longer.",
@@ -120,7 +117,6 @@ class ScoutLeaderboardPage extends StatelessWidget {
             title: const Text("Edits"),
           ),
         ],
-      ),
-    );
+      );
   }
 }

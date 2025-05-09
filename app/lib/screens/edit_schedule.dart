@@ -99,7 +99,7 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
                   red: const [],
                 );
 
-                await editMatch(match, snoutData, null);
+                await editMatch(match, snoutData);
               },
               child: const Text('Add Match'),
             ),
@@ -108,7 +108,7 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
             ListTile(
               title: Text(match.value.label),
               subtitle: Text(match.key),
-              onTap: () => editMatch(match.value, snoutData, match.key),
+              onTap: () => editMatch(match.value, snoutData),
               trailing: IconButton(
                 icon: const Icon(Icons.delete),
                 onPressed: () async {
@@ -154,12 +154,7 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
     );
   }
 
-  Future editMatch(
-    MatchScheduleItem match,
-    DataProvider data,
-    String? matchID,
-  ) async {
-    final identity = context.read<IdentityProvider>().identity;
+  Future editMatch(MatchScheduleItem match, DataProvider data) async {
     String? result = await Navigator.of(context).push(
       MaterialPageRoute(
         builder:
@@ -172,12 +167,8 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
       MatchScheduleItem resultMatch = MatchScheduleItem.fromJson(
         json.decode(result),
       );
-      Patch patch = Patch(
-        identity: identity,
-        time: DateTime.now(),
-        path: Patch.buildPath(['schedule', matchID ?? resultMatch.label]),
-        value: resultMatch.toJson(),
-      );
+
+      Patch patch = Patch.scheduleItem(DateTime.now(), resultMatch);
       if (mounted && context.mounted) {
         await submitData(context, patch);
       }

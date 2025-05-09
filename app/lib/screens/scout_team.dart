@@ -1,10 +1,8 @@
 import 'package:app/data_submit_login.dart';
-import 'package:app/providers/identity_provider.dart';
 import 'package:app/widgets/confirm_exit_dialog.dart';
 import 'package:app/widgets/dynamic_property_editor.dart';
 import 'package:app/widgets/load_status_or_error_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:snout_db/config/surveyitem.dart';
 import 'package:snout_db/event/dynamic_property.dart';
 import 'package:snout_db/patch.dart';
@@ -54,8 +52,6 @@ class _PitScoutTeamPageState extends State<PitScoutTeamPage> {
                   return;
                 }
 
-                final identity = context.read<IdentityProvider>().identity;
-
                 //New map instance to avoid messing up the UI
                 final onlyChanges =
                     Map.of(_surveyItems).entries
@@ -64,22 +60,21 @@ class _PitScoutTeamPageState extends State<PitScoutTeamPage> {
                               widget.initialData?[entry.key] != entry.value,
                         )
                         .toList();
-                for (final item in onlyChanges) {
-                  Patch patch = Patch(
-                    identity: identity,
-                    time: DateTime.now(),
-                    path: Patch.buildPath([
-                      'pitscouting',
-                      widget.team.toString(),
-                      item.key,
-                    ]),
-                    value: item.value,
-                  );
-                  //Save the scouting results to the server!!
-                  await submitData(context, patch);
-                  if(context.mounted) {
-                    Navigator.pop(context);
-                  }
+                await submitMultiplePatches(
+                  context,
+                  onlyChanges
+                      .map(
+                        (e) => Patch.teamData(
+                          DateTime.now(),
+                          widget.team,
+                          e.key,
+                          e.value,
+                        ),
+                      )
+                      .toList(),
+                );
+                if (context.mounted) {
+                  Navigator.pop(context);
                 }
               },
               icon: const Icon(Icons.save),

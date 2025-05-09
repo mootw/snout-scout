@@ -138,12 +138,7 @@ Future<List<Patch>> loadScheduleFromTBA(
         red: red,
       );
 
-      Patch patch = Patch(
-        identity: 'schedule autofill',
-        time: DateTime.now(),
-        path: Patch.buildPath(['schedule', key]),
-        value: newMatch.toJson(),
-      );
+      Patch patch = Patch.scheduleItem(DateTime.now(), newMatch);
 
       patches.add(patch);
     }

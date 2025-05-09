@@ -41,26 +41,6 @@ final eventsDirectory = Directory('events');
 class EventData {
   EventData(this.file);
 
-  List<({String identity, String status, DateTime time})> scoutStatus = [];
-
-  void sendScoutStatusToListeners() {
-    for (final listener in listeners) {
-      listener.sink.add(
-        json.encode({
-          "type": SocketMessageType.scoutStatus,
-          "value": [
-            for (final status in scoutStatus)
-              {
-                "identity": status.identity,
-                "status": status.status,
-                "time": status.time.toIso8601String(),
-              },
-          ],
-        }),
-      );
-    }
-  }
-
   File file;
   List<WebSocketChannel> listeners = [];
 }
@@ -92,6 +72,18 @@ void main(List<String> args) async {
 
   await loadEvents();
 
+  Timer.periodic(const Duration(seconds: 25), (_) {
+    for (final event in loadedEvents.entries) {
+      for (final listener in event.value.listeners) {
+        try {
+          listener.sink.add("PING");
+        } catch (e) {
+          // logger.info("failed to ping");
+        }
+      }
+    }
+  });
+
   app.get("/listen/<event>", (Request request, String event) {
     event = Uri.decodeComponent(event);
     final handler = webSocketHandler(
@@ -100,36 +92,26 @@ void main(List<String> args) async {
         webSocket.sink.done
             .then((value) => loadedEvents[event]?.listeners.remove(webSocket));
         loadedEvents[event]?.listeners.add(webSocket);
-        loadedEvents[event]?.sendScoutStatusToListeners();
 
         webSocket.stream.listen((message) {
+          if(message == "PING") {
+            webSocket.sink.add("PONG");
+            return;
+          }
+          if(message == "PONG") {
+            // Ignore pong
+            return;
+          }
+
           try {
             final decoded =
                 json.decode(message as String) as Map<String, dynamic>;
             logger.fine("got socket message");
 
             switch (decoded['type'] as String) {
-              case SocketMessageType.scoutStatusUpdate:
-                //remove old status
-                loadedEvents[event]?.scoutStatus.removeWhere(
-                      (element) => element.identity == decoded['identity'],
-                    );
-                loadedEvents[event]?.scoutStatus.removeWhere(
-                      (element) =>
-                          DateTime.now().difference(element.time).inMinutes > 9,
-                    );
-                loadedEvents[event]?.scoutStatus.add(
-                  (
-                    identity: decoded['identity'],
-                    status: decoded['value'],
-                    time: DateTime.now().toUtc()
-                  ),
-                );
-                loadedEvents[event]
-                    ?.scoutStatus
-                    .sort((a, b) => a.identity.compareTo(b.identity));
-
-                loadedEvents[event]?.sendScoutStatusToListeners();
+              case SocketMessageType.ping:
+                webSocket.sink
+                    .add(jsonEncode({"type": "pong", "value": "pong"}));
             }
           } catch (e, s) {
             logger.severe("failed to handle socket message", e, s);
@@ -252,9 +234,9 @@ void main(List<String> args) async {
     );
   });
 
-  app.get("/events/<eventID>/patchDiff",
-      (Request request, String eventID) async {
+  app.get("/events/<eventID>/head", (Request request, String eventID) async {
     eventID = Uri.decodeComponent(eventID);
+
     final File? f = loadedEvents[eventID]?.file;
     if (f == null || await f.exists() == false) {
       return Response.notFound("Event not found");
@@ -263,20 +245,8 @@ void main(List<String> args) async {
       json.decode(await f.readAsString()) as Map<String, dynamic>,
     );
 
-    final clientHead = request.headers["head"];
-    if (clientHead == null) {
-      return Response(406, body: "send head");
-    }
-    final int clientHeadInt = int.parse(clientHead);
-
-    if (clientHeadInt < 1) {
-      return Response(406, body: 'head cannot be less than 1');
-    }
-
-    final range = event.patches.getRange(clientHeadInt, event.patches.length);
-
     return Response.ok(
-      json.encode(range.toList()),
+      jsonEncode(event.patches.length),
       headers: {
         'Content-Type':
             ContentType('application', 'json', charset: 'utf-8').toString(),
@@ -339,8 +309,8 @@ void main(List<String> args) async {
               in loadedEvents[eventID]?.listeners ?? []) {
             listener.sink.add(
               json.encode({
-                "type": SocketMessageType.newPatch,
-                "patch": patch.toJson(),
+                "type": SocketMessageType.newPatchId,
+                "patch": event.patches.length - 1,
               }),
             );
           }
