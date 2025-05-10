@@ -207,6 +207,12 @@ class DataProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future lifecycleListener () async {
+    if(isDataSourceUriRemote) {
+      await _getDatabaseFromServer(dataSourceUri);
+    }
+  }
+
   //Writes a patch to local disk and submits it to the server.
   Future _postPatchToServer(Patch patch) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
