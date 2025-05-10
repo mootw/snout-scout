@@ -39,7 +39,8 @@ class SnoutImageCache {
         BrowserDetection.instance.browserEngine == BrowserEngine.webkit) {
       // Detect if Image is avif and use the compatibility decoder which is likely slower
       // than the platform decoder.
-      if (bytes.length > 16 && isAvifFile(bytes.sublist(0, 16)) == AvifFileType.avif) {
+      if (bytes.length > 16 &&
+          isAvifFile(bytes.sublist(0, 16)) == AvifFileType.avif) {
         return MemoryAvifImage(bytes);
       } else {
         return MemoryImage(bytes);

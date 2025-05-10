@@ -40,7 +40,8 @@ Future submitMultiplePatches(BuildContext context, List<Patch> patches) async {
   }
 }
 
-Future submitData(BuildContext context, Patch patch) async => submitMultiplePatches(context, [patch]);
+Future submitData(BuildContext context, Patch patch) async =>
+    submitMultiplePatches(context, [patch]);
 
 class HoldScreen extends StatelessWidget {
   const HoldScreen({super.key});

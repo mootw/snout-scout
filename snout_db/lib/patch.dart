@@ -93,7 +93,7 @@ class Patch {
     );
   }
 
-   factory Patch.teamData(DateTime time, int team, String key, dynamic value) {
+  factory Patch.teamData(DateTime time, int team, String key, dynamic value) {
     return Patch(
       identity: '',
       time: time,

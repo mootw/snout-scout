@@ -116,8 +116,11 @@ class _MatchPageState extends State<MatchPage> {
         children: [
           Row(
             children: [
-              if(match?.results == null)
-                TextButton(onPressed: () =>  editResults(matchSchedule, match, snoutData), child: Text("Add Results")),
+              if (match?.results == null)
+                TextButton(
+                  onPressed: () => editResults(matchSchedule, match, snoutData),
+                  child: Text("Add Results"),
+                ),
               if (match?.results != null)
                 Flexible(
                   child: Column(
@@ -144,7 +147,8 @@ class _MatchPageState extends State<MatchPage> {
                       ),
                       TextButton(
                         child: const Text("Edit Results"),
-                        onPressed: () => editResults(matchSchedule, match, snoutData),
+                        onPressed:
+                            () => editResults(matchSchedule, match, snoutData),
                       ),
                     ],
                   ),
@@ -386,40 +390,44 @@ class _MatchPageState extends State<MatchPage> {
     );
   }
 
-  Future editResults (MatchScheduleItem? matchSchedule, MatchData? match, DataProvider snoutData) async {
-                          final identiy =
-                              context.read<IdentityProvider>().identity;
-                          final result =
-                              await navigateWithEditLock<MatchResultValues>(
-                                context,
-                                "match:${matchSchedule?.label}:results",
-                                (context) => Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder:
-                                        (context) => EditMatchResults(
-                                          results: match?.results ?? MatchResultValues(time: DateTime.now(), redScore: 0, blueScore: 0),
-                                          config: snoutData.event.config,
-                                          matchID: widget.matchid,
-                                        ),
-                                  ),
-                                ),
-                              );
+  Future editResults(
+    MatchScheduleItem? matchSchedule,
+    MatchData? match,
+    DataProvider snoutData,
+  ) async {
+    final identiy = context.read<IdentityProvider>().identity;
+    final result = await navigateWithEditLock<MatchResultValues>(
+      context,
+      "match:${matchSchedule?.label}:results",
+      (context) => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder:
+              (context) => EditMatchResults(
+                results:
+                    match?.results ??
+                    MatchResultValues(
+                      time: DateTime.now(),
+                      redScore: 0,
+                      blueScore: 0,
+                    ),
+                config: snoutData.event.config,
+                matchID: widget.matchid,
+              ),
+        ),
+      ),
+    );
 
-                          if (result != null) {
-                            Patch patch = Patch(
-                              identity: identiy,
-                              time: DateTime.now(),
-                              path: Patch.buildPath([
-                                'matches',
-                                widget.matchid,
-                                'results',
-                              ]),
-                              value: result.toJson(),
-                            );
-                            if(mounted && context.mounted) {
-                              await submitData(context, patch);
-                            }
-                          }
-                        }
+    if (result != null) {
+      Patch patch = Patch(
+        identity: identiy,
+        time: DateTime.now(),
+        path: Patch.buildPath(['matches', widget.matchid, 'results']),
+        value: result.toJson(),
+      );
+      if (mounted && context.mounted) {
+        await submitData(context, patch);
+      }
+    }
+  }
 }

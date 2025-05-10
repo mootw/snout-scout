@@ -94,11 +94,11 @@ void main(List<String> args) async {
         loadedEvents[event]?.listeners.add(webSocket);
 
         webSocket.stream.listen((message) {
-          if(message == "PING") {
+          if (message == "PING") {
             webSocket.sink.add("PONG");
             return;
           }
-          if(message == "PONG") {
+          if (message == "PONG") {
             // Ignore pong
             return;
           }
