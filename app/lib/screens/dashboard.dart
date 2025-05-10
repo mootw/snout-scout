@@ -94,6 +94,15 @@ class _DashboardPageState extends State<DashboardPage> {
       (entry) => entry.value < snoutData.event.config.pitscouting.length * 0.5,
     );
 
+    final teamsNeedingHelp = snoutData.event.teams
+        .map(
+          (team) => MapEntry(
+            team,
+            snoutData.event.pitscouting[team.toString()]?['needs_help'],
+          ),
+        )
+        .where((scouting) => scouting.value == true);
+
     return ListView(
       children: [
         // Upcoming match
@@ -136,32 +145,24 @@ class _DashboardPageState extends State<DashboardPage> {
         const SizedBox(height: 16),
 
         Text(
-          "Teams marked as needing help",
+          "Teams marked as needs_help",
           style: Theme.of(context).textTheme.titleLarge,
         ),
-
-        Divider(),
-
-        Text(
-          "Teams in our upcoming matches",
-          style: Theme.of(context).textTheme.titleLarge,
-        ),
-        if (teamsInUpcomingMatches.isEmpty) Text("No teams"),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: Row(
             spacing: 8,
             children: [
-              for (final team in teamsInUpcomingMatches)
-                TeamListTile(teamNumber: team),
+              for (final team in teamsNeedingHelp)
+                TeamListTile(teamNumber: team.key),
             ],
           ),
         ),
 
-        const SizedBox(height: 16),
+        Divider(),
 
         Text(
-          "Team with insufficient pit scouting information (${teamsWithInsufficientPitData.length}/${snoutData.event.teams.length})",
+          "Teams with insufficient pit scouting information (${teamsWithInsufficientPitData.length}/${snoutData.event.teams.length})",
           style: Theme.of(context).textTheme.titleLarge,
         ),
         if (teamsWithInsufficientPitData.isEmpty)
@@ -199,10 +200,32 @@ class _DashboardPageState extends State<DashboardPage> {
         Divider(),
 
         Text(
+          "Teams in our upcoming matches",
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
+        if (teamsInUpcomingMatches.isEmpty) Text("No teams"),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            spacing: 8,
+            children: [
+              for (final team in teamsInUpcomingMatches)
+                TeamListTile(teamNumber: team),
+            ],
+          ),
+        ),
+
+        const SizedBox(height: 16),
+
+        Divider(),
+
+        Text(
           "Recent Scout Activities",
           style: Theme.of(context).textTheme.titleLarge,
         ),
         const ScoutStatus(),
+
+        const SizedBox(height: 16),
 
         Text("Leaderboard", style: Theme.of(context).textTheme.titleLarge),
         ScoutLeaderboard(),
