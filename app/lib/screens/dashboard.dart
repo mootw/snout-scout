@@ -20,22 +20,24 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> {
-
   late Timer _updateTimer;
 
-  @override void initState() {
-    _updateTimer = Timer.periodic(Duration(seconds: 5), (_) => setState(() {
-      // TODO actually make the home page update nicely on its own. This is mostly for any counters and timers.
-    }));
+  @override
+  void initState() {
+    _updateTimer = Timer.periodic(
+      Duration(seconds: 5),
+      (_) => setState(() {
+        // TODO actually make the home page update nicely on its own. This is mostly for any counters and timers.
+      }),
+    );
     super.initState();
   }
 
   @override
-  void dispose () {
+  void dispose() {
     _updateTimer.cancel();
     super.dispose();
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -78,8 +80,13 @@ class _DashboardPageState extends State<DashboardPage> {
                   0.5,
         );
 
-    final numberOfPitScoutingItemsByTeam = snoutData.event.pitscouting.entries
-        .map((e) => MapEntry(e.key, e.value.length))
+    final numberOfPitScoutingItemsByTeam = snoutData.event.teams
+        .map(
+          (team) => MapEntry(
+            team,
+            snoutData.event.pitscouting[team.toString()]?.length ?? 0,
+          ),
+        )
         // Lowest to highest
         .sorted((a, b) => a.value.compareTo(b.value));
 
@@ -92,8 +99,12 @@ class _DashboardPageState extends State<DashboardPage> {
         // Upcoming match
         Text(
           "Schedule Delay: ${scheduleDelay == null ? "unknown" : offsetDurationInMins(scheduleDelay)}",
+          style: Theme.of(context).textTheme.titleLarge,
         ),
-        Text("Next Match"),
+
+        const SizedBox(height: 16),
+
+        Text("Next Match", style: Theme.of(context).textTheme.titleLarge),
         if (nextMatch != null)
           MatchCard(
             match: nextMatch.getData(snoutData.event),
@@ -101,7 +112,9 @@ class _DashboardPageState extends State<DashboardPage> {
             focusTeam: snoutData.event.config.team,
           ),
 
-        Text("Our Next Match"),
+        const SizedBox(height: 16),
+
+        Text("Our Next Match", style: Theme.of(context).textTheme.titleLarge),
         if (teamNextMatch != null)
           MatchCard(
             match: teamNextMatch.getData(snoutData.event),
@@ -120,13 +133,19 @@ class _DashboardPageState extends State<DashboardPage> {
             ],
           ),
 
-        Text("Teams marked as needing help"),
+        const SizedBox(height: 16),
+
+        Text(
+          "Teams marked as needing help",
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
 
         Divider(),
 
-        Text("Teams To Scout"),
-
-        Text("Teams in our upcoming matches"),
+        Text(
+          "Teams in our upcoming matches",
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
         if (teamsInUpcomingMatches.isEmpty) Text("No teams"),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
@@ -139,8 +158,11 @@ class _DashboardPageState extends State<DashboardPage> {
           ),
         ),
 
+        const SizedBox(height: 16),
+
         Text(
           "Team with insufficient pit scouting information (${teamsWithInsufficientPitData.length}/${snoutData.event.teams.length})",
+          style: Theme.of(context).textTheme.titleLarge,
         ),
         if (teamsWithInsufficientPitData.isEmpty)
           Text("All teams are sufficient :)"),
@@ -150,13 +172,16 @@ class _DashboardPageState extends State<DashboardPage> {
             spacing: 8,
             children: [
               for (final team in teamsWithInsufficientPitData)
-                TeamListTile(teamNumber: int.tryParse(team.key) ?? 0),
+                TeamListTile(teamNumber: team.key),
             ],
           ),
         ),
 
+        const SizedBox(height: 16),
+
         Text(
           "Teams with insufficient match recordings (${teamsWithInsufficientMatchRecordings.length}/${snoutData.event.teams.length})",
+          style: Theme.of(context).textTheme.titleLarge,
         ),
         if (teamsWithInsufficientMatchRecordings.isEmpty)
           Text("All teams are sufficient :)"),
@@ -173,10 +198,13 @@ class _DashboardPageState extends State<DashboardPage> {
 
         Divider(),
 
-        Text("Recent Scout Activities"),
+        Text(
+          "Recent Scout Activities",
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
         const ScoutStatus(),
 
-        Text("Leaderboard"),
+        Text("Leaderboard", style: Theme.of(context).textTheme.titleLarge),
         ScoutLeaderboard(),
 
         const SizedBox(height: 16),

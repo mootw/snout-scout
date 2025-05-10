@@ -183,11 +183,8 @@ class DataProvider extends ChangeNotifier {
         // There are new patches, download them.
         for (int i = headLocal; i < headOrigin; i++) {
           final patchResult = await apiClient
-              .get(
-                Uri.parse(
-                  '${Uri.decodeFull(source.toString())}/patches/$i',
-                ),
-              ).timeout(Duration(seconds: 10));
+              .get(Uri.parse('${Uri.decodeFull(source.toString())}/patches/$i'))
+              .timeout(Duration(seconds: 10));
           diffPatches.add(Patch.fromJson(json.decode(patchResult.body)));
         }
 
@@ -286,11 +283,11 @@ class DataProvider extends ChangeNotifier {
 
     _subscription = _channel!.stream.listen(
       (event) async {
-        if(event == "PING") {
+        if (event == "PING") {
           _channel?.sink.add("PONG");
           return;
         }
-        if(event == "PONG") {
+        if (event == "PONG") {
           // Ignore pong
           return;
         }

@@ -157,7 +157,6 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
 
   @override
   Widget build(BuildContext context) {
-
     final isHorizontal = isWideScreen(context);
 
     if (_showSurvey || _mode == MatchMode.finished) {

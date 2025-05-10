@@ -52,10 +52,7 @@ class _AnalysisPageState extends State<AnalysisPage> {
           onTap: () {
             Navigator.push(
               context,
-              MaterialPageRoute(
-                builder:
-                    (builder) => const TableTeamSurvey(),
-              ),
+              MaterialPageRoute(builder: (builder) => const TableTeamSurvey()),
             );
           },
         ),

@@ -246,10 +246,10 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
               },
               destinations: const [
                 NavigationRailDestination(
-                    selectedIcon: Icon(Icons.dashboard),
-                    icon: Icon(Icons.dashboard_outlined),
-                    label: Text('Dashboard'),
-                  ),
+                  selectedIcon: Icon(Icons.dashboard),
+                  icon: Icon(Icons.dashboard_outlined),
+                  label: Text('Dashboard'),
+                ),
                 NavigationRailDestination(
                   selectedIcon: Icon(Icons.calendar_today),
                   icon: Icon(Icons.calendar_today_outlined),

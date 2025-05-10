@@ -20,17 +20,14 @@ class ScoutLeaderboard extends StatelessWidget {
 
     final Set<String> unique = {};
     final List<Patch> deDuplicated = [];
-    for(final patch in data) {
-      if(unique.contains(patch.path) == false) {
+    for (final patch in data) {
+      if (unique.contains(patch.path) == false) {
         deDuplicated.add(patch);
       }
       unique.add(patch.path);
     }
 
-
     for (final patch in deDuplicated) {
-
-
       if (scores[patch.identity] == null) {
         scores[patch.identity] = 0;
         edits[patch.identity] = 0;
@@ -57,66 +54,66 @@ class ScoutLeaderboard extends StatelessWidget {
     const height = 400.0;
 
     return Column(
-        children: [
-          const Text(
-            "This is just for fun! Each normal edit is worth 1 point (pit scouting is worth 1 point per field). A edits that match 'r'\\/matches\\/.+\\/robot\\/'' are worth 5 points because Robot recordings take longer.",
-          ),
-          const SizedBox(height: 32),
-          SizedBox(
-            height: height + 40,
-            child: ScrollConfiguration(
-              behavior: MouseInteractableScrollBehavior(),
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                children: [
-                  const SizedBox(width: 24),
-                  for (final (idx, item) in sorted.indexed) ...[
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Text('${idx + 1}. ${item.identity}'),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Column(
-                              children: [
-                                Container(
-                                  color: Colors.red,
-                                  width: 36,
-                                  height: item.score / highScore * height,
-                                ),
-                                Text(item.score.toString()),
-                              ],
-                            ),
-                            Column(
-                              children: [
-                                Container(
-                                  width: 36,
-                                  color: Colors.blue,
-                                  height: item.edits / highScore * height,
-                                ),
-                                Text(item.edits.toString()),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    const VerticalDivider(width: 4),
-                  ],
+      children: [
+        const Text(
+          "This is just for fun! Each normal edit is worth 1 point (pit scouting is worth 1 point per field). A edits that match 'r'\\/matches\\/.+\\/robot\\/'' are worth 5 points because Robot recordings take longer.",
+        ),
+        const SizedBox(height: 32),
+        SizedBox(
+          height: height + 40,
+          child: ScrollConfiguration(
+            behavior: MouseInteractableScrollBehavior(),
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              children: [
+                const SizedBox(width: 24),
+                for (final (idx, item) in sorted.indexed) ...[
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Text('${idx + 1}. ${item.identity}'),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Column(
+                            children: [
+                              Container(
+                                color: Colors.red,
+                                width: 36,
+                                height: item.score / highScore * height,
+                              ),
+                              Text(item.score.toString()),
+                            ],
+                          ),
+                          Column(
+                            children: [
+                              Container(
+                                width: 36,
+                                color: Colors.blue,
+                                height: item.edits / highScore * height,
+                              ),
+                              Text(item.edits.toString()),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const VerticalDivider(width: 4),
                 ],
-              ),
+              ],
             ),
           ),
-          ListTile(
-            leading: Container(height: 32, width: 32, color: Colors.red),
-            title: const Text("Score"),
-          ),
-          ListTile(
-            leading: Container(height: 32, width: 32, color: Colors.blue),
-            title: const Text("Edits"),
-          ),
-        ],
-      );
+        ),
+        ListTile(
+          leading: Container(height: 32, width: 32, color: Colors.red),
+          title: const Text("Score"),
+        ),
+        ListTile(
+          leading: Container(height: 32, width: 32, color: Colors.blue),
+          title: const Text("Edits"),
+        ),
+      ],
+    );
   }
 }

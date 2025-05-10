@@ -20,7 +20,8 @@ class ScoutAuthorizationDialog extends StatefulWidget {
   final bool allowBackButton;
 
   @override
-  State<ScoutAuthorizationDialog> createState() => _ScoutAuthorizationDialogState();
+  State<ScoutAuthorizationDialog> createState() =>
+      _ScoutAuthorizationDialogState();
 }
 
 class _ScoutAuthorizationDialogState extends State<ScoutAuthorizationDialog> {
@@ -98,7 +99,7 @@ class _ScoutAuthorizationDialogState extends State<ScoutAuthorizationDialog> {
                           context: context,
                           builder: (context) => const ScoutRegistrationScreen(),
                         );
-                
+
                         if (dialogResult != null) {
                           _popWithScout(dialogResult);
                         }
@@ -281,10 +282,12 @@ class _ScoutRegistrationScreenState extends State<ScoutRegistrationScreen> {
                                     value: password.encoded(),
                                   );
 
-                                  if(context.mounted) {
+                                  if (context.mounted) {
                                     // TODO this is bugged when creating a new event. It will register with whatever db is open, not the new database
                                     // Scout does not need auth from another scout to register
-                                    await context.read<DataProvider>().newTransaction(patch);
+                                    await context
+                                        .read<DataProvider>()
+                                        .newTransaction(patch);
                                   }
 
                                   setState(() {

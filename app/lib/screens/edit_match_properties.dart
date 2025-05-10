@@ -76,7 +76,7 @@ class _EditMatchPropertiesPageState extends State<EditMatchPropertiesPage> {
                     value: item.value,
                   );
                   //Save the scouting results to the server!!
-                  if(context.mounted) {
+                  if (context.mounted) {
                     await submitData(context, patch);
                   }
                 }

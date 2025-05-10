@@ -137,7 +137,8 @@ class _MatchRecorderAssistantPageState
         children: [
           Expanded(
             child: ListView(
-              scrollDirection: isWideScreen(context) ? Axis.horizontal : Axis.vertical,
+              scrollDirection:
+                  isWideScreen(context) ? Axis.horizontal : Axis.vertical,
               children: [
                 for (final team in match.blue)
                   _getTeamTile(
