@@ -32,6 +32,15 @@ Either compile or use a pre-compiled binary for the server.
 
 The directory should contain an events folder which will contain the json database files.
 
+# Reverse SSL Proxies
+
+## Example Caddy config
+
+```
+yourdomain.com
+
+reverse_proxy localhost:6749
+```
 
 ## Example nginx config
 
