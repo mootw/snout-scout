@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:app/config_editor/config_editor.dart';
 import 'package:app/data_submit_login.dart';
 import 'package:app/kiosk/kiosk.dart';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/providers/local_config_provider.dart';
 import 'package:app/screens/dashboard.dart';
-import 'package:app/screens/edit_markdown.dart';
 import 'package:app/screens/scout_authenticator_dialog.dart';
 import 'package:app/style.dart';
 import 'package:app/providers/identity_provider.dart';
@@ -301,7 +301,7 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
                   ),
                   const TeamGridList(showEditButton: true),
                   const AnalysisPage(),
-                  const DocumentationScreen()
+                  const DocumentationScreen(),
                 ][_currentPageIndex],
           ),
         ],
@@ -356,25 +356,43 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
             const Divider(),
             ListTile(
               title: const Text("Event Config"),
-              subtitle: Text(data.event.config.name),
               leading: const Icon(Icons.edit),
               onTap: () async {
                 final identity = context.read<IdentityProvider>().identity;
 
                 final config = context.read<DataProvider>().event.config;
 
-                final removeImage = EventConfig(
-                  name: config.name,
-                  team: config.team,
-                  fieldImage:
-                      'Removed from editor for performance reasons. edit via the docs page.',
-                  docs: config.docs,
-                  fieldStyle: config.fieldStyle,
-                  matchscouting: config.matchscouting,
-                  pitscouting: config.pitscouting,
-                  tbaEventId: config.tbaEventId,
-                  tbaSecretKey: config.tbaSecretKey,
+                final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder:
+                        (context) => ConfigEditorPage(initialState: config),
+                  ),
                 );
+
+                if (result != null) {
+                  final modAsConfig = EventConfig.fromJson(jsonDecode(result));
+
+                  Patch patch = Patch(
+                    identity: identity,
+                    time: DateTime.now(),
+                    path: Patch.buildPath(['config']),
+                    value: modAsConfig.toJson(),
+                  );
+                  //Save the scouting results to the server!!
+                  if (context.mounted) {
+                    await submitData(context, patch);
+                  }
+                }
+              },
+            ),
+            ListTile(
+              title: const Text("Event Config (JSON)"),
+              leading: const Icon(Icons.data_object),
+              onTap: () async {
+                final identity = context.read<IdentityProvider>().identity;
+
+                final config = context.read<DataProvider>().event.config;
 
                 final result = await Navigator.push(
                   context,
@@ -382,127 +400,24 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
                     builder:
                         (context) => JSONEditor(
                           validate: EventConfig.fromJson,
-                          source: removeImage,
+                          source: config,
                         ),
                   ),
                 );
 
                 if (result != null) {
                   final modAsConfig = EventConfig.fromJson(jsonDecode(result));
-                  final reAppendedConfig = EventConfig(
-                    name: modAsConfig.name,
-                    team: modAsConfig.team,
-                    fieldImage: config.fieldImage,
-                    docs: modAsConfig.docs,
-                    fieldStyle: modAsConfig.fieldStyle,
-                    matchscouting: modAsConfig.matchscouting,
-                    pitscouting: modAsConfig.pitscouting,
-                    tbaEventId: modAsConfig.tbaEventId,
-                    tbaSecretKey: modAsConfig.tbaSecretKey,
-                  );
 
                   Patch patch = Patch(
                     identity: identity,
                     time: DateTime.now(),
                     path: Patch.buildPath(['config']),
-                    value: reAppendedConfig.toJson(),
+                    value: modAsConfig.toJson(),
                   );
                   //Save the scouting results to the server!!
                   if (context.mounted) {
                     await submitData(context, patch);
                   }
-                }
-              },
-            ),
-            ListTile(
-              title: const Text("Edit Docs"),
-              leading: const Icon(Icons.book),
-              onTap: () async {
-                final identity = context.read<IdentityProvider>().identity;
-                final dataProvider = context.read<DataProvider>();
-                final result = await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder:
-                        (context) => EditMarkdownPage(
-                          source: dataProvider.event.config.docs,
-                        ),
-                  ),
-                );
-                if (result != null) {
-                  Patch patch = Patch(
-                    identity: identity,
-                    time: DateTime.now(),
-                    path: Patch.buildPath(['config', 'docs']),
-                    value: result,
-                  );
-                  //Save the scouting results to the server!!
-                  if (context.mounted) {
-                    await submitData(context, patch);
-                  }
-                }
-              },
-            ),
-            ListTile(
-              title: const Text(
-                "Set Field Image (2:1 ratio, blue alliance left, scoring table bottom)",
-              ),
-              leading: const Icon(Icons.map),
-              onTap: () async {
-                final identity = context.read<IdentityProvider>().identity;
-                String result;
-                try {
-                  final bytes = await pickOrTakeImageDialog(
-                    context,
-                    largeImageSize,
-                  );
-                  if (bytes != null) {
-                    result = base64Encode(bytes);
-                    Patch patch = Patch(
-                      identity: identity,
-                      time: DateTime.now(),
-                      path: Patch.buildPath(['config', 'fieldImage']),
-                      value: result,
-                    );
-                    //Save the scouting results to the server!!
-                    if (context.mounted) {
-                      await submitData(context, patch);
-                    }
-                  }
-                } catch (e, s) {
-                  Logger.root.severe("Error taking image from device", e, s);
-                }
-              },
-            ),
-            ListTile(
-              title: const Text("Set Pit Map Image"),
-              leading: const Icon(Icons.camera_alt),
-              onTap: () async {
-                final identity = context.read<IdentityProvider>().identity;
-
-                String result;
-                try {
-                  // FOR THE PIT MAP ALLOW FOR resolution higher than the standard scouting
-                  // image. This is because the pitmap might contain super small text
-                  final bytes = await pickOrTakeImageDialog(
-                    context,
-                    largeImageSize,
-                  );
-                  if (bytes != null) {
-                    result = base64Encode(bytes);
-                    Patch patch = Patch(
-                      identity: identity,
-                      time: DateTime.now(),
-                      path: Patch.buildPath(['pitmap']),
-                      value: result,
-                    );
-                    //Save the scouting results to the server!!
-                    if (context.mounted) {
-                      await submitData(context, patch);
-                    }
-                  }
-                } catch (e, s) {
-                  Logger.root.severe("Error taking image from device", e, s);
                 }
               },
             ),
