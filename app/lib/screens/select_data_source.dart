@@ -86,7 +86,6 @@ class _SelectDataSourceScreenState extends State<SelectDataSourceScreen> {
                 '${localSnoutDBPath.path}/sample.snoutdb',
               );
               final mockData = generateMockData(seed: 1);
-              print(mockData);
               await writeLocalDiskDatabase(
                 SnoutDB(patches: mockData),
                 sourceUri,
@@ -240,8 +239,8 @@ class _SelectDataSourceScreenState extends State<SelectDataSourceScreen> {
               title: Text(item.$1),
               leading: IconButton(
                 onPressed:
-                    () => Share.share(
-                      'https://snout-scout.web.app/#/${Uri.encodeComponent(item.$1)}',
+                    () => SharePlus.instance.share(
+                      ShareParams(text: 'https://snout-scout.web.app/#/${Uri.encodeComponent(item.$1)}'),
                     ),
                 icon: const Icon(Icons.share),
               ),

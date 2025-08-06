@@ -23,8 +23,11 @@ class _DocumentationScreenState extends State<DocumentationScreen> {
 
     final pitMap = context.watch<DataProvider>().event.pitmap;
 
+    final techDetailStyle = Theme.of(context).textTheme.bodySmall?.copyWith(
+      color: Theme.of(context).textTheme.bodySmall?.color?.withAlpha(200),
+    );
+
     return Scaffold(
-      appBar: AppBar(),
       body: ListView(
         //helps keep the scrollbar consistent at the cost of performance
         cacheExtent: 5000,
@@ -102,29 +105,20 @@ class _DocumentationScreenState extends State<DocumentationScreen> {
             if (_showDetails)
               Padding(
                 padding: const EdgeInsets.only(left: 16),
-                child: Text(
-                  "id: ${item.id}",
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
+                child: Text("id: ${item.id}", style: techDetailStyle),
               ),
             if (_showDetails)
               Padding(
                 padding: const EdgeInsets.only(left: 16),
-                child: Text(
-                  "type: ${item.type}",
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
+                child: Text("type: ${item.type}", style: techDetailStyle),
               ),
             if (_showDetails)
               Padding(
                 padding: const EdgeInsets.only(left: 16),
-                child: Text(
-                  "options: ${item.options}",
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
+                child: Text("options: ${item.options}", style: techDetailStyle),
               ),
             Padding(
-              padding: const EdgeInsets.only(left: 32, top: 4, right: 16),
+              padding: const EdgeInsets.only(left: 32, top: 2, right: 16),
               child: MarkdownText(data: item.docs),
             ),
           ],
@@ -147,18 +141,12 @@ class _DocumentationScreenState extends State<DocumentationScreen> {
             if (_showDetails)
               Padding(
                 padding: const EdgeInsets.only(left: 16),
-                child: Text(
-                  "color: ${item.color}",
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
+                child: Text("color: ${item.color}", style: techDetailStyle),
               ),
             if (_showDetails)
               Padding(
                 padding: const EdgeInsets.only(left: 16),
-                child: Text(
-                  "id: ${item.id}",
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
+                child: Text("id: ${item.id}", style: techDetailStyle),
               ),
             Padding(
               padding: const EdgeInsets.only(left: 32, top: 4, right: 16),
@@ -184,26 +172,17 @@ class _DocumentationScreenState extends State<DocumentationScreen> {
             if (_showDetails)
               Padding(
                 padding: const EdgeInsets.only(left: 16),
-                child: Text(
-                  "id: ${item.id}",
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
+                child: Text("id: ${item.id}", style: techDetailStyle),
               ),
             if (_showDetails)
               Padding(
                 padding: const EdgeInsets.only(left: 16),
-                child: Text(
-                  "type: ${item.type}",
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
+                child: Text("type: ${item.type}", style: techDetailStyle),
               ),
             if (_showDetails)
               Padding(
                 padding: const EdgeInsets.only(left: 16),
-                child: Text(
-                  "options: ${item.options}",
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
+                child: Text("options: ${item.options}", style: techDetailStyle),
               ),
             Padding(
               padding: const EdgeInsets.only(left: 32, top: 4, right: 16),
@@ -229,17 +208,14 @@ class _DocumentationScreenState extends State<DocumentationScreen> {
             if (_showDetails)
               Padding(
                 padding: const EdgeInsets.only(left: 16),
-                child: Text(
-                  "id: ${item.id}",
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
+                child: Text("id: ${item.id}", style: techDetailStyle),
               ),
             if (_showDetails)
               Padding(
                 padding: const EdgeInsets.only(left: 16),
                 child: Text(
                   "expression: ${item.expression}",
-                  style: Theme.of(context).textTheme.bodySmall,
+                  style: techDetailStyle,
                 ),
               ),
             Padding(

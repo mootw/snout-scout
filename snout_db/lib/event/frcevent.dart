@@ -110,7 +110,8 @@ class FRCEvent {
     final matchAfterNext = nextMatch == null
         ? null
         : scheduleSorted.firstWhereOrNull(
-            (match) => match.scheduledTime.isAfter(nextMatch.scheduledTime));
+            (match) => match.scheduledTime.isAfter(nextMatch.scheduledTime),
+          );
 
     if (nextMatch != null &&
         matchAfterNext != null &&

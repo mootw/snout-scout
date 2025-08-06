@@ -183,7 +183,6 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
     // Update the app if
     if (state == AppLifecycleState.resumed) {
       // Update the stuffs yay
-      print("updated");
       context.read<DataProvider>().lifecycleListener();
     }
   }
@@ -276,6 +275,11 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
                   icon: Icon(Icons.analytics_outlined),
                   label: Text('Analysis'),
                 ),
+                NavigationRailDestination(
+                  selectedIcon: Icon(Icons.book),
+                  icon: Icon(Icons.book_outlined),
+                  label: Text('Docs'),
+                ),
               ],
               selectedIndex: _currentPageIndex,
             ),
@@ -297,6 +301,7 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
                   ),
                   const TeamGridList(showEditButton: true),
                   const AnalysisPage(),
+                  const DocumentationScreen()
                 ][_currentPageIndex],
           ),
         ],
@@ -305,6 +310,7 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
         child: ListView(
           children: [
             ListTile(
+              leading: Icon(Icons.dataset),
               title: const Text("Data Source"),
               subtitle: Text(
                 Uri.decodeFull(serverConnection.dataSourceUri.toString()),
@@ -317,17 +323,20 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
                     ),
                   ),
             ),
-            const Divider(),
-            ListTile(
-              title: const Text("Documentation"),
-              trailing: const Icon(Icons.book),
-              onTap:
-                  () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const DocumentationScreen(),
-                    ),
-                  ),
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: FilledButton.tonal(
+                  onPressed: () {
+                    final data = context.read<DataProvider>().database;
+                    final stream = Stream.fromIterable(
+                      utf8.encode(json.encode(data)),
+                    );
+                    download(stream, '${data.event.config.name}.snoutdb');
+                  },
+                  child: const Text("Download DB as File"),
+                ),
+              ),
             ),
             const Divider(),
             ListTile(
@@ -343,21 +352,6 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
                       builder: (context) => const PatchHistoryPage(),
                     ),
                   ),
-            ),
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: FilledButton(
-                  onPressed: () {
-                    final data = context.read<DataProvider>().database;
-                    final stream = Stream.fromIterable(
-                      utf8.encode(json.encode(data)),
-                    );
-                    download(stream, '${data.event.config.name}.snoutdb');
-                  },
-                  child: const Text("Download DB as File"),
-                ),
-              ),
             ),
             const Divider(),
             ListTile(

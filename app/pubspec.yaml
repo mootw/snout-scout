@@ -39,20 +39,20 @@ dependencies:
   intl: ^0.20.2
   shared_preferences: ^2.5.2
   # store more than 10MB that localStorageAllows
-  fs_shim: ^2.3.4
+  fs_shim: ^2.4.0
   http: ^1.4.0
   file_selector: ^1.0.1
   image_picker: ^1.0.5
   photo_view: ^0.15.0
   eval_ex: ^1.1.8
-  share_plus: ^10.1.4
+  share_plus: ^11.0.0
   web_socket_channel: ^3.0.3
   simple_cluster: ^0.3.0
   url_launcher: ^6.2.5
   download: ^1.0.0
   csv: ^6.0.0
   fl_chart: ^0.70.2
-  flutter_markdown: 0.7.6+2 # TODO this package is going to be unsuported
+  flutter_markdown: 0.7.7+1 # TODO this package is unsuported
   # Potential alternate charting package: https://pub.dev/packages/community_charts_flutter
   
   snout_db:
@@ -64,7 +64,7 @@ dependencies:
   string_similarity: ^2.1.1
   flutter_avif: ^3.0.0
   image: ^4.5.2
-  hashlib: ^1.21.2
+  hashlib: ^2.1.0
   data_table_2: ^2.6.0
 
   # The following adds the Cupertino Icons font to your application.
