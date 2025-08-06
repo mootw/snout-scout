@@ -66,7 +66,7 @@ class _TeamViewPageState extends State<TeamViewPage> {
                   context,
                   MaterialPageRoute(
                     builder:
-                        (_) => PitScoutTeamPage(
+                        (_) => EditTeamPage(
                           team: widget.teamNumber,
                           config: data.event.config.pitscouting,
                           initialData:

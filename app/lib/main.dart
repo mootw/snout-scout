@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:app/data_submit_login.dart';
+import 'package:app/kiosk/kiosk.dart';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/providers/local_config_provider.dart';
 import 'package:app/screens/dashboard.dart';
@@ -177,17 +178,15 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
     });
   }
 
-
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     // Update the app if
-    if(state == AppLifecycleState.resumed) {
+    if (state == AppLifecycleState.resumed) {
       // Update the stuffs yay
       print("updated");
       context.read<DataProvider>().lifecycleListener();
     }
   }
-
 
   @override
   void dispose() {
@@ -512,6 +511,11 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
                   Logger.root.severe("Error taking image from device", e, s);
                 }
               },
+            ),
+            ListTile(
+              title: const Text("Kiosk"),
+              trailing: const Icon(Icons.screen_share_outlined),
+              onTap: () => runKiosk(serverConnection.dataSourceUri),
             ),
             ListTile(
               title: const Text("App Version"),

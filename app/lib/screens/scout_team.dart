@@ -7,12 +7,12 @@ import 'package:snout_db/config/surveyitem.dart';
 import 'package:snout_db/event/dynamic_property.dart';
 import 'package:snout_db/patch.dart';
 
-class PitScoutTeamPage extends StatefulWidget {
+class EditTeamPage extends StatefulWidget {
   final int team;
   final List<SurveyItem> config;
   final DynamicProperties? initialData;
 
-  const PitScoutTeamPage({
+  const EditTeamPage({
     super.key,
     required this.team,
     required this.config,
@@ -20,10 +20,10 @@ class PitScoutTeamPage extends StatefulWidget {
   });
 
   @override
-  State<PitScoutTeamPage> createState() => _PitScoutTeamPageState();
+  State<EditTeamPage> createState() => _EditTeamPageState();
 }
 
-class _PitScoutTeamPageState extends State<PitScoutTeamPage> {
+class _EditTeamPageState extends State<EditTeamPage> {
   final DynamicProperties _surveyItems = {};
   final _formKey = GlobalKey<FormState>();
 

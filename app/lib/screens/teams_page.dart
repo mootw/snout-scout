@@ -68,7 +68,7 @@ class _TeamGridListState extends State<TeamGridList> {
                                       if (result != null && context.mounted) {
                                         Patch patch = Patch.teams(
                                           DateTime.now(),
-                                          json.decode(result),
+                                          List<int>.from(json.decode(result)),
                                         );
                                         //Save the scouting results to the server!!
                                         await submitData(context, patch);

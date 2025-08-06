@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:server/socket_messages.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:snout_db/config/surveyitem.dart';
 import 'package:snout_db/db.dart';
 import 'package:snout_db/event/frcevent.dart';
 import 'package:snout_db/patch.dart';
@@ -28,6 +29,7 @@ Future writeLocalDiskDatabase(SnoutDB db, Uri path) async {
 /// To be used within the context of a single data source
 class DataProvider extends ChangeNotifier {
   final Uri dataSourceUri;
+  final bool kioskClean;
 
   final loadingLock = Lock();
 
@@ -50,7 +52,21 @@ class DataProvider extends ChangeNotifier {
 
   set database(SnoutDB newDatabase) {
     _database = newDatabase;
+    _santize();
     isInitialLoad = true;
+  }
+
+  void _santize() {
+    if (kioskClean) {
+      // Clean the data if needed
+      // final pitScoutingStrings = database.event.config.pitscouting.where((item) => item.type == SurveyItemType.text);
+      database.event.config.pitscouting.removeWhere(
+        (item) => item.type == SurveyItemType.text,
+      );
+      database.event.config.matchscouting.survey.removeWhere(
+        (item) => item.type == SurveyItemType.text,
+      );
+    }
   }
 
   SnoutDB get database {
@@ -61,7 +77,7 @@ class DataProvider extends ChangeNotifier {
 
   FRCEvent get event => database.event;
 
-  DataProvider(this.dataSourceUri) {
+  DataProvider(this.dataSourceUri, [this.kioskClean = false]) {
     () async {
       final prefs = await SharedPreferences.getInstance();
 
@@ -102,6 +118,7 @@ class DataProvider extends ChangeNotifier {
       } else {
         // Add this patch to the local DB before saving.
         database.addPatch(patch);
+        _santize();
         await writeLocalDiskDatabase(database, dataSourceUri);
       }
       notifyListeners();
@@ -193,6 +210,8 @@ class DataProvider extends ChangeNotifier {
           database.addPatch(patch);
         }
 
+        _santize();
+
         // Save new database!
         await storeText(
           storageKey,
@@ -204,8 +223,8 @@ class DataProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future lifecycleListener () async {
-    if(isDataSourceUriRemote) {
+  Future lifecycleListener() async {
+    if (isDataSourceUriRemote) {
       await _getDatabaseFromServer(dataSourceUri);
     }
   }
