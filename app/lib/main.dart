@@ -29,6 +29,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:snout_db/patch.dart';
 import 'package:snout_db/snout_db.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 /// Only update this value when there is a VALID data source loaded,
 const String defaultSourceKey = 'default_source_uri';
@@ -441,6 +442,12 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
               ),
               trailing: Text('Runtime: ${kIsWasm ? 'WASM' : 'JS'}'),
             ),
+            ListTile(
+              title: const Text('Hire Me'),
+              subtitle: const Text('portfolio.xqkz.net'),
+              leading: const Icon(Icons.work),
+              onTap: () => launchUrlString('https://portfolio.xqkz.net/'),
+            ),
           ],
         ),
       ),
@@ -474,6 +481,11 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
                     selectedIcon: Icon(Icons.analytics),
                     icon: Icon(Icons.analytics_outlined),
                     label: 'Analysis',
+                  ),
+                  NavigationDestination(
+                    selectedIcon: Icon(Icons.book),
+                    icon: Icon(Icons.book_outlined),
+                    label: 'Docs',
                   ),
                 ],
               ),
