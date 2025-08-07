@@ -1,3 +1,4 @@
+import 'package:app/form_validators.dart';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/services/tba_autofill.dart';
 import 'package:app/widgets/confirm_exit_dialog.dart';
@@ -181,13 +182,13 @@ class _EditMatchResultsState extends State<EditMatchResults> {
                       DataCell(
                         TextFormField(
                           controller: _blueScore,
-                          validator: _checkIsNumber,
+                          validator: checkIsNumber,
                         ),
                       ),
                       DataCell(
                         TextFormField(
                           controller: _redScore,
-                          validator: _checkIsNumber,
+                          validator: checkIsNumber,
                         ),
                       ),
                     ],
@@ -200,11 +201,4 @@ class _EditMatchResultsState extends State<EditMatchResults> {
       ),
     );
   }
-}
-
-String? _checkIsNumber(String? input) {
-  if (input == null || num.tryParse(input) == null) {
-    return "Input must be a number";
-  }
-  return null;
 }
