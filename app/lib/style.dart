@@ -159,9 +159,9 @@ Future<Uint8List?> pickOrTakeImageDialog(
   final avifFile = await encodeAvif(
     await photo.readAsBytes(),
     // 0 (slowest/highest quality) - 10 (fastest/lowest quality)
-    speed: 5,
+    speed: 6,
     // 0 (lossless) - 63 (lowest quality)
-    maxQuantizer: 48,
+    maxQuantizer: 46,
     minQuantizer: 40,
   );
   return avifFile;
