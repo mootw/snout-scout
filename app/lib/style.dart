@@ -80,14 +80,9 @@ Future<String?> showStringInputDialog(
 }
 
 /// standard size for images stored in snout scout
-/// (we do not want to store hundreds of MB sized images)
-/// for transport efficiency reasons, client performance
-/// for image decoding or db file, and data/disk usage.
-const double defaultImageSize = 800;
-
-/// specially used for SOME images that need higher fidelity.
-/// For now, they are just over twice the resultion of the default image. sqrt(2) would be exactly twice
-const double largeImageSize = defaultImageSize * 1.5;
+/// client performance (no thumbnails are used atm)
+/// for image decoding or db file.
+const double defaultImageSize = 1200;
 
 /// convenient dialog that will prompt the user to take a new image
 /// or select it from their device storage
@@ -164,12 +159,10 @@ Future<Uint8List?> pickOrTakeImageDialog(
   final avifFile = await encodeAvif(
     await photo.readAsBytes(),
     // 0 (slowest/highest quality) - 10 (fastest/lowest quality)
-    speed: 6,
+    speed: 5,
     // 0 (lossless) - 63 (lowest quality)
-    maxQuantizer: 36,
-    minQuantizer: 28,
-    maxQuantizerAlpha: 36,
-    minQuantizerAlpha: 28,
+    maxQuantizer: 48,
+    minQuantizer: 40,
   );
   return avifFile;
 }

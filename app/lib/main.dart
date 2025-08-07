@@ -363,7 +363,7 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
 
                 final config = context.read<DataProvider>().event.config;
 
-                final result = await Navigator.push(
+                final EventConfig? result = await Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder:
@@ -372,13 +372,12 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
                 );
 
                 if (result != null) {
-                  final modAsConfig = EventConfig.fromJson(jsonDecode(result));
 
                   Patch patch = Patch(
                     identity: identity,
                     time: DateTime.now(),
                     path: Patch.buildPath(['config']),
-                    value: modAsConfig.toJson(),
+                    value: result.toJson(),
                   );
                   //Save the scouting results to the server!!
                   if (context.mounted) {
