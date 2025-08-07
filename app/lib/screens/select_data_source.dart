@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:app/config_editor/config_editor.dart';
 import 'package:app/main.dart';
 import 'package:app/mock_data_generator.dart';
 import 'package:app/providers/data_provider.dart';
@@ -10,6 +11,7 @@ import 'package:app/screens/edit_json.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:snout_db/event/frcevent.dart';
@@ -93,13 +95,74 @@ class _SelectDataSourceScreenState extends State<SelectDataSourceScreen> {
               updateLocalDbs();
             },
           ),
-
           ListTile(
             leading: const Icon(Icons.create_new_folder),
-            title: const Text("New Local Database"),
+            title: const Text("New Database"),
+            onTap: () async {
+              final evergreenField = await rootBundle.load(
+                'evergreen_field.avif',
+              );
+              if (context.mounted) {
+                final EventConfig? value = await Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder:
+                        (context) => ConfigEditorPage(
+                          initialState: EventConfig(
+                            name: '',
+                            team: 6749,
+                            fieldImage: base64Encode(
+                              evergreenField.buffer.asUint8List(),
+                            ),
+                          ),
+                        ),
+                  ),
+                );
+
+                if (value == null) {
+                  return;
+                }
+
+                if (context.mounted) {
+                  FRCEvent event = FRCEvent(config: value);
+                  Patch p = Patch(
+                    identity: "",
+                    time: DateTime.now(),
+                    path: Patch.buildPath([""]),
+                    value: event.toJson(),
+                  );
+
+                  final sourceUri = Uri.parse(
+                    '${localSnoutDBPath.path}/${event.config.name}.snoutdb',
+                  );
+                  await writeLocalDiskDatabase(
+                    SnoutDB(patches: [p]),
+                    sourceUri,
+                  );
+
+                  if (context.mounted) {
+                    await SnoutScoutApp.getState(context)?.setSource(sourceUri);
+                    if (context.mounted && Navigator.canPop(context)) {
+                      Navigator.pop(context, sourceUri);
+                    }
+                  }
+                }
+              }
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.create_new_folder),
+            title: const Text("New Database (Raw)"),
             onTap: () async {
               if (context.mounted) {
-                final value = await createNewEvent(context);
+                final value = await Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder:
+                        (context) => JSONEditor(
+                          source: emptyNewEvent,
+                          validate: FRCEvent.fromJson,
+                        ),
+                  ),
+                );
                 if (value == null) {
                   return;
                 }
@@ -240,7 +303,10 @@ class _SelectDataSourceScreenState extends State<SelectDataSourceScreen> {
               leading: IconButton(
                 onPressed:
                     () => SharePlus.instance.share(
-                      ShareParams(text: 'https://snout-scout.web.app/#/${Uri.encodeComponent(item.$1)}'),
+                      ShareParams(
+                        text:
+                            'https://snout-scout.web.app/#/${Uri.encodeComponent(item.$1)}',
+                      ),
                     ),
                 icon: const Icon(Icons.share),
               ),
@@ -539,16 +605,6 @@ class _SnoutServerPageState extends State<SnoutServerPage> {
       ),
     );
   }
-}
-
-Future<String?> createNewEvent(BuildContext context) async {
-  return await Navigator.of(context).push(
-    MaterialPageRoute(
-      builder:
-          (context) =>
-              JSONEditor(source: emptyNewEvent, validate: FRCEvent.fromJson),
-    ),
-  );
 }
 
 FRCEvent get emptyNewEvent => FRCEvent(

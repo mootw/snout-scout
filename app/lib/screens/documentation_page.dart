@@ -82,8 +82,7 @@ class _DocumentationScreenState extends State<DocumentationScreen> {
               String result;
               try {
                 final bytes = await pickOrTakeImageDialog(
-                  context,
-                  largeImageSize,
+                  context
                 );
                 if (bytes != null) {
                   result = base64Encode(bytes);
