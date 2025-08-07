@@ -104,12 +104,24 @@ class _DashboardPageState extends State<DashboardPage> {
         .where((scouting) => scouting.value == true);
 
     return ListView(
+      // TODO handle this better...
+      padding: EdgeInsets.only(left: 12),
       children: [
         // Upcoming match
         Text(
-          "Schedule Delay: ${scheduleDelay == null ? "unknown" : offsetDurationInMins(scheduleDelay)}",
+          "Schedule ${scheduleDelay == null ? "unknown" : offsetDurationInMins(scheduleDelay)}",
           style: Theme.of(context).textTheme.titleLarge,
         ),
+        if (teamNextMatch != null && scheduleDelay != null)
+          Row(
+            children: [
+              Text("Our next match "),
+              TimeDuration(
+                time: teamNextMatch.scheduledTime.add(scheduleDelay),
+                displayDurationDefault: true,
+              ),
+            ],
+          ),
 
         const SizedBox(height: 16),
 
@@ -129,17 +141,6 @@ class _DashboardPageState extends State<DashboardPage> {
             match: teamNextMatch.getData(snoutData.event),
             matchSchedule: teamNextMatch,
             focusTeam: snoutData.event.config.team,
-          ),
-
-        if (teamNextMatch != null && scheduleDelay != null)
-          Row(
-            children: [
-              Text("Our next match: "),
-              TimeDuration(
-                time: teamNextMatch.scheduledTime.add(scheduleDelay),
-                displayDurationDefault: true,
-              ),
-            ],
           ),
 
         const SizedBox(height: 16),
