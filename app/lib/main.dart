@@ -255,33 +255,16 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
                   _currentPageIndex = index;
                 });
               },
-              destinations: const [
-                NavigationRailDestination(
-                  selectedIcon: Icon(Icons.dashboard),
-                  icon: Icon(Icons.dashboard_outlined),
-                  label: Text('Dashboard'),
-                ),
-                NavigationRailDestination(
-                  selectedIcon: Icon(Icons.calendar_today),
-                  icon: Icon(Icons.calendar_today_outlined),
-                  label: Text('Schedule'),
-                ),
-                NavigationRailDestination(
-                  selectedIcon: Icon(Icons.people),
-                  icon: Icon(Icons.people_alt_outlined),
-                  label: Text('Teams'),
-                ),
-                NavigationRailDestination(
-                  selectedIcon: Icon(Icons.analytics),
-                  icon: Icon(Icons.analytics_outlined),
-                  label: Text('Analysis'),
-                ),
-                NavigationRailDestination(
-                  selectedIcon: Icon(Icons.book),
-                  icon: Icon(Icons.book_outlined),
-                  label: Text('Docs'),
-                ),
-              ],
+              destinations:
+                  navigationDestinations
+                      .map(
+                        (e) => NavigationRailDestination(
+                          selectedIcon: e.selectedIcon,
+                          icon: e.icon,
+                          label: Text(e.label),
+                        ),
+                      )
+                      .toList(),
               selectedIndex: _currentPageIndex,
             ),
           Expanded(
@@ -372,7 +355,6 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
                 );
 
                 if (result != null) {
-
                   Patch patch = Patch(
                     identity: identity,
                     time: DateTime.now(),
@@ -460,46 +442,40 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
                   });
                 },
                 selectedIndex: _currentPageIndex,
-                destinations: const [
-                  NavigationDestination(
-                    selectedIcon: Icon(Icons.dashboard),
-                    icon: Icon(Icons.dashboard_outlined),
-                    label: 'Dashboard',
-                  ),
-                  NavigationDestination(
-                    selectedIcon: Icon(Icons.calendar_today),
-                    icon: Icon(Icons.calendar_today_outlined),
-                    label: 'Schedule',
-                  ),
-                  NavigationDestination(
-                    selectedIcon: Icon(Icons.people),
-                    icon: Icon(Icons.people_alt_outlined),
-                    label: 'Teams',
-                  ),
-                  NavigationDestination(
-                    selectedIcon: Icon(Icons.analytics),
-                    icon: Icon(Icons.analytics_outlined),
-                    label: 'Analysis',
-                  ),
-                  NavigationDestination(
-                    selectedIcon: Icon(Icons.book),
-                    icon: Icon(Icons.book_outlined),
-                    label: 'Docs',
-                  ),
-                ],
+                destinations: navigationDestinations,
               ),
     );
   }
 }
 
-class ScoutSelectorScreenWrapper extends StatelessWidget {
-  const ScoutSelectorScreenWrapper({super.key});
+const navigationDestinations = [
+  NavigationDestination(
+    selectedIcon: Icon(Icons.dashboard),
+    icon: Icon(Icons.dashboard_outlined),
+    label: 'Dashboard',
+  ),
+  NavigationDestination(
+    selectedIcon: Icon(Icons.calendar_today),
+    icon: Icon(Icons.calendar_today_outlined),
+    label: 'Schedule',
+  ),
+  NavigationDestination(
+    selectedIcon: Icon(Icons.people),
+    icon: Icon(Icons.people_alt_outlined),
+    label: 'Teams',
+  ),
+  NavigationDestination(
+    selectedIcon: Icon(Icons.analytics),
+    icon: Icon(Icons.analytics_outlined),
+    label: 'Analysis',
+  ),
+  NavigationDestination(
+    selectedIcon: Icon(Icons.book),
+    icon: Icon(Icons.book_outlined),
+    label: 'Docs',
+  ),
+];
 
-  @override
-  Widget build(BuildContext context) {
-    return const Placeholder();
-  }
-}
 
 Future editIdentityFunction({
   required BuildContext context,

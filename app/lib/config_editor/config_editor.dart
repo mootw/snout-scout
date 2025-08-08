@@ -125,7 +125,6 @@ class _ConfigEditorPageState extends State<ConfigEditorPage> {
         key: _formKey,
         child: ListView(
           cacheExtent: 9999,
-          padding: const EdgeInsets.only(left: 12, right: 12, top: 12),
           children: [
             ListTile(
               title: TextFormField(
@@ -202,7 +201,7 @@ class _ConfigEditorPageState extends State<ConfigEditorPage> {
                     color: idx % 2 == 0 ? null : Colors.white12,
                     child: Padding(
                       key: Key(idx.toString()),
-                      padding: EdgeInsetsGeometry.only(left: 12, bottom: 12),
+                      padding: EdgeInsetsGeometry.only(bottom: 12),
                       child: Row(
                         children: [
                           Expanded(
@@ -270,7 +269,7 @@ class _ConfigEditorPageState extends State<ConfigEditorPage> {
                     color: idx % 2 == 0 ? null : Colors.white12,
                     child: Padding(
                       key: Key(idx.toString()),
-                      padding: EdgeInsetsGeometry.only(left: 12, bottom: 12),
+                      padding: EdgeInsetsGeometry.only(bottom: 12),
                       child: Row(
                         children: [
                           Expanded(
@@ -414,7 +413,7 @@ class _ConfigEditorPageState extends State<ConfigEditorPage> {
             color: idx % 2 == 0 ? null : Colors.white12,
             child: Padding(
               key: Key(idx.toString()),
-              padding: EdgeInsetsGeometry.only(left: 12, bottom: 12),
+              padding: EdgeInsetsGeometry.only(bottom: 12),
               child: Row(
                 children: [
                   Expanded(
