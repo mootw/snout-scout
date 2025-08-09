@@ -230,56 +230,51 @@ class _TeamViewPageState extends State<TeamViewPage> {
             ],
           ),
           const Divider(),
+          const SizedBox(height: 16),
           Wrap(
             spacing: 12,
             alignment: WrapAlignment.center,
             children: [
+              Text("Autos", style: Theme.of(context).textTheme.titleMedium),
+              PathsViewer(
+                size: 600,
+                paths: [
+                  for (final match in data.event.teamRecordedMatches(
+                    widget.teamNumber,
+                  ))
+                    (
+                      label:
+                          match.value
+                              .getSchedule(data.event, match.key)
+                              ?.label ??
+                          match.key,
+                      path:
+                          match.value.robot[widget.teamNumber.toString()]!
+                              .timelineInterpolatedBlueNormalized(
+                                data.event.config.fieldStyle,
+                              )
+                              .where((element) => element.isInAuto)
+                              .toList(),
+                    ),
+                ],
+              ),
               Column(
                 children: [
                   const SizedBox(height: 16),
-                  Text("Autos", style: Theme.of(context).textTheme.titleMedium),
-                  PathsViewer(
-                    // Make it larger since its the team page so BIG
-                    size: 600,
-                    paths: [
+                  Text(
+                    "Autos Heatmap",
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  FieldHeatMap(
+                    events: [
                       for (final match in data.event.teamRecordedMatches(
                         widget.teamNumber,
                       ))
-                        (
-                          label:
-                              match.value
-                                  .getSchedule(data.event, match.key)
-                                  ?.label ??
-                              match.key,
-                          path:
-                              match.value.robot[widget.teamNumber.toString()]!
-                                  .timelineInterpolatedBlueNormalized(
-                                    data.event.config.fieldStyle,
-                                  )
-                                  .where((element) => element.isInAuto)
-                                  .toList(),
-                        ),
-                    ],
-                  ),
-                  Column(
-                    children: [
-                      const SizedBox(height: 16),
-                      Text(
-                        "Autos Heatmap",
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      FieldHeatMap(
-                        events: [
-                          for (final match in data.event.teamRecordedMatches(
-                            widget.teamNumber,
-                          ))
-                            ...match.value.robot[widget.teamNumber.toString()]!
-                                .timelineInterpolatedBlueNormalized(
-                                  data.event.config.fieldStyle,
-                                )
-                                .where((element) => element.isInAuto),
-                        ],
-                      ),
+                        ...match.value.robot[widget.teamNumber.toString()]!
+                            .timelineInterpolatedBlueNormalized(
+                              data.event.config.fieldStyle,
+                            )
+                            .where((element) => element.isInAuto),
                     ],
                   ),
                 ],
@@ -455,19 +450,28 @@ class ScoutingResultsViewer extends StatelessWidget {
     if (data == null) {
       return const ListTile(title: Text("Team has no pit scouting data"));
     }
-    return Column(
-      children: [
-        for (final item in snoutData.event.config.pitscouting) ...[
-          DynamicValueViewer(itemType: item, value: data[item.id]),
-          Container(
-            padding: const EdgeInsets.only(right: 16),
-            alignment: Alignment.centerRight,
-            child: EditAudit(
-              path: Patch.buildPath(['pitscouting', '$teamNumber', item.id]),
-            ),
-          ),
-        ],
-      ],
+    return Center(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: 800),
+        child: Column(
+          children: [
+            for (final item in snoutData.event.config.pitscouting) ...[
+              DynamicValueViewer(itemType: item, value: data[item.id]),
+              Container(
+                padding: const EdgeInsets.only(right: 16),
+                alignment: Alignment.centerRight,
+                child: EditAudit(
+                  path: Patch.buildPath([
+                    'pitscouting',
+                    '$teamNumber',
+                    item.id,
+                  ]),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
     );
   }
 }

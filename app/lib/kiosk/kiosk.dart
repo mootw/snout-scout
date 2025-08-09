@@ -11,9 +11,15 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:snout_db/event/match_schedule_item.dart';
 
+class KioskSettings {
+  List<String> safeIds;
+
+  KioskSettings({required this.safeIds});
+}
+
 // This is a very bad kiosk screen with ALMOST no regard to security
-void runKiosk(Uri dataSource) {
-  runApp(Kiosk(dataSource: dataSource));
+void runKiosk(Uri dataSource, KioskSettings settings) {
+  runApp(Kiosk(dataSource: dataSource, settings: settings));
 }
 
 const Duration idleTimeout = Duration(minutes: 2);
@@ -22,8 +28,9 @@ const Duration idleTimeout = Duration(minutes: 2);
 // TODO Have a rotating caurosel of interesting stats and tables and stuff
 class Kiosk extends StatefulWidget {
   final Uri dataSource;
+  final KioskSettings settings;
 
-  const Kiosk({super.key, required this.dataSource});
+  const Kiosk({super.key, required this.dataSource, required this.settings});
 
   @override
   State<Kiosk> createState() => _KioskState();
@@ -50,7 +57,7 @@ class _KioskState extends State<Kiosk> {
         ChangeNotifierProvider<DataProvider>(
           key: Key(widget.dataSource.toString()),
           // Loads the dataprovider in a cleanse mode which filters out some data
-          create: (_) => DataProvider(widget.dataSource, true),
+          create: (_) => DataProvider(widget.dataSource, widget.settings.safeIds),
         ),
       ],
       child: Column(

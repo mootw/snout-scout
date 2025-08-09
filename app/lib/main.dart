@@ -3,7 +3,7 @@ import 'dart:convert';
 
 import 'package:app/config_editor/config_editor.dart';
 import 'package:app/data_submit_login.dart';
-import 'package:app/kiosk/kiosk.dart';
+import 'package:app/kiosk/kiosk_configure.dart';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/providers/local_config_provider.dart';
 import 'package:app/screens/dashboard.dart';
@@ -400,7 +400,17 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
             ListTile(
               title: const Text("Kiosk"),
               trailing: const Icon(Icons.screen_share_outlined),
-              onTap: () => runKiosk(serverConnection.dataSourceUri),
+              onTap:
+                  () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder:
+                          (context) => KioskConfigurationScreen(
+                            dataSource: data.dataSourceUri,
+                            baseConfig: data.event.config,
+                          ),
+                    ),
+                  ),
             ),
             ListTile(
               title: const Text("App Version"),
@@ -469,7 +479,6 @@ const navigationDestinations = [
     label: 'Docs',
   ),
 ];
-
 
 Future editIdentityFunction({
   required BuildContext context,

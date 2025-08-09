@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:server/socket_messages.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:snout_db/config/surveyitem.dart';
 import 'package:snout_db/db.dart';
 import 'package:snout_db/event/frcevent.dart';
 import 'package:snout_db/patch.dart';
@@ -32,7 +31,7 @@ class PatchOutbox {
   /// Otherwise behavior will be unexpected
   PatchOutbox(this.source, this.notifyListeners);
 
-  Future init () async {
+  Future init() async {
     final prefs = await SharedPreferences.getInstance();
     outboxCache = prefs.getStringList(outboxKey) ?? [];
     notifyListeners();
@@ -41,7 +40,7 @@ class PatchOutbox {
   String get outboxKey =>
       'outbox:${base64Encode(utf8.encode(source.toString()))}';
 
-  Future clearOutbox () async {
+  Future clearOutbox() async {
     outboxCache = [];
     final prefs = await SharedPreferences.getInstance();
     await prefs.setStringList(outboxKey, []);
@@ -108,7 +107,7 @@ Future writeLocalDiskDatabase(SnoutDB db, Uri path) async {
 /// To be used within the context of a single data source
 class DataProvider extends ChangeNotifier {
   final Uri dataSourceUri;
-  final bool kioskClean;
+  final List<String>? safeIds;
 
   final _loadingLock = Lock();
 
@@ -138,14 +137,42 @@ class DataProvider extends ChangeNotifier {
   }
 
   void _santize() {
-    if (kioskClean) {
-      // Clean the data if needed
-      // final pitScoutingStrings = database.event.config.pitscouting.where((item) => item.type == SurveyItemType.text);
+    // This is expensive and slow (because it's hacky) so only run it in kiosk mode.
+    if (safeIds != null) {
+      // Remove pitscouting data
+      database.event.pitscouting.forEach(
+        (team, value) =>
+            value.removeWhere((key, value) => safeIds!.contains(key) == false),
+      );
       database.event.config.pitscouting.removeWhere(
-        (item) => item.type == SurveyItemType.text,
+        (e) => safeIds!.contains(e.id) == false,
+      );
+
+      // Remove match scouting survey data
+      database.event.matches.forEach(
+        (matchKey, match) => match.robot.forEach(
+          (teamKey, robotData) => robotData.survey.removeWhere(
+            (key, value) => safeIds!.contains(key) == false,
+          ),
+        ),
       );
       database.event.config.matchscouting.survey.removeWhere(
-        (item) => item.type == SurveyItemType.text,
+        (item) => safeIds!.contains(item.id) == false,
+      );
+
+      // Remove match properties data
+      database.event.matches.forEach(
+        (matchKey, match) => match.properties?.removeWhere(
+          (key, value) => safeIds!.contains(key) == false,
+        ),
+      );
+      database.event.config.matchscouting.properties.removeWhere(
+        (e) => safeIds!.contains(e.id) == false,
+      );
+
+      // Remove match process data
+      database.event.config.matchscouting.processes.removeWhere(
+        (e) => safeIds!.contains(e.id) == false,
       );
     }
   }
@@ -158,7 +185,7 @@ class DataProvider extends ChangeNotifier {
 
   FRCEvent get event => database.event;
 
-  DataProvider(this.dataSourceUri, [this.kioskClean = false]) {
+  DataProvider(this.dataSourceUri, [this.safeIds]) {
     () async {
       remoteOutbox = PatchOutbox(dataSourceUri, () => notifyListeners());
       await remoteOutbox.init();
@@ -228,11 +255,11 @@ class DataProvider extends ChangeNotifier {
     await _loadingLock.synchronized(() async {
       final storageKey = base64UrlEncode(utf8.encode(source.toString()));
 
-      final diskData = await readText(storageKey);
-
-      Uri path = Uri.parse('${Uri.decodeFull(source.toString())}/patches');
+      // Database is stored on disk as just an array of patches
+      String? diskData = await readText(storageKey);
 
       if (diskData == null) {
+        Uri path = Uri.parse('${Uri.decodeFull(source.toString())}/patches');
         final newData = await apiClient
             .get(path)
             .timeout(Duration(seconds: 30));
@@ -243,6 +270,7 @@ class DataProvider extends ChangeNotifier {
                 .toList();
         final decodedDatabase = SnoutDB(patches: patches);
         database = decodedDatabase;
+        _santize();
         await storeText(
           storageKey,
           json.encode(decodedDatabase.patches.map((e) => e.toJson()).toList()),
@@ -256,11 +284,6 @@ class DataProvider extends ChangeNotifier {
           List.from(
             json.decode(diskData) as List,
           ).map((x) => Patch.fromJson(x)).toList();
-      final diskDatabase = SnoutDB(patches: patches);
-
-      //Assign to local database so even when it fails to load, we still have
-      //the latest disk database
-      database = diskDatabase;
 
       //Load the changest only, since it is more bandwidth efficient
       //and the database is ONLY based on patches.
@@ -270,29 +293,35 @@ class DataProvider extends ChangeNotifier {
 
       final headOrigin = jsonDecode(headOriginResult.body) as int;
 
-      final headLocal = database.patches.length;
-      List<Patch> diffPatches = [];
+      final headLocal = patches.length;
       if (headOrigin > headLocal) {
         // There are new patches, download them.
         for (int i = headLocal; i < headOrigin; i++) {
           final patchResult = await apiClient
               .get(Uri.parse('${Uri.decodeFull(source.toString())}/patches/$i'))
               .timeout(Duration(seconds: 10));
-          diffPatches.add(Patch.fromJson(json.decode(patchResult.body)));
+
+          if (patchResult.statusCode != 200) {
+            throw Exception(
+              'Failed to download patch $i ${patchResult.statusCode} ${patchResult.body}',
+            );
+          }
+          final patch = Patch.fromJson(json.decode(patchResult.body));
+          patches.add(patch);
+          // Save new database! This allows for incremental updates. It hurts download performance
+          // but each patch is immediately saved to disk
+          await storeText(
+            storageKey,
+            json.encode(patches.map((e) => e.toJson()).toList()),
+          );
+          print('downloaded $i of ${headOrigin - headLocal} patches');
         }
 
-        for (final patch in diffPatches) {
-          // Add new patches to the database
-          database.addPatch(patch);
-        }
-
+        //Assign to local database so even when it fails to load, we still have
+        //the latest disk database
+        database = SnoutDB(patches: patches);
+        ;
         _santize();
-
-        // Save new database!
-        await storeText(
-          storageKey,
-          json.encode(database.patches.map((e) => e.toJson()).toList()),
-        );
       }
     });
 
