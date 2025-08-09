@@ -17,6 +17,85 @@ import 'package:snout_db/snout_db.dart';
 import 'package:synchronized/synchronized.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
+// Immediately save transaction to disk, then try and send the oldest transaction to the server
+// If that fails, exponential back-off (resets on app instance)
+// There is a separate outbox for each source
+class PatchOutbox {
+  final Uri source;
+  final commitLock = Lock();
+
+  List<String> outboxCache = [];
+
+  late Function notifyListeners;
+
+  /// Only one instance of the outbox can exist at the same time per uri
+  /// Otherwise behavior will be unexpected
+  PatchOutbox(this.source, this.notifyListeners);
+
+  Future init () async {
+    final prefs = await SharedPreferences.getInstance();
+    outboxCache = prefs.getStringList(outboxKey) ?? [];
+    notifyListeners();
+  }
+
+  String get outboxKey =>
+      'outbox:${base64Encode(utf8.encode(source.toString()))}';
+
+  Future clearOutbox () async {
+    outboxCache = [];
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(outboxKey, []);
+    notifyListeners();
+  }
+
+  Future newPatch(Patch patch) async {
+    // First save patch to disk asap, we can complete the future now and be certain of no data loss
+    final prefs = await SharedPreferences.getInstance();
+    final outbox = prefs.getStringList(outboxKey) ?? [];
+    outbox.add(jsonEncode(patch.toJson()));
+    outboxCache = outbox;
+    await prefs.setStringList(outboxKey, outbox);
+    notifyListeners();
+    // Then submit patches
+    commitPatchs();
+  }
+
+  Future commitPatchs() async {
+    await commitLock.synchronized(() async {
+      // Notify listeners that an outbox commit attempt is started.
+      notifyListeners();
+      final prefs = await SharedPreferences.getInstance();
+      final outbox = prefs.getStringList(outboxKey) ?? [];
+      if (outbox.isEmpty) {
+        Logger.root.warning('Tried to commit an empty outbox');
+      }
+      final patch = outbox[0];
+      try {
+        final res = await apiClient
+            .put(source, body: patch)
+            .timeout(Duration(seconds: 30));
+        if (res.statusCode == 200) {
+          // Success
+          outbox.removeAt(0);
+          await prefs.setStringList(outboxKey, outbox);
+          outboxCache = List.of(outbox);
+          notifyListeners();
+
+          // TODO commit remaining patches if there are more left
+        } else {
+          throw Exception(
+            'Failed to upload patch ${res.statusCode} ${res.body}',
+          );
+        }
+      } catch (e) {
+        Logger.root.severe('failed to upload patch $e');
+      }
+    });
+  }
+
+  void dispose() {}
+}
+
 /// saves the data into storage
 Future writeLocalDiskDatabase(SnoutDB db, Uri path) async {
   final file = fs.file(Uri.decodeFull(path.toString()));
@@ -31,10 +110,12 @@ class DataProvider extends ChangeNotifier {
   final Uri dataSourceUri;
   final bool kioskClean;
 
-  final loadingLock = Lock();
+  final _loadingLock = Lock();
 
   // Disgusting way to handle paths but it works so whatever
   bool get isDataSourceUriRemote => dataSourceUri.toString().startsWith('http');
+
+  late final PatchOutbox remoteOutbox;
 
   //Initialize the database as empty
   //this value should get quickly overwritten
@@ -79,10 +160,8 @@ class DataProvider extends ChangeNotifier {
 
   DataProvider(this.dataSourceUri, [this.kioskClean = false]) {
     () async {
-      final prefs = await SharedPreferences.getInstance();
-
-      //Initialize the patches array to be used in the UI.
-      failedPatches = prefs.getStringList("failed_patches") ?? [];
+      remoteOutbox = PatchOutbox(dataSourceUri, () => notifyListeners());
+      await remoteOutbox.init();
 
       try {
         await _loadSelectedDataSource();
@@ -114,7 +193,7 @@ class DataProvider extends ChangeNotifier {
   Future newTransaction(Patch patch) {
     final future = () async {
       if (isDataSourceUriRemote) {
-        await _postPatchToServer(patch);
+        await remoteOutbox.newPatch(patch);
       } else {
         // Add this patch to the local DB before saving.
         database.addPatch(patch);
@@ -135,9 +214,6 @@ class DataProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  //Used in the UI to see failed and successful patches
-  List<String> failedPatches = <String>[];
-
   bool connected = true;
 
   //this will load the entire database if it has
@@ -149,7 +225,7 @@ class DataProvider extends ChangeNotifier {
     // only the length of the ledger is the only way to check the state, rather than using
     // blockchain tech to properly link the list and maintain state like it really should
 
-    await loadingLock.synchronized(() async {
+    await _loadingLock.synchronized(() async {
       final storageKey = base64UrlEncode(utf8.encode(source.toString()));
 
       final diskData = await readText(storageKey);
@@ -227,46 +303,6 @@ class DataProvider extends ChangeNotifier {
     if (isDataSourceUriRemote) {
       await _getDatabaseFromServer(dataSourceUri);
     }
-  }
-
-  //Writes a patch to local disk and submits it to the server.
-  Future _postPatchToServer(Patch patch) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    try {
-      final res = await apiClient
-          .put(dataSourceUri, body: json.encode(patch))
-          .timeout(Duration(seconds: 15));
-      if (res.statusCode == 200) {
-        //Remove it from the failed patches if it exists there
-        if (failedPatches.contains(json.encode(patch))) {
-          failedPatches.remove(json.encode(patch));
-          prefs.setStringList("failed_patches", failedPatches);
-        }
-        return true;
-      } else {
-        failedPatches = prefs.getStringList("failed_patches") ?? [];
-        if (failedPatches.contains(json.encode(patch)) == false) {
-          //Do not add the same patch multiple times into the failed patches!
-          failedPatches.add(json.encode(patch));
-        }
-        prefs.setStringList("failed_patches", failedPatches);
-      }
-    } catch (e) {
-      failedPatches = prefs.getStringList("failed_patches") ?? [];
-      if (failedPatches.contains(json.encode(patch)) == false) {
-        //Do not add the same patch multiple times into the failed patches!
-        failedPatches.add(json.encode(patch));
-      }
-      prefs.setStringList("failed_patches", failedPatches);
-    }
-  }
-
-  //Clears all of the failed patches.
-  Future clearFailedPatches() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    failedPatches.clear(); //For UI update
-    prefs.setStringList("failed_patches", []);
-    notifyListeners();
   }
 
   /// REAL TIME SERVER PATCHES STUFF
@@ -368,6 +404,7 @@ class DataProvider extends ChangeNotifier {
   void dispose() {
     _subscription?.cancel();
     _channel?.sink.close();
+    remoteOutbox.dispose();
     super.dispose();
   }
 }

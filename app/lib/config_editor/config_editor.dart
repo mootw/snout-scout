@@ -114,7 +114,6 @@ class _ConfigEditorPageState extends State<ConfigEditorPage> {
                   fieldImage: fieldImage,
                 );
                 Navigator.pop(context, newConfig);
-                //TODO apply config changes
               }
             },
             icon: Icon(Icons.save),

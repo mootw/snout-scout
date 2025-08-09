@@ -24,6 +24,24 @@ String formatDuration(Duration duration) {
   }
 }
 
+String formatDurationLength(Duration duration) {
+  String s = "";
+
+  int mins = duration.inMinutes.abs();
+  if (mins > 0) {
+    s = "$mins min";
+  }
+  int hours = duration.inHours.abs();
+  if (hours > 0) {
+    s = "$hours hour";
+  }
+  int days = duration.inDays.abs();
+  if (days > 0) {
+    s = "$days day";
+  }
+  return s;
+}
+
 String offsetDurationInMins(Duration duration) {
   // Positive delay means it is behind.
   if (duration.abs() < Duration(minutes: 2)) {

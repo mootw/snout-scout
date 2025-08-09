@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:app/data_submit_login.dart';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/widgets/load_status_or_error_bar.dart';
 import 'package:flutter/material.dart';
@@ -21,9 +20,17 @@ class _FailedPatchStorageState extends State<FailedPatchStorage> {
     final serverConnection = context.watch<DataProvider>();
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Failed Patches"),
+        title: const Text("Outbox"),
         bottom: const LoadOrErrorStatusBar(),
         actions: [
+          if (serverConnection.remoteOutbox.commitLock.locked == false)
+            IconButton(
+              onPressed: () async {
+                await serverConnection.remoteOutbox.commitPatchs();
+                setState(() {});
+              },
+              icon: Icon(Icons.send),
+            ),
           IconButton(
             color: Colors.red,
             onPressed:
@@ -32,7 +39,7 @@ class _FailedPatchStorageState extends State<FailedPatchStorage> {
                   builder:
                       (context) => AlertDialog(
                         title: const Text(
-                          "Are you sure you want to delete ALL failed patches?",
+                          "Are you sure you want to delete ALL failed transactions?",
                         ),
                         actions: [
                           TextButton(
@@ -45,7 +52,8 @@ class _FailedPatchStorageState extends State<FailedPatchStorage> {
                                   Theme.of(context).colorScheme.errorContainer,
                             ),
                             onPressed: () async {
-                              await serverConnection.clearFailedPatches();
+                              await serverConnection.remoteOutbox.clearOutbox();
+                              setState(() {});
                               if (context.mounted) {
                                 Navigator.pop(context);
                               }
@@ -61,7 +69,7 @@ class _FailedPatchStorageState extends State<FailedPatchStorage> {
       ),
       body: ListView(
         children: [
-          for (final patch in serverConnection.failedPatches.reversed)
+          for (final patch in serverConnection.remoteOutbox.outboxCache)
             ListTile(
               onTap:
                   () => showDialog(
@@ -72,7 +80,6 @@ class _FailedPatchStorageState extends State<FailedPatchStorage> {
                           content: SelectableText(patch),
                         ),
                   ),
-              tileColor: Colors.red,
               title: Text(
                 DateFormat.yMMMMEEEEd().add_Hms().format(
                   Patch.fromJson(json.decode(patch)).time,
@@ -80,24 +87,6 @@ class _FailedPatchStorageState extends State<FailedPatchStorage> {
               ),
               subtitle: Text(
                 Patch.fromJson(json.decode(patch)).path.toString(),
-              ),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(
-                    onPressed: () async {
-                      //wtf is this
-                      if (context.mounted) {
-                        await submitData(
-                          context,
-                          Patch.fromJson(json.decode(patch)),
-                        );
-                      }
-                      setState(() {});
-                    },
-                    icon: const Icon(Icons.refresh),
-                  ),
-                ],
               ),
             ),
         ],

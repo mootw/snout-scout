@@ -16,6 +16,8 @@ import 'package:snout_db/patch.dart';
 
 part 'frcevent.g.dart';
 
+const scheduleBreakDuration = Duration(minutes: 29);
+
 @immutable
 @JsonSerializable()
 class FRCEvent {
@@ -88,9 +90,10 @@ class FRCEvent {
   /// returns matches SCHEDULED to have a specific team in them.
   /// this is NOT the same as teamRecordedMatches which is all matches
   /// that are actually recorded
-  List<MatchScheduleItem> matchesWithTeam(int team) => scheduleSorted
-      .where((match) => match.isScheduledToHaveTeam(team))
-      .toList();
+  List<MatchScheduleItem> matchesWithTeam(int team) =>
+      scheduleSorted
+          .where((match) => match.isScheduledToHaveTeam(team))
+          .toList();
 
   //returns the match after the last match with results
   MatchScheduleItem? get nextMatch => scheduleSorted
@@ -98,25 +101,27 @@ class FRCEvent {
       .reversed
       .lastWhereOrNull((match) => match.isComplete(this) == false);
 
-  MatchScheduleItem? nextMatchForTeam(int team) => matchesWithTeam(team)
-      .reversed
-      .lastWhereOrNull((match) => match.isComplete(this) == false);
+  MatchScheduleItem? nextMatchForTeam(int team) => matchesWithTeam(
+    team,
+  ).reversed.lastWhereOrNull((match) => match.isComplete(this) == false);
 
   //Calculates the schedule delay by using the delay of the last match with results actual time versus the scheduled time.
   Duration? get scheduleDelay {
-    final nextMatch =
-        scheduleSorted.lastWhereOrNull((match) => match.isComplete(this));
+    final nextMatch = scheduleSorted.lastWhereOrNull(
+      (match) => match.isComplete(this),
+    );
 
-    final matchAfterNext = nextMatch == null
-        ? null
-        : scheduleSorted.firstWhereOrNull(
-            (match) => match.scheduledTime.isAfter(nextMatch.scheduledTime),
-          );
+    final matchAfterNext =
+        nextMatch == null
+            ? null
+            : scheduleSorted.firstWhereOrNull(
+              (match) => match.scheduledTime.isAfter(nextMatch.scheduledTime),
+            );
 
     if (nextMatch != null &&
         matchAfterNext != null &&
         matchAfterNext.scheduledTime.difference(nextMatch.scheduledTime) >
-            const Duration(minutes: 40)) {
+            scheduleBreakDuration) {
       // Assume no schedule delay between matches that have a large time difference (new days and lunch break)
       return Duration.zero;
     }
@@ -229,16 +234,17 @@ class FRCEvent {
         "EVENTINBBOX",
         5,
         fEval: (params) {
-          final int value = matchResults.timelineInterpolated
-              .where(
-                (element) =>
-                    element.id == params[0].getString() &&
-                    element.position.x >= params[1].eval()!.toDouble() &&
-                    element.position.y >= params[2].eval()!.toDouble() &&
-                    element.position.x <= params[3].eval()!.toDouble() &&
-                    element.position.y <= params[4].eval()!.toDouble(),
-              )
-              .length;
+          final int value =
+              matchResults.timelineInterpolated
+                  .where(
+                    (element) =>
+                        element.id == params[0].getString() &&
+                        element.position.x >= params[1].eval()!.toDouble() &&
+                        element.position.y >= params[2].eval()!.toDouble() &&
+                        element.position.x <= params[3].eval()!.toDouble() &&
+                        element.position.y <= params[4].eval()!.toDouble(),
+                  )
+                  .length;
           return LazyNumberImpl(
             eval: () => Decimal.fromInt(value),
             getString: () => value.toString(),
@@ -258,17 +264,18 @@ class FRCEvent {
         "AUTOEVENTINBBOX",
         5,
         fEval: (params) {
-          final int value = matchResults.timelineInterpolated
-              .where(
-                (element) =>
-                    element.isInAuto &&
-                    element.id == params[0].getString() &&
-                    element.position.x >= params[1].eval()!.toDouble() &&
-                    element.position.y >= params[2].eval()!.toDouble() &&
-                    element.position.x <= params[3].eval()!.toDouble() &&
-                    element.position.y <= params[4].eval()!.toDouble(),
-              )
-              .length;
+          final int value =
+              matchResults.timelineInterpolated
+                  .where(
+                    (element) =>
+                        element.isInAuto &&
+                        element.id == params[0].getString() &&
+                        element.position.x >= params[1].eval()!.toDouble() &&
+                        element.position.y >= params[2].eval()!.toDouble() &&
+                        element.position.x <= params[3].eval()!.toDouble() &&
+                        element.position.y <= params[4].eval()!.toDouble(),
+                  )
+                  .length;
           return LazyNumberImpl(
             eval: () => Decimal.fromInt(value),
             getString: () => value.toString(),
@@ -288,17 +295,18 @@ class FRCEvent {
         "TELEOPEVENTINBBOX",
         5,
         fEval: (params) {
-          final int value = matchResults.timelineInterpolated
-              .where(
-                (element) =>
-                    element.isInAuto == false &&
-                    element.id == params[0].getString() &&
-                    element.position.x >= params[1].eval()!.toDouble() &&
-                    element.position.y >= params[2].eval()!.toDouble() &&
-                    element.position.x <= params[3].eval()!.toDouble() &&
-                    element.position.y <= params[4].eval()!.toDouble(),
-              )
-              .length;
+          final int value =
+              matchResults.timelineInterpolated
+                  .where(
+                    (element) =>
+                        element.isInAuto == false &&
+                        element.id == params[0].getString() &&
+                        element.position.x >= params[1].eval()!.toDouble() &&
+                        element.position.y >= params[2].eval()!.toDouble() &&
+                        element.position.x <= params[3].eval()!.toDouble() &&
+                        element.position.y <= params[4].eval()!.toDouble(),
+                  )
+                  .length;
           return LazyNumberImpl(
             eval: () => Decimal.fromInt(value),
             getString: () => value.toString(),
@@ -313,9 +321,10 @@ class FRCEvent {
         "EVENT",
         1,
         fEval: (params) {
-          final int value = matchResults.timeline
-              .where((element) => element.id == params[0].getString())
-              .length;
+          final int value =
+              matchResults.timeline
+                  .where((element) => element.id == params[0].getString())
+                  .length;
           return LazyNumberImpl(
             eval: () => Decimal.fromInt(value),
             getString: () => value.toString(),
@@ -330,12 +339,13 @@ class FRCEvent {
         "AUTOEVENT",
         1,
         fEval: (params) {
-          final int value = matchResults.timeline
-              .where(
-                (element) =>
-                    element.isInAuto && element.id == params[0].getString(),
-              )
-              .length;
+          final int value =
+              matchResults.timeline
+                  .where(
+                    (element) =>
+                        element.isInAuto && element.id == params[0].getString(),
+                  )
+                  .length;
           return LazyNumberImpl(
             eval: () => Decimal.fromInt(value),
             getString: () => value.toString(),
@@ -350,13 +360,14 @@ class FRCEvent {
         "TELEOPEVENT",
         1,
         fEval: (params) {
-          final int value = matchResults.timeline
-              .where(
-                (element) =>
-                    element.isInAuto == false &&
-                    element.id == params[0].getString(),
-              )
-              .length;
+          final int value =
+              matchResults.timeline
+                  .where(
+                    (element) =>
+                        element.isInAuto == false &&
+                        element.id == params[0].getString(),
+                  )
+                  .length;
           return LazyNumberImpl(
             eval: () => Decimal.fromInt(value),
             getString: () => value.toString(),
@@ -376,13 +387,17 @@ class FRCEvent {
             throw Exception("cannot recursively call a process");
           }
           final MatchResultsProcess? otherProcess = config
-              .matchscouting.processes
+              .matchscouting
+              .processes
               .firstWhereOrNull((element) => element.id == processID);
           if (otherProcess == null) {
             throw Exception("process $processID does not exist");
           }
-          final result =
-              runMatchResultsProcess(otherProcess, matchResults, team);
+          final result = runMatchResultsProcess(
+            otherProcess,
+            matchResults,
+            team,
+          );
           return LazyNumberImpl(
             eval: () => Decimal.parse(result!.value.toString()),
             getString: () => result!.value.toString(),

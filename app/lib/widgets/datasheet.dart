@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:download/download.dart';
 import 'package:snout_db/config/surveyitem.dart';
 
-const String noDataText = "";
+const String noDataText = '';
 
 class DataItem {
   //Helpers to create data items from different types
@@ -65,8 +65,18 @@ class DataItem {
                       fit: BoxFit.cover,
                     ),
                   ),
-          exportValue: value == null ? '' : 'Image',
+          exportValue: value == null ? noDataText : 'Image',
           sortingValue: value == null ? 0 : 1,
+        );
+      case SurveyItemType.toggle:
+        return DataItem(
+          displayValue: value == null ? SizedBox() : Text(value.toString()),
+          exportValue: value?.toString() ?? noDataText,
+          sortingValue: switch (value as bool?) {
+            null => -1,
+            false => 0,
+            true => 1,
+          },
         );
       default:
         return DataItem.fromText(value?.toString());
@@ -167,7 +177,9 @@ Color rainbowColor(double min, double max, double value) {
   )!.withAlpha(0.7).toColor();
 }
 
-const double numericWidth = 85;
+// Used for numbers
+const double numericWidth = 80;
+// Default, usually used for text
 const double defaultColumnWidth = 160;
 
 //Creates a data-table that can be scrolled horizontally and can export to csv
@@ -306,7 +318,8 @@ class _DataSheetState extends State<DataSheet> {
                 for (final column in widget.columns)
                   DataColumn(
                     label: ConstrainedBox(
-                      constraints: BoxConstraints(maxWidth: column.width),
+                      // -16 for the sorting arrow
+                      constraints: BoxConstraints(maxWidth: column.width - 16),
                       //Make the text smaller so that long text fits
                       //This is more of a hack than best practice
                       child: DefaultTextStyle(
@@ -329,8 +342,8 @@ class _DataSheetState extends State<DataSheet> {
                         DataCell(
                           SizedBox.expand(
                             child: ConstrainedBox(
-                              constraints: const BoxConstraints(
-                                maxWidth: defaultColumnWidth,
+                              constraints: BoxConstraints(
+                                maxWidth: widget.columns[columnIdx].width,
                               ),
                               child: Container(
                                 padding: EdgeInsets.only(left: 4, right: 4),

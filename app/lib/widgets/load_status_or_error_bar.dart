@@ -12,7 +12,7 @@ class LoadOrErrorStatusBar extends StatelessWidget
   Widget build(BuildContext context) {
     final data = context.watch<DataProvider>();
 
-    if (data.failedPatches.isNotEmpty) {
+    if (data.remoteOutbox.outboxCache.isNotEmpty) {
       return InkWell(
         onTap:
             () => Navigator.push(
@@ -25,9 +25,9 @@ class LoadOrErrorStatusBar extends StatelessWidget
           alignment: Alignment.center,
           width: double.infinity,
           height: 28,
-          color: Colors.orange,
+          color: Colors.indigo,
           child: Text(
-            "Tap to see ${data.failedPatches.length} failed patch(es)!",
+            "${data.remoteOutbox.outboxCache.length} transactions in outbox",
           ),
         ),
       );

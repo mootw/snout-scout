@@ -161,7 +161,7 @@ class _TeamViewPageState extends State<TeamViewPage> {
                   width: numericWidth,
                 ),
               for (final pitSurvey in data.event.config.matchscouting.survey)
-                DataItemColumn(DataItem.fromText(pitSurvey.label)),
+                DataItemColumn.fromSurveyItem(pitSurvey),
               DataItemColumn(DataItem.fromText("Scout")),
             ],
             rows: [

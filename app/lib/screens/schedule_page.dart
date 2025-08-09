@@ -7,10 +7,11 @@ import 'package:app/screens/match_page.dart';
 import 'package:app/widgets/timeduration.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:snout_db/event/frcevent.dart';
 import 'package:snout_db/event/match_schedule_item.dart';
 
 class AllMatchesPage extends StatefulWidget {
-  final double? scrollPosition;
+  final MatchScheduleItem? scrollPosition;
 
   const AllMatchesPage({super.key, this.scrollPosition});
 
@@ -25,7 +26,14 @@ class _AllMatchesPageState extends State<AllMatchesPage> {
   void initState() {
     super.initState();
     _controller = ScrollController(
-      initialScrollOffset: widget.scrollPosition ?? 0,
+      initialScrollOffset:
+          widget.scrollPosition == null
+              ? 0
+              : (context.read<DataProvider>().event.scheduleSorted.indexOf(
+                        widget.scrollPosition!,
+                      ) *
+                      matchCardHeight) -
+                  (matchCardHeight * 2),
     );
   }
 
@@ -43,9 +51,20 @@ class _AllMatchesPageState extends State<AllMatchesPage> {
           child: ListView(
             controller: _controller,
             children: [
-              //Iterate through all of the matches and add them to the list
-              //if a match is equal to the next match; highlight it!
-              for (final matchSchedule in snoutData.event.scheduleSorted)
+              for (final (idx, matchSchedule)
+                  in snoutData.event.scheduleSorted.indexed)
+              // TODO correctly handle breaks in the list in the inital scroll position check
+              ...[
+                if (idx > 0 &&
+                    matchSchedule.scheduledTime.difference(
+                          snoutData.event.scheduleSorted[idx - 1].scheduledTime,
+                        ) >
+                        scheduleBreakDuration)
+                  Center(
+                    child: Text(
+                      '${formatDurationLength(matchSchedule.scheduledTime.difference(snoutData.event.scheduleSorted[idx - 1].scheduledTime))} break',
+                    ),
+                  ),
                 Container(
                   color:
                       matchSchedule == snoutData.event.nextMatch
@@ -57,6 +76,7 @@ class _AllMatchesPageState extends State<AllMatchesPage> {
                     focusTeam: snoutData.event.config.team,
                   ),
                 ),
+              ],
 
               Padding(
                 padding: const EdgeInsets.all(16),

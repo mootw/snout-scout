@@ -160,7 +160,7 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                   width: numericWidth,
                 ),
               for (final item in data.event.config.matchscouting.survey)
-                DataItemColumn(DataItem.fromText(item.label)),
+                DataItemColumn.fromSurveyItem(item),
             ],
             rows: [
               for (final team in [..._blue, ..._red])

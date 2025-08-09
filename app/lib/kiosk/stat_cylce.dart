@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:app/providers/data_provider.dart';
 import 'package:app/screens/analysis/boxplot_analysis.dart';
@@ -66,7 +65,7 @@ class _KioskInfoCycleState extends State<KioskInfoCycle> {
 
       // consistency analysis chart, random stat (scroll?)
       BoxPlotAnalysis(),
-      
+
       //  Show a random teams autos (M2 mode)
     ];
 

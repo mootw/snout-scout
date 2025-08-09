@@ -19,7 +19,6 @@ import 'package:app/screens/schedule_page.dart';
 import 'package:app/screens/teams_page.dart';
 import 'package:app/search.dart';
 import 'package:app/widgets/load_status_or_error_bar.dart';
-import 'package:app/widgets/match_card.dart';
 import 'package:download/download.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -276,12 +275,7 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
                     // this will force it to scroll whenever the matches length changes
                     // we could add another value here to make it scroll on other changes too
                     key: Key(data.event.matches.length.toString()),
-                    scrollPosition:
-                        nextMatch == null
-                            ? null
-                            : (data.event.scheduleSorted.indexOf(nextMatch) *
-                                    matchCardHeight) -
-                                (matchCardHeight * 2),
+                    scrollPosition: nextMatch,
                   ),
                   const TeamGridList(showEditButton: true),
                   const AnalysisPage(),

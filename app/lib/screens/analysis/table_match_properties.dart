@@ -33,7 +33,7 @@ class TableMatchProperties extends StatelessWidget {
           columns: [
             DataItemColumn(DataItem.fromText("Match")),
             for (final item in data.event.config.matchscouting.properties)
-              DataItemColumn(DataItem.fromText(item.label)),
+              DataItemColumn.fromSurveyItem(item),
           ],
           rows: [
             for (final match in allMatchData)

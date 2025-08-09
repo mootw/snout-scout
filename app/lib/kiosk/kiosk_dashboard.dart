@@ -6,7 +6,6 @@ import 'package:app/screens/select_data_source.dart';
 import 'package:app/screens/teams_page.dart';
 import 'package:app/style.dart';
 import 'package:app/widgets/load_status_or_error_bar.dart';
-import 'package:app/widgets/match_card.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
@@ -134,12 +133,7 @@ class _KioskDashboardState extends State<KioskDashboard>
                     // this will force it to scroll whenever the matches length changes
                     // we could add another value here to make it scroll on other changes too
                     key: Key(data.event.matches.length.toString()),
-                    scrollPosition:
-                        nextMatch == null
-                            ? null
-                            : (data.event.scheduleSorted.indexOf(nextMatch) *
-                                    matchCardHeight) -
-                                (matchCardHeight * 2),
+                    scrollPosition: nextMatch,
                   ),
                   const TeamGridList(showEditButton: true),
                   const AnalysisPage(),

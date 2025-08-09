@@ -21,7 +21,7 @@ class TableRobotRecordingsPage extends StatelessWidget {
         title: 'Robot Recordings',
         //Data is a list of rows and columns
         columns: [
-          DataItemColumn(DataItem.fromText("Match")),
+          DataItemColumn(DataItem.fromText("Match"), width: 120),
           DataItemColumn(DataItem.fromText("Team"), width: numericWidth),
           for (final item in data.event.config.matchscouting.processes)
             DataItemColumn(
