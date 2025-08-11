@@ -38,6 +38,8 @@ final specialValues = [
   'needs_help',
 ];
 
+final invalidIdValues = RegExp(r'[^A-Za-z0-9_]');
+
 class EditSurveyItemConfig extends StatefulWidget {
   final SurveyItemEditState state;
 
@@ -55,7 +57,16 @@ class _EditSurveyItemConfigState extends State<EditSurveyItemConfig> {
         ListTile(
           title: TextFormField(
             controller: widget.state.label,
-            onChanged: (newValue) {},
+            onEditingComplete: () {
+              if (widget.state.id.text == '') {
+                widget.state.id.text =
+                    widget.state.label.text
+                        .toLowerCase()
+                        .replaceAll(' ', '_')
+                        .replaceAll(invalidIdValues, '')
+                        .trim();
+              }
+            },
             decoration: InputDecoration(
               label: Text('label'),
               border: const OutlineInputBorder(),

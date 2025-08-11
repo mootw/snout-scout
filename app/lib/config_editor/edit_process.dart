@@ -1,3 +1,4 @@
+import 'package:app/config_editor/edit_survey_item.dart';
 import 'package:flutter/material.dart';
 import 'package:snout_db/config/matchresults_process.dart';
 
@@ -44,7 +45,16 @@ class _EditProcessConfigState extends State<EditProcessConfig> {
         ListTile(
           title: TextFormField(
             controller: widget.state.label,
-            onChanged: (newValue) {},
+            onEditingComplete: () {
+              if (widget.state.id.text == '') {
+                widget.state.id.text =
+                    widget.state.label.text
+                        .toLowerCase()
+                        .replaceAll(' ', '_')
+                        .replaceAll(invalidIdValues, '')
+                        .trim();
+              }
+            },
             decoration: InputDecoration(
               label: Text('label'),
               border: const OutlineInputBorder(),

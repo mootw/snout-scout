@@ -32,9 +32,7 @@ EditLock editLock = EditLock();
 final Lock dbWriteLock = Lock();
 
 final app = Router();
-
 final Logger logger = Logger("snout-scout-server");
-
 final eventsDirectory = Directory('events');
 
 //Stuff that should be done for each event that is loaded.
@@ -46,7 +44,7 @@ class EventData {
 }
 
 //Load all events from disk and instantiate an event data class for each one
-Future loadEvents() async {
+Future _loadEvents() async {
   final List<FileSystemEntity> allEvents =
       await eventsDirectory.list().toList();
   for (final event in allEvents) {
@@ -55,6 +53,16 @@ Future loadEvents() async {
       loadedEvents[event.uri.pathSegments.last] = EventData(event);
     }
   }
+}
+
+Future<SnoutDB?> _loadFromDisk(String eventID) async {
+  final File? f = loadedEvents[eventID]?.file;
+  if (f == null || await f.exists() == false) {
+    return null;
+  }
+  return SnoutDB.fromJson(
+    json.decode(await f.readAsString()) as Map<String, dynamic>,
+  );
 }
 
 void main(List<String> args) async {
@@ -70,7 +78,7 @@ void main(List<String> args) async {
   // Create the events directory if it does not exist
   eventsDirectory.create();
 
-  await loadEvents();
+  await _loadEvents();
 
   Timer.periodic(const Duration(seconds: 25), (_) {
     for (final event in loadedEvents.entries) {
@@ -86,40 +94,37 @@ void main(List<String> args) async {
 
   app.get("/listen/<event>", (Request request, String event) {
     event = Uri.decodeComponent(event);
-    final handler = webSocketHandler(
-      (WebSocketChannel webSocket, _) {
-        logger.info('new listener for $event');
-        webSocket.sink.done
-            .then((value) => loadedEvents[event]?.listeners.remove(webSocket));
-        loadedEvents[event]?.listeners.add(webSocket);
+    final handler = webSocketHandler((WebSocketChannel webSocket, _) {
+      logger.info('new listener for $event');
+      webSocket.sink.done.then(
+        (value) => loadedEvents[event]?.listeners.remove(webSocket),
+      );
+      loadedEvents[event]?.listeners.add(webSocket);
 
-        webSocket.stream.listen((message) {
-          if (message == "PING") {
-            webSocket.sink.add("PONG");
-            return;
-          }
-          if (message == "PONG") {
-            // Ignore pong
-            return;
-          }
+      webSocket.stream.listen((message) {
+        if (message == "PING") {
+          webSocket.sink.add("PONG");
+          return;
+        }
+        if (message == "PONG") {
+          // Ignore pong
+          return;
+        }
 
-          try {
-            final decoded =
-                json.decode(message as String) as Map<String, dynamic>;
-            logger.fine("got socket message");
+        try {
+          final decoded =
+              json.decode(message as String) as Map<String, dynamic>;
+          logger.fine("got socket message");
 
-            switch (decoded['type'] as String) {
-              case SocketMessageType.ping:
-                webSocket.sink
-                    .add(jsonEncode({"type": "pong", "value": "pong"}));
-            }
-          } catch (e, s) {
-            logger.severe("failed to handle socket message", e, s);
+          switch (decoded['type'] as String) {
+            case SocketMessageType.ping:
+              webSocket.sink.add(jsonEncode({"type": "pong", "value": "pong"}));
           }
-        });
-      },
-      pingInterval: const Duration(hours: 8),
-    );
+        } catch (e, s) {
+          logger.severe("failed to handle socket message", e, s);
+        }
+      });
+    }, pingInterval: const Duration(hours: 8));
 
     return handler(request);
   });
@@ -182,7 +187,6 @@ void main(List<String> args) async {
     });
   });
 
-  /// Just accept any files that are uploaded assuming the password is provided
   app.delete("/events/<eventID>", (Request request, String eventID) {
     eventID = Uri.decodeComponent(eventID);
     // Since this edits db files, it could conflict with other writes
@@ -216,14 +220,10 @@ void main(List<String> args) async {
 
   app.get("/events/<eventID>", (Request request, String eventID) async {
     eventID = Uri.decodeComponent(eventID);
-
-    final File? f = loadedEvents[eventID]?.file;
-    if (f == null || await f.exists() == false) {
-      return Response.notFound("Event not found");
+    final event = await _loadFromDisk(eventID);
+    if (event == null) {
+      return Response.badRequest(body: 'event not found');
     }
-    final event = SnoutDB.fromJson(
-      json.decode(await f.readAsString()) as Map<String, dynamic>,
-    );
 
     return Response.ok(
       json.encode(event),
@@ -236,14 +236,10 @@ void main(List<String> args) async {
 
   app.get("/events/<eventID>/head", (Request request, String eventID) async {
     eventID = Uri.decodeComponent(eventID);
-
-    final File? f = loadedEvents[eventID]?.file;
-    if (f == null || await f.exists() == false) {
-      return Response.notFound("Event not found");
+    final event = await _loadFromDisk(eventID);
+    if (event == null) {
+      return Response.badRequest(body: 'event not found');
     }
-    final event = SnoutDB.fromJson(
-      json.decode(await f.readAsString()) as Map<String, dynamic>,
-    );
 
     return Response.ok(
       jsonEncode(event.patches.length),
@@ -254,16 +250,16 @@ void main(List<String> args) async {
     );
   });
 
-  app.get("/events/<eventID>/<subPath|.*>",
-      (Request request, String eventID, String subPath) async {
+  app.get("/events/<eventID>/<subPath|.*>", (
+    Request request,
+    String eventID,
+    String subPath,
+  ) async {
     eventID = Uri.decodeComponent(eventID);
-    final File? f = loadedEvents[eventID]?.file;
-    if (f == null || await f.exists() == false) {
-      return Response.notFound("Event not found");
+    final event = await _loadFromDisk(eventID);
+    if (event == null) {
+      return Response.badRequest(body: 'event not found');
     }
-    final event = SnoutDB.fromJson(
-      json.decode(await f.readAsString()) as Map<String, dynamic>,
-    );
 
     try {
       var dbJson = json.decode(json.encode(event));
@@ -282,50 +278,47 @@ void main(List<String> args) async {
     }
   });
 
-  app.put(
-    "/events/<eventID>",
-    (Request request, String eventID) {
-      eventID = Uri.decodeComponent(eventID);
-      // Require all writes to start with reading the file, only one at a time and do a full disk flush
-      return dbWriteLock.synchronized(() async {
-        final File? f = loadedEvents[eventID]?.file;
-        if (f == null || await f.exists() == false) {
-          return Response.notFound("Event not found");
+  app.put("/events/<eventID>", (Request request, String eventID) {
+    eventID = Uri.decodeComponent(eventID);
+    // Require all writes to start with reading the file, only one at a time and do a full disk flush
+    return dbWriteLock.synchronized(() async {
+      final File? f = loadedEvents[eventID]?.file;
+      if (f == null || await f.exists() == false) {
+        return Response.notFound("Event not found");
+      }
+      final event = SnoutDB.fromJson(
+        json.decode(await f.readAsString()) as Map<String, dynamic>,
+      );
+      //Uses UTF-8 by default
+      final String content = await request.readAsString();
+      try {
+        final Patch patch = Patch.fromJson(json.decode(content) as Map);
+
+        event.addPatch(patch);
+
+        logger.fine('added patch: ${json.encode(patch)}');
+
+        //Successful patch, send this update to all listeners
+        for (final WebSocketChannel listener
+            in loadedEvents[eventID]?.listeners ?? []) {
+          listener.sink.add(
+            json.encode({
+              "type": SocketMessageType.newPatchId,
+              "patch": event.patches.length - 1,
+            }),
+          );
         }
-        final event = SnoutDB.fromJson(
-          json.decode(await f.readAsString()) as Map<String, dynamic>,
-        );
-        //Uses UTF-8 by default
-        final String content = await request.readAsString();
-        try {
-          final Patch patch = Patch.fromJson(json.decode(content) as Map);
 
-          event.addPatch(patch);
+        //Write the new DB to disk
+        await f.writeAsString(json.encode(event), flush: true);
 
-          logger.fine('added patch: ${json.encode(patch)}');
-
-          //Successful patch, send this update to all listeners
-          for (final WebSocketChannel listener
-              in loadedEvents[eventID]?.listeners ?? []) {
-            listener.sink.add(
-              json.encode({
-                "type": SocketMessageType.newPatchId,
-                "patch": event.patches.length - 1,
-              }),
-            );
-          }
-
-          //Write the new DB to disk
-          await f.writeAsString(json.encode(event), flush: true);
-
-          return Response.ok("");
-        } catch (e, s) {
-          logger.severe('failed to accept patch: $content', e, s);
-          return Response.internalServerError(body: e);
-        }
-      });
-    },
-  );
+        return Response.ok("");
+      } catch (e, s) {
+        logger.severe('failed to accept patch: $content', e, s);
+        return Response.internalServerError(body: e);
+      }
+    });
+  });
 
   final handler = const Pipeline()
       .addMiddleware(logRequests())
@@ -343,24 +336,23 @@ void main(List<String> args) async {
   //negligable for the 30%+ compression depending on how much of the data is image
   server.autoCompress = true;
   //TODO i think this will work if chunked transfer encoding is set..
-
   logger.info('Server started: ${server.address} port ${server.port}');
 }
 
 Middleware handleCORS() => (innerHandler) {
-      return (request) async {
-        final Map<String, String> headers = {
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Headers': '*',
-          'Access-Control-Allow-Methods': '*',
-          'Access-Control-Request-Method': '*',
-        };
-
-        if (request.method == "OPTIONS") {
-          return Response.ok("", headers: headers);
-        }
-
-        final res = await innerHandler(request);
-        return res.change(headers: headers);
-      };
+  return (request) async {
+    final Map<String, String> headers = {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Headers': '*',
+      'Access-Control-Allow-Methods': '*',
+      'Access-Control-Request-Method': '*',
     };
+
+    if (request.method == "OPTIONS") {
+      return Response.ok("", headers: headers);
+    }
+
+    final res = await innerHandler(request);
+    return res.change(headers: headers);
+  };
+};
