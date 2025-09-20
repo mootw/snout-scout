@@ -9,6 +9,7 @@ import 'package:csv/csv.dart';
 import 'package:flutter/material.dart';
 import 'package:download/download.dart';
 import 'package:snout_db/config/surveyitem.dart';
+import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 
 const String noDataText = '';
 
@@ -159,11 +160,15 @@ class DataSheet extends StatefulWidget {
     this.title,
     required this.columns,
     required this.rows,
+    this.numFixedColumns = 1,
+    this.shrinkWrap = false,
   });
 
   final String? title;
   final List<List<DataItem>> rows;
   final List<DataItemColumn> columns;
+  final int numFixedColumns;
+  final bool shrinkWrap;
 
   @override
   State<DataSheet> createState() => _DataSheetState();
@@ -181,6 +186,8 @@ Color rainbowColor(double min, double max, double value) {
 const double numericWidth = 80;
 // Default, usually used for text
 const double defaultColumnWidth = 160;
+// used for match buttons in tables
+const double matchColumnWidth = 120;
 
 //Creates a data-table that can be scrolled horizontally and can export to csv
 class _DataSheetState extends State<DataSheet> {
@@ -190,13 +197,6 @@ class _DataSheetState extends State<DataSheet> {
   bool _sortAscending = true;
 
   bool _showRainbow = true;
-
-  void updateSort(int columnIndex, bool ascending) {
-    setState(() {
-      _currentSortColumn = columnIndex;
-      _sortAscending = ascending;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -252,7 +252,142 @@ class _DataSheetState extends State<DataSheet> {
       }
     }
 
+    final columns = widget.columns;
+    final rows = widget.rows;
+
+    final dataSheetWidget = ScrollConfiguration(
+      behavior: MouseInteractableScrollBehavior(),
+      child: TableView.builder(
+        pinnedColumnCount: widget.numFixedColumns,
+        pinnedRowCount: 1,
+        columnCount: columns.length,
+        rowCount: rows.length + 1,
+        columnBuilder: (column) {
+          return Span(
+            extent: FixedTableSpanExtent(columns[column].width),
+            backgroundDecoration: TableSpanDecoration(
+              border: TableSpanBorder(
+                trailing: BorderSide(color: Colors.white10),
+              ),
+            ),
+          );
+        },
+        rowBuilder: (row) {
+          return Span(
+            extent: FixedTableSpanExtent(row == 0 ? 50 : 40),
+            backgroundDecoration: TableSpanDecoration(
+              border: TableSpanBorder(
+                trailing: BorderSide(color: Colors.white10),
+              ),
+            ),
+          );
+        },
+        cellBuilder: (context, cell) {
+          if (cell.row == 0) {
+            return TableViewCell(
+              child: InkWell(
+                onTap: () {
+                  setState(() {
+                    if (_currentSortColumn == cell.column) {
+                      _sortAscending = !_sortAscending;
+                    } else {
+                      _currentSortColumn = cell.column;
+                      // Default the sort to show the "best" first
+                      _sortAscending = !columns[cell.column].largerIsBetter;
+                    }
+                  });
+                },
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: DefaultTextStyle(
+                        maxLines: 3,
+                        style: Theme.of(context).textTheme.bodySmall!,
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 4),
+                          child: columns[cell.column].item.displayValue,
+                        ),
+                      ),
+                    ),
+                    if (_currentSortColumn == cell.column)
+                      AnimatedRotation(
+                        turns: _sortAscending ? 0 : 0.5,
+                        duration: Durations.medium2,
+                        child: Icon(Icons.arrow_upward, size: 16),
+                      ),
+                  ],
+                ),
+              ),
+            );
+          }
+          final cellItem = rows[cell.row - 1][cell.column];
+          return TableViewCell(
+            child: InkWell(
+              onTap:
+                  cellItem.exportValue.length < 40
+                      ? null
+                      : () {
+                        //If the cell's export value length (basically the text of whatever the display value is)
+                        //we will have an on-tap that will display a dialog with the complete data
+                        showDialog(
+                          context: context,
+                          builder:
+                              (context) => AlertDialog(
+                                content: cellItem.displayValue,
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(context),
+                                    child: const Text("Ok"),
+                                  ),
+                                ],
+                              ),
+                        );
+                      },
+              child: Container(
+                padding: EdgeInsets.only(left: 4, right: 4),
+                color: () {
+                  if (cellItem.exportValue == "true") {
+                    return Colors.green;
+                  }
+                  if (cellItem.exportValue == "false") {
+                    return Colors.red;
+                  }
+
+                  if (_showRainbow &&
+                      cellItem.numericValue != null &&
+                      numericMinMaxes[cell.column] != null) {
+                    double min = numericMinMaxes[cell.column]!.$1;
+                    double max = numericMinMaxes[cell.column]!.$2;
+
+                    return columns[cell.column].largerIsBetter
+                        ? rainbowColor(min, max, cellItem.numericValue!)
+                        : rainbowColor(max, min, cellItem.numericValue!);
+                  }
+
+                  return cellItem.exportValue.length < 40
+                      ? null
+                      : Colors.blue.withAlpha(40);
+                }(),
+                child: DefaultTextStyle(
+                  maxLines: 2,
+                  style: Theme.of(context).textTheme.bodyMedium!,
+                  child: Align(
+                    alignment:
+                        cellItem.numericValue != null
+                            ? Alignment.centerRight
+                            : Alignment.centerLeft,
+                    child: cellItem.displayValue,
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+
     return Column(
+      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
@@ -294,136 +429,14 @@ class _DataSheetState extends State<DataSheet> {
             ],
           ),
         ),
-        ScrollConfiguration(
-          behavior: MouseInteractableScrollBehavior(),
-          child: SingleChildScrollView(
-            clipBehavior:
-                Clip.none, //Maybe this improves the scrolling performance???
-            scrollDirection: Axis.horizontal,
-            child: DataTable(
-              //This is to make the data more compact
-              columnSpacing: 0,
-              //Make the data-table more compact (this basically fits 2 lines perfectly)
-              //This is definitely against best practice, but it significantly improves
-              //the readability of the table at the cost of touch target size
-              dataRowMaxHeight: 40,
-              dataRowMinHeight: 40,
-              sortAscending: _sortAscending,
-              sortColumnIndex: _currentSortColumn,
-              border: const TableBorder(
-                horizontalInside: BorderSide(width: 0, color: Colors.white10),
-                verticalInside: BorderSide(width: 0, color: Colors.white10),
-              ),
-              columns: [
-                for (final column in widget.columns)
-                  DataColumn(
-                    label: ConstrainedBox(
-                      // -16 for the sorting arrow
-                      constraints: BoxConstraints(maxWidth: column.width - 16),
-                      //Make the text smaller so that long text fits
-                      //This is more of a hack than best practice
-                      child: DefaultTextStyle(
-                        maxLines: 3,
-                        style: Theme.of(context).textTheme.bodySmall!,
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 4),
-                          child: column.item.displayValue,
-                        ),
-                      ),
-                    ),
-                    onSort: updateSort,
-                  ),
-              ],
-              rows: [
-                for (final row in widget.rows)
-                  DataRow(
-                    cells: [
-                      for (final (columnIdx, cell) in row.indexed)
-                        DataCell(
-                          SizedBox.expand(
-                            child: ConstrainedBox(
-                              constraints: BoxConstraints(
-                                maxWidth: widget.columns[columnIdx].width,
-                              ),
-                              child: Container(
-                                padding: EdgeInsets.only(left: 4, right: 4),
-                                color: () {
-                                  if (cell.exportValue == "true") {
-                                    return Colors.green;
-                                  }
-                                  if (cell.exportValue == "false") {
-                                    return Colors.red;
-                                  }
 
-                                  if (_showRainbow &&
-                                      cell.numericValue != null &&
-                                      numericMinMaxes[columnIdx] != null) {
-                                    double min = numericMinMaxes[columnIdx]!.$1;
-                                    double max = numericMinMaxes[columnIdx]!.$2;
-
-                                    return widget
-                                            .columns[columnIdx]
-                                            .largerIsBetter
-                                        ? rainbowColor(
-                                          min,
-                                          max,
-                                          cell.numericValue!,
-                                        )
-                                        : rainbowColor(
-                                          max,
-                                          min,
-                                          cell.numericValue!,
-                                        );
-                                  }
-
-                                  return cell.exportValue.length < 40
-                                      ? null
-                                      : Colors.blue.withAlpha(40);
-                                }(),
-                                child: DefaultTextStyle(
-                                  maxLines: 2,
-                                  style:
-                                      Theme.of(context).textTheme.bodyMedium!,
-                                  child: Align(
-                                    alignment:
-                                        cell.numericValue != null
-                                            ? Alignment.centerRight
-                                            : Alignment.centerLeft,
-                                    child: cell.displayValue,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          onTap:
-                              cell.exportValue.length < 40
-                                  ? null
-                                  : () {
-                                    //If the cell's export value length (basically the text of whatever the display value is)
-                                    //we will have an on-tap that will display a dialog with the complete data
-                                    showDialog(
-                                      context: context,
-                                      builder:
-                                          (context) => AlertDialog(
-                                            content: cell.displayValue,
-                                            actions: [
-                                              TextButton(
-                                                onPressed:
-                                                    () =>
-                                                        Navigator.pop(context),
-                                                child: const Text("Ok"),
-                                              ),
-                                            ],
-                                          ),
-                                    );
-                                  },
-                        ),
-                    ],
-                  ),
-              ],
-            ),
-          ),
-        ),
+        widget.shrinkWrap
+            ? SizedBox(
+              width: double.infinity,
+              height: 50 + (rows.length * 40),
+              child: dataSheetWidget,
+            )
+            : Expanded(child: dataSheetWidget),
       ],
     );
   }

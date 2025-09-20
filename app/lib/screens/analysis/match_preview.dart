@@ -98,6 +98,7 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
         children: [
           if (widget.plan != null) widget.plan!,
           DataSheet(
+            shrinkWrap: true,
             title: "Alliance Sum of Avg",
             columns: [
               DataItemColumn(DataItem.fromText("Alliance")),
@@ -150,6 +151,7 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
           ),
           const Divider(height: 42),
           DataSheet(
+            shrinkWrap: true,
             title: "Team Averages",
             columns: [
               DataItemColumn(DataItem.fromText("Team")),

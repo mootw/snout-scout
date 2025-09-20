@@ -2,7 +2,6 @@ import 'package:app/screens/analysis/match_preview.dart';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/screens/view_team_page.dart';
 import 'package:app/widgets/datasheet.dart';
-import 'package:app/widgets/datasheet_full_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -14,7 +13,7 @@ class TableTeamAveragesPage extends StatelessWidget {
     final data = context.watch<DataProvider>();
     return Scaffold(
       appBar: AppBar(),
-      body: DataSheetFullScreen(
+      body: DataSheet(
         title: 'Team Averages',
         columns: [
           DataItemColumn(DataItem.fromText("Team"), width: numericWidth),

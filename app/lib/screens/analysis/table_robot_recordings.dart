@@ -2,7 +2,6 @@ import 'package:app/widgets/datasheet.dart';
 import 'package:app/style.dart';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/screens/view_team_page.dart';
-import 'package:app/widgets/datasheet_full_screen.dart';
 import 'package:app/widgets/edit_audit.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -16,12 +15,12 @@ class TableRobotRecordingsPage extends StatelessWidget {
     final data = context.watch<DataProvider>();
     return Scaffold(
       appBar: AppBar(),
-      body: DataSheetFullScreen(
+      body: DataSheet(
         numFixedColumns: 2,
         title: 'Robot Recordings',
         //Data is a list of rows and columns
         columns: [
-          DataItemColumn(DataItem.fromText("Match"), width: 120),
+          DataItemColumn(DataItem.fromText("Match"), width: matchColumnWidth),
           DataItemColumn(DataItem.fromText("Team"), width: numericWidth),
           for (final item in data.event.config.matchscouting.processes)
             DataItemColumn(

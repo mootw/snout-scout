@@ -1,4 +1,3 @@
-import 'package:app/widgets/datasheet_full_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:app/widgets/datasheet.dart';
 import 'package:app/providers/data_provider.dart';
@@ -13,7 +12,7 @@ class TableTeamSurvey extends StatelessWidget {
     final data = context.watch<DataProvider>();
     return Scaffold(
       appBar: AppBar(),
-      body: DataSheetFullScreen(
+      body: DataSheet(
         title: 'Team Survey',
         columns: [
           DataItemColumn(DataItem.fromText("Team"), width: numericWidth),

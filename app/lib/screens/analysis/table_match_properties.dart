@@ -28,10 +28,11 @@ class TableMatchProperties extends StatelessWidget {
       appBar: AppBar(),
       body: SingleChildScrollView(
         child: DataSheet(
+          shrinkWrap: true,
           title: 'Match Data',
           //Data is a list of rows and columns
           columns: [
-            DataItemColumn(DataItem.fromText("Match")),
+            DataItemColumn(DataItem.fromText("Match"), width: matchColumnWidth),
             for (final item in data.event.config.matchscouting.properties)
               DataItemColumn.fromSurveyItem(item),
           ],

@@ -150,10 +150,14 @@ class _TeamViewPageState extends State<TeamViewPage> {
               : const Center(child: Text('No upcoming matches')),
           const Divider(),
           DataSheet(
+            shrinkWrap: true,
             title: 'Matches',
             //Data is a list of rows and columns
             columns: [
-              DataItemColumn(DataItem.fromText("Match")),
+              DataItemColumn(
+                DataItem.fromText("Match"),
+                width: matchColumnWidth,
+              ),
               for (final item in data.event.config.matchscouting.processes)
                 DataItemColumn(
                   DataItem.fromText(item.label),
@@ -281,6 +285,7 @@ class _TeamViewPageState extends State<TeamViewPage> {
               ),
               const Divider(height: 32),
               DataSheet(
+                shrinkWrap: true,
                 title: 'Metrics',
                 //Data is a list of rows and columns
                 columns: [

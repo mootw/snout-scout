@@ -188,6 +188,7 @@ class _MatchPageState extends State<MatchPage> {
           ),
           const SizedBox(height: 8),
           DataSheet(
+            shrinkWrap: true,
             title: 'Per Team Performance',
             //Data is a list of rows and columns
             columns: [
