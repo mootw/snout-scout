@@ -1,5 +1,4 @@
-import 'dart:convert';
-
+import 'package:app/screens/teams_page.dart';
 import 'package:app/services/snout_image_cache.dart';
 import 'package:app/widgets/datasheet.dart';
 import 'package:app/providers/data_provider.dart';
@@ -9,6 +8,7 @@ import 'package:app/screens/view_team_page.dart';
 import 'package:app/widgets/image_view.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
 import 'package:snout_db/config/surveyitem.dart';
 import 'package:snout_db/event/frcevent.dart';
@@ -41,54 +41,40 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
     super.initState();
     _red = widget.red;
     _blue = widget.blue;
+
+    if (_blue.isEmpty && _red.isEmpty) {
+      SchedulerBinding.instance.addPostFrameCallback((_) => _editTeamsDialog());
+    }
+  }
+
+  void _editTeamsDialog() async {
+    final MatchAlliances? result = await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => MatchPreviewAlliancePicker(
+          startingAlliances: (red: _red, blue: _blue),
+        ),
+      ),
+    );
+    if (result != null) {
+      setState(() {
+        _red = result.red.nonNulls.toList();
+        _blue = result.blue.nonNulls.toList();
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final data = context.watch<DataProvider>();
-    final redController = TextEditingController(text: json.encode(_red));
-    final blueController = TextEditingController(text: json.encode(_red));
 
     return Scaffold(
       appBar: AppBar(
-        title:
-            widget.matchLabel != null
-                ? Text("${widget.matchLabel} Preview")
-                : const Text("Match Preview"),
+        title: widget.matchLabel != null
+            ? Text("${widget.matchLabel} Preview")
+            : const Text("Match Preview"),
         actions: [
           TextButton(
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder:
-                    (context) => AlertDialog(
-                      title: const Text("Set Teams"),
-                      content: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Text("Red"),
-                          TextField(controller: redController),
-                          const SizedBox(height: 16),
-                          const Text("Blue"),
-                          TextField(controller: blueController),
-                          FilledButton(
-                            onPressed: () {
-                              setState(() {
-                                _red = List<int>.from(
-                                  json.decode(redController.text),
-                                );
-                                _blue = List<int>.from(
-                                  json.decode(blueController.text),
-                                );
-                              });
-                            },
-                            child: Text("Submit"),
-                          ),
-                        ],
-                      ),
-                    ),
-              );
-            },
+            onPressed: _editTeamsDialog,
             child: const Text("Edit Teams"),
           ),
         ],
@@ -103,10 +89,7 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
             columns: [
               DataItemColumn(DataItem.fromText("Alliance")),
               for (final item in data.event.config.matchscouting.processes)
-                DataItemColumn(
-                  DataItem.fromText(item.label),
-                  width: numericWidth,
-                ),
+                DataItemColumn.fromProcess(item),
             ],
             rows: [
               [
@@ -154,13 +137,9 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
             shrinkWrap: true,
             title: "Team Averages",
             columns: [
-              DataItemColumn(DataItem.fromText("Team")),
+              DataItemColumn.teamHeader(),
               for (final item in data.event.config.matchscouting.processes)
-                DataItemColumn(
-                  DataItem.fromText(item.label),
-                  largerIsBetter: item.isLargerBetter,
-                  width: numericWidth,
-                ),
+                DataItemColumn.fromProcess(item),
               for (final item in data.event.config.matchscouting.survey)
                 DataItemColumn.fromSurveyItem(item),
             ],
@@ -177,14 +156,12 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                           ),
                         ),
                       ),
-                      onPressed:
-                          () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder:
-                                  (context) => TeamViewPage(teamNumber: team),
-                            ),
-                          ),
+                      onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => TeamViewPage(teamNumber: team),
+                        ),
+                      ),
                     ),
                     exportValue: team.toString(),
                     sortingValue: team,
@@ -218,49 +195,46 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                             height: 250,
                             child:
                                 context
-                                            .read<DataProvider>()
-                                            .event
-                                            .pitscouting[team
-                                            .toString()]?[robotPictureReserved] !=
-                                        null
-                                    ? AspectRatio(
-                                      aspectRatio: 1,
-                                      child: ImageViewer(
-                                        child: Image(
-                                          image: snoutImageCache.getCached(
-                                            context
-                                                .read<DataProvider>()
-                                                .event
-                                                .pitscouting[team
-                                                .toString()]![robotPictureReserved]!,
-                                          ),
-                                          fit: BoxFit.cover,
+                                        .read<DataProvider>()
+                                        .event
+                                        .pitscouting[team
+                                        .toString()]?[robotPictureReserved] !=
+                                    null
+                                ? AspectRatio(
+                                    aspectRatio: 1,
+                                    child: ImageViewer(
+                                      child: Image(
+                                        image: snoutImageCache.getCached(
+                                          context
+                                              .read<DataProvider>()
+                                              .event
+                                              .pitscouting[team
+                                              .toString()]![robotPictureReserved]!,
                                         ),
+                                        fit: BoxFit.cover,
                                       ),
-                                    )
-                                    : const Text("No image"),
+                                    ),
+                                  )
+                                : const Text("No image"),
                           ),
                           TextButton(
-                            onPressed:
-                                () => Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder:
-                                        (context) =>
-                                            TeamViewPage(teamNumber: team),
-                                  ),
-                                ),
+                            onPressed: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    TeamViewPage(teamNumber: team),
+                              ),
+                            ),
                             child: Text(
                               team.toString(),
-                              style: Theme.of(
-                                context,
-                              ).textTheme.titleLarge?.copyWith(
-                                color: getAllianceUIColor(
-                                  _red.contains(team)
-                                      ? Alliance.red
-                                      : Alliance.blue,
-                                ),
-                              ),
+                              style: Theme.of(context).textTheme.titleLarge
+                                  ?.copyWith(
+                                    color: getAllianceUIColor(
+                                      _red.contains(team)
+                                          ? Alliance.red
+                                          : Alliance.blue,
+                                    ),
+                                  ),
                             ),
                           ),
                           Column(
@@ -272,8 +246,8 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                               PathsViewer(
                                 size: 280,
                                 paths: [
-                                  for (final match in data.event
-                                      .teamRecordedMatches(team))
+                                  for (final match
+                                      in data.event.teamRecordedMatches(team))
                                     (
                                       label:
                                           match.value
@@ -283,15 +257,12 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                                               )
                                               ?.label ??
                                           match.key,
-                                      path:
-                                          match.value.robot[team.toString()]!
-                                              .timelineInterpolatedBlueNormalized(
-                                                data.event.config.fieldStyle,
-                                              )
-                                              .where(
-                                                (element) => element.isInAuto,
-                                              )
-                                              .toList(),
+                                      path: match.value.robot[team.toString()]!
+                                          .timelineInterpolatedBlueNormalized(
+                                            data.event.config.fieldStyle,
+                                          )
+                                          .where((element) => element.isInAuto)
+                                          .toList(),
                                     ),
                                 ],
                               ),
@@ -306,20 +277,18 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                                 style: Theme.of(context).textTheme.titleMedium,
                               ),
                               FieldHeatMap(
-                                events:
-                                    [
-                                      for (final match in data.event
-                                          .teamRecordedMatches(team))
-                                        match.value.robot[team.toString()]!
-                                            .timelineInterpolatedBlueNormalized(
-                                              data.event.config.fieldStyle,
-                                            )
-                                            .where(
-                                              (element) =>
-                                                  element.isPositionEvent,
-                                            )
-                                            .firstOrNull,
-                                    ].nonNulls.toList(),
+                                events: [
+                                  for (final match
+                                      in data.event.teamRecordedMatches(team))
+                                    match.value.robot[team.toString()]!
+                                        .timelineInterpolatedBlueNormalized(
+                                          data.event.config.fieldStyle,
+                                        )
+                                        .where(
+                                          (element) => element.isPositionEvent,
+                                        )
+                                        .firstOrNull,
+                                ].nonNulls.toList(),
                               ),
                             ],
                           ),
@@ -329,8 +298,8 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                           ),
                           FieldHeatMap(
                             events: [
-                              for (final match in data.event
-                                  .teamRecordedMatches(team))
+                              for (final match
+                                  in data.event.teamRecordedMatches(team))
                                 ...match.value.robot[team.toString()]!
                                     .timelineInterpolatedBlueNormalized(
                                       data.event.config.fieldStyle,
@@ -345,13 +314,14 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                                 const SizedBox(height: 8),
                                 Text(
                                   eventType.label,
-                                  style:
-                                      Theme.of(context).textTheme.titleMedium,
+                                  style: Theme.of(
+                                    context,
+                                  ).textTheme.titleMedium,
                                 ),
                                 FieldHeatMap(
                                   events: [
-                                    for (final match in data.event
-                                        .teamRecordedMatches(team))
+                                    for (final match
+                                        in data.event.teamRecordedMatches(team))
                                       ...?match.value.robot[team.toString()]
                                           ?.timelineBlueNormalized(
                                             data.event.config.fieldStyle,
@@ -371,20 +341,18 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                                 style: Theme.of(context).textTheme.titleMedium,
                               ),
                               FieldHeatMap(
-                                events:
-                                    [
-                                      for (final match in data.event
-                                          .teamRecordedMatches(team))
-                                        match.value.robot[team.toString()]!
-                                            .timelineInterpolatedBlueNormalized(
-                                              data.event.config.fieldStyle,
-                                            )
-                                            .where(
-                                              (element) =>
-                                                  element.isPositionEvent,
-                                            )
-                                            .lastOrNull,
-                                    ].nonNulls.toList(),
+                                events: [
+                                  for (final match
+                                      in data.event.teamRecordedMatches(team))
+                                    match.value.robot[team.toString()]!
+                                        .timelineInterpolatedBlueNormalized(
+                                          data.event.config.fieldStyle,
+                                        )
+                                        .where(
+                                          (element) => element.isPositionEvent,
+                                        )
+                                        .lastOrNull,
+                                ].nonNulls.toList(),
                               ),
                             ],
                           ),
@@ -397,8 +365,8 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                               ),
                               FieldHeatMap(
                                 events: [
-                                  for (final match in data.event
-                                      .teamRecordedMatches(team))
+                                  for (final match
+                                      in data.event.teamRecordedMatches(team))
                                     ...match.value.robot[team.toString()]!
                                         .timelineInterpolatedBlueNormalized(
                                           data.event.config.fieldStyle,
@@ -435,8 +403,11 @@ DataItem teamPostGameSurveyTableDisplay(
     final Map<String, double> toReturn = {};
 
     for (final match in recordedMatches) {
-      final surveyValue =
-          match.value.robot[team.toString()]!.survey[surveyItem.id]?.toString();
+      final surveyValue = match
+          .value
+          .robot[team.toString()]!
+          .survey[surveyItem.id]
+          ?.toString();
       if (surveyValue == null) {
         continue;
       }
@@ -466,8 +437,11 @@ DataItem teamPostGameSurveyTableDisplay(
   String result = "";
   // Reversed to display the most recent match first in the table
   for (final match in recordedMatches.reversed) {
-    final surveyValue =
-        match.value.robot[team.toString()]!.survey[surveyItem.id]?.toString();
+    final surveyValue = match
+        .value
+        .robot[team.toString()]!
+        .survey[surveyItem.id]
+        ?.toString();
 
     if (surveyValue == null) {
       continue;
@@ -478,4 +452,181 @@ DataItem teamPostGameSurveyTableDisplay(
   }
 
   return DataItem.fromText(result);
+}
+
+typedef MatchAlliances = ({List<int> red, List<int> blue});
+
+class MatchPreviewAlliancePicker extends StatefulWidget {
+  const MatchPreviewAlliancePicker({super.key, this.startingAlliances});
+
+  final MatchAlliances? startingAlliances;
+
+  @override
+  State<MatchPreviewAlliancePicker> createState() =>
+      MatchPreviewAlliancePickerState();
+}
+
+class MatchPreviewAlliancePickerState
+    extends State<MatchPreviewAlliancePicker> {
+  late MatchAlliances _alliances;
+
+  int? _selectedTeam;
+
+  @override
+  void initState() {
+    super.initState();
+    _alliances = widget.startingAlliances != null
+        ? (
+            blue: widget.startingAlliances!.blue.toList(),
+            red: widget.startingAlliances!.red.toList(),
+          )
+        : (blue: [], red: []);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final snoutData = context.watch<DataProvider>();
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Pick Alliances'),
+        actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.pop(context, _alliances);
+            },
+            icon: Icon(Icons.save),
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          Row(
+            children: [
+              for (int i = 0; i < _alliances.blue.length; i++)
+                Expanded(
+                  child: Container(
+                    color: Colors.blue,
+                    child: Column(
+                      children: [
+                        Text('Blue ${i + 1}'),
+                        Text(_alliances.blue[i].toString()),
+                        IconButton(
+                          onPressed: () {
+                            setState(() {
+                              _alliances.blue.removeAt(i);
+                            });
+                          },
+                          icon: Icon(Icons.close),
+                        ),
+                        if (_selectedTeam != null)
+                          FilledButton(
+                            onPressed: () {
+                              setState(() {
+                                _alliances.blue[i] = _selectedTeam!;
+                                _selectedTeam = null;
+                              });
+                            },
+                            child: Text('SET $_selectedTeam'),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              if (_selectedTeam != null)
+                Expanded(
+                  child: Column(
+                    children: [
+                      Text('Blue'),
+                      if (_selectedTeam != null)
+                        FilledButton(
+                          onPressed: () {
+                            setState(() {
+                              _alliances.blue.add(_selectedTeam!);
+                              _selectedTeam = null;
+                            });
+                          },
+                          child: Text('ADD $_selectedTeam'),
+                        ),
+                    ],
+                  ),
+                ),
+
+              for (int i = 0; i < _alliances.red.length; i++)
+                Expanded(
+                  child: Container(
+                    color: Colors.red,
+                    child: Column(
+                      children: [
+                        Text('Red ${i + 1}'),
+                        Text(_alliances.red[i].toString()),
+                        IconButton(
+                          onPressed: () {
+                            setState(() {
+                              _alliances.red.removeAt(i);
+                            });
+                          },
+                          icon: Icon(Icons.close),
+                        ),
+                        if (_selectedTeam != null)
+                          FilledButton(
+                            onPressed: () {
+                              setState(() {
+                                _alliances.red[i] = _selectedTeam!;
+                                _selectedTeam = null;
+                              });
+                            },
+                            child: Text('SET $_selectedTeam'),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              if (_selectedTeam != null)
+                Expanded(
+                  child: Column(
+                    children: [
+                      Text('Red'),
+                      if (_selectedTeam != null)
+                        FilledButton(
+                          onPressed: () {
+                            setState(() {
+                              _alliances.red.add(_selectedTeam!);
+                              _selectedTeam = null;
+                            });
+                          },
+                          child: Text('ADD $_selectedTeam'),
+                        ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+
+          Expanded(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.vertical,
+              child: Wrap(
+                children: [
+                  for (final team in snoutData.event.teams)
+                    TeamListTile(
+                      teamNumber: team,
+                      onTap: () {
+                        setState(() {
+                          if (_selectedTeam == team) {
+                            _selectedTeam = null;
+                          } else {
+                            _selectedTeam = team;
+                          }
+                        });
+                      },
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }

@@ -32,14 +32,14 @@ class TableMatchProperties extends StatelessWidget {
           title: 'Match Data',
           //Data is a list of rows and columns
           columns: [
-            DataItemColumn(DataItem.fromText("Match"), width: matchColumnWidth),
+            DataItemColumn.matchHeader(),
             for (final item in data.event.config.matchscouting.properties)
               DataItemColumn.fromSurveyItem(item),
           ],
           rows: [
             for (final match in allMatchData)
               [
-                DataItem.match(
+                DataItem.fromMatch(
                   context: context,
                   key: match.$3,
                   label: match.$1?.label ?? match.$3,

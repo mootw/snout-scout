@@ -20,14 +20,10 @@ class TableRobotRecordingsPage extends StatelessWidget {
         title: 'Robot Recordings',
         //Data is a list of rows and columns
         columns: [
-          DataItemColumn(DataItem.fromText("Match"), width: matchColumnWidth),
-          DataItemColumn(DataItem.fromText("Team"), width: numericWidth),
+          DataItemColumn.matchHeader(),
+          DataItemColumn.teamHeader(),
           for (final item in data.event.config.matchscouting.processes)
-            DataItemColumn(
-              DataItem.fromText(item.label),
-              largerIsBetter: item.isLargerBetter,
-              width: numericWidth,
-            ),
+            DataItemColumn.fromProcess(item),
           for (final item in data.event.config.matchscouting.survey)
             DataItemColumn.fromSurveyItem(item),
           DataItemColumn(DataItem.fromText("Scout")),
@@ -36,7 +32,7 @@ class TableRobotRecordingsPage extends StatelessWidget {
           for (final match in data.event.matchesSorted().reversed)
             for (final robot in match.value.robot.entries)
               [
-                DataItem.match(
+                DataItem.fromMatch(
                   context: context,
                   key: match.key,
                   label:

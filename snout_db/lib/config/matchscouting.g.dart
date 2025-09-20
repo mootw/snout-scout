@@ -7,27 +7,34 @@ part of 'matchscouting.dart';
 // **************************************************************************
 
 MatchScouting _$MatchScoutingFromJson(Map json) => MatchScouting(
-      events: (json['events'] as List<dynamic>?)
-              ?.map((e) => MatchEventConfig.fromJson(
-                  Map<String, dynamic>.from(e as Map)))
-              .toList() ??
-          const [],
-      processes: (json['processes'] as List<dynamic>?)
-              ?.map((e) => MatchResultsProcess.fromJson(
-                  Map<String, dynamic>.from(e as Map)))
-              .toList() ??
-          const [],
-      survey: (json['survey'] as List<dynamic>?)
-              ?.map((e) =>
-                  SurveyItem.fromJson(Map<String, dynamic>.from(e as Map)))
-              .toList() ??
-          const [],
-      properties: (json['properties'] as List<dynamic>?)
-              ?.map((e) =>
-                  SurveyItem.fromJson(Map<String, dynamic>.from(e as Map)))
-              .toList() ??
-          const [],
-    );
+  events:
+      (json['events'] as List<dynamic>?)
+          ?.map(
+            (e) =>
+                MatchEventConfig.fromJson(Map<String, dynamic>.from(e as Map)),
+          )
+          .toList() ??
+      const [],
+  processes:
+      (json['processes'] as List<dynamic>?)
+          ?.map(
+            (e) => MatchResultsProcess.fromJson(
+              Map<String, dynamic>.from(e as Map),
+            ),
+          )
+          .toList() ??
+      const [],
+  survey:
+      (json['survey'] as List<dynamic>?)
+          ?.map((e) => SurveyItem.fromJson(Map<String, dynamic>.from(e as Map)))
+          .toList() ??
+      const [],
+  properties:
+      (json['properties'] as List<dynamic>?)
+          ?.map((e) => SurveyItem.fromJson(Map<String, dynamic>.from(e as Map)))
+          .toList() ??
+      const [],
+);
 
 Map<String, dynamic> _$MatchScoutingToJson(MatchScouting instance) =>
     <String, dynamic>{

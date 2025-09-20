@@ -16,13 +16,9 @@ class TableTeamAveragesPage extends StatelessWidget {
       body: DataSheet(
         title: 'Team Averages',
         columns: [
-          DataItemColumn(DataItem.fromText("Team"), width: numericWidth),
+          DataItemColumn.teamHeader(),
           for (final item in data.event.config.matchscouting.processes)
-            DataItemColumn(
-              DataItem.fromText(item.label),
-              largerIsBetter: item.isLargerBetter,
-              width: numericWidth,
-            ),
+            DataItemColumn.fromProcess(item),
           for (final item in data.event.config.matchscouting.survey)
             DataItemColumn.fromSurveyItem(item),
         ],

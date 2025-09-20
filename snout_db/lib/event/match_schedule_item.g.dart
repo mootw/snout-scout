@@ -7,16 +7,12 @@ part of 'match_schedule_item.dart';
 // **************************************************************************
 
 MatchScheduleItem _$MatchScheduleItemFromJson(Map json) => MatchScheduleItem(
-      id: json['id'] as String,
-      label: json['label'] as String,
-      scheduledTime: DateTime.parse(json['scheduledTime'] as String),
-      red: (json['red'] as List<dynamic>)
-          .map((e) => (e as num).toInt())
-          .toList(),
-      blue: (json['blue'] as List<dynamic>)
-          .map((e) => (e as num).toInt())
-          .toList(),
-    );
+  id: json['id'] as String,
+  label: json['label'] as String,
+  scheduledTime: DateTime.parse(json['scheduledTime'] as String),
+  red: (json['red'] as List<dynamic>).map((e) => (e as num).toInt()).toList(),
+  blue: (json['blue'] as List<dynamic>).map((e) => (e as num).toInt()).toList(),
+);
 
 Map<String, dynamic> _$MatchScheduleItemToJson(MatchScheduleItem instance) =>
     <String, dynamic>{

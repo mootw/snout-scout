@@ -8,6 +8,7 @@ import 'package:app/widgets/image_view.dart';
 import 'package:csv/csv.dart';
 import 'package:flutter/material.dart';
 import 'package:download/download.dart';
+import 'package:snout_db/config/matchresults_process.dart';
 import 'package:snout_db/config/surveyitem.dart';
 import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 
@@ -19,53 +20,52 @@ class DataItem {
     : displayValue = Text(
         number == null || number.isNaN ? noDataText : numDisplay(number),
       ),
-      exportValue =
-          number == null || number.isNaN ? noDataText : number.toString(),
+      exportValue = number == null || number.isNaN
+          ? noDataText
+          : number.toString(),
       //negative infinity will sort no data to the bottom by default
-      sortingValue =
-          number == null || number.isNaN ? double.negativeInfinity : number,
+      sortingValue = number == null || number.isNaN
+          ? double.negativeInfinity
+          : number,
       numericValue = number;
 
   DataItem.fromErrorNumber(({double? value, String? error}) number)
-    : displayValue =
-          number.error != null
-              ? Text(number.error!, style: const TextStyle(color: warningColor))
-              : (Text(
-                number.value == null || number.value!.isNaN
-                    ? noDataText
-                    : numDisplay(number.value),
-              )),
+    : displayValue = number.error != null
+          ? Text(number.error!, style: const TextStyle(color: warningColor))
+          : (Text(
+              number.value == null || number.value!.isNaN
+                  ? noDataText
+                  : numDisplay(number.value),
+            )),
       //TODO If the error is not passed into the export value the table will not
       //know if the value is long enough to wrap. This is problematic and is
       //a sign of poorly written code.
-      exportValue =
-          number.error != null
-              ? number.error!
-              : (number.value == null || number.value!.isNaN
-                  ? noDataText
-                  : number.value.toString()),
+      exportValue = number.error != null
+          ? number.error!
+          : (number.value == null || number.value!.isNaN
+                ? noDataText
+                : number.value.toString()),
       //negative infinity will sort no data to the bottom by default
-      sortingValue =
-          number.value == null || number.value!.isNaN
-              ? double.negativeInfinity
-              : number.value!,
-      numericValue =
-          number.value == null || number.value!.isNaN ? null : number.value!;
+      sortingValue = number.value == null || number.value!.isNaN
+          ? double.negativeInfinity
+          : number.value!,
+      numericValue = number.value == null || number.value!.isNaN
+          ? null
+          : number.value!;
 
   // This is a builder because why not
   static DataItem fromSurveyItem(dynamic value, SurveyItem survey) {
     switch (survey.type) {
       case SurveyItemType.picture:
         return DataItem(
-          displayValue:
-              value == null
-                  ? const SizedBox()
-                  : ImageViewer(
-                    child: Image(
-                      image: snoutImageCache.getCached(value),
-                      fit: BoxFit.cover,
-                    ),
+          displayValue: value == null
+              ? const SizedBox()
+              : ImageViewer(
+                  child: Image(
+                    image: snoutImageCache.getCached(value),
+                    fit: BoxFit.cover,
                   ),
+                ),
           exportValue: value == null ? noDataText : 'Image',
           sortingValue: value == null ? 0 : 1,
         );
@@ -91,7 +91,14 @@ class DataItem {
       sortingValue = text?.toLowerCase() ?? "",
       numericValue = null;
 
-  DataItem.match({
+  DataItem.fromTeam(String? text)
+    : displayValue = Text(text ?? noDataText),
+      exportValue = text ?? noDataText,
+      //Empty string will sort to the bottom by default
+      sortingValue = text?.toLowerCase() ?? "",
+      numericValue = null;
+
+  DataItem.fromMatch({
     required BuildContext context,
     required String key,
     required String label,
@@ -99,11 +106,10 @@ class DataItem {
     DateTime? time,
   }) : displayValue = TextButton(
          child: Text(label, style: TextStyle(color: color)),
-         onPressed:
-             () => Navigator.push(
-               context,
-               MaterialPageRoute(builder: (context) => MatchPage(matchid: key)),
-             ),
+         onPressed: () => Navigator.push(
+           context,
+           MaterialPageRoute(builder: (context) => MatchPage(matchid: key)),
+         ),
        ),
        exportValue = label,
        sortingValue = time ?? DateTime(2000),
@@ -149,6 +155,27 @@ class DataItemColumn {
     );
   }
 
+  factory DataItemColumn.fromProcess(MatchResultsProcess item) {
+    return DataItemColumn(
+      DataItem.fromText(item.label),
+      largerIsBetter: item.isLargerBetter,
+      width: numericWidth,
+    );
+  }
+
+  factory DataItemColumn.teamHeader() {
+    return DataItemColumn(
+      DataItem.fromText('Team'),
+      width: 75,
+      // something something something
+      largerIsBetter: false,
+    );
+  }
+
+  factory DataItemColumn.matchHeader() {
+    return DataItemColumn(DataItem.fromText('Match'), width: matchColumnWidth);
+  }
+
   @override
   String toString() =>
       'DataItemWithHints(label:${item.exportValue} largerIsBetter: $largerIsBetter)';
@@ -187,7 +214,10 @@ const double numericWidth = 80;
 // Default, usually used for text
 const double defaultColumnWidth = 160;
 // used for match buttons in tables
-const double matchColumnWidth = 120;
+const double matchColumnWidth = 100;
+
+const double dataCellHeight = 40;
+const double headerCellHeight = 50;
 
 //Creates a data-table that can be scrolled horizontally and can export to csv
 class _DataSheetState extends State<DataSheet> {
@@ -274,7 +304,9 @@ class _DataSheetState extends State<DataSheet> {
         },
         rowBuilder: (row) {
           return Span(
-            extent: FixedTableSpanExtent(row == 0 ? 50 : 40),
+            extent: FixedTableSpanExtent(
+              row == 0 ? headerCellHeight : dataCellHeight,
+            ),
             backgroundDecoration: TableSpanDecoration(
               border: TableSpanBorder(
                 trailing: BorderSide(color: Colors.white10),
@@ -323,26 +355,24 @@ class _DataSheetState extends State<DataSheet> {
           final cellItem = rows[cell.row - 1][cell.column];
           return TableViewCell(
             child: InkWell(
-              onTap:
-                  cellItem.exportValue.length < 40
-                      ? null
-                      : () {
-                        //If the cell's export value length (basically the text of whatever the display value is)
-                        //we will have an on-tap that will display a dialog with the complete data
-                        showDialog(
-                          context: context,
-                          builder:
-                              (context) => AlertDialog(
-                                content: cellItem.displayValue,
-                                actions: [
-                                  TextButton(
-                                    onPressed: () => Navigator.pop(context),
-                                    child: const Text("Ok"),
-                                  ),
-                                ],
-                              ),
-                        );
-                      },
+              onTap: cellItem.exportValue.length < 40
+                  ? null
+                  : () {
+                      //If the cell's export value length (basically the text of whatever the display value is)
+                      //we will have an on-tap that will display a dialog with the complete data
+                      showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          content: cellItem.displayValue,
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: const Text("Ok"),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
               child: Container(
                 padding: EdgeInsets.only(left: 4, right: 4),
                 color: () {
@@ -372,10 +402,9 @@ class _DataSheetState extends State<DataSheet> {
                   maxLines: 2,
                   style: Theme.of(context).textTheme.bodyMedium!,
                   child: Align(
-                    alignment:
-                        cellItem.numericValue != null
-                            ? Alignment.centerRight
-                            : Alignment.centerLeft,
+                    alignment: cellItem.numericValue != null
+                        ? Alignment.centerRight
+                        : Alignment.centerLeft,
                     child: cellItem.displayValue,
                   ),
                 ),
@@ -399,15 +428,15 @@ class _DataSheetState extends State<DataSheet> {
                   '${widget.title}',
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
-              SizedBox(width: 32),
-              Checkbox(
-                value: _showRainbow,
-                onChanged:
-                    (newValue) => setState(() {
-                      _showRainbow = newValue!;
-                    }),
-              ),
-              Text("Rainbow"),
+              SizedBox(width: 16),
+              // Checkbox(
+              //   value: _showRainbow,
+              //   onChanged:
+              //       (newValue) => setState(() {
+              //         _showRainbow = newValue!;
+              //       }),
+              // ),
+              // Text("Rainbow"),
               SizedBox(width: 8),
               TextButton(
                 onPressed: () async {
@@ -432,10 +461,10 @@ class _DataSheetState extends State<DataSheet> {
 
         widget.shrinkWrap
             ? SizedBox(
-              width: double.infinity,
-              height: 50 + (rows.length * 40),
-              child: dataSheetWidget,
-            )
+                width: double.infinity,
+                height: headerCellHeight + (rows.length * dataCellHeight),
+                child: dataSheetWidget,
+              )
             : Expanded(child: dataSheetWidget),
       ],
     );

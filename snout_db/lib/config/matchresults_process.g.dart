@@ -16,11 +16,11 @@ MatchResultsProcess _$MatchResultsProcessFromJson(Map json) =>
     );
 
 Map<String, dynamic> _$MatchResultsProcessToJson(
-        MatchResultsProcess instance) =>
-    <String, dynamic>{
-      'docs': instance.docs,
-      'id': instance.id,
-      'label': instance.label,
-      'expression': instance.expression,
-      'isLargerBetter': instance.isLargerBetter,
-    };
+  MatchResultsProcess instance,
+) => <String, dynamic>{
+  'docs': instance.docs,
+  'id': instance.id,
+  'label': instance.label,
+  'expression': instance.expression,
+  'isLargerBetter': instance.isLargerBetter,
+};

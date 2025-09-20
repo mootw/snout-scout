@@ -57,7 +57,8 @@ class _KioskState extends State<Kiosk> {
         ChangeNotifierProvider<DataProvider>(
           key: Key(widget.dataSource.toString()),
           // Loads the dataprovider in a cleanse mode which filters out some data
-          create: (_) => DataProvider(widget.dataSource, widget.settings.safeIds),
+          create:
+              (_) => DataProvider(widget.dataSource, widget.settings.safeIds),
         ),
       ],
       child: Column(

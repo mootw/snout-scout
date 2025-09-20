@@ -7,25 +7,27 @@ part of 'eventconfig.dart';
 // **************************************************************************
 
 EventConfig _$EventConfigFromJson(Map json) => EventConfig(
-      name: json['name'] as String,
-      team: (json['team'] as num).toInt(),
-      tbaEventId: json['tbaEventId'] as String?,
-      tbaSecretKey: json['tbaSecretKey'] as String?,
-      fieldStyle:
-          $enumDecodeNullable(_$FieldStyleEnumMap, json['fieldStyle']) ??
-              FieldStyle.rotated,
-      pitscouting: (json['pitscouting'] as List<dynamic>?)
-              ?.map((e) =>
-                  SurveyItem.fromJson(Map<String, dynamic>.from(e as Map)))
-              .toList() ??
-          const [],
-      matchscouting: json['matchscouting'] == null
+  name: json['name'] as String,
+  team: (json['team'] as num).toInt(),
+  tbaEventId: json['tbaEventId'] as String?,
+  tbaSecretKey: json['tbaSecretKey'] as String?,
+  fieldStyle:
+      $enumDecodeNullable(_$FieldStyleEnumMap, json['fieldStyle']) ??
+      FieldStyle.rotated,
+  pitscouting:
+      (json['pitscouting'] as List<dynamic>?)
+          ?.map((e) => SurveyItem.fromJson(Map<String, dynamic>.from(e as Map)))
+          .toList() ??
+      const [],
+  matchscouting:
+      json['matchscouting'] == null
           ? const MatchScouting()
           : MatchScouting.fromJson(
-              Map<String, dynamic>.from(json['matchscouting'] as Map)),
-      docs: json['docs'] as String? ?? '',
-      fieldImage: json['fieldImage'] as String,
-    );
+            Map<String, dynamic>.from(json['matchscouting'] as Map),
+          ),
+  docs: json['docs'] as String? ?? '',
+  fieldImage: json['fieldImage'] as String,
+);
 
 Map<String, dynamic> _$EventConfigToJson(EventConfig instance) =>
     <String, dynamic>{

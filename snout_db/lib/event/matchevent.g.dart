@@ -7,11 +7,11 @@ part of 'matchevent.dart';
 // **************************************************************************
 
 MatchEvent _$MatchEventFromJson(Map json) => MatchEvent(
-      time: (json['time'] as num).toInt(),
-      id: json['id'] as String,
-      x: (json['x'] as num).toDouble(),
-      y: (json['y'] as num).toDouble(),
-    );
+  time: (json['time'] as num).toInt(),
+  id: json['id'] as String,
+  x: (json['x'] as num).toDouble(),
+  y: (json['y'] as num).toDouble(),
+);
 
 Map<String, dynamic> _$MatchEventToJson(MatchEvent instance) =>
     <String, dynamic>{

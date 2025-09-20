@@ -7,12 +7,13 @@ part of 'robotmatchresults.dart';
 // **************************************************************************
 
 RobotMatchResults _$RobotMatchResultsFromJson(Map json) => RobotMatchResults(
-      alliance: $enumDecode(_$AllianceEnumMap, json['alliance']),
-      survey: Map<String, dynamic>.from(json['survey'] as Map),
-      timeline: (json['timeline'] as List<dynamic>)
+  alliance: $enumDecode(_$AllianceEnumMap, json['alliance']),
+  survey: Map<String, dynamic>.from(json['survey'] as Map),
+  timeline:
+      (json['timeline'] as List<dynamic>)
           .map((e) => MatchEvent.fromJson(e as Map))
           .toList(),
-    );
+);
 
 Map<String, dynamic> _$RobotMatchResultsToJson(RobotMatchResults instance) =>
     <String, dynamic>{

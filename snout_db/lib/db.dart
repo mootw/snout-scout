@@ -25,9 +25,7 @@ class SnoutDB {
   /// rather we need to store the entire history of the database. for convenience
   /// a client can request the latest state, or patches, or both from the server.
   /// other metadata might get stored here too.
-  SnoutDB({
-    required this.patches,
-  }) : _event = FRCEvent.fromPatches(patches);
+  SnoutDB({required this.patches}) : _event = FRCEvent.fromPatches(patches);
 
   factory SnoutDB.fromJson(Map<String, dynamic> json) =>
       _$SnoutDBFromJson(json);

@@ -154,16 +154,9 @@ class _TeamViewPageState extends State<TeamViewPage> {
             title: 'Matches',
             //Data is a list of rows and columns
             columns: [
-              DataItemColumn(
-                DataItem.fromText("Match"),
-                width: matchColumnWidth,
-              ),
+              DataItemColumn.matchHeader(),
               for (final item in data.event.config.matchscouting.processes)
-                DataItemColumn(
-                  DataItem.fromText(item.label),
-                  largerIsBetter: item.isLargerBetter,
-                  width: numericWidth,
-                ),
+                DataItemColumn.fromProcess(item),
               for (final pitSurvey in data.event.config.matchscouting.survey)
                 DataItemColumn.fromSurveyItem(pitSurvey),
               DataItemColumn(DataItem.fromText("Scout")),
@@ -184,7 +177,7 @@ class _TeamViewPageState extends State<TeamViewPage> {
                         : a.$1?.compareTo(b.$1!) ?? 0,
               ))
                 [
-                  DataItem.match(
+                  DataItem.fromMatch(
                     context: context,
                     label: match.$1?.label ?? match.$3,
                     key: match.$3,

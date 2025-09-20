@@ -7,10 +7,10 @@ part of 'matchresults.dart';
 // **************************************************************************
 
 MatchResultValues _$MatchResultValuesFromJson(Map json) => MatchResultValues(
-      time: DateTime.parse(json['time'] as String),
-      redScore: (json['redScore'] as num).toInt(),
-      blueScore: (json['blueScore'] as num).toInt(),
-    );
+  time: DateTime.parse(json['time'] as String),
+  redScore: (json['redScore'] as num).toInt(),
+  blueScore: (json['blueScore'] as num).toInt(),
+);
 
 Map<String, dynamic> _$MatchResultValuesToJson(MatchResultValues instance) =>
     <String, dynamic>{

@@ -4,6 +4,7 @@ import 'package:app/durationformat.dart';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/screens/scout_leaderboard.dart';
 import 'package:app/screens/teams_page.dart';
+import 'package:app/screens/view_team_page.dart';
 import 'package:app/widgets/match_card.dart';
 import 'package:app/widgets/scout_status.dart';
 import 'package:app/widgets/timeduration.dart';
@@ -51,15 +52,14 @@ class _DashboardPageState extends State<DashboardPage> {
 
     final nextMatch = snoutData.event.nextMatch;
 
-    final teamsInUpcomingMatches =
-        snoutData.event
-            .matchesWithTeam(snoutData.event.config.team)
-            .reversed
-            .where((match) => match.isComplete(snoutData.event) == false)
-            .fold(<int>[], (last, next) => [...last, ...next.blue, ...next.red])
-            // Do not include our team
-            .where((team) => team != snoutData.event.config.team)
-            .toSet();
+    final teamsInUpcomingMatches = snoutData.event
+        .matchesWithTeam(snoutData.event.config.team)
+        .reversed
+        .where((match) => match.isComplete(snoutData.event) == false)
+        .fold(<int>[], (last, next) => [...last, ...next.blue, ...next.red])
+        // Do not include our team
+        .where((team) => team != snoutData.event.config.team)
+        .toSet();
 
     final numberOfRecordedMatchesByTeam = snoutData.event.teams
         .map(
@@ -155,7 +155,18 @@ class _DashboardPageState extends State<DashboardPage> {
             spacing: 8,
             children: [
               for (final team in teamsNeedingHelp)
-                TeamListTile(teamNumber: team.key),
+                TeamListTile(
+                  teamNumber: team.key,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            TeamViewPage(teamNumber: team.key),
+                      ),
+                    );
+                  },
+                ),
             ],
           ),
         ),
@@ -174,7 +185,18 @@ class _DashboardPageState extends State<DashboardPage> {
             spacing: 8,
             children: [
               for (final team in teamsWithInsufficientPitData)
-                TeamListTile(teamNumber: team.key),
+                TeamListTile(
+                  teamNumber: team.key,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            TeamViewPage(teamNumber: team.key),
+                      ),
+                    );
+                  },
+                ),
             ],
           ),
         ),
@@ -193,7 +215,18 @@ class _DashboardPageState extends State<DashboardPage> {
             spacing: 8,
             children: [
               for (final team in teamsWithInsufficientMatchRecordings)
-                TeamListTile(teamNumber: team.key),
+                TeamListTile(
+                  teamNumber: team.key,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            TeamViewPage(teamNumber: team.key),
+                      ),
+                    );
+                  },
+                ),
             ],
           ),
         ),
@@ -211,7 +244,17 @@ class _DashboardPageState extends State<DashboardPage> {
             spacing: 8,
             children: [
               for (final team in teamsInUpcomingMatches)
-                TeamListTile(teamNumber: team),
+                TeamListTile(
+                  teamNumber: team,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => TeamViewPage(teamNumber: team),
+                      ),
+                    );
+                  },
+                ),
             ],
           ),
         ),

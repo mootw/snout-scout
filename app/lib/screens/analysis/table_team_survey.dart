@@ -15,7 +15,7 @@ class TableTeamSurvey extends StatelessWidget {
       body: DataSheet(
         title: 'Team Survey',
         columns: [
-          DataItemColumn(DataItem.fromText("Team"), width: numericWidth),
+          DataItemColumn.teamHeader(),
           for (final item in data.event.config.pitscouting)
             DataItemColumn.fromSurveyItem(item),
         ],

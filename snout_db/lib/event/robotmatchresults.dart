@@ -46,9 +46,10 @@ class RobotMatchResults {
     if (alliance == Alliance.red) {
       return List.generate(events.length, (index) {
         final MatchEvent event = events[index];
-        final FieldPosition position = fieldStyle == FieldStyle.rotated
-            ? event.position.rotated
-            : event.position.mirrored;
+        final FieldPosition position =
+            fieldStyle == FieldStyle.rotated
+                ? event.position.rotated
+                : event.position.mirrored;
         return MatchEvent(
           time: event.time,
           id: event.id,

@@ -48,15 +48,16 @@ class _KioskInfoCycleState extends State<KioskInfoCycle> {
 
     final options = [
       // Show preview for next match
-      AnalysisMatchPreview(
-        red: nextMatch!.red,
-        blue: nextMatch.blue,
-        matchLabel: nextMatch.label,
-      ),
+      if (nextMatch != null)
+        AnalysisMatchPreview(
+          red: nextMatch.red,
+          blue: nextMatch.blue,
+          matchLabel: nextMatch.label,
+        ),
 
       // Pit Survey Analysis (each chart)
       AnalysisPitScouting(),
-      
+
       // Match Recording survey analysis (each chart)
       AnalysisPostMatchSurvey(),
 
@@ -69,7 +70,7 @@ class _KioskInfoCycleState extends State<KioskInfoCycle> {
       //  Show a random teams autos (M2 mode)
     ];
 
-    if(_idx >= options.length) {
+    if (_idx >= options.length) {
       _idx = 0;
     }
     return options[_idx];

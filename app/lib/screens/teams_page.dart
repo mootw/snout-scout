@@ -35,106 +35,109 @@ class _TeamGridListState extends State<TeamGridList> {
             for (final team in context.watch<DataProvider>().event.teams)
               if (widget.teamFilter == null ||
                   widget.teamFilter!.contains(team))
-                TeamListTile(teamNumber: team),
+                TeamListTile(
+                  teamNumber: team,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            TeamViewPage(teamNumber: team),
+                      ),
+                    );
+                  },
+                ),
             if (widget.showEditButton)
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Center(
                   child: FilledButton.tonal(
-                    onPressed:
-                        () => showDialog(
-                          context: context,
-                          builder:
-                              (context) => AlertDialog(
-                                title: const Text("Edit Teams"),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () async {
-                                      final result = await Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder:
-                                              (context) => JSONEditor(
-                                                validate: (item) {},
-                                                source:
-                                                    context
-                                                        .read<DataProvider>()
-                                                        .event
-                                                        .teams,
-                                              ),
-                                        ),
-                                      );
-
-                                      if (result != null && context.mounted) {
-                                        Patch patch = Patch.teams(
-                                          DateTime.now(),
-                                          List<int>.from(json.decode(result)),
-                                        );
-                                        //Save the scouting results to the server!!
-                                        await submitData(context, patch);
-                                      }
-                                    },
-                                    child: const Text("Manual"),
+                    onPressed: () => showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text("Edit Teams"),
+                        actions: [
+                          TextButton(
+                            onPressed: () async {
+                              final result = await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => JSONEditor(
+                                    validate: (item) {},
+                                    source: context
+                                        .read<DataProvider>()
+                                        .event
+                                        .teams,
                                   ),
-                                  TextButton(
-                                    onPressed: () async {
-                                      List<int> teams;
-                                      try {
-                                        teams = await getTeamListForEventTBA(
-                                          context.read<DataProvider>().event,
-                                        );
-                                        //Some reason the teams do not come sorted...
-                                        teams.sort();
-                                      } catch (e) {
-                                        if (context.mounted) {
-                                          showDialog(
-                                            context: context,
-                                            builder:
-                                                (context) => AlertDialog(
-                                                  title: Text(e.toString()),
-                                                  actions: [
-                                                    TextButton(
-                                                      onPressed:
-                                                          () => Navigator.pop(
-                                                            context,
-                                                          ),
-                                                      child: const Text("Ok"),
-                                                    ),
-                                                  ],
-                                                ),
-                                          );
-                                        }
-                                        return;
-                                      }
-                                      if (!context.mounted) {
-                                        return;
-                                      }
+                                ),
+                              );
 
-                                      final result = await Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder:
-                                              (context) => JSONEditor(
-                                                validate: (item) {},
-                                                source: teams,
-                                              ),
+                              if (result != null && context.mounted) {
+                                Patch patch = Patch.teams(
+                                  DateTime.now(),
+                                  List<int>.from(json.decode(result)),
+                                );
+                                //Save the scouting results to the server!!
+                                await submitData(context, patch);
+                              }
+                            },
+                            child: const Text("Manual"),
+                          ),
+                          TextButton(
+                            onPressed: () async {
+                              List<int> teams;
+                              try {
+                                teams = await getTeamListForEventTBA(
+                                  context.read<DataProvider>().event,
+                                );
+                                //Some reason the teams do not come sorted...
+                                teams.sort();
+                              } catch (e) {
+                                if (context.mounted) {
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) => AlertDialog(
+                                      title: Text(e.toString()),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () =>
+                                              Navigator.pop(context),
+                                          child: const Text("Ok"),
                                         ),
-                                      );
+                                      ],
+                                    ),
+                                  );
+                                }
+                                return;
+                              }
+                              if (!context.mounted) {
+                                return;
+                              }
 
-                                      if (result != null && context.mounted) {
-                                        Patch patch = Patch.teams(
-                                          DateTime.now(),
-                                          json.decode(result),
-                                        );
-                                        //Save the scouting results to the server!!
-                                        await submitData(context, patch);
-                                      }
-                                    },
-                                    child: const Text("TBA AutoFill"),
+                              final result = await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => JSONEditor(
+                                    validate: (item) {},
+                                    source: teams,
                                   ),
-                                ],
-                              ),
-                        ),
+                                ),
+                              );
+
+                              if (result != null && context.mounted) {
+                                Patch patch = Patch.teams(
+                                  DateTime.now(),
+                                  json.decode(result),
+                                );
+                                //Save the scouting results to the server!!
+                                await submitData(context, patch);
+                              }
+                            },
+                            child: const Text("TBA AutoFill"),
+                          ),
+                        ],
+                      ),
+                    ),
                     child: const Text("Edit Teams"),
                   ),
                 ),
@@ -148,17 +151,22 @@ class _TeamGridListState extends State<TeamGridList> {
 
 class TeamListTile extends StatelessWidget {
   final int teamNumber;
+  final GestureTapCallback onTap;
 
-  const TeamListTile({super.key, required this.teamNumber});
+  const TeamListTile({
+    super.key,
+    required this.teamNumber,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     final snoutData = context.watch<DataProvider>();
 
     Widget? image;
-    final data =
-        snoutData.event.pitscouting[teamNumber
-            .toString()]?[robotPictureReserved];
+    final data = snoutData
+        .event
+        .pitscouting[teamNumber.toString()]?[robotPictureReserved];
     if (data != null) {
       image = AspectRatio(
         aspectRatio: 1,
@@ -167,14 +175,7 @@ class TeamListTile extends StatelessWidget {
     }
 
     return InkWell(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => TeamViewPage(teamNumber: teamNumber),
-          ),
-        );
-      },
+      onTap: onTap,
       child: Column(
         children: [
           Container(
