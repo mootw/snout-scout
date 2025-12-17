@@ -10,10 +10,9 @@ Future submitMultiplePatches(BuildContext context, List<Patch> patches) async {
   //TODO make this flash and only pushReplacement the route at the save button, then show leaderboard while saving
   final login = await showDialog(
     context: context,
-    builder:
-        (context) => ConfirmExitDialog(
-          child: ScoutAuthorizationDialog(allowBackButton: true),
-        ),
+    builder: (context) => ConfirmExitDialog(
+      child: ScoutAuthorizationDialog(allowBackButton: true),
+    ),
   );
 
   if (login != null && context.mounted) {

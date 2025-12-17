@@ -21,14 +21,13 @@ class _AnalysisHeatMapByEventTypeState
   void initState() {
     super.initState();
     //select the first event type if it is exists
-    _selectedEvent =
-        context
-            .read<DataProvider>()
-            .event
-            .config
-            .matchscouting
-            .events
-            .firstOrNull;
+    _selectedEvent = context
+        .read<DataProvider>()
+        .event
+        .config
+        .matchscouting
+        .events
+        .firstOrNull;
   }
 
   @override
@@ -46,17 +45,16 @@ class _AnalysisHeatMapByEventTypeState
                 _selectedEvent = value!;
               });
             },
-            items:
-                data.event.config.matchscouting.events
-                    .map<DropdownMenuItem<MatchEventConfig>>((
-                      MatchEventConfig value,
-                    ) {
-                      return DropdownMenuItem<MatchEventConfig>(
-                        value: value,
-                        child: Text(value.label),
-                      );
-                    })
-                    .toList(),
+            items: data.event.config.matchscouting.events
+                .map<DropdownMenuItem<MatchEventConfig>>((
+                  MatchEventConfig value,
+                ) {
+                  return DropdownMenuItem<MatchEventConfig>(
+                    value: value,
+                    child: Text(value.label),
+                  );
+                })
+                .toList(),
           ),
           if (_selectedEvent != null)
             Expanded(
@@ -66,14 +64,13 @@ class _AnalysisHeatMapByEventTypeState
                     const SizedBox(height: 16),
                     Center(
                       child: TextButton(
-                        onPressed:
-                            () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder:
-                                    (context) => TeamViewPage(teamNumber: team),
-                              ),
-                            ),
+                        onPressed: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                TeamViewPage(teamNumber: team),
+                          ),
+                        ),
                         child: Text(team.toString()),
                       ),
                     ),

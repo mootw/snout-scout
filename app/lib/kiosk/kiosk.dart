@@ -24,8 +24,6 @@ void runKiosk(Uri dataSource, KioskSettings settings) {
 
 const Duration idleTimeout = Duration(minutes: 2);
 
-// TODO Have a list of teams that can be selected from
-// TODO Have a rotating caurosel of interesting stats and tables and stuff
 class Kiosk extends StatefulWidget {
   final Uri dataSource;
   final KioskSettings settings;
@@ -57,8 +55,8 @@ class _KioskState extends State<Kiosk> {
         ChangeNotifierProvider<DataProvider>(
           key: Key(widget.dataSource.toString()),
           // Loads the dataprovider in a cleanse mode which filters out some data
-          create:
-              (_) => DataProvider(widget.dataSource, widget.settings.safeIds),
+          create: (_) =>
+              DataProvider(widget.dataSource, widget.settings.safeIds),
         ),
       ],
       child: Column(

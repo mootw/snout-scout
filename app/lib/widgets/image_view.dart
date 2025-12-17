@@ -14,14 +14,13 @@ class ImageViewer extends StatelessWidget {
       onTap: () {
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder:
-                (context) => Scaffold(
-                  appBar: AppBar(),
-                  body: PhotoView(
-                    filterQuality: FilterQuality.medium,
-                    imageProvider: child.image,
-                  ),
-                ),
+            builder: (context) => Scaffold(
+              appBar: AppBar(),
+              body: PhotoView(
+                filterQuality: FilterQuality.medium,
+                imageProvider: child.image,
+              ),
+            ),
           ),
         );
       },

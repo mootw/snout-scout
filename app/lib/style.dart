@@ -33,19 +33,17 @@ ThemeData defaultTheme = ThemeData.from(
 const warningColor = Colors.yellow;
 
 /// Returns a UI color for a given alliance. If null, it returns null
-Color? getAllianceUIColor(Alliance? alliance) =>
-    alliance == null
-        ? null
-        : (alliance == Alliance.red ? Colors.red : Colors.blue);
+Color? getAllianceUIColor(Alliance? alliance) => alliance == null
+    ? null
+    : (alliance == Alliance.red ? Colors.red : Colors.blue);
 
 /// Generates a 'random' color from an index
-Color getColorFromIndex(int index) =>
-    HSVColor.fromAHSV(
-      1,
-      (100 + (index * pi * 10000)) % 360,
-      0.8,
-      0.7,
-    ).toColor();
+Color getColorFromIndex(int index) => HSVColor.fromAHSV(
+  1,
+  (100 + (index * pi * 10000)) % 360,
+  0.8,
+  0.7,
+).toColor();
 
 Color colorFromHex(String hexString) {
   final hexCode = hexString.replaceAll('#', '');
@@ -92,34 +90,31 @@ Future<Uint8List?> pickOrTakeImageDialog(
 ]) async {
   ImageSource? result = await showDialog(
     context: context,
-    builder:
-        (dialogContext) => SimpleDialog(
-          children: [
-            SimpleDialogOption(
-              onPressed:
-                  () => Navigator.of(dialogContext).pop(ImageSource.camera),
-              child: const ListTile(
-                leading: Icon(Icons.camera_alt),
-                title: Text("Camera"),
-              ),
-            ),
-            SimpleDialogOption(
-              onPressed:
-                  () => Navigator.of(dialogContext).pop(ImageSource.gallery),
-              child: const ListTile(
-                leading: Icon(Icons.image),
-                title: Text("Gallery"),
-              ),
-            ),
-            SimpleDialogOption(
-              onPressed: () => Navigator.of(dialogContext).pop(null),
-              child: const ListTile(
-                leading: Icon(Icons.close),
-                title: Text("Cancel"),
-              ),
-            ),
-          ],
+    builder: (dialogContext) => SimpleDialog(
+      children: [
+        SimpleDialogOption(
+          onPressed: () => Navigator.of(dialogContext).pop(ImageSource.camera),
+          child: const ListTile(
+            leading: Icon(Icons.camera_alt),
+            title: Text("Camera"),
+          ),
         ),
+        SimpleDialogOption(
+          onPressed: () => Navigator.of(dialogContext).pop(ImageSource.gallery),
+          child: const ListTile(
+            leading: Icon(Icons.image),
+            title: Text("Gallery"),
+          ),
+        ),
+        SimpleDialogOption(
+          onPressed: () => Navigator.of(dialogContext).pop(null),
+          child: const ListTile(
+            leading: Icon(Icons.close),
+            title: Text("Cancel"),
+          ),
+        ),
+      ],
+    ),
   );
 
   if (result == null) {

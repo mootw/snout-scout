@@ -13,6 +13,7 @@ SurveyItem _$SurveyItemFromJson(Map json) => SurveyItem(
   options:
       (json['options'] as List<dynamic>?)?.map((e) => e as String).toList(),
   docs: json['docs'] as String? ?? '',
+  isSensitiveField: json['isSensitiveField'] as bool? ?? true,
 );
 
 Map<String, dynamic> _$SurveyItemToJson(SurveyItem instance) =>
@@ -22,6 +23,7 @@ Map<String, dynamic> _$SurveyItemToJson(SurveyItem instance) =>
       'label': instance.label,
       'type': _$SurveyItemTypeEnumMap[instance.type]!,
       'options': instance.options,
+      'isSensitiveField': instance.isSensitiveField,
     };
 
 const _$SurveyItemTypeEnumMap = {

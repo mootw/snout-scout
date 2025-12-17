@@ -53,10 +53,9 @@ List<Patch> generateMockData({
     identity: '',
     time: startTime,
     path: Patch.buildPath(['']),
-    value:
-        FRCEvent(
-          config: EventConfig(name: 'Mock $seed', team: team, fieldImage: ''),
-        ).toJson(),
+    value: FRCEvent(
+      config: EventConfig(name: 'Mock $seed', team: team, fieldImage: ''),
+    ).toJson(),
   );
 
   Patch teamsPatch = Patch.teams(startTime, teams);

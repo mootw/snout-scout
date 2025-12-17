@@ -150,11 +150,10 @@ Stream<SearchResult> _search(FRCEvent event, String query) async* {
       continue;
     }
 
-    final quality =
-        team.toString().startsWith(query)
-            // lower than 1 so that teams show below matches
-            ? 0.99
-            : (team.toString().contains(query) ? 0.9 : -1);
+    final quality = team.toString().startsWith(query)
+        // lower than 1 so that teams show below matches
+        ? 0.99
+        : (team.toString().contains(query) ? 0.9 : -1);
     if (quality >= 0) {
       //Load the robot picture to show in the search if it is available
       Widget? robotPicture;

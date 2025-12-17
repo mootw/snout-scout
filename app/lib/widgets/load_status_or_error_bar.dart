@@ -14,13 +14,10 @@ class LoadOrErrorStatusBar extends StatelessWidget
 
     if (data.remoteOutbox.outboxCache.isNotEmpty) {
       return InkWell(
-        onTap:
-            () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const FailedPatchStorage(),
-              ),
-            ),
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const FailedPatchStorage()),
+        ),
         child: Container(
           alignment: Alignment.center,
           width: double.infinity,

@@ -234,10 +234,9 @@ class RobotMapEventView extends StatelessWidget {
         return Stack(
           children: [
             AnimatedAlign(
-              duration:
-                  isAnimating
-                      ? const Duration(milliseconds: 1000)
-                      : const Duration(milliseconds: 100),
+              duration: isAnimating
+                  ? const Duration(milliseconds: 1000)
+                  : const Duration(milliseconds: 100),
               alignment: Alignment(
                 robotPosition.x *
                     (1 +
@@ -292,7 +291,10 @@ class FieldHeatMap extends StatelessWidget {
           //size: size,
           children: [
             Container(color: Colors.black12),
-            CustomPaint(size: Size.infinite, painter: HeatMap(events: events)),
+            CustomPaint(
+              size: Size.infinite,
+              painter: HeatMap(events: events),
+            ),
           ],
         ),
       ),
@@ -320,11 +322,10 @@ class FullScreenFieldSelector extends StatelessWidget {
             onTap: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder:
-                      (context) => Scaffold(
-                        appBar: AppBar(),
-                        body: Stack(children: [child, showAbove!]),
-                      ),
+                  builder: (context) => Scaffold(
+                    appBar: AppBar(),
+                    body: Stack(children: [child, showAbove!]),
+                  ),
                 ),
               );
             },
@@ -466,32 +467,29 @@ class _PathsViewerState extends State<PathsViewer> {
                 children: [
                   TextButton(
                     child: Text("M$viewMode"),
-                    onPressed:
-                        () => setState(() {
-                          setState(() {
-                            if (viewMode == 0) {
-                              viewMode = 1;
-                            } else if (viewMode == 1) {
-                              viewMode = 2;
-                            } else {
-                              viewMode = 0;
-                            }
-                          });
-                        }),
+                    onPressed: () => setState(() {
+                      setState(() {
+                        if (viewMode == 0) {
+                          viewMode = 1;
+                        } else if (viewMode == 1) {
+                          viewMode = 2;
+                        } else {
+                          viewMode = 0;
+                        }
+                      });
+                    }),
                   ),
                   TextButton(
-                    onPressed:
-                        () => setState(() {
-                          filterIndex = -1;
-                        }),
+                    onPressed: () => setState(() {
+                      filterIndex = -1;
+                    }),
                     child: const Text("All"),
                   ),
                   for (final (idx, item) in widget.paths.indexed)
                     TextButton(
-                      onPressed:
-                          () => setState(() {
-                            filterIndex = idx;
-                          }),
+                      onPressed: () => setState(() {
+                        filterIndex = idx;
+                      }),
                       child: Text(
                         item.label,
                         style: TextStyle(
@@ -550,13 +548,12 @@ class HeatMap extends CustomPainter {
       );
       //Make the intensity of each dot based on the amount of events within its approximate area
 
-      p.color =
-          HSVColor.fromAHSV(
-            math.min(1, math.max(((group.length + 1) / maxGroupLength), 0.3)),
-            100,
-            1,
-            1,
-          ).toColor();
+      p.color = HSVColor.fromAHSV(
+        math.min(1, math.max(((group.length + 1) / maxGroupLength), 0.3)),
+        100,
+        1,
+        1,
+      ).toColor();
       //Draw more and more green circles with increasing opacity
       canvas.drawCircle(
         Offset(ls[group[0]][0], ls[group[0]][1]),

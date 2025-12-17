@@ -38,10 +38,9 @@ class TableRobotRecordingsPage extends StatelessWidget {
                   label:
                       match.value.getSchedule(data.event, match.key)?.label ??
                       match.key,
-                  time:
-                      match.value
-                          .getSchedule(data.event, match.key)
-                          ?.scheduledTime,
+                  time: match.value
+                      .getSchedule(data.event, match.key)
+                      ?.scheduledTime,
                 ),
                 DataItem(
                   displayValue: TextButton(
@@ -51,16 +50,13 @@ class TableRobotRecordingsPage extends StatelessWidget {
                         color: getAllianceUIColor(robot.value.alliance),
                       ),
                     ),
-                    onPressed:
-                        () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder:
-                                (context) => TeamViewPage(
-                                  teamNumber: int.parse(robot.key),
-                                ),
-                          ),
-                        ),
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            TeamViewPage(teamNumber: int.parse(robot.key)),
+                      ),
+                    ),
                   ),
                   exportValue: robot.key,
                   sortingValue: robot.key,

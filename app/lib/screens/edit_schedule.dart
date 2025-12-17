@@ -114,22 +114,21 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
                 onPressed: () async {
                   final result = await showDialog(
                     context: context,
-                    builder:
-                        (context) => AlertDialog(
-                          title: Text(
-                            "Are you sure you want to delete ${match.value.label}?",
-                          ),
-                          actions: [
-                            TextButton(
-                              child: const Text("No"),
-                              onPressed: () => Navigator.of(context).pop(false),
-                            ),
-                            TextButton(
-                              child: const Text("Yes"),
-                              onPressed: () => Navigator.of(context).pop(true),
-                            ),
-                          ],
+                    builder: (context) => AlertDialog(
+                      title: Text(
+                        "Are you sure you want to delete ${match.value.label}?",
+                      ),
+                      actions: [
+                        TextButton(
+                          child: const Text("No"),
+                          onPressed: () => Navigator.of(context).pop(false),
                         ),
+                        TextButton(
+                          child: const Text("Yes"),
+                          onPressed: () => Navigator.of(context).pop(true),
+                        ),
+                      ],
+                    ),
                   );
                   if (result == true) {
                     final matchesWithRemoved =
@@ -157,9 +156,8 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
   Future editMatch(MatchScheduleItem match, DataProvider data) async {
     String? result = await Navigator.of(context).push(
       MaterialPageRoute(
-        builder:
-            (context) =>
-                JSONEditor(source: match, validate: MatchScheduleItem.fromJson),
+        builder: (context) =>
+            JSONEditor(source: match, validate: MatchScheduleItem.fromJson),
       ),
     );
 

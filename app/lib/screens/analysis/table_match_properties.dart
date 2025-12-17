@@ -17,12 +17,18 @@ class TableMatchProperties extends StatelessWidget {
     };
 
     // TODO this method is used in 2 places and does not correctly sort mixed scheduled and recorded (but missing schedule) matches
-    final allMatchData = {
-      for (final matchId in allMatchIds)
-        (data.event.schedule[matchId], data.event.matches[matchId], matchId),
-    }..sorted(
-      (a, b) => a.$1 == null || b.$1 == null ? 0 : a.$1?.compareTo(b.$1!) ?? 0,
-    );
+    final allMatchData =
+        {
+          for (final matchId in allMatchIds)
+            (
+              data.event.schedule[matchId],
+              data.event.matches[matchId],
+              matchId,
+            ),
+        }..sorted(
+          (a, b) =>
+              a.$1 == null || b.$1 == null ? 0 : a.$1?.compareTo(b.$1!) ?? 0,
+        );
 
     return Scaffold(
       appBar: AppBar(),

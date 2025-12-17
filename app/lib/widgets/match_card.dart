@@ -34,23 +34,21 @@ class MatchCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final snoutData = context.watch<DataProvider>();
 
-    final matchTime =
-        match?.results != null
-            ? match!.results!.time
-            : matchSchedule.scheduledTime.add(
-              snoutData.event.scheduleDelay ?? Duration.zero,
-            );
+    final matchTime = match?.results != null
+        ? match!.results!.time
+        : matchSchedule.scheduledTime.add(
+            snoutData.event.scheduleDelay ?? Duration.zero,
+          );
 
     return SizedBox(
       height: matchCardHeight,
       child: InkWell(
-        onTap:
-            () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => MatchPage(matchid: matchSchedule.id),
-              ),
-            ),
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => MatchPage(matchid: matchSchedule.id),
+          ),
+        ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -65,14 +63,14 @@ class MatchCard extends StatelessWidget {
             ),
             matchSchedule.isScheduledToHaveTeam(focusTeam ?? 0)
                 ? SizedBox(
-                  width: 19,
-                  child: Icon(
-                    Icons.star,
-                    color: getAllianceUIColor(
-                      matchSchedule.getAllianceOf(focusTeam ?? 0),
+                    width: 19,
+                    child: Icon(
+                      Icons.star,
+                      color: getAllianceUIColor(
+                        matchSchedule.getAllianceOf(focusTeam ?? 0),
+                      ),
                     ),
-                  ),
-                )
+                  )
                 : const SizedBox(width: 19),
             SizedBox(
               width: 110,
@@ -98,9 +96,9 @@ class MatchCard extends StatelessWidget {
                               : "-",
                           style:
                               match?.results?.winner == Alliance.red ||
-                                      match?.results?.winner == Alliance.tie
-                                  ? whiteTextBold
-                                  : whiteText,
+                                  match?.results?.winner == Alliance.tie
+                              ? whiteTextBold
+                              : whiteText,
                           textAlign: TextAlign.center,
                         ),
                       ),
@@ -124,9 +122,9 @@ class MatchCard extends StatelessWidget {
                               : "-",
                           style:
                               match?.results?.winner == Alliance.blue ||
-                                      match?.results?.winner == Alliance.tie
-                                  ? whiteTextBold
-                                  : whiteText,
+                                  match?.results?.winner == Alliance.tie
+                              ? whiteTextBold
+                              : whiteText,
                           textAlign: TextAlign.center,
                         ),
                       ),

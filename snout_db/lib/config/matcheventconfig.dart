@@ -19,7 +19,11 @@ class MatchEventConfig {
   /// the background of event buttons in match recorder
   final String? color;
 
+  /// Used for rainbow table views
   final bool isLargerBetter;
+
+  /// Used to determine if related data should be displayed in kiosk mode
+  final bool isSensitiveField;
 
   const MatchEventConfig({
     required this.id,
@@ -27,6 +31,7 @@ class MatchEventConfig {
     this.color,
     this.isLargerBetter = true,
     this.docs = '',
+    this.isSensitiveField = true,
   });
 
   factory MatchEventConfig.fromJson(Map<String, dynamic> json) =>

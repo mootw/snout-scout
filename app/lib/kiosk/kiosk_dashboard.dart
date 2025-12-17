@@ -34,18 +34,16 @@ class _KioskDashboardState extends State<KioskDashboard>
               duration: const Duration(seconds: 8),
               action: SnackBarAction(
                 label: "Details",
-                onPressed:
-                    () => showDialog(
-                      context: context,
-                      builder:
-                          (dialogContext) => AlertDialog(
-                            content: SingleChildScrollView(
-                              child: SelectableText(
-                                "${record.message}\n${record.error}\n${record.object}\n${record.stackTrace}",
-                              ),
-                            ),
-                          ),
+                onPressed: () => showDialog(
+                  context: context,
+                  builder: (dialogContext) => AlertDialog(
+                    content: SingleChildScrollView(
+                      child: SelectableText(
+                        "${record.message}\n${record.error}\n${record.object}\n${record.stackTrace}",
+                      ),
                     ),
+                  ),
+                ),
               ),
             ),
           );
@@ -83,13 +81,12 @@ class _KioskDashboardState extends State<KioskDashboard>
           bottom: LoadOrErrorStatusBar(),
         ),
         body: TextButton(
-          onPressed:
-              () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const SelectDataSourceScreen(),
-                ),
-              ),
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const SelectDataSourceScreen(),
+            ),
+          ),
           child: Text("Change Source"),
         ),
       );
@@ -104,55 +101,53 @@ class _KioskDashboardState extends State<KioskDashboard>
         children: [
           if (largeDevice)
             NavigationRail(
-              backgroundColor:
-                  Theme.of(context).bottomNavigationBarTheme.backgroundColor,
+              backgroundColor: Theme.of(
+                context,
+              ).bottomNavigationBarTheme.backgroundColor,
               labelType: NavigationRailLabelType.all,
               onDestinationSelected: (int index) {
                 setState(() {
                   _currentPageIndex = index;
                 });
               },
-              destinations:
-                  navigationDestinations
-                      .map(
-                        (e) => NavigationRailDestination(
-                          selectedIcon: e.selectedIcon,
-                          icon: e.icon,
-                          label: Text(e.label),
-                        ),
-                      )
-                      .toList(),
+              destinations: navigationDestinations
+                  .map(
+                    (e) => NavigationRailDestination(
+                      selectedIcon: e.selectedIcon,
+                      icon: e.icon,
+                      label: Text(e.label),
+                    ),
+                  )
+                  .toList(),
               selectedIndex: _currentPageIndex,
             ),
           Expanded(
-            child:
-                [
-                  KioskHome(),
-                  AllMatchesPage(
-                    // 10/10 hack to make the widget re-scroll to the correct spot on load
-                    // this will force it to scroll whenever the matches length changes
-                    // we could add another value here to make it scroll on other changes too
-                    key: Key(data.event.matches.length.toString()),
-                    scrollPosition: nextMatch,
-                  ),
-                  const TeamGridList(showEditButton: true),
-                  const AnalysisPage(),
-                ][_currentPageIndex],
+            child: [
+              KioskHome(),
+              AllMatchesPage(
+                // 10/10 hack to make the widget re-scroll to the correct spot on load
+                // this will force it to scroll whenever the matches length changes
+                // we could add another value here to make it scroll on other changes too
+                key: Key(data.event.matches.length.toString()),
+                scrollPosition: nextMatch,
+              ),
+              const TeamGridList(showEditButton: true),
+              const AnalysisPage(),
+            ][_currentPageIndex],
           ),
         ],
       ),
-      bottomNavigationBar:
-          largeDevice
-              ? null
-              : NavigationBar(
-                onDestinationSelected: (int index) {
-                  setState(() {
-                    _currentPageIndex = index;
-                  });
-                },
-                selectedIndex: _currentPageIndex,
-                destinations: navigationDestinations,
-              ),
+      bottomNavigationBar: largeDevice
+          ? null
+          : NavigationBar(
+              onDestinationSelected: (int index) {
+                setState(() {
+                  _currentPageIndex = index;
+                });
+              },
+              selectedIndex: _currentPageIndex,
+              destinations: navigationDestinations,
+            ),
     );
   }
 }
@@ -195,10 +190,9 @@ class KioskHome extends StatelessWidget {
         ),
         Container(height: 300, width: 750, color: Colors.red),
         FilledButton(
-          onPressed:
-              () => {
-                // TODO go to promo page
-              },
+          onPressed: () => {
+            // TODO go to promo page
+          },
           child: Text("Learn more about ${data.config.team}"),
         ),
 

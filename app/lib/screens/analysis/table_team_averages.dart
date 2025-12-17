@@ -28,13 +28,12 @@ class TableTeamAveragesPage extends StatelessWidget {
               DataItem(
                 displayValue: TextButton(
                   child: Text(team.toString()),
-                  onPressed:
-                      () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => TeamViewPage(teamNumber: team),
-                        ),
-                      ),
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => TeamViewPage(teamNumber: team),
+                    ),
+                  ),
                 ),
                 exportValue: team.toString(),
                 sortingValue: team,

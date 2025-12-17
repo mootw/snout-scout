@@ -105,16 +105,15 @@ class _SelectDataSourceScreenState extends State<SelectDataSourceScreen> {
               if (context.mounted) {
                 final EventConfig? value = await Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder:
-                        (context) => ConfigEditorPage(
-                          initialState: EventConfig(
-                            name: '',
-                            team: 6749,
-                            fieldImage: base64Encode(
-                              evergreenField.buffer.asUint8List(),
-                            ),
-                          ),
+                    builder: (context) => ConfigEditorPage(
+                      initialState: EventConfig(
+                        name: '',
+                        team: 6749,
+                        fieldImage: base64Encode(
+                          evergreenField.buffer.asUint8List(),
                         ),
+                      ),
+                    ),
                   ),
                 );
 
@@ -156,11 +155,10 @@ class _SelectDataSourceScreenState extends State<SelectDataSourceScreen> {
               if (context.mounted) {
                 final value = await Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder:
-                        (context) => JSONEditor(
-                          source: emptyNewEvent,
-                          validate: FRCEvent.fromJson,
-                        ),
+                    builder: (context) => JSONEditor(
+                      source: emptyNewEvent,
+                      validate: FRCEvent.fromJson,
+                    ),
                   ),
                 );
                 if (value == null) {
@@ -256,9 +254,8 @@ class _SelectDataSourceScreenState extends State<SelectDataSourceScreen> {
                 final eventFile = await Navigator.push<Uri>(
                   context,
                   MaterialPageRoute(
-                    builder:
-                        (context) =>
-                            SnoutServerPage(serverUri: Uri.parse(result)),
+                    builder: (context) =>
+                        SnoutServerPage(serverUri: Uri.parse(result)),
                   ),
                 );
 
@@ -301,13 +298,12 @@ class _SelectDataSourceScreenState extends State<SelectDataSourceScreen> {
             ListTile(
               title: Text(item.$1),
               leading: IconButton(
-                onPressed:
-                    () => SharePlus.instance.share(
-                      ShareParams(
-                        text:
-                            'https://snout-scout.web.app/#/${Uri.encodeComponent(item.$1)}',
-                      ),
-                    ),
+                onPressed: () => SharePlus.instance.share(
+                  ShareParams(
+                    text:
+                        'https://snout-scout.web.app/#/${Uri.encodeComponent(item.$1)}',
+                  ),
+                ),
                 icon: const Icon(Icons.share),
               ),
               onTap: () async {
@@ -411,93 +407,7 @@ class _SnoutServerPageState extends State<SnoutServerPage> {
                         TextEditingController();
                     await showDialog(
                       context: context,
-                      builder:
-                          (context) => AlertDialog(
-                            content: TextField(
-                              controller: passwordTextController,
-                              decoration: const InputDecoration(
-                                hintText: "Upload Password",
-                              ),
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.pop(context),
-                                child: const Text("Cancel"),
-                              ),
-                              TextButton(
-                                onPressed: () async {
-                                  final response = await http.delete(
-                                    getEventPath(event),
-                                    headers: {
-                                      'upload_password':
-                                          passwordTextController.text,
-                                    },
-                                  );
-
-                                  if (!context.mounted) {
-                                    return;
-                                  }
-
-                                  if (response.statusCode == 200) {
-                                    Navigator.pop(context);
-                                    showDialog(
-                                      context: context,
-                                      builder:
-                                          (context) => AlertDialog(
-                                            title: const Text(
-                                              "Delete Success!",
-                                            ),
-                                            actions: [
-                                              TextButton(
-                                                onPressed:
-                                                    () =>
-                                                        Navigator.pop(context),
-                                                child: const Text("Ok"),
-                                              ),
-                                            ],
-                                          ),
-                                    );
-                                  } else {
-                                    showDialog(
-                                      context: context,
-                                      builder:
-                                          (context) => AlertDialog(
-                                            title: Text(
-                                              "Faied to delete ${response.statusCode} ${response.body}",
-                                            ),
-                                            actions: [
-                                              TextButton(
-                                                onPressed:
-                                                    () =>
-                                                        Navigator.pop(context),
-                                                child: const Text("Ok"),
-                                              ),
-                                            ],
-                                          ),
-                                    );
-                                  }
-
-                                  updateEvents();
-                                },
-                                child: const Text("Delete Event"),
-                              ),
-                            ],
-                          ),
-                    );
-                  },
-                ),
-              ),
-          if (_eventOptions != null)
-            ListTile(
-              leading: const Icon(Icons.upload_file),
-              title: const Text("Upload File"),
-              onTap: () async {
-                TextEditingController passwordTextController =
-                    TextEditingController();
-                await showDialog(
-                  context: context,
-                  builder:
-                      (context) => AlertDialog(
+                      builder: (context) => AlertDialog(
                         content: TextField(
                           controller: passwordTextController,
                           decoration: const InputDecoration(
@@ -511,93 +421,161 @@ class _SnoutServerPageState extends State<SnoutServerPage> {
                           ),
                           TextButton(
                             onPressed: () async {
-                              const XTypeGroup typeGroup = XTypeGroup(
-                                label: 'Snout DB',
-                                extensions: <String>['snoutdb'],
+                              final response = await http.delete(
+                                getEventPath(event),
+                                headers: {
+                                  'upload_password':
+                                      passwordTextController.text,
+                                },
                               );
-                              final XFile? file = await openFile(
-                                acceptedTypeGroups: <XTypeGroup>[typeGroup],
-                              );
+
                               if (!context.mounted) {
-                                return;
-                              }
-                              if (file == null) {
-                                showDialog(
-                                  context: context,
-                                  builder:
-                                      (context) => AlertDialog(
-                                        title: const Text("No File Selected!"),
-                                        actions: [
-                                          TextButton(
-                                            onPressed:
-                                                () => Navigator.pop(context),
-                                            child: const Text("Ok"),
-                                          ),
-                                        ],
-                                      ),
-                                );
                                 return;
                               }
 
-                              final request = http.MultipartRequest(
-                                "PUT",
-                                widget.serverUri.replace(
-                                  path: "/upload_events",
-                                ),
-                              );
-                              request.headers['upload_password'] =
-                                  passwordTextController.text;
-                              request.files.add(
-                                http.MultipartFile.fromBytes(
-                                  file.name,
-                                  await file.readAsBytes(),
-                                ),
-                              );
-                              final response = await request.send();
-                              if (!context.mounted) {
-                                return;
-                              }
                               if (response.statusCode == 200) {
                                 Navigator.pop(context);
                                 showDialog(
                                   context: context,
-                                  builder:
-                                      (context) => AlertDialog(
-                                        title: const Text("Upload Success!"),
-                                        actions: [
-                                          TextButton(
-                                            onPressed:
-                                                () => Navigator.pop(context),
-                                            child: const Text("Ok"),
-                                          ),
-                                        ],
+                                  builder: (context) => AlertDialog(
+                                    title: const Text("Delete Success!"),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Navigator.pop(context),
+                                        child: const Text("Ok"),
                                       ),
+                                    ],
+                                  ),
                                 );
                               } else {
                                 showDialog(
                                   context: context,
-                                  builder:
-                                      (context) => AlertDialog(
-                                        title: Text(
-                                          "Faied to upload ${response.statusCode}",
-                                        ),
-                                        actions: [
-                                          TextButton(
-                                            onPressed:
-                                                () => Navigator.pop(context),
-                                            child: const Text("Ok"),
-                                          ),
-                                        ],
+                                  builder: (context) => AlertDialog(
+                                    title: Text(
+                                      "Faied to delete ${response.statusCode} ${response.body}",
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Navigator.pop(context),
+                                        child: const Text("Ok"),
                                       ),
+                                    ],
+                                  ),
                                 );
                               }
 
                               updateEvents();
                             },
-                            child: const Text("Select File"),
+                            child: const Text("Delete Event"),
                           ),
                         ],
                       ),
+                    );
+                  },
+                ),
+              ),
+          if (_eventOptions != null)
+            ListTile(
+              leading: const Icon(Icons.upload_file),
+              title: const Text("Upload File"),
+              onTap: () async {
+                TextEditingController passwordTextController =
+                    TextEditingController();
+                await showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    content: TextField(
+                      controller: passwordTextController,
+                      decoration: const InputDecoration(
+                        hintText: "Upload Password",
+                      ),
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text("Cancel"),
+                      ),
+                      TextButton(
+                        onPressed: () async {
+                          const XTypeGroup typeGroup = XTypeGroup(
+                            label: 'Snout DB',
+                            extensions: <String>['snoutdb'],
+                          );
+                          final XFile? file = await openFile(
+                            acceptedTypeGroups: <XTypeGroup>[typeGroup],
+                          );
+                          if (!context.mounted) {
+                            return;
+                          }
+                          if (file == null) {
+                            showDialog(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                title: const Text("No File Selected!"),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(context),
+                                    child: const Text("Ok"),
+                                  ),
+                                ],
+                              ),
+                            );
+                            return;
+                          }
+
+                          final request = http.MultipartRequest(
+                            "PUT",
+                            widget.serverUri.replace(path: "/upload_events"),
+                          );
+                          request.headers['upload_password'] =
+                              passwordTextController.text;
+                          request.files.add(
+                            http.MultipartFile.fromBytes(
+                              file.name,
+                              await file.readAsBytes(),
+                            ),
+                          );
+                          final response = await request.send();
+                          if (!context.mounted) {
+                            return;
+                          }
+                          if (response.statusCode == 200) {
+                            Navigator.pop(context);
+                            showDialog(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                title: const Text("Upload Success!"),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(context),
+                                    child: const Text("Ok"),
+                                  ),
+                                ],
+                              ),
+                            );
+                          } else {
+                            showDialog(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                title: Text(
+                                  "Faied to upload ${response.statusCode}",
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(context),
+                                    child: const Text("Ok"),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }
+
+                          updateEvents();
+                        },
+                        child: const Text("Select File"),
+                      ),
+                    ],
+                  ),
                 );
               },
             ),

@@ -32,10 +32,9 @@ class _AnalysisPageState extends State<AnalysisPage> {
           Align(
             alignment: Alignment.topLeft,
             child: FilledButton.tonal(
-              onPressed:
-                  () => launchUrlString(
-                    "https://www.thebluealliance.com/event/$tbaKey#rankings",
-                  ),
+              onPressed: () => launchUrlString(
+                "https://www.thebluealliance.com/event/$tbaKey#rankings",
+              ),
               child: const Text("TBA Rankings"),
             ),
           ),
@@ -109,8 +108,8 @@ class _AnalysisPageState extends State<AnalysisPage> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder:
-                    (builder) => const AnalysisMatchPreview(red: [], blue: []),
+                builder: (builder) =>
+                    const AnalysisMatchPreview(red: [], blue: []),
               ),
             );
           },

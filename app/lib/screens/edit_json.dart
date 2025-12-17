@@ -34,12 +34,11 @@ class _JSONEditorState extends State<JSONEditor> {
           title: const Text("Edit"),
           actions: [
             IconButton(
-              onPressed:
-                  _error != ""
-                      ? null
-                      : () {
-                        Navigator.of(context).pop(_controller.text);
-                      },
+              onPressed: _error != ""
+                  ? null
+                  : () {
+                      Navigator.of(context).pop(_controller.text);
+                    },
               icon: const Icon(Icons.save),
             ),
           ],

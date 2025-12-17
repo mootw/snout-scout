@@ -125,10 +125,9 @@ class SnoutScoutAppState extends State<SnoutScoutApp> {
           return null;
         },
         theme: defaultTheme,
-        home:
-            _dataSource != null
-                ? const DatabaseBrowserScreen()
-                : const SelectDataSourceScreen(),
+        home: _dataSource != null
+            ? const DatabaseBrowserScreen()
+            : const SelectDataSourceScreen(),
       ),
     );
   }
@@ -158,18 +157,16 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
               duration: const Duration(seconds: 8),
               action: SnackBarAction(
                 label: "Details",
-                onPressed:
-                    () => showDialog(
-                      context: context,
-                      builder:
-                          (dialogContext) => AlertDialog(
-                            content: SingleChildScrollView(
-                              child: SelectableText(
-                                "${record.message}\n${record.error}\n${record.object}\n${record.stackTrace}",
-                              ),
-                            ),
-                          ),
+                onPressed: () => showDialog(
+                  context: context,
+                  builder: (dialogContext) => AlertDialog(
+                    content: SingleChildScrollView(
+                      child: SelectableText(
+                        "${record.message}\n${record.error}\n${record.object}\n${record.stackTrace}",
+                      ),
                     ),
+                  ),
+                ),
               ),
             ),
           );
@@ -207,13 +204,12 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
           bottom: LoadOrErrorStatusBar(),
         ),
         body: TextButton(
-          onPressed:
-              () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const SelectDataSourceScreen(),
-                ),
-              ),
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const SelectDataSourceScreen(),
+            ),
+          ),
           child: Text("Change Source"),
         ),
       );
@@ -232,11 +228,8 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
           Padding(
             padding: const EdgeInsets.only(left: 8, right: 8),
             child: IconButton(
-              onPressed:
-                  () => showSearch(
-                    context: context,
-                    delegate: SnoutScoutSearch(),
-                  ),
+              onPressed: () =>
+                  showSearch(context: context, delegate: SnoutScoutSearch()),
               icon: const Icon(Icons.search),
             ),
           ),
@@ -246,41 +239,40 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
         children: [
           if (largeDevice)
             NavigationRail(
-              backgroundColor:
-                  Theme.of(context).bottomNavigationBarTheme.backgroundColor,
+              backgroundColor: Theme.of(
+                context,
+              ).bottomNavigationBarTheme.backgroundColor,
               labelType: NavigationRailLabelType.all,
               onDestinationSelected: (int index) {
                 setState(() {
                   _currentPageIndex = index;
                 });
               },
-              destinations:
-                  navigationDestinations
-                      .map(
-                        (e) => NavigationRailDestination(
-                          selectedIcon: e.selectedIcon,
-                          icon: e.icon,
-                          label: Text(e.label),
-                        ),
-                      )
-                      .toList(),
+              destinations: navigationDestinations
+                  .map(
+                    (e) => NavigationRailDestination(
+                      selectedIcon: e.selectedIcon,
+                      icon: e.icon,
+                      label: Text(e.label),
+                    ),
+                  )
+                  .toList(),
               selectedIndex: _currentPageIndex,
             ),
           Expanded(
-            child:
-                [
-                  DashboardPage(),
-                  AllMatchesPage(
-                    // 10/10 hack to make the widget re-scroll to the correct spot on load
-                    // this will force it to scroll whenever the matches length changes
-                    // we could add another value here to make it scroll on other changes too
-                    key: Key(data.event.matches.length.toString()),
-                    scrollPosition: nextMatch,
-                  ),
-                  const TeamGridList(showEditButton: true),
-                  const AnalysisPage(),
-                  const DocumentationScreen(),
-                ][_currentPageIndex],
+            child: [
+              DashboardPage(),
+              AllMatchesPage(
+                // 10/10 hack to make the widget re-scroll to the correct spot on load
+                // this will force it to scroll whenever the matches length changes
+                // we could add another value here to make it scroll on other changes too
+                key: Key(data.event.matches.length.toString()),
+                scrollPosition: nextMatch,
+              ),
+              const TeamGridList(showEditButton: true),
+              const AnalysisPage(),
+              const DocumentationScreen(),
+            ][_currentPageIndex],
           ),
         ],
       ),
@@ -293,13 +285,12 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
               subtitle: Text(
                 Uri.decodeFull(serverConnection.dataSourceUri.toString()),
               ),
-              onTap:
-                  () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const SelectDataSourceScreen(),
-                    ),
-                  ),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const SelectDataSourceScreen(),
+                ),
+              ),
             ),
             Center(
               child: Padding(
@@ -323,13 +314,12 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
               subtitle: Text(
                 '${data.database.patches.length.toString()} transactions',
               ),
-              onTap:
-                  () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const PatchHistoryPage(),
-                    ),
-                  ),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const PatchHistoryPage(),
+                ),
+              ),
             ),
             const Divider(),
             ListTile(
@@ -343,8 +333,8 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
                 final EventConfig? result = await Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder:
-                        (context) => ConfigEditorPage(initialState: config),
+                    builder: (context) =>
+                        ConfigEditorPage(initialState: config),
                   ),
                 );
 
@@ -373,11 +363,10 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
                 final result = await Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder:
-                        (context) => JSONEditor(
-                          validate: EventConfig.fromJson,
-                          source: config,
-                        ),
+                    builder: (context) => JSONEditor(
+                      validate: EventConfig.fromJson,
+                      source: config,
+                    ),
                   ),
                 );
 
@@ -400,17 +389,15 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
             ListTile(
               title: const Text("Kiosk"),
               trailing: const Icon(Icons.screen_share_outlined),
-              onTap:
-                  () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder:
-                          (context) => KioskConfigurationScreen(
-                            dataSource: data.dataSourceUri,
-                            baseConfig: data.event.config,
-                          ),
-                    ),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => KioskConfigurationScreen(
+                    dataSource: data.dataSourceUri,
+                    baseConfig: data.event.config,
                   ),
+                ),
+              ),
             ),
             ListTile(
               title: const Text("App Version"),
@@ -436,18 +423,17 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
           ],
         ),
       ),
-      bottomNavigationBar:
-          largeDevice
-              ? null
-              : NavigationBar(
-                onDestinationSelected: (int index) {
-                  setState(() {
-                    _currentPageIndex = index;
-                  });
-                },
-                selectedIndex: _currentPageIndex,
-                destinations: navigationDestinations,
-              ),
+      bottomNavigationBar: largeDevice
+          ? null
+          : NavigationBar(
+              onDestinationSelected: (int index) {
+                setState(() {
+                  _currentPageIndex = index;
+                });
+              },
+              selectedIndex: _currentPageIndex,
+              destinations: navigationDestinations,
+            ),
     );
   }
 }
@@ -486,9 +472,8 @@ Future editIdentityFunction({
 }) async {
   await Navigator.of(context).push(
     MaterialPageRoute(
-      builder:
-          (context) =>
-              ScoutAuthorizationDialog(allowBackButton: allowBackButton),
+      builder: (context) =>
+          ScoutAuthorizationDialog(allowBackButton: allowBackButton),
     ),
   );
 }

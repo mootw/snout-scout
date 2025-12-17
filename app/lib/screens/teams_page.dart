@@ -41,8 +41,7 @@ class _TeamGridListState extends State<TeamGridList> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) =>
-                            TeamViewPage(teamNumber: team),
+                        builder: (context) => TeamViewPage(teamNumber: team),
                       ),
                     );
                   },

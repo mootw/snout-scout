@@ -45,8 +45,9 @@ class EventData {
 
 //Load all events from disk and instantiate an event data class for each one
 Future _loadEvents() async {
-  final List<FileSystemEntity> allEvents =
-      await eventsDirectory.list().toList();
+  final List<FileSystemEntity> allEvents = await eventsDirectory
+      .list()
+      .toList();
   for (final event in allEvents) {
     if (event is File) {
       logger.info(event.uri.pathSegments.last);
@@ -212,8 +213,11 @@ void main(List<String> args) async {
     return Response.ok(
       json.encode(loadedEvents.keys.toList()),
       headers: {
-        'Content-Type':
-            ContentType('application', 'json', charset: 'utf-8').toString(),
+        'Content-Type': ContentType(
+          'application',
+          'json',
+          charset: 'utf-8',
+        ).toString(),
       },
     );
   });
@@ -228,8 +232,11 @@ void main(List<String> args) async {
     return Response.ok(
       json.encode(event),
       headers: {
-        'Content-Type':
-            ContentType('application', 'json', charset: 'utf-8').toString(),
+        'Content-Type': ContentType(
+          'application',
+          'json',
+          charset: 'utf-8',
+        ).toString(),
       },
     );
   });
@@ -244,8 +251,11 @@ void main(List<String> args) async {
     return Response.ok(
       jsonEncode(event.patches.length),
       headers: {
-        'Content-Type':
-            ContentType('application', 'json', charset: 'utf-8').toString(),
+        'Content-Type': ContentType(
+          'application',
+          'json',
+          charset: 'utf-8',
+        ).toString(),
       },
     );
   });
@@ -268,8 +278,11 @@ void main(List<String> args) async {
       return Response.ok(
         json.encode(dbJson),
         headers: {
-          'Content-Type':
-              ContentType('application', 'json', charset: 'utf-8').toString(),
+          'Content-Type': ContentType(
+            'application',
+            'json',
+            charset: 'utf-8',
+          ).toString(),
         },
       );
     } catch (e, s) {

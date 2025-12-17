@@ -55,8 +55,8 @@ class _SurveyItemRatioChartState extends State<SurveyItemRatioChart> {
     Map<String, List<String>> valueKeys = {};
 
     for (final team in data.event.pitscouting.keys) {
-      final item =
-          data.event.pitscouting[team]![widget.surveyItem.id]?.toString();
+      final item = data.event.pitscouting[team]![widget.surveyItem.id]
+          ?.toString();
       if (item == null) {
         //TODO handle NULL items in their own category??
         //Basically this is just missing data in the chart.
@@ -97,22 +97,20 @@ class _SurveyItemRatioChartState extends State<SurveyItemRatioChart> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder:
-                              (context) => Scaffold(
-                                appBar: AppBar(
-                                  title: Text(
-                                    '${widget.surveyItem.label}: ${valueKeys.entries.toList()[_selectedIndex].key}',
-                                  ),
-                                ),
-                                body: TeamGridList(
-                                  teamFilter:
-                                      valueKeys.entries
-                                          .toList()[_selectedIndex]
-                                          .value
-                                          .map((e) => int.parse(e))
-                                          .toList(),
-                                ),
+                          builder: (context) => Scaffold(
+                            appBar: AppBar(
+                              title: Text(
+                                '${widget.surveyItem.label}: ${valueKeys.entries.toList()[_selectedIndex].key}',
                               ),
+                            ),
+                            body: TeamGridList(
+                              teamFilter: valueKeys.entries
+                                  .toList()[_selectedIndex]
+                                  .value
+                                  .map((e) => int.parse(e))
+                                  .toList(),
+                            ),
+                          ),
                         ),
                       );
                     }
@@ -128,8 +126,11 @@ class _SurveyItemRatioChartState extends State<SurveyItemRatioChart> {
                       0,
                       min(valueKeys.entries.toList()[i].key.length, 30),
                     ),
-                    value:
-                        valueKeys.entries.toList()[i].value.length.toDouble(),
+                    value: valueKeys.entries
+                        .toList()[i]
+                        .value
+                        .length
+                        .toDouble(),
                     color: getColorFromIndex(i),
                   ),
               ],

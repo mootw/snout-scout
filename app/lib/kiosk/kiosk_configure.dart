@@ -1,5 +1,7 @@
 import 'package:app/kiosk/kiosk.dart';
+import 'package:app/providers/data_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:snout_db/config/eventconfig.dart';
 import 'package:snout_db/config/surveyitem.dart';
 
@@ -19,42 +21,9 @@ class KioskConfigurationScreen extends StatefulWidget {
 }
 
 class _KioskConfigurationScreenState extends State<KioskConfigurationScreen> {
-  Map<({Widget label, Widget subtitle, String id}), bool> _allowedIds = {};
-
-  @override
-  void initState() {
-    super.initState();
-    _allowedIds.addEntries(
-      widget.baseConfig.pitscouting.map(
-        (e) => MapEntry((
-          label: Text(e.label),
-          subtitle: Text('pitscouting.${e.id}'),
-          id: e.id,
-        ), e.type == SurveyItemType.text ? false : true),
-      ),
-    );
-    _allowedIds.addEntries(
-      widget.baseConfig.matchscouting.properties.map(
-        (e) => MapEntry((
-          label: Text(e.label),
-          subtitle: Text('matchscouting.properties.${e.id}'),
-          id: e.id,
-        ), e.type == SurveyItemType.text ? false : true),
-      ),
-    );
-    _allowedIds.addEntries(
-      widget.baseConfig.matchscouting.processes.map(
-        (e) => MapEntry((
-          label: Text(e.label),
-          subtitle: Text('process.${e.id}'),
-          id: e.id,
-        ), true),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
+    final database = context.read<DataProvider>().database;
     return Scaffold(
       appBar: AppBar(
         title: Text('Kiosk Settings'),
@@ -64,11 +33,20 @@ class _KioskConfigurationScreenState extends State<KioskConfigurationScreen> {
               runKiosk(
                 widget.dataSource,
                 KioskSettings(
-                  safeIds:
-                      _allowedIds.entries
-                          .where((e) => e.value == true)
-                          .map((e) => e.key.id)
-                          .toList(),
+                  safeIds: <String>[
+                    ...database.event.config.pitscouting
+                        .where((e) => e.isSensitiveField == false)
+                        .map((e) => e.id),
+                    ...database.event.config.matchscouting.properties
+                        .where((e) => e.isSensitiveField == false)
+                        .map((e) => e.id),
+                    ...database.event.config.matchscouting.survey
+                        .where((e) => e.isSensitiveField == false)
+                        .map((e) => e.id),
+                    ...database.event.config.matchscouting.processes
+                        .where((e) => e.isSensitiveField == false)
+                        .map((e) => e.id),
+                  ],
                 ),
               );
             },
@@ -78,23 +56,9 @@ class _KioskConfigurationScreenState extends State<KioskConfigurationScreen> {
       ),
       body: ListView(
         children: [
-          for (final id in _allowedIds.entries)
-            Center(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: 500),
-                child: ListTile(
-                  title: id.key.label,
-                  subtitle: id.key.subtitle,
-                  trailing: Switch(
-                    value: id.value,
-                    onChanged:
-                        (newValue) => setState(() {
-                          _allowedIds[id.key] = newValue;
-                        }),
-                  ),
-                ),
-              ),
-            ),
+          Text(
+            'Adjust the scaling so that this text is comfortable to read at 50cm away',
+          ),
         ],
       ),
     );

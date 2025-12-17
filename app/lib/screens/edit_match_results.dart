@@ -97,10 +97,9 @@ class _EditMatchResultsState extends State<EditMatchResults> {
                   _isAutofillThinking = false;
                 });
               },
-              child:
-                  _isAutofillThinking
-                      ? const CircularProgressIndicator()
-                      : const Text("AutoFill TBA"),
+              child: _isAutofillThinking
+                  ? const CircularProgressIndicator()
+                  : const Text("AutoFill TBA"),
             ),
             IconButton(
               onPressed: () {

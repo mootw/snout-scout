@@ -33,36 +33,35 @@ class _FailedPatchStorageState extends State<FailedPatchStorage> {
             ),
           IconButton(
             color: Colors.red,
-            onPressed:
-                () => showDialog(
-                  context: context,
-                  builder:
-                      (context) => AlertDialog(
-                        title: const Text(
-                          "Are you sure you want to delete ALL failed transactions?",
-                        ),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context),
-                            child: const Text("Cancel"),
-                          ),
-                          FilledButton.tonal(
-                            style: FilledButton.styleFrom(
-                              backgroundColor:
-                                  Theme.of(context).colorScheme.errorContainer,
-                            ),
-                            onPressed: () async {
-                              await serverConnection.remoteOutbox.clearOutbox();
-                              setState(() {});
-                              if (context.mounted) {
-                                Navigator.pop(context);
-                              }
-                            },
-                            child: const Text("Delete"),
-                          ),
-                        ],
-                      ),
+            onPressed: () => showDialog(
+              context: context,
+              builder: (context) => AlertDialog(
+                title: const Text(
+                  "Are you sure you want to delete ALL failed transactions?",
                 ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text("Cancel"),
+                  ),
+                  FilledButton.tonal(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: Theme.of(
+                        context,
+                      ).colorScheme.errorContainer,
+                    ),
+                    onPressed: () async {
+                      await serverConnection.remoteOutbox.clearOutbox();
+                      setState(() {});
+                      if (context.mounted) {
+                        Navigator.pop(context);
+                      }
+                    },
+                    child: const Text("Delete"),
+                  ),
+                ],
+              ),
+            ),
             icon: const Icon(Icons.delete),
           ),
         ],
@@ -71,15 +70,13 @@ class _FailedPatchStorageState extends State<FailedPatchStorage> {
         children: [
           for (final patch in serverConnection.remoteOutbox.outboxCache)
             ListTile(
-              onTap:
-                  () => showDialog(
-                    context: context,
-                    builder:
-                        (context) => AlertDialog(
-                          title: const Text("Patch Data"),
-                          content: SelectableText(patch),
-                        ),
-                  ),
+              onTap: () => showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text("Patch Data"),
+                  content: SelectableText(patch),
+                ),
+              ),
               title: Text(
                 DateFormat.yMMMMEEEEd().add_Hms().format(
                   Patch.fromJson(json.decode(patch)).time,

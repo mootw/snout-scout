@@ -27,10 +27,9 @@ class AnalysisEventsHeatmap extends StatelessWidget {
                     (
                       label:
                           '${match.value.getSchedule(data.event, match.key)?.label} ${robot.key}',
-                      path:
-                          match.value.robot[robot.key]!.timelineInterpolated
-                              .where((element) => element.isInAuto)
-                              .toList(),
+                      path: match.value.robot[robot.key]!.timelineInterpolated
+                          .where((element) => element.isInAuto)
+                          .toList(),
                     ),
               ],
             ),
@@ -66,17 +65,16 @@ class AnalysisEventsHeatmap extends StatelessWidget {
           Center(
             child: FieldHeatMap(
               size: largeFieldSize,
-              events:
-                  [
-                    for (final match in data.event.matches.values)
-                      for (final robot in match.robot.values)
-                        robot
-                            .timelineInterpolatedBlueNormalized(
-                              data.event.config.fieldStyle,
-                            )
-                            .where((event) => event.isPositionEvent)
-                            .lastOrNull,
-                  ].nonNulls.toList(),
+              events: [
+                for (final match in data.event.matches.values)
+                  for (final robot in match.robot.values)
+                    robot
+                        .timelineInterpolatedBlueNormalized(
+                          data.event.config.fieldStyle,
+                        )
+                        .where((event) => event.isPositionEvent)
+                        .lastOrNull,
+              ].nonNulls.toList(),
             ),
           ),
           for (final eventType in data.event.config.matchscouting.events) ...[

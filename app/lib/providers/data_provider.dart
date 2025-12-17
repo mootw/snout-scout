@@ -234,8 +234,9 @@ class DataProvider extends ChangeNotifier {
   }
 
   Future _loadLocalDBData() async {
-    final data =
-        await fs.file(Uri.decodeFull(dataSourceUri.toString())).readAsString();
+    final data = await fs
+        .file(Uri.decodeFull(dataSourceUri.toString()))
+        .readAsString();
 
     database = SnoutDB.fromJson(json.decode(data));
     notifyListeners();
@@ -264,10 +265,9 @@ class DataProvider extends ChangeNotifier {
             .get(path)
             .timeout(Duration(seconds: 30));
 
-        final List<Patch> patches =
-            (json.decode(newData.body) as List)
-                .map((e) => Patch.fromJson(e as Map))
-                .toList();
+        final List<Patch> patches = (json.decode(newData.body) as List)
+            .map((e) => Patch.fromJson(e as Map))
+            .toList();
         final decodedDatabase = SnoutDB(patches: patches);
         database = decodedDatabase;
         _santize();
@@ -280,10 +280,9 @@ class DataProvider extends ChangeNotifier {
       }
 
       //Decode as list of patches
-      final patches =
-          List.from(
-            json.decode(diskData) as List,
-          ).map((x) => Patch.fromJson(x)).toList();
+      final patches = List.from(
+        json.decode(diskData) as List,
+      ).map((x) => Patch.fromJson(x)).toList();
 
       //Load the changest only, since it is more bandwidth efficient
       //and the database is ONLY based on patches.

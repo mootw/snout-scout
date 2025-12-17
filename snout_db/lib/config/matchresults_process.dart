@@ -21,12 +21,16 @@ class MatchResultsProcess {
   /// Used for rainbow table views
   final bool isLargerBetter;
 
+  /// Used to determine if related data should be displayed in kiosk mode
+  final bool isSensitiveField;
+
   const MatchResultsProcess({
     required this.id,
     required this.label,
     required this.expression,
     this.isLargerBetter = true,
     this.docs = '',
+    this.isSensitiveField = true,
   });
 
   factory MatchResultsProcess.fromJson(Map<String, dynamic> json) =>

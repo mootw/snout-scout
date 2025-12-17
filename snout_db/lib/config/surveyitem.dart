@@ -21,12 +21,16 @@ class SurveyItem {
   /// Used by the selector type to give a list of options
   final List<String>? options;
 
+  /// Used to determine if related data should be displayed in kiosk mode
+  final bool isSensitiveField;
+
   const SurveyItem({
     required this.id,
     required this.type,
     required this.label,
     this.options,
     this.docs = '',
+    this.isSensitiveField = true,
   });
 
   factory SurveyItem.fromJson(Map<String, dynamic> json) =>

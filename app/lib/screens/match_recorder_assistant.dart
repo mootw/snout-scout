@@ -137,19 +137,19 @@ class _MatchRecorderAssistantPageState
         children: [
           Expanded(
             child: ListView(
-              scrollDirection:
-                  isWideScreen(context) ? Axis.horizontal : Axis.vertical,
+              scrollDirection: isWideScreen(context)
+                  ? Axis.horizontal
+                  : Axis.vertical,
               children: [
                 for (final team in match.blue)
                   _getTeamTile(
                     team: team,
                     isRecommended: _recommended == team,
-                    onTap:
-                        () => _recordTeam(
-                          widget.matchid,
-                          team,
-                          match.getAllianceOf(team),
-                        ),
+                    onTap: () => _recordTeam(
+                      widget.matchid,
+                      team,
+                      match.getAllianceOf(team),
+                    ),
                     subtitle: "Blue ${match.blue.indexOf(team) + 1}",
                     subtitleColor: Colors.blue,
                   ),
@@ -157,12 +157,11 @@ class _MatchRecorderAssistantPageState
                   _getTeamTile(
                     team: team,
                     isRecommended: _recommended == team,
-                    onTap:
-                        () => _recordTeam(
-                          widget.matchid,
-                          team,
-                          match.getAllianceOf(team),
-                        ),
+                    onTap: () => _recordTeam(
+                      widget.matchid,
+                      team,
+                      match.getAllianceOf(team),
+                    ),
                     subtitle: "Red ${match.red.indexOf(team) + 1}",
                     subtitleColor: Colors.red,
                   ),
@@ -189,11 +188,8 @@ class _MatchRecorderAssistantPageState
                       _alliance = value!;
                     });
                   },
-                  items:
-                      [
-                        Alliance.blue,
-                        Alliance.red,
-                      ].map<DropdownMenuItem<Alliance>>((Alliance value) {
+                  items: [Alliance.blue, Alliance.red]
+                      .map<DropdownMenuItem<Alliance>>((Alliance value) {
                         return DropdownMenuItem<Alliance>(
                           value: value,
                           child: Text(
@@ -201,7 +197,8 @@ class _MatchRecorderAssistantPageState
                             style: TextStyle(color: getAllianceUIColor(value)),
                           ),
                         );
-                      }).toList(),
+                      })
+                      .toList(),
                 ),
               ),
               Flexible(
@@ -250,12 +247,9 @@ class _MatchRecorderAssistantPageState
     return InkWell(
       onTap: onTap,
       child: Container(
-        color:
-            _alreadyScoutedTeams.contains(team)
-                ? Colors.blueGrey.withAlpha(70)
-                : (isRecommended
-                    ? Theme.of(context).colorScheme.onPrimary
-                    : null),
+        color: _alreadyScoutedTeams.contains(team)
+            ? Colors.blueGrey.withAlpha(70)
+            : (isRecommended ? Theme.of(context).colorScheme.onPrimary : null),
         child: Row(
           children: [
             SizedBox(
@@ -299,12 +293,11 @@ class _MatchRecorderAssistantPageState
       (context) => Navigator.push(
         context,
         MaterialPageRoute(
-          builder:
-              (context) => MatchRecorderPage(
-                team: team,
-                teamAlliance: alliance,
-                matchDescription: match.label,
-              ),
+          builder: (context) => MatchRecorderPage(
+            team: team,
+            teamAlliance: alliance,
+            matchDescription: match.label,
+          ),
         ),
       ),
     );

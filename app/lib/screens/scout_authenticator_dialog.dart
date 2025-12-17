@@ -235,71 +235,68 @@ class _ScoutRegistrationScreenState extends State<ScoutRegistrationScreen> {
                 onChanged: (_) => setState(() {}),
                 decoration: const InputDecoration(hintText: 'Password'),
                 obscureText: true,
-                validator:
-                    (input) =>
-                        (input?.runes.length ?? 0) == 4 &&
-                                int.tryParse(input ?? '') != null
-                            ? null
-                            : 'Invalid Password. requires exactly 4 digits',
+                validator: (input) =>
+                    (input?.runes.length ?? 0) == 4 &&
+                        int.tryParse(input ?? '') != null
+                    ? null
+                    : 'Invalid Password. requires exactly 4 digits',
                 controller: _scoutPassword,
               ),
             ),
             Center(
-              child:
-                  _isLoading
-                      ? CircularProgressIndicator()
-                      : FilledButton(
-                        onPressed:
-                            _formKey.currentState?.validate() == true
-                                ? () async {
-                                  setState(() {
-                                    _isLoading = true;
-                                  });
-                                  await Future.delayed(Duration.zero);
-                                  final random = math.Random.secure();
-                                  final salt = [
-                                    for (int i = 0; i < 16; i++)
-                                      random.nextInt(256),
-                                  ];
+              child: _isLoading
+                  ? CircularProgressIndicator()
+                  : FilledButton(
+                      onPressed: _formKey.currentState?.validate() == true
+                          ? () async {
+                              setState(() {
+                                _isLoading = true;
+                              });
+                              await Future.delayed(Duration.zero);
+                              final random = math.Random.secure();
+                              final salt = [
+                                for (int i = 0; i < 16; i++)
+                                  random.nextInt(256),
+                              ];
 
-                                  final password = argon2id(
-                                    utf8.encode(_scoutPassword.text),
-                                    salt,
-                                    hashLength: 16,
-                                    security: Argon2Security.little,
-                                  );
+                              final password = argon2id(
+                                utf8.encode(_scoutPassword.text),
+                                salt,
+                                hashLength: 16,
+                                security: Argon2Security.little,
+                              );
 
-                                  // Create a patch that adds this scout
-                                  String identity = _scoutNameText.text;
+                              // Create a patch that adds this scout
+                              String identity = _scoutNameText.text;
 
-                                  Patch patch = Patch(
-                                    identity: identity,
-                                    time: DateTime.now(),
-                                    path: Patch.buildPath([
-                                      'scoutPasswords',
-                                      identity,
-                                    ]),
-                                    value: password.encoded(),
-                                  );
+                              Patch patch = Patch(
+                                identity: identity,
+                                time: DateTime.now(),
+                                path: Patch.buildPath([
+                                  'scoutPasswords',
+                                  identity,
+                                ]),
+                                value: password.encoded(),
+                              );
 
-                                  if (context.mounted) {
-                                    // TODO this is bugged when creating a new event. It will register with whatever db is open, not the new database
-                                    // Scout does not need auth from another scout to register
-                                    await context
-                                        .read<DataProvider>()
-                                        .newTransaction(patch);
-                                  }
+                              if (context.mounted) {
+                                // TODO this is bugged when creating a new event. It will register with whatever db is open, not the new database
+                                // Scout does not need auth from another scout to register
+                                await context
+                                    .read<DataProvider>()
+                                    .newTransaction(patch);
+                              }
 
-                                  setState(() {
-                                    _isLoading = false;
-                                  });
-                                  if (mounted && context.mounted) {
-                                    Navigator.pop(context, _scoutNameText.text);
-                                  }
-                                }
-                                : null,
-                        child: const Text('Register Scout'),
-                      ),
+                              setState(() {
+                                _isLoading = false;
+                              });
+                              if (mounted && context.mounted) {
+                                Navigator.pop(context, _scoutNameText.text);
+                              }
+                            }
+                          : null,
+                      child: const Text('Register Scout'),
+                    ),
             ),
             const SizedBox(height: 16),
           ],

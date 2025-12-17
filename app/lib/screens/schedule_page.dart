@@ -26,14 +26,13 @@ class _AllMatchesPageState extends State<AllMatchesPage> {
   void initState() {
     super.initState();
     _controller = ScrollController(
-      initialScrollOffset:
-          widget.scrollPosition == null
-              ? 0
-              : (context.read<DataProvider>().event.scheduleSorted.indexOf(
-                        widget.scrollPosition!,
-                      ) *
-                      matchCardHeight) -
-                  (matchCardHeight * 2),
+      initialScrollOffset: widget.scrollPosition == null
+          ? 0
+          : (context.read<DataProvider>().event.scheduleSorted.indexOf(
+                      widget.scrollPosition!,
+                    ) *
+                    matchCardHeight) -
+                (matchCardHeight * 2),
     );
   }
 
@@ -66,10 +65,9 @@ class _AllMatchesPageState extends State<AllMatchesPage> {
                     ),
                   ),
                 Container(
-                  color:
-                      matchSchedule == snoutData.event.nextMatch
-                          ? Theme.of(context).colorScheme.onPrimary
-                          : null,
+                  color: matchSchedule == snoutData.event.nextMatch
+                      ? Theme.of(context).colorScheme.onPrimary
+                      : null,
                   child: MatchCard(
                     match: matchSchedule.getData(snoutData.event),
                     matchSchedule: matchSchedule,
@@ -86,10 +84,9 @@ class _AllMatchesPageState extends State<AllMatchesPage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder:
-                              (context) => EditSchedulePage(
-                                matches: snoutData.event.schedule,
-                              ),
+                          builder: (context) => EditSchedulePage(
+                            matches: snoutData.event.schedule,
+                          ),
                         ),
                       );
                     },
@@ -108,14 +105,13 @@ class _AllMatchesPageState extends State<AllMatchesPage> {
               children: [
                 Text("Schedule ${offsetDurationInMins(scheduleDelay)}"),
                 TextButton(
-                  onPressed:
-                      () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder:
-                              (context) => MatchPage(matchid: teamNextMatch.id),
-                        ),
-                      ),
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          MatchPage(matchid: teamNextMatch.id),
+                    ),
+                  ),
                   child: Text(
                     teamNextMatch.label,
                     style: TextStyle(

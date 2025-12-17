@@ -42,10 +42,9 @@ class _DocumentationScreenState extends State<DocumentationScreen> {
           ListTile(
             title: const Text("Snout Scout docs"),
             leading: const Icon(Icons.menu_book),
-            onTap:
-                () => launchUrlString(
-                  "https://github.com/mootw/snout-scout/blob/main/readme.md",
-                ),
+            onTap: () => launchUrlString(
+              "https://github.com/mootw/snout-scout/blob/main/readme.md",
+            ),
           ),
           ListTile(
             title: const Text("DEBUG Field position"),
@@ -104,10 +103,9 @@ class _DocumentationScreenState extends State<DocumentationScreen> {
           Padding(
             padding: const EdgeInsets.only(left: 16, right: 16),
             child: MarkdownText(
-              data:
-                  config.docs.isNotEmpty
-                      ? config.docs
-                      : "# Welcome to the docs for ${config.name}\n**this is a temporary message that will be replaced once you set the docs property in the event config**\n\neverything that you collect should be defined in here, all 'docs' properties in the configuration support markdown",
+              data: config.docs.isNotEmpty
+                  ? config.docs
+                  : "# Welcome to the docs for ${config.name}\n**this is a temporary message that will be replaced once you set the docs property in the event config**\n\neverything that you collect should be defined in here, all 'docs' properties in the configuration support markdown",
             ),
           ),
           const Divider(),
@@ -115,10 +113,9 @@ class _DocumentationScreenState extends State<DocumentationScreen> {
             title: const Text("Show Technical Details"),
             trailing: Switch(
               value: _showDetails,
-              onChanged:
-                  (value) => setState(() {
-                    _showDetails = value;
-                  }),
+              onChanged: (value) => setState(() {
+                _showDetails = value;
+              }),
             ),
           ),
           Padding(

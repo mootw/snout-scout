@@ -9,6 +9,7 @@ class MatchEventConfigEditState {
   late bool isLargerBetter;
   late TextEditingController color;
   late TextEditingController docs;
+  late bool isSensitiveField;
 
   MatchEventConfigEditState(MatchEventConfig config) {
     label = TextEditingController(text: config.label);
@@ -16,6 +17,7 @@ class MatchEventConfigEditState {
     color = TextEditingController(text: config.color);
     isLargerBetter = config.isLargerBetter;
     docs = TextEditingController(text: config.docs);
+    isSensitiveField = config.isSensitiveField;
   }
 
   MatchEventConfig toConfig() {
@@ -25,6 +27,7 @@ class MatchEventConfigEditState {
       color: color.text,
       docs: docs.text,
       isLargerBetter: isLargerBetter,
+      isSensitiveField: isSensitiveField,
     );
   }
 }
@@ -48,12 +51,11 @@ class _EditMatchEventConfigState extends State<EditMatchEventConfig> {
             controller: widget.state.label,
             onEditingComplete: () {
               if (widget.state.id.text == '') {
-                widget.state.id.text =
-                    widget.state.label.text
-                        .toLowerCase()
-                        .replaceAll(' ', '_')
-                        .replaceAll(invalidIdValues, '')
-                        .trim();
+                widget.state.id.text = widget.state.label.text
+                    .toLowerCase()
+                    .replaceAll(' ', '_')
+                    .replaceAll(invalidIdValues, '')
+                    .trim();
               }
             },
             decoration: InputDecoration(
@@ -74,11 +76,10 @@ class _EditMatchEventConfigState extends State<EditMatchEventConfig> {
         ListTile(
           title: TextFormField(
             controller: widget.state.color,
-            onChanged:
-                (newValue) => setState(() {
-                  // TODO handle this more elegantly
-                  //Update the color swatch
-                }),
+            onChanged: (newValue) => setState(() {
+              // TODO handle this more elegantly
+              //Update the color swatch
+            }),
             decoration: InputDecoration(
               label: Text('color'),
               border: const OutlineInputBorder(),
@@ -105,10 +106,18 @@ class _EditMatchEventConfigState extends State<EditMatchEventConfig> {
           title: Text('isLargerBetter'),
           trailing: Switch(
             value: widget.state.isLargerBetter,
-            onChanged:
-                (newValue) => setState(() {
-                  widget.state.isLargerBetter = newValue;
-                }),
+            onChanged: (newValue) => setState(() {
+              widget.state.isLargerBetter = newValue;
+            }),
+          ),
+        ),
+        ListTile(
+          title: Text('isSensitiveField'),
+          trailing: Switch(
+            value: widget.state.isSensitiveField,
+            onChanged: (newValue) => setState(() {
+              widget.state.isSensitiveField = newValue;
+            }),
           ),
         ),
       ],

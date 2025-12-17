@@ -56,26 +56,23 @@ class _ConfigEditorPageState extends State<ConfigEditorPage> {
     _tbaEventId = TextEditingController(text: config.tbaEventId);
     _tbaSecretKey = TextEditingController(text: config.tbaSecretKey);
     _team = TextEditingController(text: config.team.toString());
-    _pitscouting =
-        config.pitscouting.map((item) => SurveyItemEditState(item)).toList();
-    _matchscoutingSurvey =
-        config.matchscouting.survey
-            .map((item) => SurveyItemEditState(item))
-            .toList();
-    _matchscoutingProperties =
-        config.matchscouting.properties
-            .map((item) => SurveyItemEditState(item))
-            .toList();
+    _pitscouting = config.pitscouting
+        .map((item) => SurveyItemEditState(item))
+        .toList();
+    _matchscoutingSurvey = config.matchscouting.survey
+        .map((item) => SurveyItemEditState(item))
+        .toList();
+    _matchscoutingProperties = config.matchscouting.properties
+        .map((item) => SurveyItemEditState(item))
+        .toList();
 
-    _matchscoutingEvents =
-        config.matchscouting.events
-            .map((item) => MatchEventConfigEditState(item))
-            .toList();
+    _matchscoutingEvents = config.matchscouting.events
+        .map((item) => MatchEventConfigEditState(item))
+        .toList();
 
-    _matchscoutingProcess =
-        config.matchscouting.processes
-            .map((item) => ProcessConfigEditState(item))
-            .toList();
+    _matchscoutingProcess = config.matchscouting.processes
+        .map((item) => ProcessConfigEditState(item))
+        .toList();
 
     _fieldStyle = config.fieldStyle;
     _docs = config.docs;
@@ -97,20 +94,23 @@ class _ConfigEditorPageState extends State<ConfigEditorPage> {
                   fieldStyle: _fieldStyle,
                   pitscouting: _pitscouting.map((e) => e.toConfig()).toList(),
                   matchscouting: MatchScouting(
-                    events:
-                        _matchscoutingEvents.map((e) => e.toConfig()).toList(),
-                    processes:
-                        _matchscoutingProcess.map((e) => e.toConfig()).toList(),
-                    properties:
-                        _matchscoutingProperties
-                            .map((e) => e.toConfig())
-                            .toList(),
-                    survey:
-                        _matchscoutingSurvey.map((e) => e.toConfig()).toList(),
+                    events: _matchscoutingEvents
+                        .map((e) => e.toConfig())
+                        .toList(),
+                    processes: _matchscoutingProcess
+                        .map((e) => e.toConfig())
+                        .toList(),
+                    properties: _matchscoutingProperties
+                        .map((e) => e.toConfig())
+                        .toList(),
+                    survey: _matchscoutingSurvey
+                        .map((e) => e.toConfig())
+                        .toList(),
                   ),
                   tbaEventId: _tbaEventId.text == '' ? null : _tbaEventId.text,
-                  tbaSecretKey:
-                      _tbaSecretKey.text == '' ? null : _tbaSecretKey.text,
+                  tbaSecretKey: _tbaSecretKey.text == ''
+                      ? null
+                      : _tbaSecretKey.text,
                   fieldImage: fieldImage,
                 );
                 Navigator.pop(context, newConfig);
@@ -157,7 +157,7 @@ class _ConfigEditorPageState extends State<ConfigEditorPage> {
 
             ListTile(
               title: DropdownButtonFormField(
-                value: _fieldStyle,
+                initialValue: _fieldStyle,
                 items: [
                   for (final value in FieldStyle.values)
                     DropdownMenuItem<FieldStyle>(
@@ -165,10 +165,9 @@ class _ConfigEditorPageState extends State<ConfigEditorPage> {
                       child: Text(value.toString()),
                     ),
                 ],
-                onChanged:
-                    (newValue) => setState(() {
-                      _fieldStyle = newValue!;
-                    }),
+                onChanged: (newValue) => setState(() {
+                  _fieldStyle = newValue!;
+                }),
                 decoration: InputDecoration(
                   label: Text('fieldStyle'),
                   border: const OutlineInputBorder(),
@@ -207,10 +206,9 @@ class _ConfigEditorPageState extends State<ConfigEditorPage> {
                             child: ListTile(
                               title: EditMatchEventConfig(state: item),
                               leading: IconButton(
-                                onPressed:
-                                    () => setState(() {
-                                      _matchscoutingEvents.removeAt(idx);
-                                    }),
+                                onPressed: () => setState(() {
+                                  _matchscoutingEvents.removeAt(idx);
+                                }),
                                 icon: Icon(
                                   Icons.remove,
                                   color: Colors.redAccent,
@@ -222,18 +220,16 @@ class _ConfigEditorPageState extends State<ConfigEditorPage> {
                             children: [
                               if (idx > 0)
                                 IconButton(
-                                  onPressed:
-                                      () => setState(() {
-                                        _matchscoutingEvents.move(idx, idx - 1);
-                                      }),
+                                  onPressed: () => setState(() {
+                                    _matchscoutingEvents.move(idx, idx - 1);
+                                  }),
                                   icon: Icon(Icons.arrow_upward),
                                 ),
                               if (idx < _matchscoutingEvents.length - 1)
                                 IconButton(
-                                  onPressed:
-                                      () => setState(() {
-                                        _matchscoutingEvents.move(idx, idx + 1);
-                                      }),
+                                  onPressed: () => setState(() {
+                                    _matchscoutingEvents.move(idx, idx + 1);
+                                  }),
                                   icon: Icon(Icons.arrow_downward),
                                 ),
                             ],
@@ -245,14 +241,13 @@ class _ConfigEditorPageState extends State<ConfigEditorPage> {
 
                 Center(
                   child: FilledButton.tonalIcon(
-                    onPressed:
-                        () => setState(() {
-                          _matchscoutingEvents.add(
-                            MatchEventConfigEditState(
-                              MatchEventConfig(id: '', label: ''),
-                            ),
-                          );
-                        }),
+                    onPressed: () => setState(() {
+                      _matchscoutingEvents.add(
+                        MatchEventConfigEditState(
+                          MatchEventConfig(id: '', label: ''),
+                        ),
+                      );
+                    }),
                     label: Text('Add'),
                     icon: Icon(Icons.add),
                   ),
@@ -275,10 +270,9 @@ class _ConfigEditorPageState extends State<ConfigEditorPage> {
                             child: ListTile(
                               title: EditProcessConfig(state: item),
                               leading: IconButton(
-                                onPressed:
-                                    () => setState(() {
-                                      _matchscoutingProcess.removeAt(idx);
-                                    }),
+                                onPressed: () => setState(() {
+                                  _matchscoutingProcess.removeAt(idx);
+                                }),
                                 icon: Icon(
                                   Icons.remove,
                                   color: Colors.redAccent,
@@ -290,24 +284,16 @@ class _ConfigEditorPageState extends State<ConfigEditorPage> {
                             children: [
                               if (idx > 0)
                                 IconButton(
-                                  onPressed:
-                                      () => setState(() {
-                                        _matchscoutingProcess.move(
-                                          idx,
-                                          idx - 1,
-                                        );
-                                      }),
+                                  onPressed: () => setState(() {
+                                    _matchscoutingProcess.move(idx, idx - 1);
+                                  }),
                                   icon: Icon(Icons.arrow_upward),
                                 ),
                               if (idx < _matchscoutingProcess.length - 1)
                                 IconButton(
-                                  onPressed:
-                                      () => setState(() {
-                                        _matchscoutingProcess.move(
-                                          idx,
-                                          idx + 1,
-                                        );
-                                      }),
+                                  onPressed: () => setState(() {
+                                    _matchscoutingProcess.move(idx, idx + 1);
+                                  }),
                                   icon: Icon(Icons.arrow_downward),
                                 ),
                             ],
@@ -319,18 +305,17 @@ class _ConfigEditorPageState extends State<ConfigEditorPage> {
 
                 Center(
                   child: FilledButton.tonalIcon(
-                    onPressed:
-                        () => setState(() {
-                          _matchscoutingProcess.add(
-                            ProcessConfigEditState(
-                              MatchResultsProcess(
-                                id: '',
-                                label: '',
-                                expression: '',
-                              ),
-                            ),
-                          );
-                        }),
+                    onPressed: () => setState(() {
+                      _matchscoutingProcess.add(
+                        ProcessConfigEditState(
+                          MatchResultsProcess(
+                            id: '',
+                            label: '',
+                            expression: '',
+                          ),
+                        ),
+                      );
+                    }),
                     label: Text('Add'),
                     icon: Icon(Icons.add),
                   ),
@@ -354,10 +339,9 @@ class _ConfigEditorPageState extends State<ConfigEditorPage> {
                 final result = await Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder:
-                        (context) => EditMarkdownPage(
-                          source: dataProvider.event.config.docs,
-                        ),
+                    builder: (context) => EditMarkdownPage(
+                      source: dataProvider.event.config.docs,
+                    ),
                   ),
                 );
                 if (result != null) {
@@ -417,10 +401,9 @@ class _ConfigEditorPageState extends State<ConfigEditorPage> {
                     child: ListTile(
                       title: EditSurveyItemConfig(state: item),
                       leading: IconButton(
-                        onPressed:
-                            () => setState(() {
-                              state.removeAt(idx);
-                            }),
+                        onPressed: () => setState(() {
+                          state.removeAt(idx);
+                        }),
                         icon: Icon(Icons.remove, color: Colors.redAccent),
                       ),
                     ),
@@ -429,18 +412,16 @@ class _ConfigEditorPageState extends State<ConfigEditorPage> {
                     children: [
                       if (idx > 0)
                         IconButton(
-                          onPressed:
-                              () => setState(() {
-                                state.move(idx, idx - 1);
-                              }),
+                          onPressed: () => setState(() {
+                            state.move(idx, idx - 1);
+                          }),
                           icon: Icon(Icons.arrow_upward),
                         ),
                       if (idx < state.length - 1)
                         IconButton(
-                          onPressed:
-                              () => setState(() {
-                                state.move(idx, idx + 1);
-                              }),
+                          onPressed: () => setState(() {
+                            state.move(idx, idx + 1);
+                          }),
                           icon: Icon(Icons.arrow_downward),
                         ),
                     ],
@@ -452,18 +433,13 @@ class _ConfigEditorPageState extends State<ConfigEditorPage> {
 
         Center(
           child: FilledButton.tonalIcon(
-            onPressed:
-                () => setState(() {
-                  state.add(
-                    SurveyItemEditState(
-                      SurveyItem(
-                        id: '',
-                        type: SurveyItemType.toggle,
-                        label: '',
-                      ),
-                    ),
-                  );
-                }),
+            onPressed: () => setState(() {
+              state.add(
+                SurveyItemEditState(
+                  SurveyItem(id: '', type: SurveyItemType.toggle, label: ''),
+                ),
+              );
+            }),
             label: Text('Add'),
             icon: Icon(Icons.add),
           ),

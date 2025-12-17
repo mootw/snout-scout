@@ -23,8 +23,10 @@ class AnalysisPostMatchSurvey extends StatelessWidget {
             runSpacing: 42,
             alignment: WrapAlignment.center,
             children: [
-              for (final surveyItem in data.event.config.matchscouting.survey
-                  .where((element) => element.type != SurveyItemType.picture))
+              for (final surveyItem
+                  in data.event.config.matchscouting.survey.where(
+                    (element) => element.type != SurveyItemType.picture,
+                  ))
                 PostGameRatioChart(surveyItem: surveyItem),
             ],
           ),
@@ -96,23 +98,21 @@ class _PostGameRatioChartState extends State<PostGameRatioChart> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder:
-                              (context) => Scaffold(
-                                appBar: AppBar(
-                                  title: Text(
-                                    '${widget.surveyItem.label}:  ${valueKeys.entries.toList()[asdf].key}',
-                                  ),
-                                ),
-                                body: TeamGridList(
-                                  teamFilter:
-                                      valueKeys.entries
-                                          .toList()[asdf]
-                                          .value
-                                          .teams
-                                          .map<int>((e) => int.parse(e))
-                                          .toList(),
-                                ),
+                          builder: (context) => Scaffold(
+                            appBar: AppBar(
+                              title: Text(
+                                '${widget.surveyItem.label}:  ${valueKeys.entries.toList()[asdf].key}',
                               ),
+                            ),
+                            body: TeamGridList(
+                              teamFilter: valueKeys.entries
+                                  .toList()[asdf]
+                                  .value
+                                  .teams
+                                  .map<int>((e) => int.parse(e))
+                                  .toList(),
+                            ),
+                          ),
                         ),
                       );
                     }

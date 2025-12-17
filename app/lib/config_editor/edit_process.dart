@@ -8,6 +8,7 @@ class ProcessConfigEditState {
   late bool isLargerBetter;
   late TextEditingController expression;
   late TextEditingController docs;
+  late bool isSensitiveField;
 
   ProcessConfigEditState(MatchResultsProcess config) {
     label = TextEditingController(text: config.label);
@@ -15,6 +16,7 @@ class ProcessConfigEditState {
     expression = TextEditingController(text: config.expression);
     isLargerBetter = config.isLargerBetter;
     docs = TextEditingController(text: config.docs);
+    isSensitiveField = config.isSensitiveField;
   }
 
   MatchResultsProcess toConfig() {
@@ -24,6 +26,7 @@ class ProcessConfigEditState {
       expression: expression.text,
       docs: docs.text,
       isLargerBetter: isLargerBetter,
+      isSensitiveField: isSensitiveField,
     );
   }
 }
@@ -47,12 +50,11 @@ class _EditProcessConfigState extends State<EditProcessConfig> {
             controller: widget.state.label,
             onEditingComplete: () {
               if (widget.state.id.text == '') {
-                widget.state.id.text =
-                    widget.state.label.text
-                        .toLowerCase()
-                        .replaceAll(' ', '_')
-                        .replaceAll(invalidIdValues, '')
-                        .trim();
+                widget.state.id.text = widget.state.label.text
+                    .toLowerCase()
+                    .replaceAll(' ', '_')
+                    .replaceAll(invalidIdValues, '')
+                    .trim();
               }
             },
             decoration: InputDecoration(
@@ -97,10 +99,18 @@ class _EditProcessConfigState extends State<EditProcessConfig> {
           title: Text('isLargerBetter'),
           trailing: Switch(
             value: widget.state.isLargerBetter,
-            onChanged:
-                (newValue) => setState(() {
-                  widget.state.isLargerBetter = newValue;
-                }),
+            onChanged: (newValue) => setState(() {
+              widget.state.isLargerBetter = newValue;
+            }),
+          ),
+        ),
+        ListTile(
+          title: Text('isSensitiveField'),
+          trailing: Switch(
+            value: widget.state.isSensitiveField,
+            onChanged: (newValue) => setState(() {
+              widget.state.isSensitiveField = newValue;
+            }),
           ),
         ),
       ],

@@ -37,12 +37,12 @@ class _TeamViewPageState extends State<TeamViewPage> {
 
     String? teamName =
         data.event.pitscouting[widget.teamNumber.toString()]?[teamNameReserved];
-    String? robotPicture =
-        data.event.pitscouting[widget.teamNumber
-            .toString()]?[robotPictureReserved];
-    String? teamNotes =
-        data.event.pitscouting[widget.teamNumber
-            .toString()]?[teamNotesReserved];
+    String? robotPicture = data
+        .event
+        .pitscouting[widget.teamNumber.toString()]?[robotPictureReserved];
+    String? teamNotes = data
+        .event
+        .pitscouting[widget.teamNumber.toString()]?[teamNotesReserved];
 
     MatchScheduleItem? teamNextMatch = data.event.nextMatchForTeam(
       widget.teamNumber,
@@ -65,14 +65,12 @@ class _TeamViewPageState extends State<TeamViewPage> {
                 (context) => Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder:
-                        (_) => EditTeamPage(
-                          team: widget.teamNumber,
-                          config: data.event.config.pitscouting,
-                          initialData:
-                              data.event.pitscouting[widget.teamNumber
-                                  .toString()],
-                        ),
+                    builder: (_) => EditTeamPage(
+                      team: widget.teamNumber,
+                      config: data.event.config.pitscouting,
+                      initialData:
+                          data.event.pitscouting[widget.teamNumber.toString()],
+                    ),
                   ),
                 ),
               );
@@ -119,34 +117,32 @@ class _TeamViewPageState extends State<TeamViewPage> {
           ),
           teamNextMatch != null && scheduleDelay != null
               ? Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text("next match"),
-                  TextButton(
-                    onPressed:
-                        () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder:
-                                (context) =>
-                                    MatchPage(matchid: teamNextMatch.id),
-                          ),
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text("next match"),
+                    TextButton(
+                      onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              MatchPage(matchid: teamNextMatch.id),
                         ),
-                    child: Text(
-                      teamNextMatch.label,
-                      style: TextStyle(
-                        color: getAllianceUIColor(
-                          teamNextMatch.getAllianceOf(widget.teamNumber),
+                      ),
+                      child: Text(
+                        teamNextMatch.label,
+                        style: TextStyle(
+                          color: getAllianceUIColor(
+                            teamNextMatch.getAllianceOf(widget.teamNumber),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  TimeDuration(
-                    time: teamNextMatch.scheduledTime.add(scheduleDelay),
-                    displayDurationDefault: true,
-                  ),
-                ],
-              )
+                    TimeDuration(
+                      time: teamNextMatch.scheduledTime.add(scheduleDelay),
+                      displayDurationDefault: true,
+                    ),
+                  ],
+                )
               : const Center(child: Text('No upcoming matches')),
           const Divider(),
           DataSheet(
@@ -163,19 +159,19 @@ class _TeamViewPageState extends State<TeamViewPage> {
             ],
             rows: [
               //Show ALL matches the team is scheduled for ALONG with all matches they played regardless of it it is scheduled sorted
-              for (final match in {
-                for (final matchId in matchIds)
-                  (
-                    data.event.schedule[matchId],
-                    data.event.matches[matchId],
-                    matchId,
-                  ),
-              }.sorted(
-                (a, b) =>
-                    a.$1 == null || b.$1 == null
+              for (final match
+                  in {
+                    for (final matchId in matchIds)
+                      (
+                        data.event.schedule[matchId],
+                        data.event.matches[matchId],
+                        matchId,
+                      ),
+                  }.sorted(
+                    (a, b) => a.$1 == null || b.$1 == null
                         ? 0
                         : a.$1?.compareTo(b.$1!) ?? 0,
-              ))
+                  ))
                 [
                   DataItem.fromMatch(
                     context: context,
@@ -245,13 +241,12 @@ class _TeamViewPageState extends State<TeamViewPage> {
                               .getSchedule(data.event, match.key)
                               ?.label ??
                           match.key,
-                      path:
-                          match.value.robot[widget.teamNumber.toString()]!
-                              .timelineInterpolatedBlueNormalized(
-                                data.event.config.fieldStyle,
-                              )
-                              .where((element) => element.isInAuto)
-                              .toList(),
+                      path: match.value.robot[widget.teamNumber.toString()]!
+                          .timelineInterpolatedBlueNormalized(
+                            data.event.config.fieldStyle,
+                          )
+                          .where((element) => element.isInAuto)
+                          .toList(),
                     ),
                 ],
               ),
@@ -335,18 +330,17 @@ class _TeamViewPageState extends State<TeamViewPage> {
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   FieldHeatMap(
-                    events:
-                        [
-                          for (final match in data.event.teamRecordedMatches(
-                            widget.teamNumber,
-                          ))
-                            match.value.robot[widget.teamNumber.toString()]!
-                                .timelineInterpolatedBlueNormalized(
-                                  data.event.config.fieldStyle,
-                                )
-                                .where((element) => element.isPositionEvent)
-                                .firstOrNull,
-                        ].nonNulls.toList(),
+                    events: [
+                      for (final match in data.event.teamRecordedMatches(
+                        widget.teamNumber,
+                      ))
+                        match.value.robot[widget.teamNumber.toString()]!
+                            .timelineInterpolatedBlueNormalized(
+                              data.event.config.fieldStyle,
+                            )
+                            .where((element) => element.isPositionEvent)
+                            .firstOrNull,
+                    ].nonNulls.toList(),
                   ),
                 ],
               ),
@@ -380,18 +374,17 @@ class _TeamViewPageState extends State<TeamViewPage> {
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   FieldHeatMap(
-                    events:
-                        [
-                          for (final match in data.event.teamRecordedMatches(
-                            widget.teamNumber,
-                          ))
-                            match.value.robot[widget.teamNumber.toString()]!
-                                .timelineInterpolatedBlueNormalized(
-                                  data.event.config.fieldStyle,
-                                )
-                                .where((element) => element.isPositionEvent)
-                                .lastOrNull,
-                        ].nonNulls.toList(),
+                    events: [
+                      for (final match in data.event.teamRecordedMatches(
+                        widget.teamNumber,
+                      ))
+                        match.value.robot[widget.teamNumber.toString()]!
+                            .timelineInterpolatedBlueNormalized(
+                              data.event.config.fieldStyle,
+                            )
+                            .where((element) => element.isPositionEvent)
+                            .lastOrNull,
+                    ].nonNulls.toList(),
                   ),
                 ],
               ),

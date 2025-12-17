@@ -22,14 +22,13 @@ class _BoxPlotAnalysisState extends State<BoxPlotAnalysis> {
   void initState() {
     super.initState();
     //Automatically select the first process by default if it exists (it might be null!)
-    _selectedProcess =
-        context
-            .read<DataProvider>()
-            .event
-            .config
-            .matchscouting
-            .processes
-            .firstOrNull;
+    _selectedProcess = context
+        .read<DataProvider>()
+        .event
+        .config
+        .matchscouting
+        .processes
+        .firstOrNull;
   }
 
   @override
@@ -65,24 +64,22 @@ class _BoxPlotAnalysisState extends State<BoxPlotAnalysis> {
     num min =
         teamValues?.values.fold(
           0,
-          (previousValue, element) =>
-              element.isEmpty
-                  ? (previousValue ?? 0)
-                  : previousValue! < element.min
-                  ? previousValue
-                  : element.min,
+          (previousValue, element) => element.isEmpty
+              ? (previousValue ?? 0)
+              : previousValue! < element.min
+              ? previousValue
+              : element.min,
         ) ??
         0;
 
     num max =
         teamValues?.values.fold(
           0,
-          (previousValue, element) =>
-              element.isEmpty
-                  ? (previousValue ?? 0)
-                  : previousValue! > element.max
-                  ? previousValue
-                  : element.max,
+          (previousValue, element) => element.isEmpty
+              ? (previousValue ?? 0)
+              : previousValue! > element.max
+              ? previousValue
+              : element.max,
         ) ??
         0;
 
@@ -114,17 +111,16 @@ class _BoxPlotAnalysisState extends State<BoxPlotAnalysis> {
                 _selectedProcess = value!;
               });
             },
-            items:
-                data.event.config.matchscouting.processes
-                    .map<DropdownMenuItem<MatchResultsProcess>>((
-                      MatchResultsProcess value,
-                    ) {
-                      return DropdownMenuItem<MatchResultsProcess>(
-                        value: value,
-                        child: Text(value.label),
-                      );
-                    })
-                    .toList(),
+            items: data.event.config.matchscouting.processes
+                .map<DropdownMenuItem<MatchResultsProcess>>((
+                  MatchResultsProcess value,
+                ) {
+                  return DropdownMenuItem<MatchResultsProcess>(
+                    value: value,
+                    child: Text(value.label),
+                  );
+                })
+                .toList(),
           ),
           if (teamValues == null) const Text("Select a process to see a plot"),
           if (valuesSorted != null)
@@ -158,9 +154,8 @@ class _BoxPlotAnalysisState extends State<BoxPlotAnalysis> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder:
-                                      (context) =>
-                                          TeamViewPage(teamNumber: entry.key),
+                                  builder: (context) =>
+                                      TeamViewPage(teamNumber: entry.key),
                                 ),
                               );
                             },

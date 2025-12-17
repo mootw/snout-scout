@@ -42,58 +42,54 @@ class _MatchPageState extends State<MatchPage> {
         bottom: const LoadOrErrorStatusBar(),
         actions: [
           FilledButton(
-            onPressed:
-                () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder:
-                        (builder) =>
-                            MatchRecorderAssistantPage(matchid: widget.matchid),
-                  ),
-                ),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (builder) =>
+                    MatchRecorderAssistantPage(matchid: widget.matchid),
+              ),
+            ),
             child: const Text("Scout"),
           ),
           const SizedBox(width: 12),
           FilledButton.tonal(
-            onPressed:
-                () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder:
-                        (builder) => AnalysisMatchPreview(
-                          red: matchSchedule?.red ?? [],
-                          blue: matchSchedule?.blue ?? [],
-                          matchLabel: matchSchedule?.label,
-                          plan: Column(
-                            children: [
-                              for (final item
-                                  in snoutData
-                                      .event
-                                      .config
-                                      .matchscouting
-                                      .properties) ...[
-                                DynamicValueViewer(
-                                  itemType: item,
-                                  value: match?.properties?[item.id],
-                                ),
-                                Container(
-                                  padding: const EdgeInsets.only(right: 16),
-                                  alignment: Alignment.centerRight,
-                                  child: EditAudit(
-                                    path: Patch.buildPath([
-                                      'matches',
-                                      widget.matchid,
-                                      'properties',
-                                      item.id,
-                                    ]),
-                                  ),
-                                ),
-                              ],
-                            ],
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (builder) => AnalysisMatchPreview(
+                  red: matchSchedule?.red ?? [],
+                  blue: matchSchedule?.blue ?? [],
+                  matchLabel: matchSchedule?.label,
+                  plan: Column(
+                    children: [
+                      for (final item
+                          in snoutData
+                              .event
+                              .config
+                              .matchscouting
+                              .properties) ...[
+                        DynamicValueViewer(
+                          itemType: item,
+                          value: match?.properties?[item.id],
+                        ),
+                        Container(
+                          padding: const EdgeInsets.only(right: 16),
+                          alignment: Alignment.centerRight,
+                          child: EditAudit(
+                            path: Patch.buildPath([
+                              'matches',
+                              widget.matchid,
+                              'properties',
+                              item.id,
+                            ]),
                           ),
                         ),
+                      ],
+                    ],
                   ),
                 ),
+              ),
+            ),
             child: const Text("Preview"),
           ),
           const SizedBox(width: 12),
@@ -103,10 +99,9 @@ class _MatchPageState extends State<MatchPage> {
           if (snoutData.event.config.tbaEventId != null)
             FilledButton.tonal(
               child: const Text("TBA"),
-              onPressed:
-                  () => launchUrlString(
-                    "https://www.thebluealliance.com/match/${widget.matchid}",
-                  ),
+              onPressed: () => launchUrlString(
+                "https://www.thebluealliance.com/match/${widget.matchid}",
+              ),
             ),
           const SizedBox(width: 12),
         ],
@@ -147,8 +142,8 @@ class _MatchPageState extends State<MatchPage> {
                       ),
                       TextButton(
                         child: const Text("Edit Results"),
-                        onPressed:
-                            () => editResults(matchSchedule, match, snoutData),
+                        onPressed: () =>
+                            editResults(matchSchedule, match, snoutData),
                       ),
                     ],
                   ),
@@ -225,14 +220,12 @@ class _MatchPageState extends State<MatchPage> {
                               ),
                         ),
                       ),
-                      onPressed:
-                          () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder:
-                                  (context) => TeamViewPage(teamNumber: team),
-                            ),
-                          ),
+                      onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => TeamViewPage(teamNumber: team),
+                        ),
+                      ),
                     ),
                     exportValue: team.toString(),
                     sortingValue: team,
@@ -289,10 +282,9 @@ class _MatchPageState extends State<MatchPage> {
                         for (final robot in match.robot.entries)
                           (
                             label: robot.key,
-                            path:
-                                robot.value.timelineInterpolated
-                                    .where((element) => element.isInAuto)
-                                    .toList(),
+                            path: robot.value.timelineInterpolated
+                                .where((element) => element.isInAuto)
+                                .toList(),
                           ),
                       ],
                     ),
@@ -348,13 +340,11 @@ class _MatchPageState extends State<MatchPage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder:
-                          (context) => EditMatchPropertiesPage(
-                            matchID: widget.matchid,
-                            config:
-                                snoutData.event.config.matchscouting.properties,
-                            initialData: match?.properties,
-                          ),
+                      builder: (context) => EditMatchPropertiesPage(
+                        matchID: widget.matchid,
+                        config: snoutData.event.config.matchscouting.properties,
+                        initialData: match?.properties,
+                      ),
                     ),
                   );
                 },
@@ -399,18 +389,17 @@ class _MatchPageState extends State<MatchPage> {
       (context) => Navigator.push(
         context,
         MaterialPageRoute(
-          builder:
-              (context) => EditMatchResults(
-                results:
-                    match?.results ??
-                    MatchResultValues(
-                      time: DateTime.now(),
-                      redScore: 0,
-                      blueScore: 0,
-                    ),
-                config: snoutData.event.config,
-                matchID: widget.matchid,
-              ),
+          builder: (context) => EditMatchResults(
+            results:
+                match?.results ??
+                MatchResultValues(
+                  time: DateTime.now(),
+                  redScore: 0,
+                  blueScore: 0,
+                ),
+            config: snoutData.event.config,
+            matchID: widget.matchid,
+          ),
         ),
       ),
     );

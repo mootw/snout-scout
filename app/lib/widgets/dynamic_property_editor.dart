@@ -51,15 +51,14 @@ class _DynamicPropertyEditorWidgetState
       children: [
         if (_value != _initialValue)
           IconButton(
-            onPressed:
-                () => setState(() {
-                  _value = _initialValue;
-                  if (widget.tool.type == SurveyItemType.text ||
-                      widget.tool.type == SurveyItemType.number) {
-                    _myController.text =
-                        _initialValue ?? ""; // _initialValue can be null!
-                  }
-                }),
+            onPressed: () => setState(() {
+              _value = _initialValue;
+              if (widget.tool.type == SurveyItemType.text ||
+                  widget.tool.type == SurveyItemType.number) {
+                _myController.text =
+                    _initialValue ?? ""; // _initialValue can be null!
+              }
+            }),
             icon: const Icon(Icons.restore),
           ),
         Expanded(
@@ -124,16 +123,14 @@ class _DynamicPropertyEditorWidgetState
                   });
                 },
                 //Insert empty value here as an option
-                items:
-                    [
-                      null,
-                      ...widget.tool.options!,
-                    ].map<DropdownMenuItem<String>>((String? value) {
+                items: [null, ...widget.tool.options!]
+                    .map<DropdownMenuItem<String>>((String? value) {
                       return DropdownMenuItem<String>(
                         value: value,
                         child: Text(value ?? ""),
                       );
-                    }).toList(),
+                    })
+                    .toList(),
               ),
             ),
             SurveyItemType.toggle => ListTile(
@@ -182,13 +179,12 @@ class _DynamicPropertyEditorWidgetState
                 },
               ),
               title: Text(widget.tool.label),
-              subtitle:
-                  _value == null
-                      ? const Text("No Image")
-                      : Image(
-                        image: snoutImageCache.getCached(_value),
-                        fit: BoxFit.contain,
-                      ),
+              subtitle: _value == null
+                  ? const Text("No Image")
+                  : Image(
+                      image: snoutImageCache.getCached(_value),
+                      fit: BoxFit.contain,
+                    ),
             ),
           },
         ),
@@ -215,20 +211,18 @@ class SurveyItemDocs extends StatelessWidget {
     return IconButton.filledTonal(
       iconSize: 16,
       visualDensity: VisualDensity.compact,
-      onPressed:
-          () => showDialog(
-            context: context,
-            builder:
-                (context) => AlertDialog(
-                  content: MarkdownText(data: tool.docs),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('Ok'),
-                    ),
-                  ],
-                ),
-          ),
+      onPressed: () => showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          content: MarkdownText(data: tool.docs),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Ok'),
+            ),
+          ],
+        ),
+      ),
       icon: const Icon(Icons.question_mark),
     );
   }

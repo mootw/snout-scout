@@ -13,6 +13,7 @@ MatchResultsProcess _$MatchResultsProcessFromJson(Map json) =>
       expression: json['expression'] as String,
       isLargerBetter: json['isLargerBetter'] as bool? ?? true,
       docs: json['docs'] as String? ?? '',
+      isSensitiveField: json['isSensitiveField'] as bool? ?? true,
     );
 
 Map<String, dynamic> _$MatchResultsProcessToJson(
@@ -23,4 +24,5 @@ Map<String, dynamic> _$MatchResultsProcessToJson(
   'label': instance.label,
   'expression': instance.expression,
   'isLargerBetter': instance.isLargerBetter,
+  'isSensitiveField': instance.isSensitiveField,
 };

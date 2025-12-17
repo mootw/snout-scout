@@ -81,29 +81,27 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
       child: FilledButton.tonal(
         style: FilledButton.styleFrom(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          foregroundColor:
-              (toolColor?.computeLuminance() ?? 0) < 0.5
-                  ? Colors.white
-                  : Colors.black,
+          foregroundColor: (toolColor?.computeLuminance() ?? 0) < 0.5
+              ? Colors.white
+              : Colors.black,
           backgroundColor: toolColor,
         ),
-        onPressed:
-            _mode == MatchMode.setup || _lastMoveEvent == null
-                ? null
-                : () {
-                  HapticFeedback.mediumImpact();
-                  setState(() {
-                    if (_mode != MatchMode.setup && _robotPosition != null) {
-                      _events.add(
-                        MatchEvent.fromEventConfig(
-                          time: _time,
-                          event: tool,
-                          position: _robotPosition!,
-                        ),
-                      );
-                    }
-                  });
-                },
+        onPressed: _mode == MatchMode.setup || _lastMoveEvent == null
+            ? null
+            : () {
+                HapticFeedback.mediumImpact();
+                setState(() {
+                  if (_mode != MatchMode.setup && _robotPosition != null) {
+                    _events.add(
+                      MatchEvent.fromEventConfig(
+                        time: _time,
+                        event: tool,
+                        position: _robotPosition!,
+                      ),
+                    );
+                  }
+                });
+              },
         child: Text(tool.label, textAlign: TextAlign.center),
       ),
     );
@@ -123,26 +121,24 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
             ),
             for (final item in _events)
               TextButton(
-                onPressed:
-                    () => setState(() {
-                      _events.remove(item);
-                    }),
+                onPressed: () => setState(() {
+                  _events.remove(item);
+                }),
                 child: Text(
                   '${item.time.round()}  ${item.getLabelFromConfig(context.watch<DataProvider>().event.config)}',
                   style: TextStyle(
-                    color:
-                        item.isPositionEvent
-                            ? Theme.of(context).colorScheme.onSurface
-                            : item.getColorFromConfig(
-                                  context.watch<DataProvider>().event.config,
-                                ) !=
-                                null
-                            ? colorFromHex(
-                              item.getColorFromConfig(
+                    color: item.isPositionEvent
+                        ? Theme.of(context).colorScheme.onSurface
+                        : item.getColorFromConfig(
                                 context.watch<DataProvider>().event.config,
-                              )!,
-                            )
-                            : null,
+                              ) !=
+                              null
+                        ? colorFromHex(
+                            item.getColorFromConfig(
+                              context.watch<DataProvider>().event.config,
+                            )!,
+                          )
+                        : null,
                   ),
                 ),
               ),
@@ -167,10 +163,9 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
             actions: [
               if (_mode != MatchMode.finished)
                 FilledButton.tonal(
-                  onPressed:
-                      () => setState(() {
-                        _showSurvey = !_showSurvey;
-                      }),
+                  onPressed: () => setState(() {
+                    _showSurvey = !_showSurvey;
+                  }),
                   child: const Text("Show Recorder"),
                 ),
               IconButton(
@@ -226,10 +221,9 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
             title: Text("${widget.team}"),
             actions: [
               FilledButton.tonal(
-                onPressed:
-                    () => setState(() {
-                      _showSurvey = !_showSurvey;
-                    }),
+                onPressed: () => setState(() {
+                  _showSurvey = !_showSurvey;
+                }),
                 child: const Text("Show Survey"),
               ),
               _statusAndToolBar(),
@@ -284,12 +278,11 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                       child: Transform.rotate(
                         angle: _rotateField ? math.pi : 0,
                         child: FieldPositionSelector(
-                          coverAlignment:
-                              _mode != MatchMode.setup
-                                  ? null
-                                  : widget.teamAlliance == Alliance.red
-                                  ? -1
-                                  : 1,
+                          coverAlignment: _mode != MatchMode.setup
+                              ? null
+                              : widget.teamAlliance == Alliance.red
+                              ? -1
+                              : 1,
                           teamNumber: widget.team,
                           alliance: widget.teamAlliance,
                           robotPosition: _robotPosition,
@@ -331,10 +324,9 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
           title: Text("${widget.team}"),
           actions: [
             FilledButton.tonal(
-              onPressed:
-                  () => setState(() {
-                    _showSurvey = !_showSurvey;
-                  }),
+              onPressed: () => setState(() {
+                _showSurvey = !_showSurvey;
+              }),
               child: const Text("Show Survey"),
             ),
             const SizedBox(width: 32),
@@ -357,12 +349,11 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                     angle: _rotateField ? math.pi : 0,
                     child: FieldPositionSelector(
                       teamNumber: widget.team,
-                      coverAlignment:
-                          _mode != MatchMode.setup
-                              ? null
-                              : widget.teamAlliance == Alliance.red
-                              ? -1
-                              : 1,
+                      coverAlignment: _mode != MatchMode.setup
+                          ? null
+                          : widget.teamAlliance == Alliance.red
+                          ? -1
+                          : 1,
                       alliance: widget.teamAlliance,
                       robotPosition: _robotPosition,
                       onTap: (robotPosition) {
@@ -408,9 +399,10 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
 
   Widget _statusAndToolBar() {
     Image? robotPicture;
-    final pictureData =
-        context.watch<DataProvider>().event.pitscouting[widget.team
-            .toString()]?[robotPictureReserved];
+    final pictureData = context
+        .watch<DataProvider>()
+        .event
+        .pitscouting[widget.team.toString()]?[robotPictureReserved];
     if (pictureData != null) {
       robotPicture = Image(image: snoutImageCache.getCached(pictureData));
     }
@@ -422,13 +414,12 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
         children: [
           IconButton(
             tooltip: "Rotate Map",
-            onPressed:
-                () => setState(() {
-                  _rotateField = !_rotateField;
-                  context.read<LocalConfigProvider>().setFlipFieldImage(
-                    _rotateField,
-                  );
-                }),
+            onPressed: () => setState(() {
+              _rotateField = !_rotateField;
+              context.read<LocalConfigProvider>().setFlipFieldImage(
+                _rotateField,
+              );
+            }),
             icon: const Icon(Icons.rotate_right),
           ),
           const SizedBox(width: 8),
@@ -438,31 +429,26 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
           if (robotPicture != null)
             Center(
               child: TextButton(
-                onPressed:
-                    () => Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder:
-                            (context) => Scaffold(
-                              appBar: AppBar(),
-                              body: PhotoView(
-                                imageProvider: robotPicture!.image,
-                              ),
-                            ),
-                      ),
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => Scaffold(
+                      appBar: AppBar(),
+                      body: PhotoView(imageProvider: robotPicture!.image),
                     ),
+                  ),
+                ),
                 child: const Text("Robot Picture"),
               ),
             ),
           const SizedBox(width: 8),
           FilledButton.icon(
             icon: const Icon(Icons.arrow_forward),
-            style:
-                _mode == MatchMode.playing
-                    ? FilledButton.styleFrom(
-                      backgroundColor: Colors.red,
-                      foregroundColor: Colors.white,
-                    )
-                    : null,
+            style: _mode == MatchMode.playing
+                ? FilledButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    foregroundColor: Colors.white,
+                  )
+                : null,
             onPressed: _lastMoveEvent == null ? null : _handleNextSection,
             label: Text(
               _mode == MatchMode.setup

@@ -53,13 +53,11 @@ class _EditTeamPageState extends State<EditTeamPage> {
                 }
 
                 //New map instance to avoid messing up the UI
-                final onlyChanges =
-                    Map.of(_surveyItems).entries
-                        .where(
-                          (entry) =>
-                              widget.initialData?[entry.key] != entry.value,
-                        )
-                        .toList();
+                final onlyChanges = Map.of(_surveyItems).entries
+                    .where(
+                      (entry) => widget.initialData?[entry.key] != entry.value,
+                    )
+                    .toList();
                 await submitMultiplePatches(
                   context,
                   onlyChanges

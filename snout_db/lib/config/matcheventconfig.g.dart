@@ -12,6 +12,7 @@ MatchEventConfig _$MatchEventConfigFromJson(Map json) => MatchEventConfig(
   color: json['color'] as String?,
   isLargerBetter: json['isLargerBetter'] as bool? ?? true,
   docs: json['docs'] as String? ?? '',
+  isSensitiveField: json['isSensitiveField'] as bool? ?? true,
 );
 
 Map<String, dynamic> _$MatchEventConfigToJson(MatchEventConfig instance) =>
@@ -21,4 +22,5 @@ Map<String, dynamic> _$MatchEventConfigToJson(MatchEventConfig instance) =>
       'label': instance.label,
       'color': instance.color,
       'isLargerBetter': instance.isLargerBetter,
+      'isSensitiveField': instance.isSensitiveField,
     };
