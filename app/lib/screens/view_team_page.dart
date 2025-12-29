@@ -1,20 +1,20 @@
+import 'package:app/screens/edit_data_items.dart';
 import 'package:app/services/snout_image_cache.dart';
 import 'package:app/widgets/datasheet.dart';
-import 'package:app/edit_lock.dart';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/widgets/edit_audit.dart';
 import 'package:app/widgets/fieldwidget.dart';
 import 'package:app/style.dart';
 import 'package:app/screens/match_page.dart';
-import 'package:app/screens/scout_team.dart';
 import 'package:app/widgets/image_view.dart';
 import 'package:app/widgets/timeduration.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:provider/provider.dart';
-import 'package:snout_db/config/surveyitem.dart';
+import 'package:snout_db/config/data_item_schema.dart';
+import 'package:snout_db/data_item.dart';
 import 'package:snout_db/event/match_schedule_item.dart';
-import 'package:snout_db/patch.dart';
 
 // Reserved pit scouting IDs that are used within the app
 const String teamNameReserved = 'team_name';
@@ -35,12 +35,12 @@ class _TeamViewPageState extends State<TeamViewPage> {
   Widget build(BuildContext context) {
     final data = context.watch<DataProvider>();
 
-    String? teamName =
+    final teamName =
         data.event.pitscouting[widget.teamNumber.toString()]?[teamNameReserved];
-    String? robotPicture = data
+    final robotPicture = data
         .event
         .pitscouting[widget.teamNumber.toString()]?[robotPictureReserved];
-    String? teamNotes = data
+    final teamNotes = data
         .event
         .pitscouting[widget.teamNumber.toString()]?[teamNotesReserved];
 
@@ -50,7 +50,7 @@ class _TeamViewPageState extends State<TeamViewPage> {
     Duration? scheduleDelay = data.event.scheduleDelay;
 
     final matchIds = {
-      ...data.event.matchesWithTeam(widget.teamNumber).map((e) => e.id),
+      ...data.event.matcheScheduledWithTeam(widget.teamNumber).map((e) => e.id),
       ...data.event.teamRecordedMatches(widget.teamNumber).map((e) => e.key),
     };
 
@@ -59,21 +59,7 @@ class _TeamViewPageState extends State<TeamViewPage> {
         actions: [
           TextButton(
             onPressed: () async {
-              await navigateWithEditLock(
-                context,
-                "scoutteam:${widget.teamNumber}",
-                (context) => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => EditTeamPage(
-                      team: widget.teamNumber,
-                      config: data.event.config.pitscouting,
-                      initialData:
-                          data.event.pitscouting[widget.teamNumber.toString()],
-                    ),
-                  ),
-                ),
-              );
+              await editTeamDataPage(context, widget.teamNumber);
             },
             child: const Text("Scout"),
           ),
@@ -153,9 +139,9 @@ class _TeamViewPageState extends State<TeamViewPage> {
               DataItemColumn.matchHeader(),
               for (final item in data.event.config.matchscouting.processes)
                 DataItemColumn.fromProcess(item),
+              DataItemColumn.text('Scout'),
               for (final pitSurvey in data.event.config.matchscouting.survey)
                 DataItemColumn.fromSurveyItem(pitSurvey),
-              DataItemColumn(DataItem.fromText("Scout")),
             ],
             rows: [
               //Show ALL matches the team is scheduled for ALONG with all matches they played regardless of it it is scheduled sorted
@@ -173,7 +159,7 @@ class _TeamViewPageState extends State<TeamViewPage> {
                         : a.$1?.compareTo(b.$1!) ?? 0,
                   ))
                 [
-                  DataItem.fromMatch(
+                  DataTableItem.fromMatch(
                     context: context,
                     label: match.$1?.label ?? match.$3,
                     key: match.$3,
@@ -190,35 +176,24 @@ class _TeamViewPageState extends State<TeamViewPage> {
                         ),
                   ),
                   for (final item in data.event.config.matchscouting.processes)
-                    DataItem.fromErrorNumber(
+                    DataTableItem.fromErrorNumber(
                       data.event.runMatchResultsProcess(
                             item,
                             match.$2?.robot[widget.teamNumber.toString()],
+                            data.event.matchSurvey(widget.teamNumber, match.$3),
                             widget.teamNumber,
                           ) ??
                           (value: null, error: null),
                     ),
-                  for (final pitSurvey
-                      in data.event.config.matchscouting.survey)
-                    DataItem.fromSurveyItem(
-                      match
-                          .$2
-                          ?.robot[widget.teamNumber.toString()]
-                          ?.survey[pitSurvey.id],
-                      pitSurvey,
+                  traceTableItem(data.database, match.$3, widget.teamNumber),
+                  for (final survey in data.event.config.matchscouting.survey)
+                    DataTableItem.fromSurveyItem(
+                      data.event.matchSurvey(
+                        widget.teamNumber,
+                        match.$3,
+                      )?[survey.id],
+                      survey,
                     ),
-                  DataItem.fromText(
-                    getAuditString(
-                      context.watch<DataProvider>().database.getLastPatchFor(
-                        Patch.buildPath([
-                          'matches',
-                          match.$3,
-                          'robot',
-                          '${widget.teamNumber}',
-                        ]),
-                      ),
-                    ),
-                  ),
                 ],
             ],
           ),
@@ -277,18 +252,18 @@ class _TeamViewPageState extends State<TeamViewPage> {
                 title: 'Metrics',
                 //Data is a list of rows and columns
                 columns: [
-                  DataItemColumn(DataItem.fromText("Metric")),
+                  DataItemColumn(DataTableItem.fromText("Metric")),
                   for (final event in data.event.config.matchscouting.events)
                     DataItemColumn(
-                      DataItem.fromText(event.label),
+                      DataTableItem.fromText(event.label),
                       largerIsBetter: event.isLargerBetter,
                     ),
                 ],
                 rows: [
                   [
-                    DataItem.fromText("Total"),
+                    DataTableItem.fromText("Total"),
                     for (final event in data.event.config.matchscouting.events)
-                      DataItem.fromNumber(
+                      DataTableItem.fromNumber(
                         data.event.teamAverageMetric(
                           widget.teamNumber,
                           event.id,
@@ -296,10 +271,10 @@ class _TeamViewPageState extends State<TeamViewPage> {
                       ),
                   ],
                   [
-                    DataItem.fromText("Auto"),
+                    DataTableItem.fromText("Auto"),
                     for (final eventType
                         in data.event.config.matchscouting.events)
-                      DataItem.fromNumber(
+                      DataTableItem.fromNumber(
                         data.event.teamAverageMetric(
                           widget.teamNumber,
                           eventType.id,
@@ -308,10 +283,10 @@ class _TeamViewPageState extends State<TeamViewPage> {
                       ),
                   ],
                   [
-                    DataItem.fromText("Teleop"),
+                    DataTableItem.fromText("Teleop"),
                     for (final eventType
                         in data.event.config.matchscouting.events)
-                      DataItem.fromNumber(
+                      DataTableItem.fromNumber(
                         data.event.teamAverageMetric(
                           widget.teamNumber,
                           eventType.id,
@@ -438,25 +413,18 @@ class ScoutingResultsViewer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final data = snoutData.event.pitscouting[teamNumber.toString()];
-    if (data == null) {
-      return const ListTile(title: Text("Team has no pit scouting data"));
-    }
     return Center(
       child: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: 800),
         child: Column(
           children: [
             for (final item in snoutData.event.config.pitscouting) ...[
-              DynamicValueViewer(itemType: item, value: data[item.id]),
+              DynamicValueViewer(itemType: item, value: data?[item.id]),
               Container(
                 padding: const EdgeInsets.only(right: 16),
                 alignment: Alignment.centerRight,
-                child: EditAudit(
-                  path: Patch.buildPath([
-                    'pitscouting',
-                    '$teamNumber',
-                    item.id,
-                  ]),
+                child: DataItemEditAudit(
+                  dataItem: DataItem.team(teamNumber, item.id, null),
                 ),
               ),
             ],
@@ -468,7 +436,7 @@ class ScoutingResultsViewer extends StatelessWidget {
 }
 
 class DynamicValueViewer extends StatelessWidget {
-  final SurveyItem itemType;
+  final DataItemSchema itemType;
   final dynamic value;
 
   const DynamicValueViewer({
@@ -486,7 +454,7 @@ class DynamicValueViewer extends StatelessWidget {
       );
     }
 
-    if (itemType.type == SurveyItemType.picture) {
+    if (itemType.type == DataItemType.picture) {
       return ListTile(
         title: Text(itemType.label),
         subtitle: ImageViewer(
@@ -499,9 +467,25 @@ class DynamicValueViewer extends StatelessWidget {
       );
     }
 
+    if (itemType.type == DataItemType.toggle ||
+        itemType.type == DataItemType.toggle) {
+      return ListTile(
+        title: Text(itemType.label),
+        subtitle: Row(
+          children: [
+            Icon(
+              value == true ? Icons.check_circle : Icons.remove_circle,
+              color: value == true ? Colors.green : Colors.red,
+            ),
+            Text(value.toString()),
+          ],
+        ),
+      );
+    }
+
     return ListTile(
       title: Text(itemType.label),
-      subtitle: SelectableText(value.toString()),
+      subtitle: MarkdownBody(data: value.toString(), shrinkWrap: true),
     );
   }
 }

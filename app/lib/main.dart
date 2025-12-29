@@ -14,11 +14,12 @@ import 'package:app/screens/analysis.dart';
 import 'package:app/screens/select_data_source.dart';
 import 'package:app/screens/documentation_page.dart';
 import 'package:app/screens/edit_json.dart';
-import 'package:app/screens/patch_history.dart';
+import 'package:app/screens/chain_history.dart';
 import 'package:app/screens/schedule_page.dart';
 import 'package:app/screens/teams_page.dart';
 import 'package:app/search.dart';
 import 'package:app/widgets/load_status_or_error_bar.dart';
+import 'package:cbor/cbor.dart';
 import 'package:download/download.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -26,8 +27,8 @@ import 'package:logging/logging.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:snout_db/patch.dart';
-import 'package:snout_db/snout_db.dart';
+import 'package:snout_db/actions/write_config.dart';
+import 'package:snout_db/snout_chain.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 /// Only update this value when there is a VALID data source loaded,
@@ -292,6 +293,11 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
                 ),
               ),
             ),
+            ListTile(
+              title: const Text("Register"),
+              leading: const Icon(Icons.account_circle),
+              onTap: () => registerNewScout(context),
+            ),
             Center(
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -299,7 +305,7 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
                   onPressed: () {
                     final data = context.read<DataProvider>().database;
                     final stream = Stream.fromIterable(
-                      utf8.encode(json.encode(data)),
+                      cbor.encode(SnoutDBFile(actions: data.actions).toCbor()),
                     );
                     download(stream, '${data.event.config.name}.snoutdb');
                   },
@@ -312,12 +318,12 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
               title: const Text("Ledger"),
               trailing: const Icon(Icons.receipt_long),
               subtitle: Text(
-                '${data.database.patches.length.toString()} transactions',
+                '${data.database.actions.length.toString()} transactions',
               ),
               onTap: () => Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const PatchHistoryPage(),
+                  builder: (context) => const ActionChainHistoryPage(),
                 ),
               ),
             ),
@@ -326,8 +332,6 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
               title: const Text("Event Config"),
               leading: const Icon(Icons.edit),
               onTap: () async {
-                final identity = context.read<IdentityProvider>().identity;
-
                 final config = context.read<DataProvider>().event.config;
 
                 final EventConfig? result = await Navigator.push(
@@ -339,15 +343,10 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
                 );
 
                 if (result != null) {
-                  Patch patch = Patch(
-                    identity: identity,
-                    time: DateTime.now(),
-                    path: Patch.buildPath(['config']),
-                    value: result.toJson(),
-                  );
+                  final writeConfig = ActionWriteConfig(result);
                   //Save the scouting results to the server!!
                   if (context.mounted) {
-                    await submitData(context, patch);
+                    await submitData(context, writeConfig);
                   }
                 }
               },
@@ -356,8 +355,6 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
               title: const Text("Event Config (JSON)"),
               leading: const Icon(Icons.data_object),
               onTap: () async {
-                final identity = context.read<IdentityProvider>().identity;
-
                 final config = context.read<DataProvider>().event.config;
 
                 final result = await Navigator.push(
@@ -372,16 +369,9 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
 
                 if (result != null) {
                   final modAsConfig = EventConfig.fromJson(jsonDecode(result));
-
-                  Patch patch = Patch(
-                    identity: identity,
-                    time: DateTime.now(),
-                    path: Patch.buildPath(['config']),
-                    value: modAsConfig.toJson(),
-                  );
-                  //Save the scouting results to the server!!
+                  final writeConfig = ActionWriteConfig(modAsConfig);
                   if (context.mounted) {
-                    await submitData(context, patch);
+                    await submitData(context, writeConfig);
                   }
                 }
               },
@@ -465,15 +455,3 @@ const navigationDestinations = [
     label: 'Docs',
   ),
 ];
-
-Future editIdentityFunction({
-  required BuildContext context,
-  bool allowBackButton = true,
-}) async {
-  await Navigator.of(context).push(
-    MaterialPageRoute(
-      builder: (context) =>
-          ScoutAuthorizationDialog(allowBackButton: allowBackButton),
-    ),
-  );
-}

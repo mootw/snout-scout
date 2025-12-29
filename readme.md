@@ -7,7 +7,7 @@
 
 # About
 
-Snout Scout is designed to make data work for you! Created and maintained by team a 6749 alumni, it is a source available all-in-one scouting solution that easily works for any year's game with just a json config file!
+Snout Scout is designed to make data work for you! Created and maintained by a team 6749 alumni, it is a source available all-in-one scouting solution that easily works for any year's game with just a json config file!
 
 
 ## Design Goals:
@@ -16,21 +16,21 @@ Snout Scout is designed to make data work for you! Created and maintained by tea
 - device agnostic; PWA first with native apps for all platforms via Flutter
 - all data processing is done on client for FULL offline support
 - easy export of data into multiple formats like csv and json
-- responsive in low bandwidth scenarios and provide reliable low latency sync to origin
-- origin handles authentication/autorizaton (TBD) and as the source of truth
+- responsive in low bandwidth scenarios to allow for multiple transport layers to be considered
+- cryptography ensures data integrity
 - Connect to the TBA API to autofill data like event schedules and match results (including support for year specific data mapping).
 - Single compact (mostly) readable data JSON file to allow for durable data. The structure is also fully typed and null safe
 - strong separation between live stats (like ranking position) and facts (like scouting match data)
 - no data loss
     - client saves all data locally until it can sync
-    - database stores a changeset of all changes
-- data anywhere. A client device can load and edit scouting data from a server or local disk for the highest possible flexibility.
+    - database is append only
+- data anywhere. A client device can load and edit scouting data from a peer or local disk.
 
 ## Snout-scout is NOT designed to:
 - track official standings or scores directly (official scores are linked if TBA event key is provided)
 - analyse multiple events at once (multiple events can be queried at the server level)
 - retain compatibility with previous year data (there is no obligation for backwards compatibility)
-- have **extensive** security controls. an authenticated user is assumed to be non-malicious and trusted, there is not validation of timestamps, IDs, or other information sent from clients (This is out of scope for now).
+- have **extensive** security controls. a cryptographically authenticated user is assumed to be non-malicious and trusted, there is not validation of timestamps, IDs, or other information sent from clients.
 
 
 # Network/sync methodologies
@@ -48,7 +48,7 @@ Snout Scout is designed to make data work for you! Created and maintained by tea
 
 
 # Data Size Estimate
-Snout Scout stores all data in a single JSON file. Here is an approximate breakdown of the rough **DISK** size of the a database file including some of the parts. This is an estimate and real world results will vary.
+Snout Scout stores all data in a single Cbor file. Here is an approximate breakdown of the rough **DISK** size of the a database file including some of the parts. This is an estimate and real world results will vary.
 
 for a 40 team 80 match event:
 - Latest event state: ~10MB (pit scouting with 1 image; 8MB pit scouting data; 2MB match data)
@@ -60,12 +60,10 @@ for a 40 team 80 match event:
 
 
 # technical philosophy
-- devices will get faster
 - internet connection is assumed; and at >= 50KB/s and will only get faster in the future
-- use gzip and other web compression technology
+- use standardized technologies like Cbor for stability and portability. take advantage of novel techniques where value can be added
 - dont complicate the schema by simplifying key names to "save bandwidth", or reduce normalization for a "micro-optimization".
-- the schema should be as humanly readable as possible (and easy work with)
-- there is minimal need to optimize data loading other than chunking each change (splitting assets away to load optimistically; this creates a more ambiguous state. this may change in the future)
+- data should be easy to work with, import and export
 
 
 # how TBA is used

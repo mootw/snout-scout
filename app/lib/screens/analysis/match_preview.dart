@@ -10,9 +10,9 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
-import 'package:snout_db/config/surveyitem.dart';
+import 'package:snout_db/config/data_item_schema.dart';
 import 'package:snout_db/event/frcevent.dart';
-import 'package:snout_db/snout_db.dart';
+import 'package:snout_db/snout_chain.dart';
 
 class AnalysisMatchPreview extends StatefulWidget {
   const AnalysisMatchPreview({
@@ -87,13 +87,13 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
             shrinkWrap: true,
             title: "Alliance Sum of Avg",
             columns: [
-              DataItemColumn(DataItem.fromText("Alliance")),
+              DataItemColumn(DataTableItem.fromText("Alliance")),
               for (final item in data.event.config.matchscouting.processes)
                 DataItemColumn.fromProcess(item),
             ],
             rows: [
               [
-                const DataItem(
+                const DataTableItem(
                   displayValue: Text(
                     "BLUE",
                     style: TextStyle(color: Colors.blue),
@@ -102,7 +102,7 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                   sortingValue: "BLUE",
                 ),
                 for (final item in data.event.config.matchscouting.processes)
-                  DataItem.fromNumber(
+                  DataTableItem.fromNumber(
                     _blue.fold<double>(
                       0,
                       (previousValue, team) =>
@@ -112,7 +112,7 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                   ),
               ],
               [
-                const DataItem(
+                const DataTableItem(
                   displayValue: Text(
                     "RED",
                     style: TextStyle(color: Colors.red),
@@ -121,7 +121,7 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                   sortingValue: "RED",
                 ),
                 for (final item in data.event.config.matchscouting.processes)
-                  DataItem.fromNumber(
+                  DataTableItem.fromNumber(
                     _red.fold<double>(
                       0,
                       (previousValue, team) =>
@@ -146,7 +146,7 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
             rows: [
               for (final team in [..._blue, ..._red])
                 [
-                  DataItem(
+                  DataTableItem(
                     displayValue: TextButton(
                       child: Text(
                         team.toString(),
@@ -167,7 +167,7 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                     sortingValue: team,
                   ),
                   for (final item in data.event.config.matchscouting.processes)
-                    DataItem.fromNumber(
+                    DataTableItem.fromNumber(
                       data.event.teamAverageProcess(team, item),
                     ),
                   for (final item in data.event.config.matchscouting.survey)
@@ -392,21 +392,19 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
   }
 }
 
-DataItem teamPostGameSurveyTableDisplay(
+DataTableItem teamPostGameSurveyTableDisplay(
   FRCEvent event,
   int team,
-  SurveyItem surveyItem,
+  DataItemSchema surveyItem,
 ) {
   final recordedMatches = event.teamRecordedMatches(team).toList();
 
-  if (surveyItem.type == SurveyItemType.selector) {
+  if (surveyItem.type == DataItemType.selector) {
     final Map<String, double> toReturn = {};
 
     for (final match in recordedMatches) {
-      final surveyValue = match
-          .value
-          .robot[team.toString()]!
-          .survey[surveyItem.id]
+      final surveyValue = event
+          .matchSurvey(team, match.key)?[surveyItem.id]
           ?.toString();
       if (surveyValue == null) {
         continue;
@@ -419,7 +417,7 @@ DataItem teamPostGameSurveyTableDisplay(
     }
 
     //Convert the map to be a percentage rather than total sum
-    return DataItem.fromText(
+    return DataTableItem.fromText(
       toReturn.entries
           .sorted((a, b) => Comparable.compare(b.value, a.value))
           .fold<String>(
@@ -430,17 +428,15 @@ DataItem teamPostGameSurveyTableDisplay(
     );
   }
 
-  if (surveyItem.type == SurveyItemType.picture) {
-    return DataItem.fromText("See team page or Robot recordings");
+  if (surveyItem.type == DataItemType.picture) {
+    return DataTableItem.fromText("See team page or Robot Traces");
   }
 
   String result = "";
   // Reversed to display the most recent match first in the table
   for (final match in recordedMatches.reversed) {
-    final surveyValue = match
-        .value
-        .robot[team.toString()]!
-        .survey[surveyItem.id]
+    final surveyValue = event
+        .matchSurvey(team, match.key)?[surveyItem.id]
         ?.toString();
 
     if (surveyValue == null) {
@@ -451,7 +447,7 @@ DataItem teamPostGameSurveyTableDisplay(
         '${match.value.getSchedule(event, match.key)?.label ?? match.key}: $surveyValue\n';
   }
 
-  return DataItem.fromText(result);
+  return DataTableItem.fromText(result);
 }
 
 typedef MatchAlliances = ({List<int> red, List<int> blue});

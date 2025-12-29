@@ -53,7 +53,7 @@ dependencies:
   download: ^1.0.0
   csv: ^6.0.0
   fl_chart: ^1.0.0
-  flutter_markdown: 0.7.7+1 # TODO this package is unsuported
+  flutter_markdown_plus: ^1.0.7
   # Potential alternate charting package: https://pub.dev/packages/community_charts_flutter
   
   snout_db:
@@ -72,6 +72,10 @@ dependencies:
   cupertino_icons: ^1.0.8
   synchronized: ^3.3.1
   two_dimensional_scrollables: ^0.3.7
+  webcrypto: ^0.6.0
+  cryptography: ^2.9.0
+  cbor: ^6.3.7
+  model_viewer_plus: ^1.10.0
 
 dev_dependencies:
   flutter_test:

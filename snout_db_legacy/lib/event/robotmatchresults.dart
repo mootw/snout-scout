@@ -1,8 +1,8 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:meta/meta.dart';
-import 'package:snout_db/event/dynamic_property.dart';
-import 'package:snout_db/event/matchevent.dart';
-import 'package:snout_db/snout_db.dart';
+import 'package:snout_db_legacy/event/dynamic_property.dart';
+import 'package:snout_db_legacy/event/matchevent.dart';
+import 'package:snout_db_legacy/snout_db.dart';
 
 part 'robotmatchresults.g.dart';
 

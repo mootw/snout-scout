@@ -127,15 +127,17 @@ class KioskBanner extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                Text('Edits: ${snoutData.database.patches.length.toString()}'),
+                Text('Edits: ${snoutData.database.actions.length.toString()}'),
                 if (nextMatch != null)
                   MatchCard(
                     match: nextMatch.getData(snoutData.event),
+                    results: snoutData.event.getMatchResults(nextMatch.id),
                     matchSchedule: nextMatch,
                     focusTeam: snoutData.event.config.team,
                   ),
                 MatchCard(
                   match: teamNextMatch.getData(snoutData.event),
+                  results: snoutData.event.getMatchResults(teamNextMatch.id),
                   matchSchedule: teamNextMatch,
                   focusTeam: snoutData.event.config.team,
                 ),

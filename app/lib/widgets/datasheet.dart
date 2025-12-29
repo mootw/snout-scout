@@ -9,14 +9,14 @@ import 'package:csv/csv.dart';
 import 'package:flutter/material.dart';
 import 'package:download/download.dart';
 import 'package:snout_db/config/matchresults_process.dart';
-import 'package:snout_db/config/surveyitem.dart';
+import 'package:snout_db/config/data_item_schema.dart';
 import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 
 const String noDataText = '';
 
-class DataItem {
+class DataTableItem {
   //Helpers to create data items from different types
-  DataItem.fromNumber(double? number)
+  DataTableItem.fromNumber(double? number)
     : displayValue = Text(
         number == null || number.isNaN ? noDataText : numDisplay(number),
       ),
@@ -29,7 +29,7 @@ class DataItem {
           : number,
       numericValue = number;
 
-  DataItem.fromErrorNumber(({double? value, String? error}) number)
+  DataTableItem.fromErrorNumber(({double? value, String? error}) number)
     : displayValue = number.error != null
           ? Text(number.error!, style: const TextStyle(color: warningColor))
           : (Text(
@@ -54,10 +54,10 @@ class DataItem {
           : number.value!;
 
   // This is a builder because why not
-  static DataItem fromSurveyItem(dynamic value, SurveyItem survey) {
+  static DataTableItem fromSurveyItem(dynamic value, DataItemSchema survey) {
     switch (survey.type) {
-      case SurveyItemType.picture:
-        return DataItem(
+      case DataItemType.picture:
+        return DataTableItem(
           displayValue: value == null
               ? const SizedBox()
               : ImageViewer(
@@ -69,8 +69,8 @@ class DataItem {
           exportValue: value == null ? noDataText : 'Image',
           sortingValue: value == null ? 0 : 1,
         );
-      case SurveyItemType.toggle:
-        return DataItem(
+      case DataItemType.toggle:
+        return DataTableItem(
           displayValue: value == null ? SizedBox() : Text(value.toString()),
           exportValue: value?.toString() ?? noDataText,
           sortingValue: switch (value as bool?) {
@@ -80,25 +80,25 @@ class DataItem {
           },
         );
       default:
-        return DataItem.fromText(value?.toString());
+        return DataTableItem.fromText(value?.toString());
     }
   }
 
-  DataItem.fromText(String? text)
+  DataTableItem.fromText(String? text)
     : displayValue = Text(text ?? noDataText),
       exportValue = text ?? noDataText,
       //Empty string will sort to the bottom by default
       sortingValue = text?.toLowerCase() ?? "",
       numericValue = null;
 
-  DataItem.fromTeam(String? text)
+  DataTableItem.fromTeam(String? text)
     : displayValue = Text(text ?? noDataText),
       exportValue = text ?? noDataText,
       //Empty string will sort to the bottom by default
       sortingValue = text?.toLowerCase() ?? "",
       numericValue = null;
 
-  DataItem.fromMatch({
+  DataTableItem.fromMatch({
     required BuildContext context,
     required String key,
     required String label,
@@ -115,7 +115,7 @@ class DataItem {
        sortingValue = time ?? DateTime(2000),
        numericValue = null;
 
-  const DataItem({
+  const DataTableItem({
     required this.displayValue,
     required this.exportValue,
     required this.sortingValue,
@@ -132,7 +132,7 @@ class DataItem {
 }
 
 class DataItemColumn {
-  DataItem item;
+  DataTableItem item;
   bool largerIsBetter;
   double width;
 
@@ -142,14 +142,14 @@ class DataItemColumn {
     this.width = defaultColumnWidth,
   });
 
-  factory DataItemColumn.fromSurveyItem(SurveyItem item) {
+  factory DataItemColumn.fromSurveyItem(DataItemSchema item) {
     return DataItemColumn(
-      DataItem.fromText(item.label),
+      DataTableItem.fromText(item.label),
       largerIsBetter: true,
       width: switch (item.type) {
-        SurveyItemType.number => numericWidth,
-        SurveyItemType.picture => numericWidth,
-        SurveyItemType.toggle => numericWidth,
+        DataItemType.number => numericWidth,
+        DataItemType.picture => numericWidth,
+        DataItemType.toggle => numericWidth,
         _ => defaultColumnWidth,
       },
     );
@@ -157,7 +157,7 @@ class DataItemColumn {
 
   factory DataItemColumn.fromProcess(MatchResultsProcess item) {
     return DataItemColumn(
-      DataItem.fromText(item.label),
+      DataTableItem.fromText(item.label),
       largerIsBetter: item.isLargerBetter,
       width: numericWidth,
     );
@@ -165,7 +165,7 @@ class DataItemColumn {
 
   factory DataItemColumn.teamHeader() {
     return DataItemColumn(
-      DataItem.fromText('Team'),
+      DataTableItem.fromText('Team'),
       width: 75,
       // something something something
       largerIsBetter: false,
@@ -173,7 +173,11 @@ class DataItemColumn {
   }
 
   factory DataItemColumn.matchHeader() {
-    return DataItemColumn(DataItem.fromText('Match'), width: matchColumnWidth);
+    return DataItemColumn(DataTableItem.fromText('Match'), width: matchColumnWidth);
+  }
+
+  factory DataItemColumn.text(String text) {
+    return DataItemColumn(DataTableItem.fromText(text), width: matchColumnWidth);
   }
 
   @override
@@ -192,7 +196,7 @@ class DataSheet extends StatefulWidget {
   });
 
   final String? title;
-  final List<List<DataItem>> rows;
+  final List<List<DataTableItem>> rows;
   final List<DataItemColumn> columns;
   final int numFixedColumns;
   final bool shrinkWrap;
@@ -234,7 +238,7 @@ class _DataSheetState extends State<DataSheet> {
       widget.rows.add([
         ...List.generate(
           widget.columns.length,
-          (_) => DataItem.fromText("EMPTY"),
+          (_) => DataTableItem.fromText("EMPTY"),
         ),
       ]);
     }
@@ -377,7 +381,7 @@ class _DataSheetState extends State<DataSheet> {
                 padding: EdgeInsets.only(left: 4, right: 4),
                 color: () {
                   if (cellItem.exportValue == "true") {
-                    return Colors.green;
+                    return  Colors.green;
                   }
                   if (cellItem.exportValue == "false") {
                     return Colors.red;
@@ -471,9 +475,9 @@ class _DataSheetState extends State<DataSheet> {
   }
 }
 
-String dataTableToCSV(List<DataItem> columns, List<List<DataItem>> rows) {
+String dataTableToCSV(List<DataTableItem> columns, List<List<DataTableItem>> rows) {
   //Append the colums to the top of the rows
-  List<List<DataItem>> combined = [columns, ...rows];
+  List<List<DataTableItem>> combined = [columns, ...rows];
   return const ListToCsvConverter().convert(combined);
 }
 

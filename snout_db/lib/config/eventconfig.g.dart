@@ -16,16 +16,41 @@ EventConfig _$EventConfigFromJson(Map json) => EventConfig(
       FieldStyle.rotated,
   pitscouting:
       (json['pitscouting'] as List<dynamic>?)
-          ?.map((e) => SurveyItem.fromJson(Map<String, dynamic>.from(e as Map)))
+          ?.map(
+            (e) => DataItemSchema.fromJson(Map<String, dynamic>.from(e as Map)),
+          )
           .toList() ??
       const [],
-  matchscouting:
-      json['matchscouting'] == null
-          ? const MatchScouting()
-          : MatchScouting.fromJson(
-            Map<String, dynamic>.from(json['matchscouting'] as Map),
-          ),
-  docs: json['docs'] as String? ?? '',
+  pit:
+      (json['pit'] as List<dynamic>?)
+          ?.map(
+            (e) => DataItemSchema.fromJson(Map<String, dynamic>.from(e as Map)),
+          )
+          .toList() ??
+      const [
+        DataItemSchema(
+          id: 'pit_map',
+          label: 'Pit Map',
+          type: DataItemType.picture,
+          docs: 'Image of the Pit Map',
+        ),
+        DataItemSchema(
+          id: 'schedule',
+          label: 'Schedule',
+          type: DataItemType.text,
+          docs: 'Event Schedule as a markdown table',
+        ),
+        DataItemSchema(
+          id: 'fresh_battery',
+          label: 'Fresh Battery',
+          type: DataItemType.toggle,
+        ),
+      ],
+  matchscouting: json['matchscouting'] == null
+      ? const MatchScouting()
+      : MatchScouting.fromJson(
+          Map<String, dynamic>.from(json['matchscouting'] as Map),
+        ),
   fieldImage: json['fieldImage'] as String,
 );
 
@@ -37,8 +62,8 @@ Map<String, dynamic> _$EventConfigToJson(EventConfig instance) =>
       'fieldStyle': _$FieldStyleEnumMap[instance.fieldStyle]!,
       'team': instance.team,
       'pitscouting': instance.pitscouting.map((e) => e.toJson()).toList(),
+      'pit': instance.pit.map((e) => e.toJson()).toList(),
       'matchscouting': instance.matchscouting.toJson(),
-      'docs': instance.docs,
       'fieldImage': instance.fieldImage,
     };
 

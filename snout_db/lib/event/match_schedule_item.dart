@@ -39,8 +39,9 @@ class MatchScheduleItem implements Comparable<MatchScheduleItem> {
   //Default sorting should be based on match time, and then hashCode
   @override
   int compareTo(MatchScheduleItem other) {
-    final timeDiff =
-        scheduledTime.difference(other.scheduledTime).inMicroseconds;
+    final timeDiff = scheduledTime
+        .difference(other.scheduledTime)
+        .inMicroseconds;
     if (timeDiff == 0) {
       return hashCode.compareTo(other.hashCode);
     } else {
@@ -57,10 +58,10 @@ class MatchScheduleItem implements Comparable<MatchScheduleItem> {
   /// difference between the time that the match was scheduled and the actual time
   /// the match started
   Duration? delayFromScheduledTime(FRCEvent event) =>
-      event.matches[id]?.results?.time.difference(scheduledTime);
+      event.getMatchResults(id)?.time.difference(scheduledTime);
 
   /// is true when the match has match results, which means the match is complete
-  bool isComplete(FRCEvent event) => getData(event)?.results != null;
+  bool isComplete(FRCEvent event) => event.getMatchResults(id) != null;
 
   MatchData? getData(FRCEvent event) => event.matches[id];
 }

@@ -2,15 +2,18 @@ import 'dart:async';
 
 import 'package:app/durationformat.dart';
 import 'package:app/providers/data_provider.dart';
+import 'package:app/screens/edit_data_items.dart';
 import 'package:app/screens/scout_leaderboard.dart';
 import 'package:app/screens/teams_page.dart';
 import 'package:app/screens/view_team_page.dart';
+import 'package:app/widgets/edit_audit.dart';
 import 'package:app/widgets/match_card.dart';
 import 'package:app/widgets/scout_status.dart';
 import 'package:app/widgets/timeduration.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:snout_db/data_item.dart';
 import 'package:snout_db/event/match_schedule_item.dart';
 
 class DashboardPage extends StatefulWidget {
@@ -53,7 +56,7 @@ class _DashboardPageState extends State<DashboardPage> {
     final nextMatch = snoutData.event.nextMatch;
 
     final teamsInUpcomingMatches = snoutData.event
-        .matchesWithTeam(snoutData.event.config.team)
+        .matcheScheduledWithTeam(snoutData.event.config.team)
         .reversed
         .where((match) => match.isComplete(snoutData.event) == false)
         .fold(<int>[], (last, next) => [...last, ...next.blue, ...next.red])
@@ -74,7 +77,7 @@ class _DashboardPageState extends State<DashboardPage> {
           (entry) =>
               entry.value <
               snoutData.event
-                      .matchesWithTeam(entry.key)
+                      .matcheScheduledWithTeam(entry.key)
                       .where((match) => match.isComplete(snoutData.event))
                       .length *
                   0.5,
@@ -129,6 +132,7 @@ class _DashboardPageState extends State<DashboardPage> {
         if (nextMatch != null)
           MatchCard(
             match: nextMatch.getData(snoutData.event),
+            results: snoutData.event.getMatchResults(nextMatch.id),
             matchSchedule: nextMatch,
             focusTeam: snoutData.event.config.team,
           ),
@@ -139,6 +143,7 @@ class _DashboardPageState extends State<DashboardPage> {
         if (teamNextMatch != null)
           MatchCard(
             match: teamNextMatch.getData(snoutData.event),
+            results: snoutData.event.getMatchResults(teamNextMatch.id),
             matchSchedule: teamNextMatch,
             focusTeam: snoutData.event.config.team,
           ),
@@ -259,7 +264,35 @@ class _DashboardPageState extends State<DashboardPage> {
           ),
         ),
 
-        const SizedBox(height: 16),
+        Divider(),
+        Center(
+          child: FilledButton(
+            onPressed: () async {
+              await editPitData(context);
+            },
+            child: Text('Edit Pit Data'),
+          ),
+        ),
+        Center(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: 800),
+            child: Column(
+              children: [
+                for (final item in snoutData.event.config.pit) ...[
+                  DynamicValueViewer(
+                    itemType: item,
+                    value: snoutData.event.pitData()?[item.id],
+                  ),
+                  Container(
+                    padding: const EdgeInsets.only(right: 16),
+                    alignment: Alignment.centerRight,
+                    child: DataItemEditAudit(dataItem: DataItem.pit(item.id, null)),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
 
         Divider(),
 

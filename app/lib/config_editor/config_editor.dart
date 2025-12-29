@@ -4,19 +4,16 @@ import 'package:app/config_editor/edit_match_event.dart';
 import 'package:app/config_editor/edit_process.dart';
 import 'package:app/config_editor/edit_survey_item.dart';
 import 'package:app/form_validators.dart';
-import 'package:app/providers/data_provider.dart';
-import 'package:app/screens/edit_markdown.dart';
 import 'package:app/services/snout_image_cache.dart';
 import 'package:app/style.dart';
 import 'package:app/widgets/image_view.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:provider/provider.dart';
 import 'package:snout_db/config/matcheventconfig.dart';
 import 'package:snout_db/config/matchresults_process.dart';
 import 'package:snout_db/config/matchscouting.dart';
-import 'package:snout_db/config/surveyitem.dart';
-import 'package:snout_db/snout_db.dart';
+import 'package:snout_db/config/data_item_schema.dart';
+import 'package:snout_db/snout_chain.dart';
 
 class ConfigEditorPage extends StatefulWidget {
   final EventConfig initialState;
@@ -38,12 +35,12 @@ class _ConfigEditorPageState extends State<ConfigEditorPage> {
   late final TextEditingController _tbaSecretKey;
   late FieldStyle _fieldStyle;
   late final TextEditingController _team;
+  late final List<SurveyItemEditState> _pit;
   late final List<SurveyItemEditState> _pitscouting;
   late final List<SurveyItemEditState> _matchscoutingSurvey;
   late final List<SurveyItemEditState> _matchscoutingProperties;
   late final List<MatchEventConfigEditState> _matchscoutingEvents;
   late final List<ProcessConfigEditState> _matchscoutingProcess;
-  late String _docs;
   late String fieldImage;
 
   @override
@@ -56,6 +53,7 @@ class _ConfigEditorPageState extends State<ConfigEditorPage> {
     _tbaEventId = TextEditingController(text: config.tbaEventId);
     _tbaSecretKey = TextEditingController(text: config.tbaSecretKey);
     _team = TextEditingController(text: config.team.toString());
+    _pit = config.pit.map((item) => SurveyItemEditState(item)).toList();
     _pitscouting = config.pitscouting
         .map((item) => SurveyItemEditState(item))
         .toList();
@@ -75,7 +73,6 @@ class _ConfigEditorPageState extends State<ConfigEditorPage> {
         .toList();
 
     _fieldStyle = config.fieldStyle;
-    _docs = config.docs;
     fieldImage = config.fieldImage;
   }
 
@@ -90,8 +87,8 @@ class _ConfigEditorPageState extends State<ConfigEditorPage> {
                 final newConfig = EventConfig(
                   name: _name.text,
                   team: int.parse(_team.text),
-                  docs: _docs,
                   fieldStyle: _fieldStyle,
+                  pit: _pit.map((e) => e.toConfig()).toList(),
                   pitscouting: _pitscouting.map((e) => e.toConfig()).toList(),
                   matchscouting: MatchScouting(
                     events: _matchscoutingEvents
@@ -185,6 +182,9 @@ class _ConfigEditorPageState extends State<ConfigEditorPage> {
                 ),
               ),
             ),
+
+            ListTile(title: Text('pit')),
+            _buildSurveySection(_pit),
 
             ListTile(title: Text('pitscouting')),
             _buildSurveySection(_pitscouting),
@@ -329,33 +329,10 @@ class _ConfigEditorPageState extends State<ConfigEditorPage> {
             ListTile(title: Text('matchscouting.properties')),
             _buildSurveySection(_matchscoutingProperties),
 
-            ListTile(title: Text('docs')),
-            Padding(padding: const EdgeInsets.all(16.0), child: Text(_docs)),
-            ListTile(
-              title: const Text("Edit Docs"),
-              leading: const Icon(Icons.book),
-              onTap: () async {
-                final dataProvider = context.read<DataProvider>();
-                final result = await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => EditMarkdownPage(
-                      source: dataProvider.event.config.docs,
-                    ),
-                  ),
-                );
-                if (result != null) {
-                  setState(() {
-                    _docs = result;
-                  });
-                }
-              },
-            ),
-
             ListTile(title: Text('fieldImage')),
             ImageViewer(
               child: Image(
-                image: snoutImageCache.getCached(fieldImage),
+                image: snoutImageCache.getCached(base64Decode(fieldImage)),
                 fit: BoxFit.cover,
               ),
             ),
@@ -436,7 +413,7 @@ class _ConfigEditorPageState extends State<ConfigEditorPage> {
             onPressed: () => setState(() {
               state.add(
                 SurveyItemEditState(
-                  SurveyItem(id: '', type: SurveyItemType.toggle, label: ''),
+                  DataItemSchema(id: '', type: DataItemType.toggle, label: ''),
                 ),
               );
             }),

@@ -1,7 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:meta/meta.dart';
+import 'package:snout_db/config/data_item_schema.dart';
 import 'package:snout_db/config/matchscouting.dart';
-import 'package:snout_db/config/surveyitem.dart';
 
 part 'eventconfig.g.dart';
 
@@ -33,12 +33,12 @@ class EventConfig {
   /// team number
   final int team;
 
-  final List<SurveyItem> pitscouting;
+  // TODO rename this field before 2026
+  final List<DataItemSchema> pitscouting;
+
+  final List<DataItemSchema> pit;
 
   final MatchScouting matchscouting;
-
-  /// documentation about this years scouting (generic)
-  final String docs;
 
   final String fieldImage;
 
@@ -49,8 +49,13 @@ class EventConfig {
     this.tbaSecretKey,
     this.fieldStyle = FieldStyle.rotated,
     this.pitscouting = const [],
+    this.pit = const [
+      // Default values to inspire these pit data fields
+      DataItemSchema(id: 'pit_map', label: 'Pit Map', type: DataItemType.picture, docs: 'Image of the Pit Map'),
+      DataItemSchema(id: 'schedule', label: 'Schedule', type: DataItemType.text, docs: 'Event Schedule as a markdown table'),
+      DataItemSchema(id: 'fresh_battery', label: 'Fresh Battery', type: DataItemType.toggle),
+    ],
     this.matchscouting = const MatchScouting(),
-    this.docs = '',
     // image is put last to make editing via text easier
     required this.fieldImage,
   });

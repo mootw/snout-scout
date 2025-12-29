@@ -1,11 +1,6 @@
-import 'package:json_annotation/json_annotation.dart';
-import 'package:meta/meta.dart';
+import 'package:cbor/cbor.dart';
 import 'package:snout_db/game.dart';
 
-part 'matchresults.g.dart';
-
-@immutable
-@JsonSerializable()
 class MatchResultValues {
   ///the time when the match actually started
   final DateTime time;
@@ -19,9 +14,22 @@ class MatchResultValues {
     required this.blueScore,
   });
 
-  factory MatchResultValues.fromJson(Map json) =>
-      _$MatchResultValuesFromJson(json);
-  Map<String, dynamic> toJson() => _$MatchResultValuesToJson(this);
+  static MatchResultValues fromCbor(CborValue value) {
+    final map = value as CborMap;
+    return MatchResultValues(
+      time: DateTime.fromMillisecondsSinceEpoch(
+        (map[CborString('time')]! as CborInt).toInt(),
+      ),
+      redScore: (map[CborString('redScore')]! as CborInt).toInt(),
+      blueScore: (map[CborString('blueScore')]! as CborInt).toInt(),
+    );
+  }
+
+  CborMap toCbor() => CborMap({
+        CborString('time'): CborSmallInt(time.millisecondsSinceEpoch),
+        CborString('redScore'): CborSmallInt(redScore),
+        CborString('blueScore'): CborSmallInt(blueScore),
+      });
 
   Alliance get winner {
     if (redScore == blueScore) {

@@ -45,6 +45,7 @@ class _BoxPlotAnalysisState extends State<BoxPlotAnalysis> {
                       .runMatchResultsProcess(
                         _selectedProcess!,
                         match.value.robot[team.toString()],
+                        data.event.matchSurvey(team, match.key),
                         team,
                       )
                       ?.value ??

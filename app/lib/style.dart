@@ -3,7 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_avif/flutter_avif.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:snout_db/snout_db.dart';
+import 'package:snout_db/snout_chain.dart';
 import 'dart:math';
 
 // DESIGN GUIDELINES MIN SCREEN WIDTH = 355

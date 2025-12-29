@@ -1,17 +1,16 @@
 //Data class that handles scouting tool things
 
-import 'dart:convert';
-
+import 'package:app/screens/edit_markdown.dart';
 import 'package:app/services/snout_image_cache.dart';
 import 'package:app/style.dart';
 import 'package:app/widgets/markdown_wrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:snout_db/config/surveyitem.dart';
+import 'package:snout_db/config/data_item_schema.dart';
 import 'package:snout_db/event/dynamic_property.dart';
 
 class DynamicPropertyEditorWidget extends StatefulWidget {
-  final SurveyItem tool;
+  final DataItemSchema tool;
   final DynamicProperties survey;
   final DynamicProperties? initialData;
 
@@ -39,8 +38,8 @@ class _DynamicPropertyEditorWidgetState
   @override
   void initState() {
     super.initState();
-    if (widget.tool.type == SurveyItemType.text ||
-        widget.tool.type == SurveyItemType.number) {
+    if (widget.tool.type == DataItemType.text ||
+        widget.tool.type == DataItemType.number) {
       _myController.text = _value?.toString() ?? "";
     }
   }
@@ -53,8 +52,8 @@ class _DynamicPropertyEditorWidgetState
           IconButton(
             onPressed: () => setState(() {
               _value = _initialValue;
-              if (widget.tool.type == SurveyItemType.text ||
-                  widget.tool.type == SurveyItemType.number) {
+              if (widget.tool.type == DataItemType.text ||
+                  widget.tool.type == DataItemType.number) {
                 _myController.text =
                     _initialValue ?? ""; // _initialValue can be null!
               }
@@ -63,25 +62,54 @@ class _DynamicPropertyEditorWidgetState
           ),
         Expanded(
           child: switch (widget.tool.type) {
-            SurveyItemType.text => TextFormField(
-              controller: _myController,
-              onChanged: (text) {
-                setState(() {
-                  _value = text;
-                  //TO prevent previously filled but now unfilled data from showing as empty.
-                  if (text == "") {
-                    _value = null;
-                  }
-                });
-              },
-              minLines: 1,
-              maxLines: 8,
-              decoration: InputDecoration(
-                label: Text(widget.tool.label),
-                border: const OutlineInputBorder(),
-              ),
+            DataItemType.text => Row(
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    controller: _myController,
+                    onChanged: (text) {
+                      setState(() {
+                        _value = text;
+                        //TO prevent previously filled but now unfilled data from showing as empty.
+                        if (text == "") {
+                          _value = null;
+                        }
+                      });
+                    },
+                    minLines: 1,
+                    maxLines: 8,
+                    decoration: InputDecoration(
+                      label: Text(widget.tool.label),
+                      border: const OutlineInputBorder(),
+                    ),
+                  ),
+                ),
+                // Allow editing the text field in a fullscreen markdown editor
+                IconButton(
+                  icon: Icon(Icons.edit_note),
+                  onPressed: () async {
+                    final text = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            EditMarkdownPage(source: _myController.text),
+                      ),
+                    );
+                    if (text != null) {
+                      setState(() {
+                        _value = text;
+                        _myController.text = text;
+                        //TO prevent previously filled but now unfilled data from showing as empty.
+                        if (text == "") {
+                          _value = null;
+                        }
+                      });
+                    }
+                  },
+                ),
+              ],
             ),
-            SurveyItemType.number => TextFormField(
+            DataItemType.number => TextFormField(
               //Numbers or no value only
               validator: (value) {
                 if (value == null || value == "") {
@@ -112,7 +140,7 @@ class _DynamicPropertyEditorWidgetState
                 border: const OutlineInputBorder(),
               ),
             ),
-            SurveyItemType.selector => ListTile(
+            DataItemType.selector => ListTile(
               title: Text(widget.tool.label),
               subtitle: DropdownButton<String>(
                 value: _value,
@@ -133,7 +161,7 @@ class _DynamicPropertyEditorWidgetState
                     .toList(),
               ),
             ),
-            SurveyItemType.toggle => ListTile(
+            DataItemType.toggle => ListTile(
               title: Text(widget.tool.label),
               subtitle: SegmentedButton<bool?>(
                 showSelectedIcon: false,
@@ -162,7 +190,7 @@ class _DynamicPropertyEditorWidgetState
                 },
               ),
             ),
-            SurveyItemType.picture => ListTile(
+            DataItemType.picture => ListTile(
               leading: IconButton(
                 icon: const Icon(Icons.camera_alt),
                 onPressed: () async {
@@ -170,7 +198,7 @@ class _DynamicPropertyEditorWidgetState
                     final bytes = await pickOrTakeImageDialog(context);
                     if (bytes != null) {
                       setState(() {
-                        _value = base64Encode(bytes);
+                        _value = bytes;
                       });
                     }
                   } catch (e, s) {
@@ -198,7 +226,7 @@ class _DynamicPropertyEditorWidgetState
 }
 
 class SurveyItemDocs extends StatelessWidget {
-  final SurveyItem tool;
+  final DataItemSchema tool;
 
   const SurveyItemDocs({required this.tool, super.key});
 

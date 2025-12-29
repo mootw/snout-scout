@@ -6,7 +6,7 @@ import 'package:app/screens/teams_page.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:snout_db/config/surveyitem.dart';
+import 'package:snout_db/config/data_item_schema.dart';
 
 class AnalysisPostMatchSurvey extends StatelessWidget {
   const AnalysisPostMatchSurvey({super.key});
@@ -25,7 +25,7 @@ class AnalysisPostMatchSurvey extends StatelessWidget {
             children: [
               for (final surveyItem
                   in data.event.config.matchscouting.survey.where(
-                    (element) => element.type != SurveyItemType.picture,
+                    (element) => element.type != DataItemType.picture,
                   ))
                 PostGameRatioChart(surveyItem: surveyItem),
             ],
@@ -39,7 +39,7 @@ class AnalysisPostMatchSurvey extends StatelessWidget {
 class PostGameRatioChart extends StatefulWidget {
   const PostGameRatioChart({super.key, required this.surveyItem});
 
-  final SurveyItem surveyItem;
+  final DataItemSchema surveyItem;
 
   @override
   State<PostGameRatioChart> createState() => _PostGameRatioChartState();
@@ -55,9 +55,11 @@ class _PostGameRatioChartState extends State<PostGameRatioChart> {
     //Map of all of the values, to their respective teams
     Map<String, ({int count, List<String> teams})> valueKeys = {};
 
-    for (final match in data.event.matches.values) {
-      for (final robot in match.robot.entries) {
-        final item = robot.value.survey[widget.surveyItem.id]?.toString();
+    for (final match in data.event.matches.entries) {
+      for (final robot in match.value.robot.entries) {
+        final item = data.event
+            .matchSurvey(int.parse(robot.key), match.key)?[widget.surveyItem.id]
+            ?.toString();
         if (item == null) {
           //Basically this is just missing data in the chart.
           continue;

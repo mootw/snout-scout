@@ -8,7 +8,7 @@ import 'package:app/services/snout_image_cache.dart';
 import 'package:app/services/tba_autofill.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:snout_db/patch.dart';
+import 'package:snout_db/actions/write_teams.dart';
 
 /// Displays a wrapped grid of teams
 class TeamGridList extends StatefulWidget {
@@ -71,13 +71,13 @@ class _TeamGridListState extends State<TeamGridList> {
                                 ),
                               );
 
+                              final teams = List<int>.from(json.decode(result));
+                              teams.sort();
+
                               if (result != null && context.mounted) {
-                                Patch patch = Patch.teams(
-                                  DateTime.now(),
-                                  List<int>.from(json.decode(result)),
-                                );
+                                final action = ActionWriteTeams(teams);
                                 //Save the scouting results to the server!!
-                                await submitData(context, patch);
+                                await submitData(context, action);
                               }
                             },
                             child: const Text("Manual"),
@@ -124,12 +124,11 @@ class _TeamGridListState extends State<TeamGridList> {
                               );
 
                               if (result != null && context.mounted) {
-                                Patch patch = Patch.teams(
-                                  DateTime.now(),
-                                  json.decode(result),
+                                final action = ActionWriteTeams(
+                                  json.decode(result) as List<int>,
                                 );
                                 //Save the scouting results to the server!!
-                                await submitData(context, patch);
+                                await submitData(context, action);
                               }
                             },
                             child: const Text("TBA AutoFill"),

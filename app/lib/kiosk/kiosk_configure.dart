@@ -3,7 +3,6 @@ import 'package:app/providers/data_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:snout_db/config/eventconfig.dart';
-import 'package:snout_db/config/surveyitem.dart';
 
 class KioskConfigurationScreen extends StatefulWidget {
   final EventConfig baseConfig;
@@ -26,7 +25,7 @@ class _KioskConfigurationScreenState extends State<KioskConfigurationScreen> {
     final database = context.read<DataProvider>().database;
     return Scaffold(
       appBar: AppBar(
-        title: Text('Kiosk Settings'),
+        title: Text('Kiosk Mode'),
         actions: [
           IconButton(
             onPressed: () {

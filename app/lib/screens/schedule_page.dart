@@ -70,6 +70,7 @@ class _AllMatchesPageState extends State<AllMatchesPage> {
                       : null,
                   child: MatchCard(
                     match: matchSchedule.getData(snoutData.event),
+                    results: snoutData.event.getMatchResults(matchSchedule.id),
                     matchSchedule: matchSchedule,
                     focusTeam: snoutData.event.config.team,
                   ),

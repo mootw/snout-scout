@@ -1,5 +1,3 @@
-import 'package:meta/meta.dart';
-
 /// Number between -1 and 1 on both axis, 0,0 is the center of the field
 /// Positive X is towards the opposing alliance.
 /// Positive Y is along the alliance wall
@@ -9,7 +7,6 @@ import 'package:meta/meta.dart';
 /// the viewer and the admin. -1, 0 is about where blue 2 drivers station is.
 /// and 1,0 is where red 2 driver station is
 /// the values are rounded to a realistic accuracy
-@immutable
 class FieldPosition {
   final double x;
   final double y;

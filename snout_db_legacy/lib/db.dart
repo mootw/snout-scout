@@ -1,7 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:snout_db/event/frcevent.dart';
-import 'package:snout_db/patch.dart';
+import 'package:snout_db_legacy/event/frcevent.dart';
+import 'package:snout_db_legacy/patch.dart';
 
 part 'db.g.dart';
 

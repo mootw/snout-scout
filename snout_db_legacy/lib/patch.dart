@@ -3,8 +3,8 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:meta/meta.dart';
 import 'package:rfc_6901/rfc_6901.dart';
-import 'package:snout_db/event/frcevent.dart';
-import 'package:snout_db/event/match_schedule_item.dart';
+import 'package:snout_db_legacy/event/frcevent.dart';
+import 'package:snout_db_legacy/event/match_schedule_item.dart';
 
 part 'patch.g.dart';
 

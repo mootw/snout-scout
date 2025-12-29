@@ -17,19 +17,19 @@ class SnoutImageCache {
     _images.clear();
   }
 
-  Uint8List _getBytesCached(String data) {
+  Uint8List _getBytesCached(List<int> data) {
     final image = _images[data.hashCode];
     if (image != null) {
       return image;
     } else {
-      final decoded = base64Decode(data);
+      final decoded = Uint8List.fromList(data);
       _images[data.hashCode] = decoded;
       return decoded;
     }
   }
 
   /// This gets a compatible image decoder
-  ImageProvider getCached(String data) {
+  ImageProvider getCached(List<int> data) {
     final bytes = _getBytesCached(data);
 
     // TODO bug with google chrome: https://github.com/flutter/flutter/issues/160600

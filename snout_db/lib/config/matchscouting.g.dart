@@ -26,12 +26,16 @@ MatchScouting _$MatchScoutingFromJson(Map json) => MatchScouting(
       const [],
   survey:
       (json['survey'] as List<dynamic>?)
-          ?.map((e) => SurveyItem.fromJson(Map<String, dynamic>.from(e as Map)))
+          ?.map(
+            (e) => DataItemSchema.fromJson(Map<String, dynamic>.from(e as Map)),
+          )
           .toList() ??
       const [],
   properties:
       (json['properties'] as List<dynamic>?)
-          ?.map((e) => SurveyItem.fromJson(Map<String, dynamic>.from(e as Map)))
+          ?.map(
+            (e) => DataItemSchema.fromJson(Map<String, dynamic>.from(e as Map)),
+          )
           .toList() ??
       const [],
 );

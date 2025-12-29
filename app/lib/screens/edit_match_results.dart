@@ -7,7 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 import 'package:snout_db/event/matchresults.dart';
-import 'package:snout_db/snout_db.dart';
+import 'package:snout_db/snout_chain.dart';
 
 class EditMatchResults extends StatefulWidget {
   final EventConfig config;
@@ -106,7 +106,7 @@ class _EditMatchResultsState extends State<EditMatchResults> {
                 if (_form.currentState?.validate() ?? false) {
                   //Input is valid
                   //Construct match results object
-                  MatchResultValues results = MatchResultValues(
+                  final results = MatchResultValues(
                     time: _matchEndTime.subtract(matchLength),
                     redScore: int.parse(_redScore.text),
                     blueScore: int.parse(_blueScore.text),

@@ -1,6 +1,5 @@
 import 'package:app/data_submit_login.dart';
-import 'package:app/providers/identity_provider.dart';
-import 'package:app/screens/edit_match_properties.dart';
+import 'package:app/screens/edit_data_items.dart';
 import 'package:app/widgets/datasheet.dart';
 import 'package:app/edit_lock.dart';
 import 'package:app/providers/data_provider.dart';
@@ -12,13 +11,16 @@ import 'package:app/screens/edit_match_results.dart';
 import 'package:app/screens/match_recorder_assistant.dart';
 import 'package:app/screens/view_team_page.dart';
 import 'package:app/widgets/load_status_or_error_bar.dart';
+import 'package:app/widgets/scout_name_display.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:snout_db/actions/write_matchresults.dart';
+import 'package:snout_db/data_item.dart';
 import 'package:snout_db/event/match_data.dart';
 import 'package:snout_db/event/match_schedule_item.dart';
 import 'package:snout_db/event/matchresults.dart';
-import 'package:snout_db/patch.dart';
+import 'package:snout_db/match_result.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class MatchPage extends StatefulWidget {
@@ -70,18 +72,19 @@ class _MatchPageState extends State<MatchPage> {
                               .properties) ...[
                         DynamicValueViewer(
                           itemType: item,
-                          value: match?.properties?[item.id],
+                          value: snoutData.event.matchProperties(
+                            widget.matchid,
+                          )?[item.id],
                         ),
                         Container(
                           padding: const EdgeInsets.only(right: 16),
                           alignment: Alignment.centerRight,
-                          child: EditAudit(
-                            path: Patch.buildPath([
-                              'matches',
+                          child: DataItemEditAudit(
+                            dataItem: DataItem.match(
                               widget.matchid,
-                              'properties',
                               item.id,
-                            ]),
+                              null,
+                            ),
                           ),
                         ),
                       ],
@@ -109,14 +112,16 @@ class _MatchPageState extends State<MatchPage> {
       body: ListView(
         cacheExtent: 5000,
         children: [
+          // TODO this entire layout is cooked and needs to be reworked
           Row(
+            mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              if (match?.results == null)
+              if (snoutData.event.getMatchResults(widget.matchid) == null)
                 TextButton(
                   onPressed: () => editResults(matchSchedule, match, snoutData),
                   child: Text("Add Results"),
                 ),
-              if (match?.results != null)
+              if (snoutData.event.getMatchResults(widget.matchid) != null)
                 Flexible(
                   child: Column(
                     children: [
@@ -131,10 +136,20 @@ class _MatchPageState extends State<MatchPage> {
                             cells: [
                               const DataCell(Text("Score")),
                               DataCell(
-                                Text(match!.results!.redScore.toString()),
+                                Text(
+                                  snoutData.event
+                                      .getMatchResults(widget.matchid)!
+                                      .redScore
+                                      .toString(),
+                                ),
                               ),
                               DataCell(
-                                Text(match.results!.blueScore.toString()),
+                                Text(
+                                  snoutData.event
+                                      .getMatchResults(widget.matchid)!
+                                      .blueScore
+                                      .toString(),
+                                ),
                               ),
                             ],
                           ),
@@ -160,12 +175,15 @@ class _MatchPageState extends State<MatchPage> {
                         ),
                       ),
                     ),
-                    if (match?.results != null)
+                    if (snoutData.event.getMatchResults(widget.matchid) != null)
                       ListTile(
                         title: const Text("Actual Time"),
                         subtitle: Text(
                           DateFormat.jm().add_yMd().format(
-                            match!.results!.time.toLocal(),
+                            snoutData.event
+                                .getMatchResults(widget.matchid)!
+                                .time
+                                .toLocal(),
                           ),
                         ),
                       ),
@@ -177,9 +195,15 @@ class _MatchPageState extends State<MatchPage> {
           Container(
             padding: const EdgeInsets.only(right: 16),
             alignment: Alignment.centerRight,
-            child: EditAudit(
-              path: Patch.buildPath(['matches', widget.matchid, 'results']),
-            ),
+            child: snoutData.event.getMatchResults(widget.matchid) != null
+                ? ScoutName(
+                    db: snoutData.database,
+                    scoutPubkey: snoutData
+                        .event
+                        .matchResults['/match/${widget.matchid}/result']!
+                        .$2,
+                  )
+                : null, 
           ),
           const SizedBox(height: 8),
           DataSheet(
@@ -190,9 +214,9 @@ class _MatchPageState extends State<MatchPage> {
               DataItemColumn.teamHeader(),
               for (final item in snoutData.event.config.matchscouting.processes)
                 DataItemColumn.fromProcess(item),
+              DataItemColumn.text('Scout'),
               for (final item in snoutData.event.config.matchscouting.survey)
-                DataItemColumn(DataItem.fromText(item.label)),
-              DataItemColumn(DataItem.fromText("Scout")),
+                DataItemColumn(DataTableItem.fromText(item.label)),
             ],
             rows: [
               for (final team in <int>{
@@ -202,7 +226,7 @@ class _MatchPageState extends State<MatchPage> {
                 ...match?.robot.keys.map((e) => int.tryParse(e)).nonNulls ?? [],
               })
                 [
-                  DataItem(
+                  DataTableItem(
                     displayValue: TextButton(
                       child: Text(
                         team.toString() +
@@ -232,33 +256,26 @@ class _MatchPageState extends State<MatchPage> {
                   ),
                   for (final item
                       in snoutData.event.config.matchscouting.processes)
-                    DataItem.fromErrorNumber(
+                    DataTableItem.fromErrorNumber(
                       snoutData.event.runMatchResultsProcess(
                             item,
                             match?.robot[team.toString()],
+                            snoutData.event.matchSurvey(team, widget.matchid),
                             team,
                           ) ??
                           //Missing results, this is not an error
                           (value: null, error: null),
                     ),
+                  traceTableItem(snoutData.database, widget.matchid, team),
                   for (final item
                       in snoutData.event.config.matchscouting.survey)
-                    DataItem.fromSurveyItem(
-                      match?.robot[team.toString()]?.survey[item.id],
+                    DataTableItem.fromSurveyItem(
+                      snoutData.event.matchSurvey(
+                        team,
+                        widget.matchid,
+                      )?[item.id],
                       item,
                     ),
-                  DataItem.fromText(
-                    getAuditString(
-                      context.watch<DataProvider>().database.getLastPatchFor(
-                        Patch.buildPath([
-                          'matches',
-                          widget.matchid,
-                          'robot',
-                          '$team',
-                        ]),
-                      ),
-                    ),
-                  ),
                 ],
             ],
           ),
@@ -329,47 +346,37 @@ class _MatchPageState extends State<MatchPage> {
               ],
             ),
           SizedBox(height: 16),
-          Column(
-            children: [
-              Text(
-                "Properties",
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              FilledButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => EditMatchPropertiesPage(
-                        matchID: widget.matchid,
-                        config: snoutData.event.config.matchscouting.properties,
-                        initialData: match?.properties,
+          Center(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: 800),
+              child: Column(
+                children: [
+                  Text("Data", style: Theme.of(context).textTheme.titleMedium),
+                  FilledButton(
+                    onPressed: () async {
+                      await editMatchDataPage(context, widget.matchid);
+                    },
+                    child: const Text("Edit"),
+                  ),
+                  for (final item
+                      in snoutData.event.config.matchscouting.properties) ...[
+                    DynamicValueViewer(
+                      itemType: item,
+                      value: snoutData.event.matchProperties(
+                        widget.matchid,
+                      )?[item.id],
+                    ),
+                    Container(
+                      padding: const EdgeInsets.only(right: 16),
+                      alignment: Alignment.centerRight,
+                      child: DataItemEditAudit(
+                        dataItem: DataItem.match(widget.matchid, item.id, null),
                       ),
                     ),
-                  );
-                },
-                child: const Text("Edit"),
+                  ],
+                ],
               ),
-              for (final item
-                  in snoutData.event.config.matchscouting.properties) ...[
-                DynamicValueViewer(
-                  itemType: item,
-                  value: match?.properties?[item.id],
-                ),
-                Container(
-                  padding: const EdgeInsets.only(right: 16),
-                  alignment: Alignment.centerRight,
-                  child: EditAudit(
-                    path: Patch.buildPath([
-                      'matches',
-                      widget.matchid,
-                      'properties',
-                      item.id,
-                    ]),
-                  ),
-                ),
-              ],
-            ],
+            ),
           ),
           Text(widget.matchid),
         ],
@@ -382,7 +389,6 @@ class _MatchPageState extends State<MatchPage> {
     MatchData? match,
     DataProvider snoutData,
   ) async {
-    final identiy = context.read<IdentityProvider>().identity;
     final result = await navigateWithEditLock<MatchResultValues>(
       context,
       "match:${matchSchedule?.label}:results",
@@ -391,7 +397,7 @@ class _MatchPageState extends State<MatchPage> {
         MaterialPageRoute(
           builder: (context) => EditMatchResults(
             results:
-                match?.results ??
+                snoutData.event.getMatchResults(widget.matchid) ??
                 MatchResultValues(
                   time: DateTime.now(),
                   redScore: 0,
@@ -405,14 +411,11 @@ class _MatchPageState extends State<MatchPage> {
     );
 
     if (result != null) {
-      Patch patch = Patch(
-        identity: identiy,
-        time: DateTime.now(),
-        path: Patch.buildPath(['matches', widget.matchid, 'results']),
-        value: result.toJson(),
+      final action = ActionWriteMatchResults(
+        MatchResult(match: widget.matchid, result: result),
       );
       if (mounted && context.mounted) {
-        await submitData(context, patch);
+        await submitData(context, action);
       }
     }
   }

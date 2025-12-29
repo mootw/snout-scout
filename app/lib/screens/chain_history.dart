@@ -1,22 +1,22 @@
 import 'dart:convert';
 
-import 'package:app/data_submit_login.dart';
 import 'package:app/providers/data_provider.dart';
+import 'package:app/widgets/scout_name_display.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:snout_db/patch.dart';
+import 'package:snout_db/action.dart';
 
-class PatchHistoryPage extends StatefulWidget {
+class ActionChainHistoryPage extends StatefulWidget {
   final String? filter;
 
-  const PatchHistoryPage({super.key, this.filter});
+  const ActionChainHistoryPage({super.key, this.filter});
 
   @override
-  State<PatchHistoryPage> createState() => _PatchHistoryPageState();
+  State<ActionChainHistoryPage> createState() => _ActionChainHistoryPageState();
 }
 
-class _PatchHistoryPageState extends State<PatchHistoryPage> {
+class _ActionChainHistoryPageState extends State<ActionChainHistoryPage> {
   final TextEditingController _controller = TextEditingController();
 
   @override
@@ -29,25 +29,23 @@ class _PatchHistoryPageState extends State<PatchHistoryPage> {
 
   @override
   Widget build(BuildContext context) {
-    final patches = context
-        .watch<DataProvider>()
-        .database
-        .patches
-        .reversed
-        .toList();
+    final database = context.watch<DataProvider>().database;
+    final actions = database.actions.reversed.toList();
 
     final search = _controller.text;
 
-    final filteredPatches = patches.where((patch) {
+    final filteredPatches = actions.where((patch) {
+      final chainAction = patch.payload;
+
       if (search == "") {
         //empty search means all results
         //and im too lazy to create a separate code path
         return true;
       }
-      if (patch.identity.contains(search)) {
+      if (patch.author.toString().contains(search)) {
         return true;
       }
-      if (patch.path.contains(search)) {
+      if (chainAction.action.toString().contains(search)) {
         return true;
       }
 
@@ -69,8 +67,13 @@ class _PatchHistoryPageState extends State<PatchHistoryPage> {
         itemCount: filteredPatches.length,
         itemBuilder: (context, index) {
           final patch = filteredPatches[index];
+          final chainAction = patch.payload;
           return ListTile(
-            title: Text('${filteredPatches.length - index}: ${patch.identity}'),
+            title: Text(
+              '${actions.length - index}: ${chainAction.action.toString()}',
+            ),
+            subtitle: ScoutName(db: database, scoutPubkey: patch.author),
+            trailing: Text(DateFormat.jms().add_yMd().format(chainAction.time)),
             onTap: () => showDialog(
               context: context,
               builder: (_) => AlertDialog(
@@ -79,28 +82,12 @@ class _PatchHistoryPageState extends State<PatchHistoryPage> {
                     onPressed: () => Navigator.pop(context),
                     child: const Text("Close"),
                   ),
-                  TextButton(
-                    onPressed: () async {
-                      final newPatchToApply = Patch(
-                        identity: patch.identity,
-                        path: patch.path,
-                        time: DateTime.now(),
-                        value: patch.value,
-                      );
-                      if (context.mounted) {
-                        await submitData(context, newPatchToApply);
-                      }
-                    },
-                    child: const Text("Re-Submit Patch As NEW"),
-                  ),
                 ],
                 content: SingleChildScrollView(
-                  child: SelectableText(json.encode(patch)),
+                  child: SelectableText(chainAction.action.toCbor().toString()),
                 ),
               ),
             ),
-            subtitle: Text(patch.path),
-            trailing: Text(DateFormat.jms().add_yMd().format(patch.time)),
           );
         },
       ),

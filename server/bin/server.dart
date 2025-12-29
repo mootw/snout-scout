@@ -12,8 +12,7 @@ import 'package:shelf_gzip/shelf_gzip.dart';
 import 'package:shelf_multipart/shelf_multipart.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'package:shelf_web_socket/shelf_web_socket.dart';
-import 'package:snout_db/patch.dart';
-import 'package:snout_db/snout_db.dart';
+import 'package:snout_db/snout_chain.dart';
 import 'package:synchronized/synchronized.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
@@ -56,12 +55,12 @@ Future _loadEvents() async {
   }
 }
 
-Future<SnoutDB?> _loadFromDisk(String eventID) async {
+Future<SnoutDBFile?> _loadFromDisk(String eventID) async {
   final File? f = loadedEvents[eventID]?.file;
   if (f == null || await f.exists() == false) {
     return null;
   }
-  return SnoutDB.fromJson(
+  return SnoutDBFile.fromJson(
     json.decode(await f.readAsString()) as Map<String, dynamic>,
   );
 }
@@ -249,7 +248,7 @@ void main(List<String> args) async {
     }
 
     return Response.ok(
-      jsonEncode(event.patches.length),
+      jsonEncode(event.actions.length),
       headers: {
         'Content-Type': ContentType(
           'application',
@@ -299,7 +298,7 @@ void main(List<String> args) async {
       if (f == null || await f.exists() == false) {
         return Response.notFound("Event not found");
       }
-      final event = SnoutDB.fromJson(
+      final event = SnoutDBFile.fromJson(
         json.decode(await f.readAsString()) as Map<String, dynamic>,
       );
       //Uses UTF-8 by default

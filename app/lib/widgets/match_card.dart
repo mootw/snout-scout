@@ -7,7 +7,8 @@ import 'package:app/screens/match_page.dart';
 import 'package:flutter/material.dart';
 import 'package:snout_db/event/match_data.dart';
 import 'package:snout_db/event/match_schedule_item.dart';
-import 'package:snout_db/snout_db.dart';
+import 'package:snout_db/event/matchresults.dart';
+import 'package:snout_db/snout_chain.dart';
 
 const double matchCardHeight = 46;
 
@@ -20,12 +21,14 @@ const TextStyle whiteTextBold = TextStyle(
 
 class MatchCard extends StatelessWidget {
   final MatchData? match;
+  final MatchResultValues? results;
   final MatchScheduleItem matchSchedule;
   final int? focusTeam;
 
   const MatchCard({
     super.key,
     required this.match,
+    required this.results,
     required this.matchSchedule,
     this.focusTeam,
   });
@@ -34,8 +37,8 @@ class MatchCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final snoutData = context.watch<DataProvider>();
 
-    final matchTime = match?.results != null
-        ? match!.results!.time
+    final matchTime = results != null
+        ? results!.time
         : matchSchedule.scheduledTime.add(
             snoutData.event.scheduleDelay ?? Duration.zero,
           );
@@ -91,12 +94,12 @@ class MatchCard extends StatelessWidget {
                       SizedBox(
                         width: 25,
                         child: Text(
-                          match?.results?.redScore != null
-                              ? match!.results!.redScore.toString()
+                          results?.redScore != null
+                              ? results!.redScore.toString()
                               : "-",
                           style:
-                              match?.results?.winner == Alliance.red ||
-                                  match?.results?.winner == Alliance.tie
+                              results?.winner == Alliance.red ||
+                                  results?.winner == Alliance.tie
                               ? whiteTextBold
                               : whiteText,
                           textAlign: TextAlign.center,
@@ -117,12 +120,12 @@ class MatchCard extends StatelessWidget {
                       SizedBox(
                         width: 25,
                         child: Text(
-                          match?.results?.blueScore != null
-                              ? match!.results!.blueScore.toString()
+                          results?.blueScore != null
+                              ? results!.blueScore.toString()
                               : "-",
                           style:
-                              match?.results?.winner == Alliance.blue ||
-                                  match?.results?.winner == Alliance.tie
+                              results?.winner == Alliance.blue ||
+                                  results?.winner == Alliance.tie
                               ? whiteTextBold
                               : whiteText,
                           textAlign: TextAlign.center,

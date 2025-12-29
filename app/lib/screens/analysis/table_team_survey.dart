@@ -22,7 +22,7 @@ class TableTeamSurvey extends StatelessWidget {
         rows: [
           for (final team in data.event.teams)
             [
-              DataItem(
+              DataTableItem(
                 displayValue: TextButton(
                   child: Text(team.toString()),
                   onPressed: () => Navigator.push(
@@ -36,7 +36,7 @@ class TableTeamSurvey extends StatelessWidget {
                 sortingValue: team,
               ),
               for (final surveyItem in data.event.config.pitscouting)
-                DataItem.fromSurveyItem(
+                DataTableItem.fromSurveyItem(
                   data.event.pitscouting[team.toString()]?[surveyItem.id],
                   surveyItem,
                 ),

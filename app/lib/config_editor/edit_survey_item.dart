@@ -1,16 +1,16 @@
 import 'package:app/screens/view_team_page.dart';
 import 'package:flutter/material.dart';
-import 'package:snout_db/config/surveyitem.dart';
+import 'package:snout_db/config/data_item_schema.dart';
 
 class SurveyItemEditState {
   late TextEditingController label;
   late TextEditingController id;
-  late SurveyItemType type;
+  late DataItemType type;
   late TextEditingController docs;
   late List<TextEditingController>? options;
   late bool isSensitiveField;
 
-  SurveyItemEditState(SurveyItem config) {
+  SurveyItemEditState(DataItemSchema config) {
     label = TextEditingController(text: config.label);
     id = TextEditingController(text: config.id);
     type = config.type;
@@ -21,8 +21,8 @@ class SurveyItemEditState {
     isSensitiveField = config.isSensitiveField;
   }
 
-  SurveyItem toConfig() {
-    return SurveyItem(
+  DataItemSchema toConfig() {
+    return DataItemSchema(
       id: id.text,
       type: type,
       label: label.text,
@@ -118,8 +118,8 @@ class _EditSurveyItemConfigState extends State<EditSurveyItemConfig> {
           title: DropdownButtonFormField(
             initialValue: widget.state.type,
             items: [
-              for (final value in SurveyItemType.values)
-                DropdownMenuItem<SurveyItemType>(
+              for (final value in DataItemType.values)
+                DropdownMenuItem<DataItemType>(
                   value: value,
                   child: Text(value.toString()),
                 ),
@@ -134,7 +134,7 @@ class _EditSurveyItemConfigState extends State<EditSurveyItemConfig> {
           ),
         ),
 
-        if (widget.state.type == SurveyItemType.selector) ...[
+        if (widget.state.type == DataItemType.selector) ...[
           ListTile(title: Text('options')),
           ListView(
             shrinkWrap: true,

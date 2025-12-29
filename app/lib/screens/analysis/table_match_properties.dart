@@ -45,14 +45,14 @@ class TableMatchProperties extends StatelessWidget {
           rows: [
             for (final match in allMatchData)
               [
-                DataItem.fromMatch(
+                DataTableItem.fromMatch(
                   context: context,
                   key: match.$3,
                   label: match.$1?.label ?? match.$3,
                   time: match.$1?.scheduledTime,
                 ),
                 for (final item in data.event.config.matchscouting.properties)
-                  DataItem.fromSurveyItem(match.$2?.properties?[item.id], item),
+                  DataTableItem.fromSurveyItem(data.event.matchProperties(match.$3)?[item.id], item),
               ],
           ],
         ),

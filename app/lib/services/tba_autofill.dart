@@ -2,9 +2,9 @@
 import 'dart:convert';
 
 import 'package:logging/logging.dart';
+import 'package:snout_db/actions/write_schedule.dart';
 import 'package:snout_db/event/frcevent.dart';
 import 'package:snout_db/event/match_schedule_item.dart';
-import 'package:snout_db/patch.dart';
 import 'package:http/http.dart' as http;
 
 final tbaApiClient = http.Client();
@@ -54,10 +54,7 @@ Future<List<int>> getTeamListForEventTBA(FRCEvent eventData) async {
   return [for (final team in teams) team['team_number']];
 }
 
-Future<List<Patch>> loadScheduleFromTBA(
-  FRCEvent eventData,
-  String identity,
-) async {
+Future<ActionWriteSchedule> loadScheduleFromTBA(FRCEvent eventData) async {
   if (eventData.config.tbaEventId == null) {
     throw Exception("TBA event ID cannot be null in the config!");
   }
@@ -79,7 +76,8 @@ Future<List<Patch>> loadScheduleFromTBA(
 
   final matches = json.decode(apiData.body);
 
-  List<Patch> patches = [];
+  Map<String, MatchScheduleItem> newSchedule = {};
+  newSchedule.addAll(eventData.schedule);
 
   for (final match in matches) {
     String key = match['key'];
@@ -128,20 +126,17 @@ Future<List<Patch>> loadScheduleFromTBA(
     }
 
     //ONLY modify matches that do not exist yet to prevent damage
-    if (eventData.schedule.keys.toList().contains(key) == false) {
+    if (newSchedule.keys.toList().contains(key) == false) {
       Logger.root.info("match $key does not exist; adding...");
-      MatchScheduleItem newMatch = MatchScheduleItem(
+      newSchedule[key] = MatchScheduleItem(
         id: key,
         label: description,
         scheduledTime: startTime,
         blue: blue,
         red: red,
       );
-
-      Patch patch = Patch.scheduleItem(DateTime.now(), newMatch);
-
-      patches.add(patch);
     }
   }
-  return patches;
+
+  return ActionWriteSchedule(newSchedule.values.toList());
 }

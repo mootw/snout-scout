@@ -25,7 +25,7 @@ class TableTeamAveragesPage extends StatelessWidget {
         rows: [
           for (final team in data.event.teams)
             [
-              DataItem(
+              DataTableItem(
                 displayValue: TextButton(
                   child: Text(team.toString()),
                   onPressed: () => Navigator.push(
@@ -39,7 +39,7 @@ class TableTeamAveragesPage extends StatelessWidget {
                 sortingValue: team,
               ),
               for (final item in data.event.config.matchscouting.processes)
-                DataItem.fromNumber(data.event.teamAverageProcess(team, item)),
+                DataTableItem.fromNumber(data.event.teamAverageProcess(team, item)),
               for (final item in data.event.config.matchscouting.survey)
                 teamPostGameSurveyTableDisplay(data.event, team, item),
             ],

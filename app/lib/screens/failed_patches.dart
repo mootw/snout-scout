@@ -1,11 +1,7 @@
-import 'dart:convert';
-
 import 'package:app/providers/data_provider.dart';
 import 'package:app/widgets/load_status_or_error_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:snout_db/patch.dart';
 
 class FailedPatchStorage extends StatefulWidget {
   const FailedPatchStorage({super.key});
@@ -26,7 +22,7 @@ class _FailedPatchStorageState extends State<FailedPatchStorage> {
           if (serverConnection.remoteOutbox.commitLock.locked == false)
             IconButton(
               onPressed: () async {
-                await serverConnection.remoteOutbox.commitPatchs();
+                await serverConnection.remoteOutbox.commitActions();
                 setState(() {});
               },
               icon: Icon(Icons.send),
@@ -77,14 +73,15 @@ class _FailedPatchStorageState extends State<FailedPatchStorage> {
                   content: SelectableText(patch),
                 ),
               ),
-              title: Text(
-                DateFormat.yMMMMEEEEd().add_Hms().format(
-                  Patch.fromJson(json.decode(patch)).time,
-                ),
-              ),
-              subtitle: Text(
-                Patch.fromJson(json.decode(patch)).path.toString(),
-              ),
+              // TODO
+              // title: Text(
+              //   DateFormat.yMMMMEEEEd().add_Hms().format(
+              //     Patch.fromJson(json.decode(patch)).time,
+              //   ),
+              // ),
+              // subtitle: Text(
+              //   Patch.fromJson(json.decode(patch)).path.toString(),
+              // ),
             ),
         ],
       ),

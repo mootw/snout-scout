@@ -17,10 +17,10 @@ import 'package:provider/provider.dart';
 import 'package:snout_db/config/matcheventconfig.dart';
 import 'package:snout_db/event/dynamic_property.dart';
 import 'package:snout_db/event/matchevent.dart';
-import 'package:snout_db/event/robotmatchresults.dart';
+import 'package:snout_db/event/robot_match_trace.dart';
 import 'dart:math' as math;
 
-import 'package:snout_db/snout_db.dart';
+import 'package:snout_db/snout_chain.dart';
 
 class MatchRecorderPage extends StatefulWidget {
   final String matchDescription;
@@ -37,6 +37,11 @@ class MatchRecorderPage extends StatefulWidget {
   @override
   State<MatchRecorderPage> createState() => _MatchRecorderPageState();
 }
+
+typedef RobotMatchTraceDataResult = ({
+  RobotMatchTraceData trace,
+  DynamicProperties survey,
+});
 
 enum MatchMode { setup, playing, finished }
 
@@ -174,14 +179,13 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                     //Do not save with pending form errors.
                     return;
                   }
-                  Navigator.pop(
-                    context,
-                    RobotMatchResults(
+                  Navigator.pop<RobotMatchTraceDataResult>(context, (
+                    trace: RobotMatchTraceData(
                       alliance: widget.teamAlliance,
                       timeline: _events,
-                      survey: _postGameSurvey,
                     ),
-                  );
+                    survey: _postGameSurvey,
+                  ));
                 },
                 icon: const Icon(Icons.save),
               ),

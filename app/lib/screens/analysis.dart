@@ -68,7 +68,7 @@ class _AnalysisPageState extends State<AnalysisPage> {
           },
         ),
         ListTile(
-          title: const Text("Robot Recordings"),
+          title: const Text("Robot Traces"),
           leading: const Icon(Icons.table_chart),
           onTap: () {
             Navigator.push(
