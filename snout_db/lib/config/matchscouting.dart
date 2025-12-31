@@ -1,8 +1,8 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:meta/meta.dart';
+import 'package:snout_db/config/data_item_schema.dart';
 import 'package:snout_db/config/matcheventconfig.dart';
 import 'package:snout_db/config/matchresults_process.dart';
-import 'package:snout_db/config/data_item_schema.dart';
 
 part 'matchscouting.g.dart';
 

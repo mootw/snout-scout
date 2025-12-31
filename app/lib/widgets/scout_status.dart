@@ -30,9 +30,12 @@ class ScoutStatus extends StatelessWidget {
       children: [
         for (final scout in scoutStatus.entries)
           ListTile(
-            title: ScoutName(
-              db: context.watch<DataProvider>().database,
-              scoutPubkey: scout.key,
+            title: Align(
+              alignment: Alignment.centerLeft,
+              child: ScoutName(
+                db: context.watch<DataProvider>().database,
+                scoutPubkey: scout.key,
+              ),
             ),
             subtitle: Text(scout.value.$2.toString()),
             trailing: Text(

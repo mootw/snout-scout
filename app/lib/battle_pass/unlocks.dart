@@ -178,13 +178,20 @@ class MintVibesBanner extends NameBannerUnlock {
     : super(
         'banner-mint-vibes',
         'Mint Vibes',
-        (context, child) => Container(
-          padding: const EdgeInsets.symmetric(horizontal: 4),
+        (context, child) => DecoratedBox(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(6),
-            gradient: LinearGradient(colors: [Colors.greenAccent.withOpacity(0.3), Colors.cyanAccent.withOpacity(0.3)]),
+            gradient: LinearGradient(
+              colors: [
+                Colors.greenAccent.withOpacity(0.3),
+                Colors.cyanAccent.withOpacity(0.3),
+              ],
+            ),
           ),
-          child: child,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: child,
+          ),
         ),
       );
 }
@@ -194,13 +201,20 @@ class PurpleVibesBanner extends NameBannerUnlock {
     : super(
         'banner-purple-vibes',
         'Purple Vibes',
-        (context, child) => Container(
-          padding: const EdgeInsets.symmetric(horizontal: 4),
+        (context, child) => DecoratedBox(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(6),
-            gradient: LinearGradient(colors: [Colors.purple.withOpacity(0.3), Colors.pink.withOpacity(0.3)]),
+            gradient: LinearGradient(
+              colors: [
+                Colors.purple.withOpacity(0.3),
+                Colors.pink.withOpacity(0.3),
+              ],
+            ),
           ),
-          child: child,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: child,
+          ),
         ),
       );
 }
@@ -210,13 +224,20 @@ class CherryVibesBanner extends NameBannerUnlock {
     : super(
         'banner-cherry-vibes',
         'Cherry Vibes',
-        (context, child) => Container(
-          padding: const EdgeInsets.symmetric(horizontal: 4),
+        (context, child) => DecoratedBox(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(6),
-            gradient: LinearGradient(colors: [Colors.redAccent.withOpacity(0.3), Colors.pinkAccent.withOpacity(0.3)]),
+            gradient: LinearGradient(
+              colors: [
+                Colors.redAccent.withOpacity(0.3),
+                Colors.pinkAccent.withOpacity(0.3),
+              ],
+            ),
           ),
-          child: child,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: child,
+          ),
         ),
       );
 }

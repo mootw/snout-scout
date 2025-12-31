@@ -22,13 +22,10 @@ double bencoinDistributions(SnoutChain chain, Pubkey scout) {
     switch (action.payload.action) {
       case ActionWriteMatchResults _:
         totalBencoin += 5;
-        break;
       case ActionWriteMatchTrace _:
         totalBencoin += 35;
-        break;
       case ActionWriteDataItem _:
         totalBencoin += 3;
-        break;
       default:
         break;
     }

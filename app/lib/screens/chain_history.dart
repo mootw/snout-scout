@@ -1,11 +1,8 @@
-import 'dart:convert';
-
 import 'package:app/providers/data_provider.dart';
 import 'package:app/widgets/scout_name_display.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:snout_db/action.dart';
 
 class ActionChainHistoryPage extends StatefulWidget {
   final String? filter;
@@ -72,7 +69,10 @@ class _ActionChainHistoryPageState extends State<ActionChainHistoryPage> {
             title: Text(
               '${actions.length - index}: ${chainAction.action.toString()}',
             ),
-            subtitle: ScoutName(db: database, scoutPubkey: patch.author),
+            subtitle: Align(
+              alignment: Alignment.centerLeft,
+              child: ScoutName(db: database, scoutPubkey: patch.author),
+            ),
             trailing: Text(DateFormat.jms().add_yMd().format(chainAction.time)),
             onTap: () => showDialog(
               context: context,

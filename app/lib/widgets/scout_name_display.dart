@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:animated_text_kit2/animated_text_kit2.dart';
 import 'package:app/battle_pass/unlocks.dart';
 import 'package:collection/collection.dart';
