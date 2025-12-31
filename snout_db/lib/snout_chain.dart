@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:snout_db/app_extras/scout_profile.dart';
 import 'package:snout_db/config/eventconfig.dart';
 import 'package:snout_db/dbfile.dart';
 import 'package:snout_db/event/frcevent.dart';
@@ -30,7 +31,14 @@ class SnoutChain {
   /// public key data
   Map<Pubkey, EncryptedSecretKey> allowedKeys = {};
 
+  /// Per scout name aliases
   Map<Pubkey, String> aliases = {};
+
+  /// Per scout battle pass levels
+  Map<Pubkey, int> scoutBattlePassLevels = {};
+
+  /// Per scout configuration profile
+  Map<Pubkey, ScoutProfile> scoutProfiles = {};
 
   /// Primary constructed data index
   FRCEvent event = FRCEvent(

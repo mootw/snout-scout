@@ -46,16 +46,20 @@ class _ScoutAuthorizationDialogState extends State<ScoutAuthorizationDialog> {
   void initState() {
     super.initState();
 
-    () async {
-      final prefs = await SharedPreferences.getInstance();
-      final lastSelectedScout = prefs.getString('_lastSelectedScout');
+    _selectedScout = widget.scoutToAuthorize;
 
-      if (lastSelectedScout != null) {
-        setState(() {
-          _selectedScout = Pubkey(base64Decode(lastSelectedScout));
-        });
-      }
-    }();
+    if (_selectedScout == null) {
+      () async {
+        final prefs = await SharedPreferences.getInstance();
+        final lastSelectedScout = prefs.getString('_lastSelectedScout');
+
+        if (lastSelectedScout != null) {
+          setState(() {
+            _selectedScout = Pubkey(base64Decode(lastSelectedScout));
+          });
+        }
+      }();
+    }
   }
 
   // Sets the last used scout name before returning the result.

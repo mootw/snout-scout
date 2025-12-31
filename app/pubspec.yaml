@@ -76,6 +76,7 @@ dependencies:
   cryptography: ^2.9.0
   cbor: ^6.3.7
   model_viewer_plus: ^1.10.0
+  animated_text_kit2: ^0.0.4
 
 dev_dependencies:
   flutter_test:

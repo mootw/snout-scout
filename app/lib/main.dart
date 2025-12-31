@@ -111,6 +111,7 @@ class SnoutScoutAppState extends State<SnoutScoutApp> {
           ),
       ],
       child: MaterialApp(
+        debugShowCheckedModeBanner: false,
         title: 'Snout Scout',
         onGenerateRoute: (settings) {
           final name = settings.name;
@@ -226,14 +227,12 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
         titleSpacing: 0,
         title: Text(data.event.config.name),
         actions: [
-          Padding(
-            padding: const EdgeInsets.only(left: 8, right: 8),
-            child: IconButton(
-              onPressed: () =>
-                  showSearch(context: context, delegate: SnoutScoutSearch()),
-              icon: const Icon(Icons.search),
-            ),
+          IconButton(
+            onPressed: () =>
+                showSearch(context: context, delegate: SnoutScoutSearch()),
+            icon: const Icon(Icons.search),
           ),
+          SizedBox(width: 4),
         ],
       ),
       body: Row(

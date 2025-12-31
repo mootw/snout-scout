@@ -1,15 +1,14 @@
 import 'dart:collection';
-import 'dart:math';
+import 'dart:math' as math;
 
+import 'package:snout_db/app_extras/bencoin.dart';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/widgets/datasheet.dart';
 import 'package:app/widgets/scout_name_display.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:snout_db/actions/write_matchtrace.dart';
 import 'package:snout_db/pubkey.dart';
-
-int sixOrSeven(int? seed) => Random(seed).nextBool() ? 6 : 7;
 
 class ScoutLeaderboard extends StatelessWidget {
   const ScoutLeaderboard({super.key});
@@ -19,41 +18,47 @@ class ScoutLeaderboard extends StatelessWidget {
     final db = context.watch<DataProvider>().database;
     final actions = db.actions;
 
-    final scores = <Pubkey, int>{};
+    final scouts = db.allowedKeys.keys;
+
+    final bencoins = <Pubkey, double>{};
     final edits = <Pubkey, int>{};
 
-    for (final actionMessage in actions) {
-      final chainAction = actionMessage.payload;
-      if (scores[actionMessage.author] == null) {
-        scores[actionMessage.author] = 0;
-        edits[actionMessage.author] = 0;
-      }
-
-      int addValue = 1;
-      if (chainAction is ActionWriteMatchTrace) {
-        // cursed seeding function
-        addValue = sixOrSeven(actionMessage.payloadBytes.length);
-      }
-
-      edits[actionMessage.author] = edits[actionMessage.author]! + 1;
-      scores[actionMessage.author] = scores[actionMessage.author]! + addValue;
+    for (final scout in scouts) {
+      bencoins[scout] = spendableBencoin(db, scout);
+      edits[scout] = 0;
     }
 
-    List<({Pubkey identity, int score, int edits})> sorted = [
-      for (final scout in scores.entries)
-        (identity: scout.key, score: scout.value, edits: edits[scout.key]!),
+    for (final actionMessage in actions) {
+      edits[actionMessage.author] = (edits[actionMessage.author] ?? 0) + 1;
+    }
+
+    List<({Pubkey identity, double bencoin, int edits})> sorted = [
+      for (final scout in bencoins.entries)
+        (
+          identity: scout.key,
+          bencoin: scout.value,
+          edits: edits[scout.key] ?? 0,
+        ),
     ];
 
-    sorted.sort((k1, k2) => k2.score.compareTo(k1.score));
+    sorted.sort((k1, k2) => k2.bencoin.compareTo(k1.bencoin));
 
-    int highScore = sorted.first.score;
+    double highBencoin = math.max(sorted.first.bencoin, 100);
+    double highEdits = math.max(
+      sorted
+          .sorted((k1, k2) => k2.edits.compareTo(k1.edits))
+          .first
+          .edits
+          .toDouble(),
+      10,
+    );
 
     const height = 400.0;
 
     return Column(
       children: [
         const Text(
-          "Each normal edit is worth 1 point. Match Traces are worth 6 or 7 points.",
+          "Earn Bencoin by Scouting and then predict matches. Remember it's not gambling if you know the outcome!",
         ),
         const SizedBox(height: 32),
         SizedBox(
@@ -82,9 +87,9 @@ class ScoutLeaderboard extends StatelessWidget {
                               Container(
                                 color: Colors.red,
                                 width: 36,
-                                height: item.score / highScore * height,
+                                height: item.bencoin / highBencoin * height,
                               ),
-                              Text(item.score.toString()),
+                              Text(item.bencoin.toString()),
                             ],
                           ),
                           Column(
@@ -92,7 +97,7 @@ class ScoutLeaderboard extends StatelessWidget {
                               Container(
                                 width: 36,
                                 color: Colors.blue,
-                                height: item.edits / highScore * height,
+                                height: item.edits / highEdits * height,
                               ),
                               Text(item.edits.toString()),
                             ],
@@ -109,7 +114,7 @@ class ScoutLeaderboard extends StatelessWidget {
         ),
         ListTile(
           leading: Container(height: 32, width: 32, color: Colors.red),
-          title: const Text("Score"),
+          title: const Text("Bencoin"),
         ),
         ListTile(
           leading: Container(height: 32, width: 32, color: Colors.blue),

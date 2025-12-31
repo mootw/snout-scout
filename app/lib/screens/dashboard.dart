@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:app/battle_pass/battle_pass.dart';
 import 'package:app/durationformat.dart';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/screens/edit_data_items.dart';
@@ -107,9 +108,30 @@ class _DashboardPageState extends State<DashboardPage> {
         .where((scouting) => scouting.value == true);
 
     return ListView(
-      // TODO handle this better...
+      cacheExtent: 5000,
       padding: EdgeInsets.only(left: 12),
       children: [
+        Wrap(
+          children: [
+            IconButton(
+              icon: Image.asset('battle_pass.png', width: 24, height: 24),
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const BattlePassPage()),
+              ),
+            ),
+            IconButton(
+              icon: Icon(Icons.trending_up),
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const BattlePassPage()),
+              ),
+            ),
+          ],
+        ),
+
+        Divider(),
+
         // Upcoming match
         Text(
           "Schedule ${scheduleDelay == null ? "unknown" : offsetDurationInMins(scheduleDelay)}",
@@ -286,7 +308,9 @@ class _DashboardPageState extends State<DashboardPage> {
                   Container(
                     padding: const EdgeInsets.only(right: 16),
                     alignment: Alignment.centerRight,
-                    child: DataItemEditAudit(dataItem: DataItem.pit(item.id, null)),
+                    child: DataItemEditAudit(
+                      dataItem: DataItem.pit(item.id, null),
+                    ),
                   ),
                 ],
               ],

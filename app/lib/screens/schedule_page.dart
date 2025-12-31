@@ -39,98 +39,54 @@ class _AllMatchesPageState extends State<AllMatchesPage> {
   @override
   Widget build(BuildContext context) {
     final snoutData = context.watch<DataProvider>();
-
-    MatchScheduleItem? teamNextMatch = snoutData.event.nextMatchForTeam(
-      snoutData.event.config.team,
-    );
-    Duration? scheduleDelay = snoutData.event.scheduleDelay;
-    return Column(
+    return ListView(
+      controller: _controller,
       children: [
-        Expanded(
-          child: ListView(
-            controller: _controller,
-            children: [
-              for (final (idx, matchSchedule)
-                  in snoutData.event.scheduleSorted.indexed)
-              // TODO correctly handle breaks in the list in the inital scroll position check
-              ...[
-                if (idx > 0 &&
-                    matchSchedule.scheduledTime.difference(
-                          snoutData.event.scheduleSorted[idx - 1].scheduledTime,
-                        ) >
-                        scheduleBreakDuration)
-                  Center(
-                    child: Text(
-                      '${formatDurationLength(matchSchedule.scheduledTime.difference(snoutData.event.scheduleSorted[idx - 1].scheduledTime))} break',
-                    ),
-                  ),
-                Container(
-                  color: matchSchedule == snoutData.event.nextMatch
-                      ? Theme.of(context).colorScheme.onPrimary
-                      : null,
-                  child: MatchCard(
-                    match: matchSchedule.getData(snoutData.event),
-                    results: snoutData.event.getMatchResults(matchSchedule.id),
-                    matchSchedule: matchSchedule,
-                    focusTeam: snoutData.event.config.team,
-                  ),
-                ),
-              ],
-
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Center(
-                  child: FilledButton.tonal(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => EditSchedulePage(
-                            matches: snoutData.event.schedule,
-                          ),
-                        ),
-                      );
-                    },
-                    child: const Text("Edit Schedule"),
-                  ),
-                ),
+        for (final (idx, matchSchedule)
+            in snoutData.event.scheduleSorted.indexed)
+        // TODO correctly handle breaks in the list in the inital scroll position check
+        ...[
+          if (idx > 0 &&
+              matchSchedule.scheduledTime.difference(
+                    snoutData.event.scheduleSorted[idx - 1].scheduledTime,
+                  ) >
+                  scheduleBreakDuration)
+            Center(
+              child: Text(
+                '${formatDurationLength(matchSchedule.scheduledTime.difference(snoutData.event.scheduleSorted[idx - 1].scheduledTime))} break',
               ),
-            ],
-          ),
-        ),
-        if (teamNextMatch != null && scheduleDelay != null)
+            ),
           Container(
-            color: Theme.of(context).colorScheme.surfaceContainerHighest,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text("Schedule ${offsetDurationInMins(scheduleDelay)}"),
-                TextButton(
-                  onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          MatchPage(matchid: teamNextMatch.id),
-                    ),
-                  ),
-                  child: Text(
-                    teamNextMatch.label,
-                    style: TextStyle(
-                      color: getAllianceUIColor(
-                        teamNextMatch.getAllianceOf(
-                          snoutData.event.config.team,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                TimeDuration(
-                  time: teamNextMatch.scheduledTime.add(scheduleDelay),
-                  displayDurationDefault: true,
-                ),
-              ],
+            color: matchSchedule == snoutData.event.nextMatch
+                ? Theme.of(context).colorScheme.onPrimary
+                : null,
+            child: MatchCard(
+              match: matchSchedule.getData(snoutData.event),
+              results: snoutData.event.getMatchResults(matchSchedule.id),
+              matchSchedule: matchSchedule,
+              focusTeam: snoutData.event.config.team,
             ),
           ),
+        ],
+    
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: Center(
+            child: FilledButton.tonal(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => EditSchedulePage(
+                      matches: snoutData.event.schedule,
+                    ),
+                  ),
+                );
+              },
+              child: const Text("Edit Schedule"),
+            ),
+          ),
+        ),
       ],
     );
   }

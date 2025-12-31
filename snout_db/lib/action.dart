@@ -1,6 +1,8 @@
 import 'package:cbor/cbor.dart';
 import 'package:collection/collection.dart';
 import 'package:snout_db/actions/add_keypair.dart';
+import 'package:snout_db/actions/extras/battle_pass_upgrade.dart';
+import 'package:snout_db/actions/extras/write_scout_profile.dart';
 import 'package:snout_db/actions/write_config.dart';
 import 'package:snout_db/actions/write_dataitem.dart';
 import 'package:snout_db/actions/write_matchresults.dart';
@@ -35,7 +37,9 @@ enum ActionType {
   writeDataItem(ActionWriteDataItem.typeId, ActionWriteDataItem.fromCbor),
   writeRobotTrace(ActionWriteMatchTrace.typeId, ActionWriteMatchTrace.fromCbor),
   writeSchedule(ActionWriteSchedule.typeId, ActionWriteSchedule.fromCbor),
-  writeMatchresult(ActionWriteMatchResults.typeId, ActionWriteMatchResults.fromCbor);
+  writeMatchresult(ActionWriteMatchResults.typeId, ActionWriteMatchResults.fromCbor),
+  writeScoutProfile(ActionWriteScoutProfile.typeId, ActionWriteScoutProfile.fromCbor),
+  levelUpBattlePass(ActionBattlePassLevelUp.typeId, ActionBattlePassLevelUp.fromCbor);
 
   final int id;
   final ActionFactory factory;
