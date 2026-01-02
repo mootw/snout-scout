@@ -96,14 +96,18 @@ class _TBATeamAvatarState extends State<_TBATeamAvatar> {
       final avatar = await cacheOnly.file.readAsString();
       final imageData = decodeImage(avatar);
       if (imageData != null) {
-        setState(() {
-          _imageData = imageData;
-        });
+        if (mounted) {
+          setState(() {
+            _imageData = imageData;
+          });
+        }
       } else {
         final data = await _genericAvatar();
-        setState(() {
-          _imageData = data;
-        });
+        if (mounted) {
+          setState(() {
+            _imageData = data;
+          });
+        }
       }
       return;
     }

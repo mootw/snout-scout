@@ -249,21 +249,38 @@ class RobotMapEventView extends StatelessWidget {
                         ((robotFieldProportion * constraints.maxWidth) /
                             constraints.maxHeight)),
               ),
-              child: Container(
-                alignment: Alignment.center,
-                width: robotFieldProportion * constraints.maxWidth,
-                height: robotFieldProportion * constraints.maxWidth,
-                color: getAllianceUIColor(robotRecording.alliance),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    FRCTeamAvatar(
-                      teamNumber: int.tryParse(team) ?? 0,
-                      size: robotFieldProportion * constraints.maxWidth * 0.6,
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Container(
+                    alignment: Alignment.center,
+                    width: robotFieldProportion * constraints.maxWidth,
+                    height: robotFieldProportion * constraints.maxWidth,
+                    color: getAllianceUIColor(robotRecording.alliance),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        FRCTeamAvatar(
+                          teamNumber: int.tryParse(team) ?? 0,
+                          size:
+                              robotFieldProportion * constraints.maxWidth * 0.7,
+                        ),
+                      ],
                     ),
-                    Text(team, style: TextStyle(fontSize: 10)),
-                  ],
-                ),
+                  ),
+                  Positioned(
+                    top: -17, // Distance from the bottom edge
+                    child: Center(
+                      child: Text(
+                        team,
+                        style: TextStyle(
+                          fontSize: 12,
+                          backgroundColor: Colors.black38,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
             for (final event in allRecentEvents)

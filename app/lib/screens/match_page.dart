@@ -112,86 +112,79 @@ class _MatchPageState extends State<MatchPage> {
       body: ListView(
         cacheExtent: 5000,
         children: [
-          // TODO this entire layout is cooked and needs to be reworked
           Row(
-            mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              if (snoutData.event.getMatchResults(widget.matchid) == null)
-                TextButton(
-                  onPressed: () => editResults(matchSchedule, match, snoutData),
-                  child: Text("Add Results"),
-                ),
               if (snoutData.event.getMatchResults(widget.matchid) != null)
                 Flexible(
-                  child: Column(
-                    children: [
-                      DataTable(
-                        columns: const [
-                          DataColumn(label: Text("Results")),
-                          DataColumn(label: Text("Red")),
-                          DataColumn(label: Text("Blue")),
-                        ],
-                        rows: [
-                          DataRow(
-                            cells: [
-                              const DataCell(Text("Score")),
-                              DataCell(
-                                Text(
-                                  snoutData.event
-                                      .getMatchResults(widget.matchid)!
-                                      .redScore
-                                      .toString(),
-                                ),
-                              ),
-                              DataCell(
-                                Text(
-                                  snoutData.event
-                                      .getMatchResults(widget.matchid)!
-                                      .blueScore
-                                      .toString(),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
+                  child: ListTile(
+                    title: const Text("Actual Time"),
+                    subtitle: Text(
+                      DateFormat.jm().add_yMd().format(
+                        snoutData.event
+                            .getMatchResults(widget.matchid)!
+                            .time
+                            .toLocal(),
                       ),
-                      TextButton(
-                        child: const Text("Edit Results"),
-                        onPressed: () =>
-                            editResults(matchSchedule, match, snoutData),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
               Flexible(
-                child: Column(
-                  children: [
-                    ListTile(
-                      title: const Text("Scheduled Time"),
-                      subtitle: Text(
-                        DateFormat.jm().add_yMd().format(
-                          matchSchedule?.scheduledTime.toLocal() ??
-                              DateTime.now(),
-                        ),
-                      ),
+                child: ListTile(
+                  title: const Text("Scheduled Time"),
+                  subtitle: Text(
+                    DateFormat.jm().add_yMd().format(
+                      matchSchedule?.scheduledTime.toLocal() ?? DateTime.now(),
                     ),
-                    if (snoutData.event.getMatchResults(widget.matchid) != null)
-                      ListTile(
-                        title: const Text("Actual Time"),
-                        subtitle: Text(
-                          DateFormat.jm().add_yMd().format(
-                            snoutData.event
-                                .getMatchResults(widget.matchid)!
-                                .time
-                                .toLocal(),
-                          ),
-                        ),
-                      ),
-                  ],
+                  ),
                 ),
               ),
             ],
           ),
+          // TODO this entire layout is cooked and needs to be reworked
+          if (snoutData.event.getMatchResults(widget.matchid) == null)
+            TextButton(
+              onPressed: () => editResults(matchSchedule, match, snoutData),
+              child: Text("Add Results"),
+            ),
+          if (snoutData.event.getMatchResults(widget.matchid) != null)
+            Column(
+              children: [
+                DataTable(
+                  columns: const [
+                    DataColumn(label: Text("Results")),
+                    DataColumn(label: Text("Red")),
+                    DataColumn(label: Text("Blue")),
+                  ],
+                  rows: [
+                    DataRow(
+                      cells: [
+                        const DataCell(Text("Score")),
+                        DataCell(
+                          Text(
+                            snoutData.event
+                                .getMatchResults(widget.matchid)!
+                                .redScore
+                                .toString(),
+                          ),
+                        ),
+                        DataCell(
+                          Text(
+                            snoutData.event
+                                .getMatchResults(widget.matchid)!
+                                .blueScore
+                                .toString(),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                TextButton(
+                  child: const Text("Edit Results"),
+                  onPressed: () => editResults(matchSchedule, match, snoutData),
+                ),
+              ],
+            ),
           Container(
             padding: const EdgeInsets.only(right: 16),
             alignment: Alignment.centerRight,

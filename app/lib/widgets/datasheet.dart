@@ -222,6 +222,7 @@ class DataSheet extends StatefulWidget {
     required this.rows,
     this.numFixedColumns = 1,
     this.shrinkWrap = false,
+    this.showRainbow = true,
   });
 
   final String? title;
@@ -229,6 +230,7 @@ class DataSheet extends StatefulWidget {
   final List<DataItemColumn> columns;
   final int numFixedColumns;
   final bool shrinkWrap;
+  final bool showRainbow;
 
   @override
   State<DataSheet> createState() => _DataSheetState();
@@ -259,8 +261,6 @@ class _DataSheetState extends State<DataSheet> {
 
   int? _currentSortColumn;
   bool _sortAscending = true;
-
-  bool _showRainbow = true;
 
   @override
   Widget build(BuildContext context) {
@@ -417,7 +417,7 @@ class _DataSheetState extends State<DataSheet> {
                     return Colors.red;
                   }
 
-                  if (_showRainbow &&
+                  if (widget.showRainbow &&
                       cellItem.numericValue != null &&
                       numericMinMaxes[cell.column] != null) {
                     double min = numericMinMaxes[cell.column]!.$1;

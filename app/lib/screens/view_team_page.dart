@@ -70,7 +70,7 @@ class _TeamViewPageState extends State<TeamViewPage> {
             FRCTeamAvatar(teamNumber: widget.teamNumber, size: 32),
             const SizedBox(width: 8),
             Text(
-              "Team ${widget.teamNumber}${teamName == null ? '' : ': $teamName'}",
+              "${widget.teamNumber}${teamName == null ? '' : ': $teamName'}",
             ),
           ],
         ),
@@ -257,13 +257,17 @@ class _TeamViewPageState extends State<TeamViewPage> {
               DataSheet(
                 shrinkWrap: true,
                 title: 'Metrics',
-                //Data is a list of rows and columns
+                showRainbow: false,
                 columns: [
-                  DataItemColumn(DataTableItem.fromText("Metric")),
+                  DataItemColumn(
+                    DataTableItem.fromText("Metric"),
+                    width: numericWidth,
+                  ),
                   for (final event in data.event.config.matchscouting.events)
                     DataItemColumn(
                       DataTableItem.fromText(event.label),
                       largerIsBetter: event.isLargerBetter,
+                      width: numericWidth,
                     ),
                 ],
                 rows: [
