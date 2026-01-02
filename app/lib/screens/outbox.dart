@@ -1,16 +1,21 @@
+import 'dart:convert';
+
 import 'package:app/providers/data_provider.dart';
 import 'package:app/widgets/load_status_or_error_bar.dart';
+import 'package:cbor/cbor.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:snout_db/message.dart';
 
-class FailedPatchStorage extends StatefulWidget {
-  const FailedPatchStorage({super.key});
+class OutboxStoragePage extends StatefulWidget {
+  const OutboxStoragePage({super.key});
 
   @override
-  State<FailedPatchStorage> createState() => _FailedPatchStorageState();
+  State<OutboxStoragePage> createState() => _OutboxStoragePageState();
 }
 
-class _FailedPatchStorageState extends State<FailedPatchStorage> {
+class _OutboxStoragePageState extends State<OutboxStoragePage> {
   @override
   Widget build(BuildContext context) {
     final serverConnection = context.watch<DataProvider>();
@@ -70,18 +75,26 @@ class _FailedPatchStorageState extends State<FailedPatchStorage> {
                 context: context,
                 builder: (context) => AlertDialog(
                   title: const Text("Patch Data"),
-                  content: SelectableText(patch),
+                  content: Text(SignedChainMessage.fromCbor(
+                    cbor.decode(base64Decode(patch)) as CborMap,
+                  ).payload.action.toCbor().toString()),
                 ),
               ),
-              // TODO
-              // title: Text(
-              //   DateFormat.yMMMMEEEEd().add_Hms().format(
-              //     Patch.fromJson(json.decode(patch)).time,
-              //   ),
-              // ),
-              // subtitle: Text(
-              //   Patch.fromJson(json.decode(patch)).path.toString(),
-              // ),
+              leading: IconButton(icon: Icon(Icons.delete), onPressed: () {
+                serverConnection.remoteOutbox.remove(patch);
+              },),
+              title: Text(
+                DateFormat.yMMMMEEEEd().add_Hms().format(
+                  SignedChainMessage.fromCbor(
+                    cbor.decode(base64Decode(patch)) as CborMap,
+                  ).payload.time,
+                ),
+              ),
+              subtitle: Text(
+                SignedChainMessage.fromCbor(
+                    cbor.decode(base64Decode(patch)) as CborMap,
+                  ).payload.action.toString(),
+              ),
             ),
         ],
       ),

@@ -42,17 +42,17 @@ class ActionWriteKeyPair implements ChainAction {
   }
 
   @override
-  bool isValid(SnoutChain chain, SignedChainMessage signee) {
+  String? isValid(SnoutChain chain, SignedChainMessage signee) {
     if (chain.actions.isEmpty) {
       // Always allow as first action
-      return true;
+      return null;
     }
 
     if (chain.allowedKeys.keys.contains(pk)) {
       // Key already exists, do not overwrite!!
       // This might not actually be necessary
       // because we are comparing the pubkey to signed key and checking the signature
-      return false;
+      return "Key already exists";
     }
 
     /// Only the first keypair is allowed to authorize adding new keypairs
@@ -66,10 +66,10 @@ class ActionWriteKeyPair implements ChainAction {
     }
 
     if (rootPubKey != null && rootPubKey == signee.author) {
-      return true;
+      return null;
+    } else {
+      return "Only the root keypair is allowed to authorize adding new keypairs";
     }
-
-    return false;
   }
 
   @override

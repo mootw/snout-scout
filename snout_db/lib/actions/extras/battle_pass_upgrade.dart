@@ -26,24 +26,27 @@ class ActionBattlePassLevelUp implements ChainAction {
   }
 
   @override
-  bool isValid(SnoutChain db, SignedChainMessage signee) {
+  String? isValid(SnoutChain db, SignedChainMessage signee) {
     final spendable = spendableBencoin(db, signee.author);
 
     // Require the scout to have enough spendable bencoin
     if (spendable < cost) {
-      return false;
+      return "spendable bencoin ($spendable) is less than cost ($cost)";
     }
 
     // Require that the scout has the previous level
-    final lastLevelUp = db.actions.lastWhereOrNull((e) => e.payload.action is ActionBattlePassLevelUp);
+    final lastLevelUp = db.actions.lastWhereOrNull(
+      (e) =>
+          e.author == signee.author &&
+          e.payload.action is ActionBattlePassLevelUp,
+    );
 
-    if(lastLevelUp != null && (lastLevelUp.payload.action as ActionBattlePassLevelUp).level == level - 1) {
-      return true;
+    if (lastLevelUp != null &&
+        (lastLevelUp.payload.action as ActionBattlePassLevelUp).level !=
+            level - 1) {
+      return "incorrect previous battle pass level ordering";
     }
-    if(lastLevelUp == null) {
-      return true;
-    }
-    return false;
+    return null;
   }
 
   @override

@@ -22,7 +22,8 @@ abstract interface class ChainAction {
   /// This Action should verify that the content of the action is valid
   /// given the current state of the database and that the signee is authorized
   /// to perform this action.
-  bool isValid(SnoutChain db, SignedChainMessage signee);
+  /// Returns null if the action is valid, or a string error message if invalid.
+  String? isValid(SnoutChain db, SignedChainMessage signee);
 
   /// Applies this action to the database without any verification.
   void apply(SnoutChain db, SignedChainMessage signee);

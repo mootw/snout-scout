@@ -97,7 +97,8 @@ class SnoutChain {
       );
     }
 
-    if (chainAction.action.isValid(this, message)) {
+    final valid = chainAction.action.isValid(this, message);
+    if (valid == null) {
       // Adding the message to the db file must occur after applying the action
       // To ensure that actions depending on previous actions work correctly
       chainAction.action.apply(this, message);
@@ -105,7 +106,7 @@ class SnoutChain {
 
       // TODO update indexes
     } else {
-      throw Exception("Action is not valid on this chain");
+      throw Exception("Action is not valid on this chain: $valid");
     }
   }
 }

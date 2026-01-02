@@ -35,8 +35,8 @@ class ActionWriteSchedule implements ChainAction {
   }
 
   @override
-  bool isValid(SnoutChain db, SignedChainMessage signee) {
-    return true;
+  String? isValid(SnoutChain db, SignedChainMessage signee) {
+    return null;
   }
 
   @override

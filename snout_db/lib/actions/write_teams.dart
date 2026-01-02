@@ -30,9 +30,11 @@ class ActionWriteTeams implements ChainAction {
   }
 
   @override
-  bool isValid(SnoutChain db, SignedChainMessage signee) {
+  String? isValid(SnoutChain db, SignedChainMessage signee) {
     /// The teams list is sorted from smallest to largest
-    return teams.isSorted((a, b) => a.compareTo(b));
+    return teams.isSorted((a, b) => a.compareTo(b))
+        ? null
+        : "list is not sorted from smallest to largest";
   }
 
   @override

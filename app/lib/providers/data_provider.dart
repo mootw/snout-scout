@@ -49,6 +49,15 @@ class PatchOutbox {
     notifyListeners();
   }
 
+  Future remove(String value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(
+      outboxKey,
+      prefs.getStringList(outboxKey)?.where((e) => e != value).toList() ?? [],
+    );
+    notifyListeners();
+  }
+
   Future writeNewMessage(SignedChainMessage message) async {
     // First save patch to disk asap, we can complete the future now and be certain of no data loss
     final prefs = await SharedPreferences.getInstance();

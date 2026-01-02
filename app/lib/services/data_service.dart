@@ -16,7 +16,7 @@ Future<Uint8List?> readBytes(String key) async {
   }
 }
 
-Future<Uint8List?> storeBytes(String key, Uint8List bytes) async {
+Future<void> storeBytes(String key, Uint8List bytes) async {
   final file = fs.file('${remoteDBPath.path}/$key');
   if (await file.exists() == false) {
     await file.create(recursive: true);

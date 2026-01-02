@@ -235,10 +235,7 @@ void main(List<String> args) async {
   /// Gets an ordered list of all message hashes in the database
   /// Using json is fine here because gzip makes the file size about the same as binary encoding
   /// This also makes it easier to debug
-  app.get("/events/<eventID>/index", (
-    Request request,
-    String eventID,
-  ) async {
+  app.get("/events/<eventID>/index", (Request request, String eventID) async {
     eventID = Uri.decodeComponent(eventID);
     final event = await _loadFromDisk(eventID);
     if (event == null) {
@@ -317,7 +314,7 @@ void main(List<String> args) async {
           listener.sink.add(
             json.encode({
               "type": SocketMessageType.newPatchId,
-              "message": base64Encode(await message.hash),
+              "message": base64UrlEncode(await message.hash),
             }),
           );
         }
@@ -331,7 +328,7 @@ void main(List<String> args) async {
         return Response.ok("");
       } catch (e, s) {
         logger.severe('failed to accept message: $content', e, s);
-        return Response.internalServerError(body: e);
+        return Response.internalServerError(body: e.toString());
       }
     });
   });
