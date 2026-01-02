@@ -7,6 +7,7 @@ import 'package:app/widgets/fieldwidget.dart';
 import 'package:app/style.dart';
 import 'package:app/screens/match_page.dart';
 import 'package:app/widgets/image_view.dart';
+import 'package:app/widgets/team_avatar.dart';
 import 'package:app/widgets/timeduration.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
@@ -64,8 +65,14 @@ class _TeamViewPageState extends State<TeamViewPage> {
             child: const Text("Scout"),
           ),
         ],
-        title: Text(
-          "Team ${widget.teamNumber}${teamName == null ? '' : ': $teamName'}",
+        title: Row(
+          children: [
+            FRCTeamAvatar(teamNumber: widget.teamNumber, size: 32),
+            const SizedBox(width: 8),
+            Text(
+              "Team ${widget.teamNumber}${teamName == null ? '' : ': $teamName'}",
+            ),
+          ],
         ),
       ),
       body: ListView(

@@ -1,7 +1,5 @@
 import 'package:app/widgets/datasheet.dart';
-import 'package:app/style.dart';
 import 'package:app/providers/data_provider.dart';
-import 'package:app/screens/view_team_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -39,31 +37,20 @@ class TableRobotRecordingsPage extends StatelessWidget {
                       .getSchedule(data.event, match.key)
                       ?.scheduledTime,
                 ),
-                DataTableItem(
-                  displayValue: TextButton(
-                    child: Text(
-                      robot.key,
-                      style: TextStyle(
-                        color: getAllianceUIColor(robot.value.alliance),
-                      ),
-                    ),
-                    onPressed: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            TeamViewPage(teamNumber: int.parse(robot.key)),
-                      ),
-                    ),
-                  ),
-                  exportValue: robot.key,
-                  sortingValue: robot.key,
+                DataTableItem.fromTeam(
+                  context: context,
+                  team: int.tryParse(robot.key) ?? 0,
+                  alliance: robot.value.alliance,
                 ),
                 for (final item in data.event.config.matchscouting.processes)
                   DataTableItem.fromErrorNumber(
                     data.event.runMatchResultsProcess(
                           item,
                           match.value.robot[robot.key],
-                          data.event.matchSurvey(int.tryParse(robot.key) ?? 0, match.key),
+                          data.event.matchSurvey(
+                            int.tryParse(robot.key) ?? 0,
+                            match.key,
+                          ),
                           int.tryParse(robot.key) ?? 0,
                         ) ??
                         (value: null, error: "Missing Results"),

@@ -4,6 +4,7 @@ import 'package:app/providers/data_provider.dart';
 import 'package:app/screens/match_page.dart';
 import 'package:app/screens/view_team_page.dart';
 import 'package:app/services/snout_image_cache.dart';
+import 'package:app/widgets/team_avatar.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -156,23 +157,10 @@ Stream<SearchResult> _search(FRCEvent event, String query) async* {
         ? 0.99
         : (team.toString().contains(query) ? 0.9 : -1);
     if (quality >= 0) {
-      //Load the robot picture to show in the search if it is available
-      Widget? robotPicture;
-      final pictureData =
-          event.pitscouting[team.toString()]?[robotPictureReserved];
-      if (pictureData != null) {
-        robotPicture = AspectRatio(
-          aspectRatio: 1,
-          child: Image(
-            image: memoryImageProvider(pictureData),
-            fit: BoxFit.cover,
-          ),
-        );
-      }
       yield SearchResult(
         quality.toDouble(),
         (context) => ListTile(
-          leading: robotPicture,
+          leading: FRCTeamAvatar(teamNumber: team, size: null),
           title: Text(team.toString()),
           subtitle: const Text("Team"),
           onTap: () {
@@ -243,24 +231,10 @@ Stream<SearchResult> _search(FRCEvent event, String query) async* {
         query,
       );
       if (quality >= threshold) {
-        //Load the robot picture to show in the search if it is available
-        Widget? robotPicture;
-        final pictureData =
-            event.pitscouting[team.toString()]?[robotPictureReserved];
-        if (pictureData != null) {
-          robotPicture = AspectRatio(
-            aspectRatio: 1,
-            child: Image(
-              image: memoryImageProvider(pictureData),
-              fit: BoxFit.cover,
-            ),
-          );
-        }
-
         yield SearchResult(
           quality,
           (context) => ListTile(
-            leading: robotPicture,
+            leading: FRCTeamAvatar(teamNumber: team, size: null),
             title: Text('${item.value}'),
             subtitle: Text("${team.toString()}: ${surveyItem.id}"),
             onTap: () {
@@ -305,6 +279,10 @@ Stream<SearchResult> _search(FRCEvent event, String query) async* {
           yield SearchResult(
             quality,
             (context) => ListTile(
+              leading: FRCTeamAvatar(
+                teamNumber: int.tryParse(robot.key) ?? 0,
+                size: null,
+              ),
               title: Text(value.value.toString()),
               subtitle: Text(
                 "${event.schedule[match.key]?.label}: ${robot.key}: ${value.key}",

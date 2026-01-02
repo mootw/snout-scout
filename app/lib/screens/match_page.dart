@@ -11,6 +11,7 @@ import 'package:app/screens/match_recorder_assistant.dart';
 import 'package:app/screens/view_team_page.dart';
 import 'package:app/widgets/load_status_or_error_bar.dart';
 import 'package:app/widgets/scout_name_display.dart';
+import 'package:app/widgets/team_avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -227,21 +228,28 @@ class _MatchPageState extends State<MatchPage> {
                 [
                   DataTableItem(
                     displayValue: TextButton(
-                      child: Text(
-                        team.toString() +
-                            (matchSchedule?.isScheduledToHaveTeam(team) == false
-                                ? " [surrogate]"
-                                : ""),
-                        style: TextStyle(
-                          // Get the alliance color first from the match data, then the schedule
-                          color:
-                              getAllianceUIColor(
-                                match?.robot[team.toString()]?.alliance,
-                              ) ??
-                              getAllianceUIColor(
-                                matchSchedule?.getAllianceOf(team),
-                              ),
-                        ),
+                      child: Row(
+                        children: [
+                          FRCTeamAvatar(teamNumber: team),
+                          const SizedBox(width: 4),
+                          Text(
+                            team.toString() +
+                                (matchSchedule?.isScheduledToHaveTeam(team) ==
+                                        false
+                                    ? " [surrogate]"
+                                    : ""),
+                            style: TextStyle(
+                              // Get the alliance color first from the match data, then the schedule
+                              color:
+                                  getAllianceUIColor(
+                                    match?.robot[team.toString()]?.alliance,
+                                  ) ??
+                                  getAllianceUIColor(
+                                    matchSchedule?.getAllianceOf(team),
+                                  ),
+                            ),
+                          ),
+                        ],
                       ),
                       onPressed: () => Navigator.push(
                         context,

@@ -2,14 +2,17 @@ import 'dart:convert';
 import 'dart:ui';
 
 import 'package:app/screens/match_page.dart';
+import 'package:app/screens/view_team_page.dart';
 import 'package:app/services/snout_image_cache.dart';
 import 'package:app/style.dart';
 import 'package:app/widgets/image_view.dart';
+import 'package:app/widgets/team_avatar.dart';
 import 'package:csv/csv.dart';
 import 'package:flutter/material.dart';
 import 'package:download/download.dart';
 import 'package:snout_db/config/matchresults_process.dart';
 import 'package:snout_db/config/data_item_schema.dart';
+import 'package:snout_db/snout_chain.dart';
 import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 
 const String noDataText = '';
@@ -91,12 +94,32 @@ class DataTableItem {
       sortingValue = text?.toLowerCase() ?? "",
       numericValue = null;
 
-  DataTableItem.fromTeam(String? text)
-    : displayValue = Text(text ?? noDataText),
-      exportValue = text ?? noDataText,
-      //Empty string will sort to the bottom by default
-      sortingValue = text?.toLowerCase() ?? "",
-      numericValue = null;
+  DataTableItem.fromTeam({
+    required BuildContext context,
+    required int team,
+    Alliance? alliance,
+  }) : displayValue = TextButton(
+         child: Row(
+           children: [
+             FRCTeamAvatar(teamNumber: team),
+             const SizedBox(width: 4),
+             Text(
+               team.toString(),
+               style: TextStyle(color: getAllianceUIColor(alliance)),
+             ),
+           ],
+         ),
+         onPressed: () => Navigator.push(
+           context,
+           MaterialPageRoute(
+             builder: (context) => TeamViewPage(teamNumber: team),
+           ),
+         ),
+       ),
+       exportValue = team.toString(),
+       //Empty string will sort to the bottom by default
+       sortingValue = team,
+       numericValue = null;
 
   DataTableItem.fromMatch({
     required BuildContext context,
@@ -166,18 +189,24 @@ class DataItemColumn {
   factory DataItemColumn.teamHeader() {
     return DataItemColumn(
       DataTableItem.fromText('Team'),
-      width: 75,
+      width: 75 + 16,
       // something something something
       largerIsBetter: false,
     );
   }
 
   factory DataItemColumn.matchHeader() {
-    return DataItemColumn(DataTableItem.fromText('Match'), width: matchColumnWidth);
+    return DataItemColumn(
+      DataTableItem.fromText('Match'),
+      width: matchColumnWidth,
+    );
   }
 
   factory DataItemColumn.text(String text) {
-    return DataItemColumn(DataTableItem.fromText(text), width: matchColumnWidth);
+    return DataItemColumn(
+      DataTableItem.fromText(text),
+      width: defaultColumnWidth,
+    );
   }
 
   @override
@@ -218,7 +247,8 @@ const double numericWidth = 80;
 // Default, usually used for text
 const double defaultColumnWidth = 160;
 // used for match buttons in tables
-const double matchColumnWidth = 100;
+const double matchColumnWidth = 105;
+const double teamColumnWidth = 75 + 16;
 
 const double dataCellHeight = 40;
 const double headerCellHeight = 50;
@@ -381,7 +411,7 @@ class _DataSheetState extends State<DataSheet> {
                 padding: EdgeInsets.only(left: 4, right: 4),
                 color: () {
                   if (cellItem.exportValue == "true") {
-                    return  Colors.green;
+                    return Colors.green;
                   }
                   if (cellItem.exportValue == "false") {
                     return Colors.red;
@@ -475,7 +505,10 @@ class _DataSheetState extends State<DataSheet> {
   }
 }
 
-String dataTableToCSV(List<DataTableItem> columns, List<List<DataTableItem>> rows) {
+String dataTableToCSV(
+  List<DataTableItem> columns,
+  List<List<DataTableItem>> rows,
+) {
   //Append the colums to the top of the rows
   List<List<DataTableItem>> combined = [columns, ...rows];
   return const ListToCsvConverter().convert(combined);

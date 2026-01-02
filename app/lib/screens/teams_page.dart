@@ -6,6 +6,7 @@ import 'package:app/screens/edit_json.dart';
 import 'package:app/screens/view_team_page.dart';
 import 'package:app/services/snout_image_cache.dart';
 import 'package:app/services/tba_autofill.dart';
+import 'package:app/widgets/team_avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:snout_db/actions/write_teams.dart';
@@ -183,9 +184,16 @@ class TeamListTile extends StatelessWidget {
             child: image ?? const Center(child: Text("No Image")),
           ),
           const SizedBox(height: 4),
-          Text(
-            teamNumber.toString(),
-            style: Theme.of(context).textTheme.titleMedium,
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              FRCTeamAvatar(teamNumber: teamNumber),
+              const SizedBox(width: 4),
+              Text(
+                teamNumber.toString(),
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+            ],
           ),
         ],
       ),

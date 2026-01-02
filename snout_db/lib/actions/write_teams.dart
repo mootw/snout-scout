@@ -16,15 +16,19 @@ class ActionWriteTeams implements ChainAction {
   ActionWriteTeams(this.teams);
 
   @override
-  CborValue toCbor() =>
-      CborMap({CborString("teams"): CborString(json.encode(teams))});
+  CborValue toCbor() => CborMap({
+    CborString("teams"): CborList([
+      for (final team in teams) CborSmallInt(team),
+    ]),
+  });
 
   static ActionWriteTeams fromCbor(CborValue data) {
     final map = data as CborMap;
     return ActionWriteTeams(
       List<int>.from(
-        json.decode((map[CborString("teams")]! as CborString).toString())
-            as List<dynamic>,
+        (map[CborString("teams")]! as CborList)
+            .map((e) => (e as CborSmallInt).value)
+            .toList(),
       ),
     );
   }

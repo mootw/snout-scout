@@ -1,3 +1,4 @@
+import 'package:app/widgets/team_avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:app/widgets/datasheet.dart';
 import 'package:app/providers/data_provider.dart';
@@ -22,19 +23,7 @@ class TableTeamSurvey extends StatelessWidget {
         rows: [
           for (final team in data.event.teams)
             [
-              DataTableItem(
-                displayValue: TextButton(
-                  child: Text(team.toString()),
-                  onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => TeamViewPage(teamNumber: team),
-                    ),
-                  ),
-                ),
-                exportValue: team.toString(),
-                sortingValue: team,
-              ),
+              DataTableItem.fromTeam(context: context, team: team),
               for (final surveyItem in data.event.config.pitscouting)
                 DataTableItem.fromSurveyItem(
                   data.event.pitscouting[team.toString()]?[surveyItem.id],

@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:cbor/cbor.dart';
 import 'package:snout_db/config/data_item_schema.dart';
 
@@ -21,7 +23,8 @@ class DataItem {
 
   DataItem.team(int team, this.key, this.value) : entity = '/team/$team';
 
-  DataItem.match(String match, this.key, this.value) : entity = '/match/$match/data';
+  DataItem.match(String match, this.key, this.value)
+    : entity = '/match/$match/data';
 
   DataItem.matchTeam(String match, int team, this.key, this.value)
     : entity = '/match/$match/team/$team';
@@ -29,7 +32,11 @@ class DataItem {
   DataItem.fromCbor(CborMap item)
     : entity = (item[CborString('e')]! as CborString).toString(),
       key = (item[CborString('k')]! as CborString).toString(),
-      value = item[CborString('v')]!.toObject();
+      // convert bytes back to Uint8List because cbor decode returns List<int>
+      // unfortunately this copy tax appears unavoidable
+      value = item[CborString('v')] is CborBytes
+          ? Uint8List.fromList(item[CborString('v')]!.toObject()! as List<int>)
+          : item[CborString('v')]!.toObject();
 
   CborMap toCbor() => CborMap({
     CborString('e'): CborString(entity),

@@ -9,18 +9,18 @@ import 'package:snout_db/data_item.dart';
 import 'package:snout_db/pubkey.dart';
 import 'package:snout_db/snout_chain.dart';
 
-DataTableItem traceTableItem (SnoutChain db, String matchId, int team) {
-    final key = '/match/$matchId/trace/$team';
-    final result = db.event.traces[key];
-    if (result == null) {
-      return DataTableItem.fromText('');
-    }
-    final alias= db.aliases[result.$2] ?? result.$2.toString();
-    return DataTableItem(
-      displayValue: ScoutName(db: db, scoutPubkey: result.$2),
-      exportValue: alias,
-      sortingValue: alias,
-    );
+DataTableItem traceTableItem(SnoutChain db, String matchId, int team) {
+  final key = '/match/$matchId/trace/$team';
+  final result = db.event.traces[key];
+  if (result == null) {
+    return DataTableItem.fromText('');
+  }
+  final alias = db.aliases[result.$2] ?? result.$2.toString();
+  return DataTableItem(
+    displayValue: ScoutName(db: db, scoutPubkey: result.$2),
+    exportValue: alias,
+    sortingValue: alias,
+  );
 }
 
 class DataItemEditAudit extends StatelessWidget {

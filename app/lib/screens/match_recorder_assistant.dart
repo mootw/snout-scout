@@ -5,6 +5,7 @@ import 'package:app/style.dart';
 import 'package:app/screens/match_recorder.dart';
 import 'package:app/screens/view_team_page.dart';
 import 'package:app/widgets/load_status_or_error_bar.dart';
+import 'package:app/widgets/team_avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:snout_db/actions/write_dataitem.dart';
@@ -176,7 +177,13 @@ class _MatchRecorderAssistantPageState
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 // if (isRecommended) const Text("Recommended"),
-                Text("$team", style: Theme.of(context).textTheme.bodyLarge),
+                Row(
+                  children: [
+                    FRCTeamAvatar(teamNumber: team),
+                    const SizedBox(width: 4),
+                    Text("$team", style: Theme.of(context).textTheme.bodyLarge),
+                  ],
+                ),
                 Text(
                   subtitle,
                   style: Theme.of(

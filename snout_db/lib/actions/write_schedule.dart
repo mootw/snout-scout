@@ -41,7 +41,6 @@ class ActionWriteSchedule implements ChainAction {
 
   @override
   void apply(SnoutChain chain, SignedChainMessage signee) {
-    // TODO using the existing format!
     chain.event.schedule = Map.fromEntries(
       schedule.map((e) => MapEntry(e.id, e)),
     );

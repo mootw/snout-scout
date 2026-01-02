@@ -6,6 +6,7 @@ import 'dart:math' as math;
 import 'package:app/providers/data_provider.dart';
 import 'package:app/services/snout_image_cache.dart';
 import 'package:app/style.dart';
+import 'package:app/widgets/team_avatar.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -253,7 +254,16 @@ class RobotMapEventView extends StatelessWidget {
                 width: robotFieldProportion * constraints.maxWidth,
                 height: robotFieldProportion * constraints.maxWidth,
                 color: getAllianceUIColor(robotRecording.alliance),
-                child: Text(team, style: TextStyle(fontSize: 10)),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    FRCTeamAvatar(
+                      teamNumber: int.tryParse(team) ?? 0,
+                      size: robotFieldProportion * constraints.maxWidth * 0.6,
+                    ),
+                    Text(team, style: TextStyle(fontSize: 10)),
+                  ],
+                ),
               ),
             ),
             for (final event in allRecentEvents)

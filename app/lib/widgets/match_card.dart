@@ -1,5 +1,6 @@
 import 'package:app/providers/data_provider.dart';
 import 'package:app/style.dart';
+import 'package:app/widgets/team_avatar.dart';
 import 'package:app/widgets/timeduration.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -76,7 +77,7 @@ class MatchCard extends StatelessWidget {
                   )
                 : const SizedBox(width: 19),
             SizedBox(
-              width: 110,
+              width: 80,
               child: Text(matchSchedule.label, textAlign: TextAlign.center),
             ),
             Column(
@@ -84,13 +85,19 @@ class MatchCard extends StatelessWidget {
               children: [
                 Container(
                   height: 20,
-                  width: 160,
-                  color: Colors.red,
+                  width: 200,
+                  color: Colors.red.withAlpha(128),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                       for (final team in matchSchedule.red)
-                        Text("$team", style: whiteText),
+                        Row(
+                          children: [
+                            FRCTeamAvatar(teamNumber: team),
+                            const SizedBox(width: 2),
+                            Text("$team", style: whiteText),
+                          ],
+                        ),
                       SizedBox(
                         width: 25,
                         child: Text(
@@ -110,13 +117,19 @@ class MatchCard extends StatelessWidget {
                 ),
                 Container(
                   height: 20,
-                  width: 160,
-                  color: Colors.blueAccent,
+                  width: 200,
+                  color: Colors.blueAccent.withAlpha(128),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                       for (final team in matchSchedule.blue)
-                        Text("$team", style: whiteText),
+                        Row(
+                          children: [
+                            FRCTeamAvatar(teamNumber: team),
+                            const SizedBox(width: 2),
+                            Text("$team", style: whiteText),
+                          ],
+                        ),
                       SizedBox(
                         width: 25,
                         child: Text(

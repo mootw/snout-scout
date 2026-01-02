@@ -6,6 +6,7 @@ import 'package:app/widgets/fieldwidget.dart';
 import 'package:app/style.dart';
 import 'package:app/screens/view_team_page.dart';
 import 'package:app/widgets/image_view.dart';
+import 'package:app/widgets/team_avatar.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -146,25 +147,12 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
             rows: [
               for (final team in [..._blue, ..._red])
                 [
-                  DataTableItem(
-                    displayValue: TextButton(
-                      child: Text(
-                        team.toString(),
-                        style: TextStyle(
-                          color: getAllianceUIColor(
-                            _red.contains(team) ? Alliance.red : Alliance.blue,
-                          ),
-                        ),
-                      ),
-                      onPressed: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => TeamViewPage(teamNumber: team),
-                        ),
-                      ),
-                    ),
-                    exportValue: team.toString(),
-                    sortingValue: team,
+                  DataTableItem.fromTeam(
+                    context: context,
+                    team: team,
+                    alliance: _red.contains(team)
+                        ? Alliance.red
+                        : Alliance.blue,
                   ),
                   for (final item in data.event.config.matchscouting.processes)
                     DataTableItem.fromNumber(
@@ -225,16 +213,22 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                                     TeamViewPage(teamNumber: team),
                               ),
                             ),
-                            child: Text(
-                              team.toString(),
-                              style: Theme.of(context).textTheme.titleLarge
-                                  ?.copyWith(
-                                    color: getAllianceUIColor(
-                                      _red.contains(team)
-                                          ? Alliance.red
-                                          : Alliance.blue,
-                                    ),
-                                  ),
+                            child: Row(
+                              children: [
+                                FRCTeamAvatar(teamNumber: team),
+                                const SizedBox(width: 4),
+                                Text(
+                                  team.toString(),
+                                  style: Theme.of(context).textTheme.titleLarge
+                                      ?.copyWith(
+                                        color: getAllianceUIColor(
+                                          _red.contains(team)
+                                              ? Alliance.red
+                                              : Alliance.blue,
+                                        ),
+                                      ),
+                                ),
+                              ],
                             ),
                           ),
                           Column(

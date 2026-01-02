@@ -164,6 +164,7 @@ class _EditDataItemsPageState extends State<EditDataItemsPage> {
                   child: DynamicPropertyEditorWidget(
                     tool: item,
                     survey: _items,
+                    initialData: widget.initialData,
                   ),
                 ),
             ],

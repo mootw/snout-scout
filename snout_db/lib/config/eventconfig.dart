@@ -51,9 +51,23 @@ class EventConfig {
     this.pitscouting = const [],
     this.pit = const [
       // Default values to inspire these pit data fields
-      DataItemSchema(id: 'pit_map', label: 'Pit Map', type: DataItemType.picture, docs: 'Image of the Pit Map'),
-      DataItemSchema(id: 'schedule', label: 'Schedule', type: DataItemType.text, docs: 'Event Schedule as a markdown table'),
-      DataItemSchema(id: 'fresh_battery', label: 'Fresh Battery', type: DataItemType.toggle),
+      DataItemSchema(
+        id: 'pit_map',
+        label: 'Pit Map',
+        type: DataItemType.picture,
+        docs: 'Image of the Pit Map',
+      ),
+      DataItemSchema(
+        id: 'docs',
+        label: 'Docs',
+        type: DataItemType.text,
+        docs: 'Event schedule and other important info',
+      ),
+      DataItemSchema(
+        id: 'fresh_battery',
+        label: 'Fresh Battery',
+        type: DataItemType.toggle,
+      ),
     ],
     this.matchscouting = const MatchScouting(),
     // image is put last to make editing via text easier

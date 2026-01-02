@@ -3,6 +3,8 @@ import 'dart:collection';
 import 'package:app/screens/analysis/boxplot.dart';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/screens/view_team_page.dart';
+import 'package:app/widgets/datasheet.dart';
+import 'package:app/widgets/team_avatar.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -127,7 +129,10 @@ class _BoxPlotAnalysisState extends State<BoxPlotAnalysis> {
           if (valuesSorted != null)
             Row(
               children: [
-                const SizedBox(width: 100, child: Center(child: Text("Team"))),
+                const SizedBox(
+                  width: teamColumnWidth,
+                  child: Center(child: Text("Team")),
+                ),
                 Expanded(
                   child: CustomPaint(
                     painter: BoxPlotLabelPainter(
@@ -147,9 +152,15 @@ class _BoxPlotAnalysisState extends State<BoxPlotAnalysis> {
                     Row(
                       children: [
                         SizedBox(
-                          width: 100,
+                          width: teamColumnWidth,
                           child: TextButton(
-                            child: Text(entry.key.toString()),
+                            child: Row(
+                              children: [
+                                FRCTeamAvatar(teamNumber: entry.key),
+                                const SizedBox(width: 4),
+                                Text(entry.key.toString()),
+                              ],
+                            ),
                             onPressed: () {
                               //Open this teams scouting page
                               Navigator.push(

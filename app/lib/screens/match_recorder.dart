@@ -9,6 +9,7 @@ import 'package:app/providers/data_provider.dart';
 import 'package:app/widgets/fieldwidget.dart';
 import 'package:app/style.dart';
 import 'package:app/widgets/dynamic_property_editor.dart';
+import 'package:app/widgets/team_avatar.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -164,7 +165,13 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
       return ConfirmExitDialog(
         child: Scaffold(
           appBar: AppBar(
-            title: Text("${widget.team}"),
+            title: Row(
+              children: [
+                FRCTeamAvatar(teamNumber: widget.team),
+                const SizedBox(width: 8),
+                Text("${widget.team}"),
+              ],
+            ),
             actions: [
               if (_mode != MatchMode.finished)
                 FilledButton.tonal(
@@ -222,7 +229,13 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
       return ConfirmExitDialog(
         child: Scaffold(
           appBar: AppBar(
-            title: Text("${widget.team}"),
+            title: Row(
+              children: [
+                FRCTeamAvatar(teamNumber: widget.team),
+                const SizedBox(width: 8),
+                Text("${widget.team}"),
+              ],
+            ),
             actions: [
               FilledButton.tonal(
                 onPressed: () => setState(() {

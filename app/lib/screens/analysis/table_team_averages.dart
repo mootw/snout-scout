@@ -25,21 +25,11 @@ class TableTeamAveragesPage extends StatelessWidget {
         rows: [
           for (final team in data.event.teams)
             [
-              DataTableItem(
-                displayValue: TextButton(
-                  child: Text(team.toString()),
-                  onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => TeamViewPage(teamNumber: team),
-                    ),
-                  ),
-                ),
-                exportValue: team.toString(),
-                sortingValue: team,
-              ),
+              DataTableItem.fromTeam(context: context, team: team),
               for (final item in data.event.config.matchscouting.processes)
-                DataTableItem.fromNumber(data.event.teamAverageProcess(team, item)),
+                DataTableItem.fromNumber(
+                  data.event.teamAverageProcess(team, item),
+                ),
               for (final item in data.event.config.matchscouting.survey)
                 teamPostGameSurveyTableDisplay(data.event, team, item),
             ],

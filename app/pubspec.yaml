@@ -77,6 +77,9 @@ dependencies:
   cbor: ^6.3.7
   model_viewer_plus: ^1.10.0
   animated_text_kit2: ^0.0.4
+  flutter_cache_manager: ^3.4.1
+  cached_network_image: ^3.4.1
+  web: ^1.1.1
 
 dev_dependencies:
   flutter_test:
