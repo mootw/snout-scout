@@ -1,7 +1,6 @@
 import 'package:app/data_submit_login.dart';
 import 'package:app/screens/edit_data_items.dart';
 import 'package:app/widgets/datasheet.dart';
-import 'package:app/edit_lock.dart';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/widgets/edit_audit.dart';
 import 'package:app/widgets/fieldwidget.dart';
@@ -203,7 +202,7 @@ class _MatchPageState extends State<MatchPage> {
                         .matchResults['/match/${widget.matchid}/result']!
                         .$2,
                   )
-                : null, 
+                : null,
           ),
           const SizedBox(height: 8),
           DataSheet(
@@ -389,23 +388,19 @@ class _MatchPageState extends State<MatchPage> {
     MatchData? match,
     DataProvider snoutData,
   ) async {
-    final result = await navigateWithEditLock<MatchResultValues>(
+    final result = await Navigator.push(
       context,
-      "match:${matchSchedule?.label}:results",
-      (context) => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => EditMatchResults(
-            results:
-                snoutData.event.getMatchResults(widget.matchid) ??
-                MatchResultValues(
-                  time: DateTime.now(),
-                  redScore: 0,
-                  blueScore: 0,
-                ),
-            config: snoutData.event.config,
-            matchID: widget.matchid,
-          ),
+      MaterialPageRoute(
+        builder: (context) => EditMatchResults(
+          results:
+              snoutData.event.getMatchResults(widget.matchid) ??
+              MatchResultValues(
+                time: DateTime.now(),
+                redScore: 0,
+                blueScore: 0,
+              ),
+          config: snoutData.event.config,
+          matchID: widget.matchid,
         ),
       ),
     );

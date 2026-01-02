@@ -11,7 +11,6 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:server/socket_messages.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:snout_db/action.dart';
 import 'package:snout_db/event/frcevent.dart';
 import 'package:snout_db/message.dart';
 import 'package:snout_db/snout_chain.dart';
@@ -114,6 +113,7 @@ Future writeLocalDiskDatabase(SnoutDBFile db, Uri path) async {
   }
   await file.writeAsBytes(Uint8List.fromList(cbor.encode(db.toCbor())));
 }
+
 
 /// To be used within the context of a single data source
 class DataProvider extends ChangeNotifier {

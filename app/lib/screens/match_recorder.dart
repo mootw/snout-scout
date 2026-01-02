@@ -408,7 +408,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
         .event
         .pitscouting[widget.team.toString()]?[robotPictureReserved];
     if (pictureData != null) {
-      robotPicture = Image(image: snoutImageCache.getCached(pictureData));
+      robotPicture = Image(image: memoryImageProvider(pictureData));
     }
 
     return Padding(

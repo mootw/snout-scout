@@ -164,7 +164,7 @@ Stream<SearchResult> _search(FRCEvent event, String query) async* {
         robotPicture = AspectRatio(
           aspectRatio: 1,
           child: Image(
-            image: snoutImageCache.getCached(pictureData),
+            image: memoryImageProvider(pictureData),
             fit: BoxFit.cover,
           ),
         );
@@ -251,7 +251,7 @@ Stream<SearchResult> _search(FRCEvent event, String query) async* {
           robotPicture = AspectRatio(
             aspectRatio: 1,
             child: Image(
-              image: snoutImageCache.getCached(pictureData),
+              image: memoryImageProvider(pictureData),
               fit: BoxFit.cover,
             ),
           );

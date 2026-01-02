@@ -168,7 +168,7 @@ class TeamListTile extends StatelessWidget {
     if (data != null) {
       image = AspectRatio(
         aspectRatio: 1,
-        child: Image(image: snoutImageCache.getCached(data), fit: BoxFit.cover),
+        child: Image(image: memoryImageProvider(data), fit: BoxFit.cover),
       );
     }
 

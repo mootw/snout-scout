@@ -1,5 +1,4 @@
 import 'package:app/data_submit_login.dart';
-import 'package:app/edit_lock.dart';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/widgets/confirm_exit_dialog.dart';
 import 'package:app/widgets/dynamic_property_editor.dart';
@@ -15,17 +14,13 @@ import 'package:snout_db/event/dynamic_property.dart';
 Future editTeamDataPage(BuildContext context, int team) async {
   final data = context.read<DataProvider>();
 
-  final List<MapEntry>? result = await navigateWithEditLock(
+  final List<MapEntry>? result = await Navigator.push(
     context,
-    "scoutteam:$team",
-    (context) => Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => EditDataItemsPage(
-          title: Text("Scouting $team"),
-          config: data.event.config.pitscouting,
-          initialData: data.event.pitscouting[team.toString()],
-        ),
+    MaterialPageRoute(
+      builder: (context) => EditDataItemsPage(
+        title: Text("Scouting $team"),
+        config: data.event.config.pitscouting,
+        initialData: data.event.pitscouting[team.toString()],
       ),
     ),
   );
@@ -43,17 +38,13 @@ Future editTeamDataPage(BuildContext context, int team) async {
 Future editMatchDataPage(BuildContext context, String matchID) async {
   final snoutData = context.read<DataProvider>();
 
-  final List<MapEntry>? result = await navigateWithEditLock(
+  final List<MapEntry>? result = await Navigator.push(
     context,
-    "matchdata:$matchID",
-    (context) => Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => EditDataItemsPage(
-          title: Text('Match $matchID'),
-          config: snoutData.event.config.matchscouting.properties,
-          initialData: snoutData.event.matchProperties(matchID),
-        ),
+    MaterialPageRoute(
+      builder: (context) => EditDataItemsPage(
+        title: Text('Match $matchID'),
+        config: snoutData.event.config.matchscouting.properties,
+        initialData: snoutData.event.matchProperties(matchID),
       ),
     ),
   );
@@ -73,24 +64,20 @@ Future editMatchDataPage(BuildContext context, String matchID) async {
 Future editPitData(BuildContext context) async {
   final snoutData = context.read<DataProvider>();
 
-  final List<MapEntry>? result = await navigateWithEditLock(
+  final List<MapEntry>? result = await Navigator.push(
     context,
-    "pitdata",
-    (context) => Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => EditDataItemsPage(
-          title: const Text('Pit Data'),
-          config: snoutData.event.config.pit,
-          initialData: DynamicProperties.fromEntries(
-            snoutData.event.dataItems.entries
-                .where(
-                  // TODO use a more robust way to identify the values for this robots survey using a proper index based on the config
-                  (e) => e.key.startsWith('/pit/'),
-                )
-                .map((e) => MapEntry(e.value.$1.key, e.value.$1.value))
-                .toList(),
-          ),
+    MaterialPageRoute(
+      builder: (context) => EditDataItemsPage(
+        title: const Text('Pit Data'),
+        config: snoutData.event.config.pit,
+        initialData: DynamicProperties.fromEntries(
+          snoutData.event.dataItems.entries
+              .where(
+                // TODO use a more robust way to identify the values for this robots survey using a proper index based on the config
+                (e) => e.key.startsWith('/pit/'),
+              )
+              .map((e) => MapEntry(e.value.$1.key, e.value.$1.value))
+              .toList(),
         ),
       ),
     ),

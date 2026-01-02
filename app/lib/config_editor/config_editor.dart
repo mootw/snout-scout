@@ -332,7 +332,7 @@ class _ConfigEditorPageState extends State<ConfigEditorPage> {
             ListTile(title: Text('fieldImage')),
             ImageViewer(
               child: Image(
-                image: snoutImageCache.getCached(base64Decode(fieldImage)),
+                image: memoryImageProvider(base64Decode(fieldImage)),
                 fit: BoxFit.cover,
               ),
             ),

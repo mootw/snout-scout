@@ -81,7 +81,7 @@ class _TeamViewPageState extends State<TeamViewPage> {
                     aspectRatio: 1,
                     child: ImageViewer(
                       child: Image(
-                        image: snoutImageCache.getCached(robotPicture),
+                        image: memoryImageProvider(robotPicture),
                         fit: BoxFit.cover,
                       ),
                     ),
@@ -459,7 +459,7 @@ class DynamicValueViewer extends StatelessWidget {
         title: Text(itemType.label),
         subtitle: ImageViewer(
           child: Image(
-            image: snoutImageCache.getCached(value),
+            image: memoryImageProvider(value),
             height: 500,
             fit: BoxFit.contain,
           ),

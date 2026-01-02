@@ -210,7 +210,7 @@ class _DynamicPropertyEditorWidgetState
               subtitle: _value == null
                   ? const Text("No Image")
                   : Image(
-                      image: snoutImageCache.getCached(_value),
+                      image: memoryImageProvider(_value),
                       fit: BoxFit.contain,
                     ),
             ),

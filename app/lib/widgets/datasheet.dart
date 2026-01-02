@@ -62,7 +62,7 @@ class DataTableItem {
               ? const SizedBox()
               : ImageViewer(
                   child: Image(
-                    image: snoutImageCache.getCached(value),
+                    image: memoryImageProvider(value),
                     fit: BoxFit.cover,
                   ),
                 ),

@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:cbor/cbor.dart';
-import 'package:collection/collection.dart';
 import 'package:dotenv/dotenv.dart';
 import 'package:logging/logging.dart';
 import 'package:server/socket_messages.dart';
@@ -18,14 +17,9 @@ import 'package:snout_db/snout_chain.dart';
 import 'package:synchronized/synchronized.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
-import 'edit_lock.dart';
-
 final env = DotEnv(includePlatformEnvironment: true);
 int serverPort = 6749;
 Map<String, EventData> loadedEvents = {};
-
-//To keep things simple we will just have 1 edit lock for all loaded events.
-EditLock editLock = EditLock();
 
 // used to prevent the server from writing the database multiple times at once
 final Lock dbWriteLock = Lock();
@@ -125,33 +119,6 @@ void main(List<String> args) async {
     }, pingInterval: const Duration(hours: 8));
 
     return handler(request);
-  });
-
-  app.get("/edit_lock", (Request request) {
-    final key = request.headers["key"];
-    if (key == null) {
-      return Response.badRequest(body: "invalid or missing key");
-    }
-    final lock = editLock.get(key);
-    return Response.ok(lock.toString());
-  });
-
-  app.post("/edit_lock", (Request request) {
-    final key = request.headers["key"];
-    if (key == null) {
-      return Response.badRequest(body: "invalid or missing key");
-    }
-    editLock.set(key);
-    return Response.ok("");
-  });
-
-  app.delete("/edit_lock", (Request request) {
-    final key = request.headers["key"];
-    if (key == null) {
-      return Response.badRequest(body: "invalid or missing key");
-    }
-    editLock.clear(key);
-    return Response.ok("");
   });
 
   app.put("/upload_events", (Request request) {

@@ -204,7 +204,7 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                                     aspectRatio: 1,
                                     child: ImageViewer(
                                       child: Image(
-                                        image: snoutImageCache.getCached(
+                                        image: memoryImageProvider(
                                           context
                                               .read<DataProvider>()
                                               .event
