@@ -7,11 +7,12 @@ environment:
 
 
 dependencies:
+  cbor: ^6.3.7
+  collection: ^1.19.1
   dotenv: ^4.2.0
   eval_ex: ^1.1.8
   http: ^1.1.2
   logging: ^1.2.0
-  rfc_6901: ^0.2.0
 
   shelf: ^1.4.2
   shelf_gzip: ^4.1.0

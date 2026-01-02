@@ -207,7 +207,7 @@ class PurpleVibesBanner extends NameBannerUnlock {
             gradient: LinearGradient(
               colors: [
                 Colors.purple.withOpacity(0.3),
-                Colors.pink.withOpacity(0.3),
+                Colors.yellow.withOpacity(0.3),
               ],
             ),
           ),

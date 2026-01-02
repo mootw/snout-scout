@@ -120,13 +120,13 @@ class _DashboardPageState extends State<DashboardPage> {
                 MaterialPageRoute(builder: (context) => const BattlePassPage()),
               ),
             ),
-            IconButton(
-              icon: Icon(Icons.trending_up),
-              onPressed: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const BattlePassPage()),
-              ),
-            ),
+            // IconButton(
+            //   icon: Icon(Icons.trending_up),
+            //   onPressed: () => Navigator.push(
+            //     context,
+            //     MaterialPageRoute(builder: (context) => const BattlePassPage()),
+            //   ),
+            // ),
           ],
         ),
 

@@ -832,14 +832,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.2.3"
-  rfc_6901:
-    dependency: transitive
-    description:
-      name: rfc_6901
-      sha256: "6a43b1858dca2febaf93e15639aa6b0c49ccdfd7647775f15a499f872b018154"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.2.1"
   rxdart:
     dependency: transitive
     description:
