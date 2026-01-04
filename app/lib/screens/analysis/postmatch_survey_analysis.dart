@@ -17,6 +17,7 @@ class AnalysisPostMatchSurvey extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text("Post-Match Survey Analysis")),
       body: ListView(
+        primary: true,
         children: [
           Wrap(
             spacing: 42,

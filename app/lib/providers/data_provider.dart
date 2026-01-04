@@ -89,8 +89,6 @@ class PatchOutbox {
           await prefs.setStringList(outboxKey, outbox);
           outboxCache = List.of(outbox);
           notifyListeners();
-
-          // TODO commit remaining patches if there are more left
         } else {
           throw Exception(
             'Failed to upload patch ${res.statusCode} ${res.body}',
@@ -113,7 +111,6 @@ Future writeLocalDiskDatabase(SnoutDBFile db, Uri path) async {
   }
   await file.writeAsBytes(Uint8List.fromList(cbor.encode(db.toCbor())));
 }
-
 
 /// To be used within the context of a single data source
 class DataProvider extends ChangeNotifier {
@@ -278,9 +275,9 @@ class DataProvider extends ChangeNotifier {
         // new database! do an initial full sync, this is one network request
         // This is problematic if a device has a poor connection
 
-        final data = await apiClient
-            .get(Uri.parse(Uri.decodeFull(source.toString())))
-            .timeout(Duration(seconds: 10));
+        final data = await apiClient.get(
+          Uri.parse(Uri.decodeFull(source.toString())),
+        );
 
         final remoteDb = SnoutChain.fromFile(
           SnoutDBFile.fromCbor(cbor.decode(data.bodyBytes) as CborMap),
@@ -307,11 +304,13 @@ class DataProvider extends ChangeNotifier {
         return;
       }
 
+      print(StackTrace.current);
+
       // Get index from origin
       // Index is in the form of a json list of message hashes encoded in url safe base64
       final indexResult = await apiClient
           .get(Uri.parse('${Uri.decodeFull(source.toString())}/index'))
-          .timeout(Duration(seconds: 10));
+          .timeout(Duration(seconds: 20));
 
       clientDb.messageHashes = (json.decode(indexResult.body) as List)
           .map<List<int>>((e) => base64Url.decode(e as String))
@@ -322,7 +321,6 @@ class DataProvider extends ChangeNotifier {
         storageKey,
         Uint8List.fromList(cbor.encode(clientDb.toCbor())),
       );
-      notifyListeners();
 
       // Find missing messages
       final missingMessageHashes = clientDb.messageHashes
@@ -446,7 +444,7 @@ class DataProvider extends ChangeNotifier {
 
         _channel?.sink.close();
         //Re-attempt a connection after some time
-        Timer(const Duration(seconds: 3), () {
+        Timer(const Duration(seconds: 17), () {
           if (connected == false) {
             _initializeLiveServerPatches();
           }

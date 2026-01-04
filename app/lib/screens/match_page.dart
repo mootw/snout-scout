@@ -111,6 +111,7 @@ class _MatchPageState extends State<MatchPage> {
       ),
       body: ListView(
         cacheExtent: 5000,
+        primary: true,
         children: [
           Row(
             children: [

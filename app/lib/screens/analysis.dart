@@ -24,20 +24,9 @@ class AnalysisPage extends StatefulWidget {
 class _AnalysisPageState extends State<AnalysisPage> {
   @override
   Widget build(BuildContext context) {
-    final tbaKey = context.watch<DataProvider>().event.config.tbaEventId;
-
     return ListView(
+      primary: true,
       children: [
-        if (tbaKey != null)
-          Align(
-            alignment: Alignment.topLeft,
-            child: FilledButton.tonal(
-              onPressed: () => launchUrlString(
-                "https://www.thebluealliance.com/event/$tbaKey#rankings",
-              ),
-              child: const Text("TBA Rankings"),
-            ),
-          ),
         ListTile(
           title: const Text("Search Raw Data"),
           leading: const Icon(Icons.search),

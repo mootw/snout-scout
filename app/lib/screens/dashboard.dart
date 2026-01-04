@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:snout_db/data_item.dart';
 import 'package:snout_db/event/match_schedule_item.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -47,6 +48,7 @@ class _DashboardPageState extends State<DashboardPage> {
   @override
   Widget build(BuildContext context) {
     final snoutData = context.watch<DataProvider>();
+    final tbaKey = snoutData.event.config.tbaEventId;
 
     Duration? scheduleDelay = snoutData.event.scheduleDelay;
 
@@ -109,10 +111,19 @@ class _DashboardPageState extends State<DashboardPage> {
 
     return ListView(
       cacheExtent: 5000,
-      padding: EdgeInsets.only(left: 12),
       children: [
         Wrap(
           children: [
+            if (tbaKey != null)
+              Align(
+                alignment: Alignment.topLeft,
+                child: FilledButton.tonal(
+                  onPressed: () => launchUrlString(
+                    "https://www.thebluealliance.com/event/$tbaKey#rankings",
+                  ),
+                  child: const Text("TBA Rankings"),
+                ),
+              ),
             IconButton(
               icon: Image.asset('battle_pass.png', width: 24, height: 24),
               onPressed: () => Navigator.push(

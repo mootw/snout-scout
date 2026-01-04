@@ -12,6 +12,7 @@ class AnalysisEventsHeatmap extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text("Events Heatmap Analysis")),
       body: ListView(
+        primary: true,
         children: [
           Center(
             child: Text(

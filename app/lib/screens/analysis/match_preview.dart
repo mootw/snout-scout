@@ -81,6 +81,7 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
         ],
       ),
       body: ListView(
+        primary: true,
         cacheExtent: 5000,
         children: [
           if (widget.plan != null) widget.plan!,

@@ -146,6 +146,7 @@ class _BoxPlotAnalysisState extends State<BoxPlotAnalysis> {
             ),
           Expanded(
             child: ListView(
+              primary: true,
               children: [
                 if (valuesSorted != null)
                   for (final entry in valuesSorted.entries)

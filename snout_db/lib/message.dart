@@ -11,7 +11,7 @@ import 'package:snout_db/pubkey.dart';
 /// re-encoding is not guaranteed to be byte-identical!!
 class SignedChainMessage {
   static final ed25519 = cryptography.Ed25519();
-  static Future<List<int>> _ph(List<int> input) async {
+  static Future<List<int>> _prehash(List<int> input) async {
     return (await const DartSha512().hash(input)).bytes;
   }
 
@@ -29,17 +29,24 @@ class SignedChainMessage {
   SignedChainMessage(this.author, this.payloadBytes, this.signature)
     : payload = ChainActionData.fromCbor(cbor.decode(payloadBytes) as CborMap);
 
-  SignedChainMessage.fromChainActionData(this.author, this.payload, this.signature)
-    : payloadBytes = cbor.encode(payload.toCbor());
+  SignedChainMessage.fromChainActionData(
+    this.author,
+    this.payload,
+    this.signature,
+  ) : payloadBytes = cbor.encode(payload.toCbor());
 
-  /// sha512(author || content || signature)
+  /// Hash of this message sha256(author || content || signature)
   Future<List<int>> get hash async {
-    return await _ph([...author.bytes, ...payloadBytes, ...signature]);
+    return (await cryptography.Sha256().hash([
+      ...author.bytes,
+      ...payloadBytes,
+      ...signature,
+    ])).bytes;
   }
 
   /// Verifies that the Message is signed by the claiming author
   Future<bool> verify() async {
-    final digest = await _ph([...author.bytes, ...payloadBytes]);
+    final digest = await _prehash([...author.bytes, ...payloadBytes]);
     return await ed25519.verify(
       digest,
       signature: cryptography.Signature(
@@ -58,7 +65,7 @@ class SignedChainMessage {
   ) async {
     final kp = await ed25519.newKeyPairFromSeed(seedKey);
     final author = (await kp.extractPublicKey()).bytes;
-    final digest = await _ph([...author, ...payload]);
+    final digest = await _prehash([...author, ...payload]);
     final wand = await ed25519.newSignatureWandFromKeyPair(kp);
     final sig = await wand.sign(digest);
 

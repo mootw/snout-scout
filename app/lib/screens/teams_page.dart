@@ -26,6 +26,7 @@ class _TeamGridListState extends State<TeamGridList> {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
+      primary: true,
       scrollDirection: Axis.vertical,
       child: Center(
         child: Wrap(

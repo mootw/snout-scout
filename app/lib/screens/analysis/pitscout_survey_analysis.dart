@@ -17,6 +17,7 @@ class AnalysisPitScouting extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text("Scouting Survey Analysis")),
       body: ListView(
+        primary: true,
         children: [
           Wrap(
             spacing: 42,

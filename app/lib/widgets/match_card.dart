@@ -44,112 +44,117 @@ class MatchCard extends StatelessWidget {
             snoutData.event.scheduleDelay ?? Duration.zero,
           );
 
-    return SizedBox(
-      height: matchCardHeight,
-      child: InkWell(
-        onTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => MatchPage(matchid: matchSchedule.id),
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        border: Border.all(color: Theme.of(context).hintColor),
+      ),
+      child: SizedBox(
+        height: matchCardHeight,
+        child: InkWell(
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => MatchPage(matchid: matchSchedule.id),
+            ),
           ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SizedBox(
-              width: 65,
-              child: Column(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(
+                width: 65,
+                child: Column(
+                  children: [
+                    TimeDuration(time: matchTime),
+                    Text(DateFormat.E().format(matchTime.toLocal())),
+                  ],
+                ),
+              ),
+              matchSchedule.isScheduledToHaveTeam(focusTeam ?? 0)
+                  ? SizedBox(
+                      width: 19,
+                      child: Icon(
+                        Icons.star,
+                        color: getAllianceUIColor(
+                          matchSchedule.getAllianceOf(focusTeam ?? 0),
+                        ),
+                      ),
+                    )
+                  : const SizedBox(width: 19),
+              SizedBox(
+                width: 80,
+                child: Text(matchSchedule.label, textAlign: TextAlign.center),
+              ),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  TimeDuration(time: matchTime),
-                  Text(DateFormat.E().format(matchTime.toLocal())),
+                  Container(
+                    height: 20,
+                    width: 200,
+                    color: Colors.red.withAlpha(128),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        for (final team in matchSchedule.red)
+                          Row(
+                            children: [
+                              FRCTeamAvatar(teamNumber: team),
+                              const SizedBox(width: 2),
+                              Text("$team", style: whiteText),
+                            ],
+                          ),
+                        SizedBox(
+                          width: 25,
+                          child: Text(
+                            results?.redScore != null
+                                ? results!.redScore.toString()
+                                : "-",
+                            style:
+                                results?.winner == Alliance.red ||
+                                    results?.winner == Alliance.tie
+                                ? whiteTextBold
+                                : whiteText,
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    height: 20,
+                    width: 200,
+                    color: Colors.blueAccent.withAlpha(128),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        for (final team in matchSchedule.blue)
+                          Row(
+                            children: [
+                              FRCTeamAvatar(teamNumber: team),
+                              const SizedBox(width: 2),
+                              Text("$team", style: whiteText),
+                            ],
+                          ),
+                        SizedBox(
+                          width: 25,
+                          child: Text(
+                            results?.blueScore != null
+                                ? results!.blueScore.toString()
+                                : "-",
+                            style:
+                                results?.winner == Alliance.blue ||
+                                    results?.winner == Alliance.tie
+                                ? whiteTextBold
+                                : whiteText,
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
-            ),
-            matchSchedule.isScheduledToHaveTeam(focusTeam ?? 0)
-                ? SizedBox(
-                    width: 19,
-                    child: Icon(
-                      Icons.star,
-                      color: getAllianceUIColor(
-                        matchSchedule.getAllianceOf(focusTeam ?? 0),
-                      ),
-                    ),
-                  )
-                : const SizedBox(width: 19),
-            SizedBox(
-              width: 80,
-              child: Text(matchSchedule.label, textAlign: TextAlign.center),
-            ),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  height: 20,
-                  width: 200,
-                  color: Colors.red.withAlpha(128),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      for (final team in matchSchedule.red)
-                        Row(
-                          children: [
-                            FRCTeamAvatar(teamNumber: team),
-                            const SizedBox(width: 2),
-                            Text("$team", style: whiteText),
-                          ],
-                        ),
-                      SizedBox(
-                        width: 25,
-                        child: Text(
-                          results?.redScore != null
-                              ? results!.redScore.toString()
-                              : "-",
-                          style:
-                              results?.winner == Alliance.red ||
-                                  results?.winner == Alliance.tie
-                              ? whiteTextBold
-                              : whiteText,
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Container(
-                  height: 20,
-                  width: 200,
-                  color: Colors.blueAccent.withAlpha(128),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      for (final team in matchSchedule.blue)
-                        Row(
-                          children: [
-                            FRCTeamAvatar(teamNumber: team),
-                            const SizedBox(width: 2),
-                            Text("$team", style: whiteText),
-                          ],
-                        ),
-                      SizedBox(
-                        width: 25,
-                        child: Text(
-                          results?.blueScore != null
-                              ? results!.blueScore.toString()
-                              : "-",
-                          style:
-                              results?.winner == Alliance.blue ||
-                                  results?.winner == Alliance.tie
-                              ? whiteTextBold
-                              : whiteText,
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
