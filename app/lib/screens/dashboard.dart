@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:app/battle_pass/battle_pass.dart';
 import 'package:app/durationformat.dart';
 import 'package:app/providers/data_provider.dart';
+import 'package:app/screens/documentation_page.dart';
 import 'package:app/screens/edit_data_items.dart';
 import 'package:app/screens/scout_leaderboard.dart';
 import 'package:app/screens/teams_page.dart';
@@ -115,21 +116,27 @@ class _DashboardPageState extends State<DashboardPage> {
         Wrap(
           children: [
             if (tbaKey != null)
-              Align(
-                alignment: Alignment.topLeft,
-                child: FilledButton.tonal(
-                  onPressed: () => launchUrlString(
-                    "https://www.thebluealliance.com/event/$tbaKey#rankings",
-                  ),
-                  child: const Text("TBA Rankings"),
+              TextButton(
+                onPressed: () => launchUrlString(
+                  "https://www.thebluealliance.com/event/$tbaKey#rankings",
                 ),
+                child: const Text("TBA"),
               ),
             IconButton(
-              icon: Image.asset('battle_pass.png', width: 24, height: 24),
+              icon: Image.asset('assets/battle_pass.png', width: 24, height: 24),
               onPressed: () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const BattlePassPage()),
               ),
+            ),
+            IconButton(
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const DocumentationScreen(),
+                ),
+              ),
+              icon: Icon(Icons.book),
             ),
             // IconButton(
             //   icon: Icon(Icons.trending_up),

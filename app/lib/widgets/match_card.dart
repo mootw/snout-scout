@@ -77,13 +77,20 @@ class MatchCard extends StatelessWidget {
                   child: Column(
                     children: [
                       TimeDuration(time: matchTime),
-                      Text(DateFormat.E().format(matchTime.toLocal())),
+                      Text(
+                        DateFormat.E().format(matchTime.toLocal()),
+                        style: whiteText,
+                      ),
                     ],
                   ),
                 ),
                 SizedBox(
-                  width: 80,
-                  child: Text(matchSchedule.label, textAlign: TextAlign.center),
+                  width: 75,
+                  child: Text(
+                    matchSchedule.label,
+                    textAlign: TextAlign.center,
+                    style: whiteText,
+                  ),
                 ),
                 Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -100,23 +107,26 @@ class MatchCard extends StatelessWidget {
                             color: Colors.red.withAlpha(128),
                           ),
                           height: 20,
-                          width: 180,
+                          width: 170,
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
                               for (final team in matchSchedule.red)
-                                Row(
-                                  children: [
-                                    FRCTeamAvatar(teamNumber: team),
-                                    const SizedBox(width: 2),
-                                    Text(team.toString(), style: whiteText),
-                                  ],
+                                Flexible(
+                                  child: Row(
+                                    children: [
+                                      const SizedBox(width: 3),
+                                      FRCTeamAvatar(teamNumber: team, size: 15),
+                                      const SizedBox(width: 2),
+                                      Text(team.toString(), style: whiteText),
+                                    ],
+                                  ),
                                 ),
                             ],
                           ),
                         ),
                         SizedBox(
-                          width: 28,
+                          width: 30,
                           child: Text(
                             results?.redScore != null
                                 ? results!.redScore.toString()
@@ -131,7 +141,7 @@ class MatchCard extends StatelessWidget {
                       children: [
                         Container(
                           height: 20,
-                          width: 180,
+                          width: 170,
                           decoration: BoxDecoration(
                             border:
                                 results?.winner == Alliance.blue ||
@@ -144,18 +154,21 @@ class MatchCard extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
                               for (final team in matchSchedule.blue)
-                                Row(
-                                  children: [
-                                    FRCTeamAvatar(teamNumber: team),
-                                    const SizedBox(width: 2),
-                                    Text(team.toString(), style: whiteText),
-                                  ],
+                                Flexible(
+                                  child: Row(
+                                    children: [
+                                      const SizedBox(width: 3),
+                                      FRCTeamAvatar(teamNumber: team, size: 15),
+                                      const SizedBox(width: 2),
+                                      Text(team.toString(), style: whiteText),
+                                    ],
+                                  ),
                                 ),
                             ],
                           ),
                         ),
                         SizedBox(
-                          width: 28,
+                          width: 30,
                           child: Text(
                             results?.blueScore != null
                                 ? results!.blueScore.toString()

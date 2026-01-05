@@ -292,7 +292,6 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
               ),
               const TeamGridList(showEditButton: true),
               const AnalysisPage(),
-              const DocumentationScreen(),
             ][_currentPageIndex],
           ),
         ],
@@ -397,7 +396,7 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
               },
             ),
             ListTile(
-              title: const Text("Enable Kiosk"),
+              title: const Text("Kiosk Mode"),
               subtitle: const Text("Restarts App. Requires password to exit."),
               trailing: const Icon(Icons.screen_share_outlined),
               onTap: () async {
@@ -489,10 +488,5 @@ const navigationDestinations = [
     selectedIcon: Icon(Icons.analytics),
     icon: Icon(Icons.analytics_outlined),
     label: 'Analysis',
-  ),
-  NavigationDestination(
-    selectedIcon: Icon(Icons.book),
-    icon: Icon(Icons.book_outlined),
-    label: 'Docs',
   ),
 ];

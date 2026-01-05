@@ -24,13 +24,14 @@ class _DocumentationScreenState extends State<DocumentationScreen> {
     );
 
     return Scaffold(
+      appBar: AppBar(title: const Text("Documentation")),
       body: ListView(
         //helps keep the scrollbar consistent at the cost of performance
         cacheExtent: 5000,
         children: [
           ListTile(
             title: const Text("Snout Scout docs"),
-            leading: const Icon(Icons.menu_book),
+            leading: const Icon(Icons.book),
             onTap: () => launchUrlString(
               "https://github.com/mootw/snout-scout/blob/main/readme.md",
             ),

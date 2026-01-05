@@ -74,7 +74,7 @@ class _BattlePassPageState extends State<BattlePassPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Image.asset('battle_pass.png', width: 140, height: 140),
+                    Image.asset('assets/battle_pass.png', width: 140, height: 140),
                     SizedBox(width: 32),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,

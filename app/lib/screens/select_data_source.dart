@@ -102,7 +102,7 @@ class _SelectDataSourceScreenState extends State<SelectDataSourceScreen> {
             title: const Text("New Database"),
             onTap: () async {
               final evergreenField = await rootBundle.load(
-                'evergreen_field.avif',
+                'assets/evergreen_field.avif',
               );
               if (context.mounted) {
                 final EventConfig? value = await Navigator.of(context).push(
@@ -124,8 +124,8 @@ class _SelectDataSourceScreenState extends State<SelectDataSourceScreen> {
                 }
 
                 // Login
-                final RegistrationResult? login =
-                    await Navigator.of(context).push(
+                final RegistrationResult? login = await Navigator.of(context)
+                    .push(
                       MaterialPageRoute(
                         builder: (context) => ScoutRegistrationScreen(),
                       ),
@@ -188,8 +188,8 @@ class _SelectDataSourceScreenState extends State<SelectDataSourceScreen> {
                 }
 
                 // Login
-                final RegistrationResult? login =
-                    await Navigator.of(context).push(
+                final RegistrationResult? login = await Navigator.of(context)
+                    .push(
                       MaterialPageRoute(
                         builder: (context) => ScoutRegistrationScreen(),
                       ),

@@ -7,7 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:snout_db/event/frcevent.dart';
 import 'package:snout_db/event/match_schedule_item.dart';
 
-const double runSpacing = 4;
+const double runSpacing = 6;
 
 class AllMatchesPage extends StatefulWidget {
   final MatchScheduleItem? scrollPosition;

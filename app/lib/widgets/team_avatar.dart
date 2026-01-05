@@ -14,7 +14,7 @@ class FRCTeamAvatar extends StatelessWidget {
 
   final double? size;
 
-  const FRCTeamAvatar({super.key, required this.teamNumber, this.size = 14});
+  const FRCTeamAvatar({super.key, required this.teamNumber, this.size = 15});
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +27,7 @@ class FRCTeamAvatar extends StatelessWidget {
         height: size,
         child: Image(
           errorBuilder: (context, error, stackTrace) =>
-              Image.asset('default_team_avatar.png'),
+              Image.asset('assets/default_team_avatar.png'),
           image: TBAAvatarImageProvider(
             teamNumber,
             year,
@@ -55,7 +55,7 @@ class FRCTeamAvatar extends StatelessWidget {
     } else {
       return CachedNetworkImage(
         errorWidget: (context, url, error) =>
-            Image.asset('default_team_avatar.png'),
+            Image.asset('assets/default_team_avatar.png'),
         imageUrl:
             'https://www.thebluealliance.com/avatar/$year/frc$teamNumber.png',
         width: size,
