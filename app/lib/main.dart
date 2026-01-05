@@ -446,7 +446,7 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
             ),
             ListTile(
               title: const Text('Hire Me'),
-              subtitle: const Text('portfolio.xqkz.net'),
+              subtitle: const Text('https://portfolio.xqkz.net'),
               leading: const Icon(Icons.work),
               onTap: () => launchUrlString('https://portfolio.xqkz.net/'),
             ),

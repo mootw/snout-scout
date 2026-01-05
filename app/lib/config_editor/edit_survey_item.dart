@@ -37,7 +37,6 @@ final specialValues = [
   robotPictureReserved,
   teamNameReserved,
   teamNotesReserved,
-  'needs_help',
 ];
 
 final invalidIdValues = RegExp(r'[^A-Za-z0-9_]');

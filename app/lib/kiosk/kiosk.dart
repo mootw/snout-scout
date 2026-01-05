@@ -152,8 +152,17 @@ class KioskBanner extends StatelessWidget {
         ),
         Row(
           children: [
+            Expanded(
+              child: Container(
+                color: Colors.green[900],
+                child: InkWell(
+                  child: Center(child: Text('Reset Kiosk')),
+                  onTap: () => onReset(),
+                ),
+              ),
+            ),
             Container(
-              width: 50,
+              width: 40,
               color: Colors.brown,
               child: InkWell(
                 child: Center(child: Text('Exit')),
@@ -169,15 +178,6 @@ class KioskBanner extends StatelessWidget {
                     main();
                   }
                 },
-              ),
-            ),
-            Expanded(
-              child: Container(
-                color: Colors.green[900],
-                child: InkWell(
-                  child: Center(child: Text('Reset Kiosk')),
-                  onTap: () => onReset(),
-                ),
               ),
             ),
           ],

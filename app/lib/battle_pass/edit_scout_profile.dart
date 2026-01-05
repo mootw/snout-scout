@@ -22,7 +22,6 @@ RegExp emojiMatch = RegExp(
   unicode: true,
 );
 
-
 class EditScoutProfile extends StatefulWidget {
   const EditScoutProfile({super.key, required this.scoutPubkey});
 
@@ -97,7 +96,7 @@ class _EditScoutProfileState extends State<EditScoutProfile> {
               ),
             ),
             SizedBox(height: 16),
-            
+
             Text('Unlocked Items:'),
             Wrap(
               spacing: 8,
@@ -119,56 +118,62 @@ class _EditScoutProfileState extends State<EditScoutProfile> {
                   ),
               ],
             ),
-              
+
+            SizedBox(height: 8),
             if (_selectedUnlocks.any((e) => e is EmojiPrefixUnlock)) ...[
               SizedBox(
                 width: 150,
                 child: TextFormField(
                   controller: _prefixEmojiController,
                   maxLength: maxPrefixLength,
-                  onChanged: (_) => setState(() {}),
                   validator: (value) {
                     if (value != null) {
                       final matches = emojiMatch.allMatches(value);
                       if (value.replaceAll(emojiMatch, '').isNotEmpty) {
                         return 'Only emojis allowed';
                       }
-              
+
                       if (matches.length > maxPrefixLength) {
                         return '$maxPrefixLength emoji allowed';
                       }
                     }
                     return null;
                   },
-                  decoration: InputDecoration(labelText: 'Prefix Emoji'),
+                  decoration: InputDecoration(
+                    label: Text('Prefix Emoji'),
+                    border: const OutlineInputBorder(),
+                  ),
                 ),
               ),
             ],
+            SizedBox(height: 8),
             if (_selectedUnlocks.any((e) => e is EmojiSuffixUnlock)) ...[
               SizedBox(
                 width: 150,
                 child: TextFormField(
                   controller: _suffixEmojiController,
                   maxLength: maxSuffixLength,
-                  onChanged: (_) => setState(() {}),
                   validator: (value) {
                     if (value != null) {
                       final matches = emojiMatch.allMatches(value);
                       if (value.replaceAll(emojiMatch, '').isNotEmpty) {
                         return 'Only emojis allowed';
                       }
-              
+
                       if (matches.length > maxSuffixLength) {
                         return '$maxSuffixLength emoji allowed';
                       }
                     }
                     return null;
                   },
-                  decoration: InputDecoration(labelText: 'Suffix Emoji'),
+                  decoration: InputDecoration(
+                    label: Text('Suffix Emoji'),
+                    border: const OutlineInputBorder(),
+                  ),
                 ),
               ),
             ],
-              
+
             SizedBox(height: 16),
             FilledButton(
               onPressed: () async {
@@ -181,7 +186,7 @@ class _EditScoutProfileState extends State<EditScoutProfile> {
                   prefixEmoji: _prefixEmojiController.text,
                   suffixEmoji: _suffixEmojiController.text,
                 );
-              
+
                 final AuthorizedScoutData? auth = await showDialog(
                   context: context,
                   builder: (context) => ScoutAuthorizationDialog(
@@ -189,23 +194,23 @@ class _EditScoutProfileState extends State<EditScoutProfile> {
                     scoutToAuthorize: widget.scoutPubkey,
                   ),
                 );
-              
+
                 if (auth == null) {
                   return;
                 }
-              
+
                 List<int> lastHash = await db.actions.last.hash;
-              
+
                 SignedChainMessage signed = await ChainActionData(
                   time: DateTime.now(),
                   previousHash: lastHash,
                   action: ActionWriteScoutProfile(newProfile),
                 ).encodeAndSign(auth.secretKey);
-              
+
                 if (!context.mounted) {
                   return;
                 }
-              
+
                 await context.read<DataProvider>().newTransaction(signed);
                 if (context.mounted) {
                   Navigator.of(context).pop();

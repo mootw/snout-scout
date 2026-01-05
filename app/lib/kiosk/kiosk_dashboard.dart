@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:model_viewer_plus/model_viewer_plus.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class KioskDashboard extends StatefulWidget {
   const KioskDashboard({super.key});
@@ -103,7 +104,7 @@ class KioskHome extends StatelessWidget {
     );
 
     // TODO generate this once rather than on each build since it is a static value.
-    final glbString = robotGlb == null
+    final glbDataString = robotGlb == null
         ? null
         : 'data:model/gltf-binary;base64,${base64Encode(robotGlb.content)}';
 
@@ -118,13 +119,18 @@ class KioskHome extends StatelessWidget {
                   children: [
                     Text(
                       'Our Robot',
-                      style: Theme.of(context).textTheme.headlineMedium,
+                      style: Theme.of(context).textTheme.displaySmall,
                     ),
                     Expanded(
-                      child: glbString == null
+                      child: glbDataString == null
                           ? Text('/robot.glb')
                           : ModelViewer(
-                              src: glbString,
+                              debugLogging: false,
+                              // For some reason it is way too bright by default. Guessing underlying config is weird
+                              exposure: 0.7,
+                              src: glbDataString,
+                              // Plays the first animation found in the model automatically
+                              autoPlay: true,
                               //src: 'https://modelviewer.dev/shared-assets/models/Astronaut.glb',
                               autoRotate: true,
                             ),
@@ -133,38 +139,57 @@ class KioskHome extends StatelessWidget {
                 ),
               ),
               Expanded(
-                child: Container(
-                  color: Colors.black,
-                  alignment: Alignment.center,
-                  child: Text('TODO SLIDESHOW'),
+                child: Column(
+                  children: [
+                    Text(
+                      'Our Team',
+                      style: Theme.of(context).textTheme.displaySmall,
+                    ),
+                    Expanded(
+                      child: Container(
+                        color: Colors.black,
+                        alignment: Alignment.center,
+                        child: Text('TODO SLIDESHOW'),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
         ),
 
+        const Divider(height: 0),
+
         Expanded(
           flex: 5,
-          child: Column(
+          child: Row(
             children: [
-              Text(
-                'Want to learn more about another robot?',
-                style: Theme.of(context).textTheme.displaySmall,
-              ),
-              Text(
-                'Here are some cool stats we have collected. To see more, check out the navigation on the left',
-              ),
-              const Divider(height: 0),
-              Expanded(
-                child: Row(
+              SizedBox(
+                width: 350,
+                child: Column(
                   children: [
-                    SizedBox(
-                      width: 380,
+                    Expanded(
                       child: AllMatchesPage(
                         key: Key(nextMatch?.id ?? 'no_match'),
                         scrollPosition: nextMatch,
                       ),
                     ),
+                    Divider(height: 0),
+                    ListTile(
+                      title: const Text('Hire Me'),
+                      subtitle: const Text('https://portfolio.xqkz.net'),
+                      leading: const Icon(Icons.work),
+                      onTap: () =>
+                          launchUrlString('https://portfolio.xqkz.net/'),
+                    ),
+                  ],
+                ),
+              ),
+              VerticalDivider(width: 0),
+              Expanded(
+                child: Row(
+                  children: [
                     SizedBox(
                       width: 250,
                       child: AutoScroller(child: const AnalysisPage()),
@@ -174,18 +199,19 @@ class KioskHome extends StatelessWidget {
                         child: const TeamGridList(showEditButton: false),
                       ),
                     ),
-                    // Expanded(
-                    //   child: Container(
-                    //     clipBehavior: Clip.hardEdge,
-                    //     decoration: BoxDecoration(
-                    //       border: Border.all(color: Colors.white),
-                    //     ),
-                    //     child: KioskInfoCycle(),
-                    //   ),
-                    // ),
                   ],
                 ),
               ),
+
+              // Expanded(
+              //   child: Container(
+              //     clipBehavior: Clip.hardEdge,
+              //     decoration: BoxDecoration(
+              //       border: Border.all(color: Colors.white),
+              //     ),
+              //     child: KioskInfoCycle(),
+              //   ),
+              // ),
             ],
           ),
         ),

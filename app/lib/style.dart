@@ -9,7 +9,6 @@ import 'dart:math';
 // DESIGN GUIDELINES MIN SCREEN WIDTH = 355
 // this means that the unfolded z fold could overflow slightly...
 // but the intention is to accomodate larger screens sooo
-const double minimumWidth = 355;
 
 // https://m3.material.io/foundations/layout/applying-layout/medium
 bool isLargeDevice(BuildContext context) =>

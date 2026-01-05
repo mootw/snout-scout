@@ -73,10 +73,11 @@ class MatchCard extends StatelessWidget {
                           )
                         : null,
                   ),
-                  width: 67,
+                  width: 60,
                   child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      TimeDuration(time: matchTime),
+                      TimeDuration(time: matchTime, style: whiteText),
                       Text(
                         DateFormat.E().format(matchTime.toLocal()),
                         style: whiteText,

@@ -216,7 +216,7 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                             ),
                             child: Row(
                               children: [
-                                FRCTeamAvatar(teamNumber: team),
+                                FRCTeamAvatar(teamNumber: team, size: 20),
                                 const SizedBox(width: 4),
                                 Text(
                                   team.toString(),

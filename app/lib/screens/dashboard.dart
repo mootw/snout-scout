@@ -59,15 +59,6 @@ class _DashboardPageState extends State<DashboardPage> {
 
     final nextMatch = snoutData.event.nextMatch;
 
-    final teamsInUpcomingMatches = snoutData.event
-        .matcheScheduledWithTeam(snoutData.event.config.team)
-        .reversed
-        .where((match) => match.isComplete(snoutData.event) == false)
-        .fold(<int>[], (last, next) => [...last, ...next.blue, ...next.red])
-        // Do not include our team
-        .where((team) => team != snoutData.event.config.team)
-        .toSet();
-
     final numberOfRecordedMatchesByTeam = snoutData.event.teams
         .map(
           (team) =>
@@ -101,15 +92,6 @@ class _DashboardPageState extends State<DashboardPage> {
       (entry) => entry.value < snoutData.event.config.pitscouting.length * 0.5,
     );
 
-    final teamsNeedingHelp = snoutData.event.teams
-        .map(
-          (team) => MapEntry(
-            team,
-            snoutData.event.pitscouting[team.toString()]?['needs_help'],
-          ),
-        )
-        .where((scouting) => scouting.value == true);
-
     return ListView(
       cacheExtent: 5000,
       children: [
@@ -123,7 +105,11 @@ class _DashboardPageState extends State<DashboardPage> {
                 child: const Text("TBA"),
               ),
             IconButton(
-              icon: Image.asset('assets/battle_pass.png', width: 24, height: 24),
+              icon: Image.asset(
+                'assets/battle_pass.png',
+                width: 24,
+                height: 24,
+              ),
               onPressed: () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const BattlePassPage()),
@@ -155,20 +141,7 @@ class _DashboardPageState extends State<DashboardPage> {
           "Schedule ${scheduleDelay == null ? "unknown" : offsetDurationInMins(scheduleDelay)}",
           style: Theme.of(context).textTheme.titleLarge,
         ),
-        if (teamNextMatch != null && scheduleDelay != null)
-          Row(
-            children: [
-              Text("Our next match "),
-              TimeDuration(
-                time: teamNextMatch.scheduledTime.add(scheduleDelay),
-                displayDurationDefault: true,
-              ),
-            ],
-          ),
 
-        const SizedBox(height: 16),
-
-        Text("Next Match", style: Theme.of(context).textTheme.titleLarge),
         if (nextMatch != null)
           MatchCard(
             match: nextMatch.getData(snoutData.event),
@@ -180,6 +153,16 @@ class _DashboardPageState extends State<DashboardPage> {
         const SizedBox(height: 16),
 
         Text("Our Next Match", style: Theme.of(context).textTheme.titleLarge),
+        if (teamNextMatch != null && scheduleDelay != null)
+          Row(
+            children: [
+              Text("Our next match "),
+              TimeDuration(
+                time: teamNextMatch.scheduledTime.add(scheduleDelay),
+                displayDurationDefault: true,
+              ),
+            ],
+          ),
         if (teamNextMatch != null)
           MatchCard(
             match: teamNextMatch.getData(snoutData.event),
@@ -190,36 +173,10 @@ class _DashboardPageState extends State<DashboardPage> {
 
         const SizedBox(height: 16),
 
-        Text(
-          "Teams marked as needs_help",
-          style: Theme.of(context).textTheme.titleLarge,
-        ),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            spacing: 8,
-            children: [
-              for (final team in teamsNeedingHelp)
-                TeamListTile(
-                  teamNumber: team.key,
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            TeamViewPage(teamNumber: team.key),
-                      ),
-                    );
-                  },
-                ),
-            ],
-          ),
-        ),
-
         Divider(),
 
         Text(
-          "Teams with insufficient pit scouting information (${teamsWithInsufficientPitData.length}/${snoutData.event.teams.length})",
+          "Teams with sufficient pit scouting information (${snoutData.event.teams.length - teamsWithInsufficientPitData.length}/${snoutData.event.teams.length})",
           style: Theme.of(context).textTheme.titleLarge,
         ),
         if (teamsWithInsufficientPitData.isEmpty)
@@ -249,7 +206,7 @@ class _DashboardPageState extends State<DashboardPage> {
         const SizedBox(height: 16),
 
         Text(
-          "Teams with insufficient match recordings (${teamsWithInsufficientMatchRecordings.length}/${snoutData.event.teams.length})",
+          "Teams with sufficient match recordings (${snoutData.event.teams.length - teamsWithInsufficientMatchRecordings.length}/${snoutData.event.teams.length})",
           style: Theme.of(context).textTheme.titleLarge,
         ),
         if (teamsWithInsufficientMatchRecordings.isEmpty)
@@ -278,33 +235,6 @@ class _DashboardPageState extends State<DashboardPage> {
 
         Divider(),
 
-        Text(
-          "Teams in our upcoming matches",
-          style: Theme.of(context).textTheme.titleLarge,
-        ),
-        if (teamsInUpcomingMatches.isEmpty) Text("No teams"),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            spacing: 8,
-            children: [
-              for (final team in teamsInUpcomingMatches)
-                TeamListTile(
-                  teamNumber: team,
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => TeamViewPage(teamNumber: team),
-                      ),
-                    );
-                  },
-                ),
-            ],
-          ),
-        ),
-
-        Divider(),
         Center(
           child: FilledButton(
             onPressed: () async {
