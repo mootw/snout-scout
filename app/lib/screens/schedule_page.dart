@@ -7,6 +7,8 @@ import 'package:provider/provider.dart';
 import 'package:snout_db/event/frcevent.dart';
 import 'package:snout_db/event/match_schedule_item.dart';
 
+const double runSpacing = 4;
+
 class AllMatchesPage extends StatefulWidget {
   final MatchScheduleItem? scrollPosition;
 
@@ -28,7 +30,7 @@ class _AllMatchesPageState extends State<AllMatchesPage> {
           : (context.read<DataProvider>().event.scheduleSorted.indexOf(
                       widget.scrollPosition!,
                     ) *
-                    matchCardHeight) -
+                    (matchCardHeight + runSpacing)) -
                 (matchCardHeight * 2),
     );
   }
@@ -53,19 +55,21 @@ class _AllMatchesPageState extends State<AllMatchesPage> {
                 '${formatDurationLength(matchSchedule.scheduledTime.difference(snoutData.event.scheduleSorted[idx - 1].scheduledTime))} break',
               ),
             ),
-          Container(
-            color: matchSchedule == snoutData.event.nextMatch
-                ? Theme.of(context).colorScheme.onPrimary
-                : null,
+          Align(
+            alignment: Alignment.center,
             child: MatchCard(
               match: matchSchedule.getData(snoutData.event),
               results: snoutData.event.getMatchResults(matchSchedule.id),
               matchSchedule: matchSchedule,
               focusTeam: snoutData.event.config.team,
+              color: matchSchedule == snoutData.event.nextMatch
+                  ? Theme.of(context).colorScheme.onPrimary
+                  : null,
             ),
           ),
+          SizedBox(height: runSpacing),
         ],
-    
+
         Padding(
           padding: const EdgeInsets.all(16),
           child: Center(
@@ -74,9 +78,8 @@ class _AllMatchesPageState extends State<AllMatchesPage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => EditSchedulePage(
-                      matches: snoutData.event.schedule,
-                    ),
+                    builder: (context) =>
+                        EditSchedulePage(matches: snoutData.event.schedule),
                   ),
                 );
               },

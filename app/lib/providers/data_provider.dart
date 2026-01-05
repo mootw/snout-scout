@@ -7,10 +7,12 @@ import 'package:app/providers/client_snout_db.dart';
 import 'package:app/providers/loading_status_service.dart';
 import 'package:app/services/data_service.dart';
 import 'package:cbor/cbor.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:server/socket_messages.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:snout_db/actions/write_config.dart';
 import 'package:snout_db/event/frcevent.dart';
 import 'package:snout_db/message.dart';
 import 'package:snout_db/snout_chain.dart';
@@ -115,7 +117,7 @@ Future writeLocalDiskDatabase(SnoutDBFile db, Uri path) async {
 /// To be used within the context of a single data source
 class DataProvider extends ChangeNotifier {
   final Uri dataSourceUri;
-  final List<String>? safeIds;
+  final bool kioskMode;
 
   final _loadingLock = Lock();
 
@@ -137,43 +139,49 @@ class DataProvider extends ChangeNotifier {
 
   void _sanitize() {
     // This is expensive and slow (because it's hacky) so only run it in kiosk mode.
-    if (safeIds != null) {
-      // TODO reimplement sanitize feature
-      // Remove pitscouting data
-      // database.event.pitscouting.forEach(
-      //   (team, value) =>
-      //       value.removeWhere((key, value) => safeIds!.contains(key) == false),
-      // );
-      // database.event.config.pitscouting.removeWhere(
-      //   (e) => safeIds!.contains(e.id) == false,
-      // );
+    if (kioskMode) {
+      // Since the kiosk mode overwrites the database, we must  grab the config from the actions list manually
+      final configAction = database.actions.lastWhereOrNull(
+        (e) => e.payload.action is ActionWriteConfig,
+      );
+      final config =
+          (configAction?.payload.action as ActionWriteConfig?)?.config;
 
-      // // Remove match scouting survey data
-      // database.event.matches.forEach(
-      //   (matchKey, match) => match.robot.forEach(
-      //     (teamKey, robotData) => robotData.survey.removeWhere(
-      //       (key, value) => safeIds!.contains(key) == false,
-      //     ),
-      //   ),
-      // );
-      // database.event.config.matchscouting.survey.removeWhere(
-      //   (item) => safeIds!.contains(item.id) == false,
-      // );
+      final List<String>? safeIds = config == null
+          ? []
+          : [
+              ...config.pitscouting
+                  .where((e) => e.isSensitiveField == false)
+                  .map((e) => e.id),
+              ...config.matchscouting.properties
+                  .where((e) => e.isSensitiveField == false)
+                  .map((e) => e.id),
+              ...config.matchscouting.survey
+                  .where((e) => e.isSensitiveField == false)
+                  .map((e) => e.id),
+              ...config.matchscouting.processes
+                  .where((e) => e.isSensitiveField == false)
+                  .map((e) => e.id),
+            ];
 
-      // // Remove match properties data
-      // database.event.matches.forEach(
-      //   (matchKey, match) => match.properties?.removeWhere(
-      //     (key, value) => safeIds!.contains(key) == false,
-      //   ),
-      // );
-      // database.event.config.matchscouting.properties.removeWhere(
-      //   (e) => safeIds!.contains(e.id) == false,
-      // );
+      // Remove data items by key ids
+      database.event.dataItems.removeWhere(
+        (e, s) => safeIds!.contains(s.$1.key) == false,
+      );
 
-      // // Remove match process data
-      // database.event.config.matchscouting.processes.removeWhere(
-      //   (e) => safeIds!.contains(e.id) == false,
-      // );
+      database.event.config.pitscouting.removeWhere(
+        (e) => safeIds!.contains(e.id) == false,
+      );
+      database.event.config.matchscouting.survey.removeWhere(
+        (item) => safeIds!.contains(item.id) == false,
+      );
+      database.event.config.matchscouting.properties.removeWhere(
+        (e) => safeIds!.contains(e.id) == false,
+      );
+      // Remove match process data
+      database.event.config.matchscouting.processes.removeWhere(
+        (e) => safeIds!.contains(e.id) == false,
+      );
     }
   }
 
@@ -185,7 +193,7 @@ class DataProvider extends ChangeNotifier {
 
   FRCEvent get event => database.event;
 
-  DataProvider(this.dataSourceUri, [this.safeIds]) {
+  DataProvider(this.dataSourceUri, [this.kioskMode = false]) {
     () async {
       remoteOutbox = PatchOutbox(dataSourceUri, () => notifyListeners());
       await remoteOutbox.init();

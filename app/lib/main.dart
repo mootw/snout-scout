@@ -3,11 +3,12 @@ import 'dart:convert';
 
 import 'package:app/config_editor/config_editor.dart';
 import 'package:app/data_submit_login.dart';
-import 'package:app/kiosk/kiosk_configure.dart';
+import 'package:app/kiosk/kiosk.dart';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/providers/local_config_provider.dart';
 import 'package:app/screens/dashboard.dart';
 import 'package:app/screens/scout_authenticator_dialog.dart';
+import 'package:app/services/data_service.dart';
 import 'package:app/style.dart';
 import 'package:app/providers/identity_provider.dart';
 import 'package:app/screens/analysis.dart';
@@ -21,6 +22,7 @@ import 'package:app/search.dart';
 import 'package:app/widgets/load_status_or_error_bar.dart';
 import 'package:cbor/cbor.dart';
 import 'package:download/download.dart';
+import 'package:file_selector/file_selector.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
@@ -30,9 +32,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:snout_db/actions/write_config.dart';
 import 'package:snout_db/snout_chain.dart';
 import 'package:url_launcher/url_launcher_string.dart';
+import 'package:archive/archive.dart';
 
 /// Only update this value when there is a VALID data source loaded,
 const String defaultSourceKey = 'default_source_uri';
+
+const String kioskModeKey = 'kiosk_mode';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -60,6 +65,22 @@ void main() async {
   final defaultDataSource = prefs.getString(defaultSourceKey);
   final ds = defaultDataSource == null ? null : Uri.parse(defaultDataSource);
 
+  final kioskMode = prefs.getBool(kioskModeKey) ?? false;
+
+  if (ds != null && kioskMode) {
+    try {
+      print('Running in kiosk mode with data source $ds');
+      final file = fs.file('${fs.directory('/kiosk').path}/kiosk.zip');
+
+      final bytes = await file.readAsBytes();
+      final archive = ZipDecoder().decodeBytes(bytes);
+
+      runApp(Kiosk(dataSource: ds, kioskData: archive));
+      return;
+    } catch (e, s) {
+      print('$e, $s');
+    }
+  }
   runApp(SnoutScoutApp(defaultSourceKey: ds));
 }
 
@@ -376,17 +397,38 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
               },
             ),
             ListTile(
-              title: const Text("Kiosk"),
+              title: const Text("Enable Kiosk"),
+              subtitle: const Text("Restarts App. Requires password to exit."),
               trailing: const Icon(Icons.screen_share_outlined),
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => KioskConfigurationScreen(
-                    dataSource: data.dataSourceUri,
-                    baseConfig: data.event.config,
-                  ),
-                ),
-              ),
+              onTap: () async {
+                const XTypeGroup typeGroup = XTypeGroup(
+                  label: 'kiosk package',
+                  extensions: <String>['zip'],
+                  uniformTypeIdentifiers: <String>['kiosk.zip'],
+                );
+
+                final XFile? pickedFile = await openFile(
+                  acceptedTypeGroups: <XTypeGroup>[typeGroup],
+                );
+
+                if (pickedFile != null) {
+                  final fileBytes = await pickedFile.readAsBytes();
+                  // Ensure that the archive is decodable
+                  final archive = ZipDecoder().decodeBytes(fileBytes);
+
+                  final file = fs.file(
+                    '${fs.directory('/kiosk').path}/kiosk.zip',
+                  );
+                  if (await file.exists() == false) {
+                    await file.create(recursive: true);
+                  }
+                  await file.writeAsBytes(fileBytes, flush: true);
+
+                  final prefs = await SharedPreferences.getInstance();
+                  prefs.setBool(kioskModeKey, true);
+                  main();
+                }
+              },
             ),
             ListTile(
               title: const Text("App Version"),

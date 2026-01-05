@@ -26,7 +26,8 @@ class _ActionChainHistoryPageState extends State<ActionChainHistoryPage> {
 
   @override
   Widget build(BuildContext context) {
-    final database = context.watch<DataProvider>().database;
+    final dp = context.watch<DataProvider>();
+    final database = dp.database;
     final actions = database.actions.reversed.toList();
 
     final search = _controller.text;
@@ -57,7 +58,7 @@ class _ActionChainHistoryPageState extends State<ActionChainHistoryPage> {
             //I KNOW THIS IS BAD PRACTICE
             //I ALSO DONT CARE TO FIX IT
           }),
-          decoration: const InputDecoration(hintText: 'Ledger Filter'),
+          decoration: const InputDecoration(hintText: 'Filter'),
         ),
       ),
       body: ListView.builder(
@@ -74,20 +75,24 @@ class _ActionChainHistoryPageState extends State<ActionChainHistoryPage> {
               child: ScoutName(db: database, scoutPubkey: patch.author),
             ),
             trailing: Text(DateFormat.jms().add_yMd().format(chainAction.time)),
-            onTap: () => showDialog(
-              context: context,
-              builder: (_) => AlertDialog(
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text("Close"),
+            onTap: dp.kioskMode == true
+                ? null
+                : () => showDialog(
+                    context: context,
+                    builder: (_) => AlertDialog(
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text("Close"),
+                        ),
+                      ],
+                      content: SingleChildScrollView(
+                        child: SelectableText(
+                          chainAction.action.toCbor().toString(),
+                        ),
+                      ),
+                    ),
                   ),
-                ],
-                content: SingleChildScrollView(
-                  child: SelectableText(chainAction.action.toCbor().toString()),
-                ),
-              ),
-            ),
           );
         },
       ),
