@@ -3,6 +3,7 @@ import 'package:collection/collection.dart';
 import 'package:snout_db/actions/add_keypair.dart';
 import 'package:snout_db/actions/extras/battle_pass_upgrade.dart';
 import 'package:snout_db/actions/extras/write_scout_profile.dart';
+import 'package:snout_db/actions/strategy/write_team_list.dart';
 import 'package:snout_db/actions/write_config.dart';
 import 'package:snout_db/actions/write_dataitem.dart';
 import 'package:snout_db/actions/write_matchresults.dart';
@@ -38,9 +39,19 @@ enum ActionType {
   writeDataItem(ActionWriteDataItem.typeId, ActionWriteDataItem.fromCbor),
   writeRobotTrace(ActionWriteMatchTrace.typeId, ActionWriteMatchTrace.fromCbor),
   writeSchedule(ActionWriteSchedule.typeId, ActionWriteSchedule.fromCbor),
-  writeMatchresult(ActionWriteMatchResults.typeId, ActionWriteMatchResults.fromCbor),
-  writeScoutProfile(ActionWriteScoutProfile.typeId, ActionWriteScoutProfile.fromCbor),
-  levelUpBattlePass(ActionBattlePassLevelUp.typeId, ActionBattlePassLevelUp.fromCbor);
+  writeMatchresult(
+    ActionWriteMatchResults.typeId,
+    ActionWriteMatchResults.fromCbor,
+  ),
+  writeScoutProfile(
+    ActionWriteScoutProfile.typeId,
+    ActionWriteScoutProfile.fromCbor,
+  ),
+  writeTeamList(ActionWriteTeamList.typeId, ActionWriteTeamList.fromCbor),
+  levelUpBattlePass(
+    ActionBattlePassLevelUp.typeId,
+    ActionBattlePassLevelUp.fromCbor,
+  );
 
   final int id;
   final ActionFactory factory;
@@ -48,9 +59,7 @@ enum ActionType {
   const ActionType(this.id, this.factory);
 
   static ActionType? fromId(int id) {
-    final type = ActionType.values.firstWhereOrNull(
-      (t) => t.id == id,
-    );
+    final type = ActionType.values.firstWhereOrNull((t) => t.id == id);
     return type;
   }
 
@@ -79,7 +88,10 @@ class ChainActionData {
   });
 
   Future<SignedChainMessage> encodeAndSign(List<int> seedKey) async {
-    return await SignedChainMessage.createAndSign(cbor.encode(toCbor()), seedKey);
+    return await SignedChainMessage.createAndSign(
+      cbor.encode(toCbor()),
+      seedKey,
+    );
   }
 
   CborMap toCbor() => CborMap({

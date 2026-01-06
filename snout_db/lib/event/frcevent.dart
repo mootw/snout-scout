@@ -13,6 +13,7 @@ import 'package:snout_db/event/matchevent.dart';
 import 'package:snout_db/event/matchresults.dart';
 import 'package:snout_db/event/robot_match_trace.dart';
 import 'package:snout_db/pubkey.dart';
+import 'package:snout_db/strategy/team_list.dart';
 
 part 'frcevent.g.dart';
 
@@ -30,6 +31,9 @@ class FRCEvent {
   @JsonKey(includeToJson: false, includeFromJson: false)
   Map<String, (DataItem item, Pubkey author, DateTime modifiedDate)> dataItems =
       {};
+
+  @JsonKey(includeToJson: false, includeFromJson: false)
+  Map<String, TeamList> teamLists = {};
 
   /// '''Table'''
   @JsonKey(includeToJson: false, includeFromJson: false)

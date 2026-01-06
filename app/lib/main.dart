@@ -8,12 +8,12 @@ import 'package:app/providers/data_provider.dart';
 import 'package:app/providers/local_config_provider.dart';
 import 'package:app/screens/dashboard.dart';
 import 'package:app/screens/scout_authenticator_dialog.dart';
+import 'package:app/screens/teams_lists.dart';
 import 'package:app/services/data_service.dart';
 import 'package:app/style.dart';
 import 'package:app/providers/identity_provider.dart';
 import 'package:app/screens/analysis.dart';
 import 'package:app/screens/select_data_source.dart';
-import 'package:app/screens/documentation_page.dart';
 import 'package:app/screens/edit_json.dart';
 import 'package:app/screens/chain_history.dart';
 import 'package:app/screens/schedule_page.dart';
@@ -25,6 +25,7 @@ import 'package:download/download.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:logging/logging.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
@@ -40,7 +41,8 @@ const String defaultSourceKey = 'default_source_uri';
 const String kioskModeKey = 'kiosk_mode';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
   FlutterError.onError = (details) {
     FlutterError.presentError(details);
@@ -111,6 +113,10 @@ class SnoutScoutAppState extends State<SnoutScoutApp> {
   @override
   void initState() {
     super.initState();
+    // Keep the splash up for 3 extra seconds
+    Future.delayed(
+      Duration(seconds: 3),
+    ).then((onValue) => FlutterNativeSplash.remove());
     _dataSource = widget.defaultSourceKey;
   }
 
@@ -170,6 +176,7 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
   @override
   void initState() {
     super.initState();
+
     WidgetsBinding.instance.addObserver(this);
     Logger.root.onRecord.listen((record) {
       if (record.level >= Level.SEVERE) {
@@ -292,6 +299,7 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
               ),
               const TeamGridList(showEditButton: true),
               const AnalysisPage(),
+              const TeamListsPage(),
             ][_currentPageIndex],
           ),
         ],
@@ -488,5 +496,10 @@ const navigationDestinations = [
     selectedIcon: Icon(Icons.analytics),
     icon: Icon(Icons.analytics_outlined),
     label: 'Analysis',
+  ),
+  NavigationDestination(
+    selectedIcon: Icon(Icons.list),
+    icon: Icon(Icons.list_outlined),
+    label: 'Lists',
   ),
 ];
