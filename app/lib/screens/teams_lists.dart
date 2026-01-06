@@ -249,6 +249,11 @@ class _EditTeamListState extends State<EditTeamList> {
               children: [
                 for (final entry in _list.teams)
                   TeamListTileItem(
+                    onDelete: () {
+                      setState(() {
+                        _list.teams.remove(entry);
+                      });
+                    },
                     key: ValueKey(entry.team),
                     entry: entry,
                     rank: _list.teams.indexOf(entry) + 1,
@@ -335,12 +340,14 @@ class TeamListTileItem extends StatefulWidget {
   final TeamListEntry entry;
   final int rank;
   final ValueChanged<String> onChanged;
+  final VoidCallback onDelete;
 
   const TeamListTileItem({
     super.key,
     required this.entry,
     required this.rank,
     required this.onChanged,
+    required this.onDelete,
   });
 
   @override
@@ -378,6 +385,7 @@ class _TeamListTileItemState extends State<TeamListTileItem> {
         height: 120,
         child: Row(
           children: [
+            IconButton(icon: Icon(Icons.delete), onPressed: widget.onDelete),
             SizedBox(
               width: 40,
               child: Text(
