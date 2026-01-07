@@ -511,14 +511,14 @@ class MatchPreviewAlliancePickerState
                           icon: Icon(Icons.close),
                         ),
                         if (_selectedTeam != null)
-                          FilledButton(
+                          FilledButton.tonal(
                             onPressed: () {
                               setState(() {
                                 _alliances.blue[i] = _selectedTeam!;
                                 _selectedTeam = null;
                               });
                             },
-                            child: Text('SET $_selectedTeam'),
+                            child: Text('Replace $_selectedTeam'),
                           ),
                       ],
                     ),
@@ -528,16 +528,23 @@ class MatchPreviewAlliancePickerState
                 Expanded(
                   child: Column(
                     children: [
-                      Text('Blue'),
                       if (_selectedTeam != null)
                         FilledButton(
+                          style: ButtonStyle(
+                            backgroundColor: WidgetStatePropertyAll(
+                              Colors.blue,
+                            ),
+                          ),
                           onPressed: () {
                             setState(() {
                               _alliances.blue.add(_selectedTeam!);
                               _selectedTeam = null;
                             });
                           },
-                          child: Text('ADD $_selectedTeam'),
+                          child: Text(
+                            'Add Blue\n$_selectedTeam',
+                            textAlign: TextAlign.center,
+                          ),
                         ),
                     ],
                   ),
@@ -560,14 +567,14 @@ class MatchPreviewAlliancePickerState
                           icon: Icon(Icons.close),
                         ),
                         if (_selectedTeam != null)
-                          FilledButton(
+                          FilledButton.tonal(
                             onPressed: () {
                               setState(() {
                                 _alliances.red[i] = _selectedTeam!;
                                 _selectedTeam = null;
                               });
                             },
-                            child: Text('SET $_selectedTeam'),
+                            child: Text('Replace $_selectedTeam'),
                           ),
                       ],
                     ),
@@ -577,16 +584,21 @@ class MatchPreviewAlliancePickerState
                 Expanded(
                   child: Column(
                     children: [
-                      Text('Red'),
                       if (_selectedTeam != null)
                         FilledButton(
+                          style: ButtonStyle(
+                            backgroundColor: WidgetStatePropertyAll(Colors.red),
+                          ),
                           onPressed: () {
                             setState(() {
                               _alliances.red.add(_selectedTeam!);
                               _selectedTeam = null;
                             });
                           },
-                          child: Text('ADD $_selectedTeam'),
+                          child: Text(
+                            'Add Red\n$_selectedTeam',
+                            textAlign: TextAlign.center,
+                          ),
                         ),
                     ],
                   ),
