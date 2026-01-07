@@ -30,7 +30,7 @@ class _ActionChainHistoryPageState extends State<ActionChainHistoryPage> {
     final database = dp.database;
     final actions = database.actions.reversed.toList();
 
-    final search = _controller.text;
+    final search = _controller.text.toLowerCase();
 
     final filteredPatches = actions.where((patch) {
       final chainAction = patch.payload;
@@ -40,10 +40,10 @@ class _ActionChainHistoryPageState extends State<ActionChainHistoryPage> {
         //and im too lazy to create a separate code path
         return true;
       }
-      if (patch.author.toString().contains(search)) {
+      if (patch.author.toString().toLowerCase().contains(search)) {
         return true;
       }
-      if (chainAction.action.toString().contains(search)) {
+      if (chainAction.action.toString().toLowerCase().contains(search)) {
         return true;
       }
 
@@ -68,13 +68,20 @@ class _ActionChainHistoryPageState extends State<ActionChainHistoryPage> {
           final chainAction = patch.payload;
           return ListTile(
             title: Text(
-              '${actions.length - index}: ${chainAction.action.toString()}',
+              '${actions.length - actions.indexOf(patch)}: ${chainAction.action.toString()}',
             ),
-            subtitle: Align(
-              alignment: Alignment.centerLeft,
-              child: ScoutName(db: database, scoutPubkey: patch.author),
+            subtitle: Row(
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                Expanded(
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: ScoutName(db: database, scoutPubkey: patch.author),
+                  ),
+                ),
+                Text(DateFormat.jms().add_yMd().format(chainAction.time)),
+              ],
             ),
-            trailing: Text(DateFormat.jms().add_yMd().format(chainAction.time)),
             onTap: dp.kioskMode == true
                 ? null
                 : () => showDialog(
