@@ -228,7 +228,7 @@ class _EditTeamListState extends State<EditTeamList> {
         body: ListView(
           children: [
             Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(12.0),
               child: TextField(
                 controller: _descriptionController,
                 decoration: const InputDecoration(
@@ -256,7 +256,7 @@ class _EditTeamListState extends State<EditTeamList> {
                     },
                     key: ValueKey(entry.team),
                     entry: entry,
-                    rank: _list.teams.indexOf(entry) + 1,
+                    index: _list.teams.indexOf(entry),
                     onChanged: (val) {
                       setState(() {
                         _list.teams[_list.teams.indexOf(entry)].description =
@@ -338,14 +338,14 @@ class _EditTeamListState extends State<EditTeamList> {
 
 class TeamListTileItem extends StatefulWidget {
   final TeamListEntry entry;
-  final int rank;
+  final int index;
   final ValueChanged<String> onChanged;
   final VoidCallback onDelete;
 
   const TeamListTileItem({
     super.key,
     required this.entry,
-    required this.rank,
+    required this.index,
     required this.onChanged,
     required this.onDelete,
   });
@@ -374,28 +374,36 @@ class _TeamListTileItemState extends State<TeamListTileItem> {
   @override
   Widget build(BuildContext context) {
     final data = context.watch<DataProvider>();
-    return InkWell(
+    return SizedBox(
       key: ValueKey(widget.entry.team),
-      onTap: () => Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => TeamViewPage(teamNumber: widget.entry.team),
-        ),
-      ),
-      child: SizedBox(
-        height: 120,
-        child: Row(
-          children: [
-            IconButton(icon: Icon(Icons.delete), onPressed: widget.onDelete),
-            SizedBox(
-              width: 40,
-              child: Text(
-                '${widget.rank}',
-                style: Theme.of(context).textTheme.titleLarge,
-                textAlign: TextAlign.center,
+      height: 100,
+      child: Row(
+        children: [
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(
+                width: 30,
+                child: Text(
+                  '${widget.index + 1}',
+                  style: Theme.of(context).textTheme.titleLarge,
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              IconButton(icon: Icon(Icons.delete), onPressed: widget.onDelete),
+            ],
+          ),
+
+          InkWell(
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) =>
+                    TeamViewPage(teamNumber: widget.entry.team),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8),
+            child: SizedBox(
+              width: 92,
+              height: 92,
               child: () {
                 final pictureData =
                     data.event.pitscouting[widget.entry.team
@@ -412,30 +420,29 @@ class _TeamListTileItemState extends State<TeamListTileItem> {
                 return const SizedBox();
               }(),
             ),
-            const SizedBox(width: 8),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                FRCTeamAvatar(teamNumber: widget.entry.team, size: 42),
-                Text(widget.entry.team.toString()),
-              ],
+          ),
+          const SizedBox(width: 8),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              FRCTeamAvatar(teamNumber: widget.entry.team, size: 42),
+              Text(widget.entry.team.toString()),
+            ],
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: TextField(
+              controller: _descriptionController,
+              decoration: const InputDecoration(border: OutlineInputBorder()),
+              onChanged: (value) {
+                widget.entry.description = value;
+                widget.onChanged(value);
+              },
             ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: TextField(
-                controller: _descriptionController,
-                maxLines: 3,
-                decoration: const InputDecoration(border: OutlineInputBorder()),
-                onChanged: (value) {
-                  widget.entry.description = value;
-                  widget.onChanged(value);
-                },
-              ),
-            ),
-            // Space for drag handle
-            const SizedBox(width: 48),
-          ],
-        ),
+          ),
+          // Space for drag handle
+          const SizedBox(width: 42),
+        ],
       ),
     );
   }

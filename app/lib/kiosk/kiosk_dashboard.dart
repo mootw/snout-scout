@@ -125,6 +125,8 @@ class KioskHome extends StatelessWidget {
                       child: glbDataString == null
                           ? Text('/robot.glb')
                           : ModelViewer(
+                              // Handles conflicts with the 
+                              backgroundColor: Theme.of(context).canvasColor,
                               debugLogging: false,
                               // For some reason it is way too bright by default. Guessing underlying config is weird
                               exposure: 0.7,
