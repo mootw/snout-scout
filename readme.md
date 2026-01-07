@@ -14,17 +14,17 @@ Snout Scout is designed to make data work for you! Created and maintained by a t
 - make scouting have real time impact for match planning with automated digests.
 - game agnostic; the app is fully configurable using a json file.
 - device agnostic; PWA first with native apps for all platforms via Flutter
-- all data processing is done on client for FULL offline support
+- FULL offline support (devices could hypothetically share data peer to peer)
 - easy export of data into multiple formats like csv and json
-- responsive in low bandwidth scenarios to allow for multiple transport layers to be considered
 - cryptography ensures data integrity
 - Connect to the TBA API to autofill data like event schedules and match results (including support for year specific data mapping).
-- Single compact (mostly) readable data JSON file to allow for durable data. The structure is also fully typed and null safe
-- strong separation between live stats (like ranking position) and facts (like scouting match data)
 - no data loss
     - client saves all data locally until it can sync
-    - database is append only
-- data anywhere. A client device can load and edit scouting data from a peer or local disk.
+    - Append only database with cryptographically signed messages
+- strong separation between live stats (like ranking position/pick lists) and facts (like scouting match data)
+
+- internet connection is assumed at >= 30KB/s (~400ms ping; <10% packet loss); and will provide a good experience
+- use standardized technologies like Cbor for stability and portability. take advantage of novel techniques where value can be added
 
 ## Snout-scout is NOT designed to:
 - track official standings or scores directly (official scores are linked if TBA event key is provided)
@@ -33,37 +33,15 @@ Snout Scout is designed to make data work for you! Created and maintained by a t
 - have **extensive** security controls. a cryptographically authenticated user is assumed to be non-malicious and trusted, there is not validation of timestamps, IDs, or other information sent from clients.
 
 
-# Network/sync methodologies
-## Origin on Internet - Direct
-- All devices have an internet connection to an origin server
-- Devices can sync anywhere
-- Latency is determined by the reliability of internet at competition
-- Devices with no mobile data coverage need to use a hotspot connection or only sync when internet is avaiable (this could be infrequent).
-- NOTE: A hotspot device can be used to proxy the internet connection into a local area network to get results similar to Origin at Event.
-
-## Origin at Event
-- A local area network is set up at compeition and origin server is on that network.
-- This is the most durable network setup but requires devices to tether to the network to update meaning higher latency.
-- Only devices physically located near the origin can update with it.
-
-
 # Data Size Estimate
 Snout Scout stores all data in a single Cbor file. Here is an approximate breakdown of the rough **DISK** size of the a database file including some of the parts. This is an estimate and real world results will vary.
 
-for a 40 team 80 match event:
-- Latest event state: ~10MB (pit scouting with 1 image; 8MB pit scouting data; 2MB match data)
-- Changeset: ~15MB, a patch has minimal overhead but depends on how much data is modified
-- **Disk size: 25MB**; latest state: **10MB**. to get a range of patches varies on the patch data and quantity, is porportional to how up to date the client is
+A typical event with 1 image per team will be about 2-4MB.
 
-- A match recording for 1 team could be as large as 4-8KB (~1KB compressed)
-- Image (As compressed and sized in the app): ~80KB-160KB (small-large)
-
-
-# technical philosophy
-- internet connection is assumed; and at >= 50KB/s and will only get faster in the future
-- use standardized technologies like Cbor for stability and portability. take advantage of novel techniques where value can be added
-- dont complicate the schema by simplifying key names to "save bandwidth", or reduce normalization for a "micro-optimization".
-- data should be easy to work with, import and export
+Message Sizes:
+- Signed messages are typically ~250 bytes (including signature headers)
+- Images are typically 30-50KB
+- Config messages are at lease Image sizeed; as they contain the base64 encoded field image. Frequently modifying the config should be avoided!
 
 
 # how TBA is used
