@@ -1,3 +1,5 @@
+import 'package:meta/meta.dart';
+
 /// Number between -1 and 1 on both axis, 0,0 is the center of the field
 /// Positive X is towards the opposing alliance.
 /// Positive Y is along the alliance wall
@@ -7,12 +9,15 @@
 /// the viewer and the admin. -1, 0 is about where blue 2 drivers station is.
 /// and 1,0 is where red 2 driver station is
 /// the values are rounded to a realistic accuracy
+@immutable
 class FieldPosition {
   final double x;
   final double y;
 
+  const FieldPosition(this.x, this.y);
+
   /// Rounded, yields a resolution of about 8cm
-  FieldPosition(double x, double y)
+  FieldPosition.rounded(double x, double y)
     : x = (x * 200).roundToDouble() / 200,
       y = (y * 100).roundToDouble() / 100;
 

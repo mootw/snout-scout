@@ -10,13 +10,12 @@ import 'package:app/widgets/team_avatar.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:simple_cluster/simple_cluster.dart';
 import 'package:snout_db/event/match_data.dart';
 import 'package:snout_db/event/matchevent.dart';
 import 'package:snout_db/event/robot_match_trace.dart';
 import 'package:snout_db/snout_chain.dart';
 
-const double mapRatio = 0.5;
+const double mapRatio = 0.50;
 const double fieldWidthMeters = 16.48;
 const double robotSizeMeters = 0.8;
 const double robotFieldProportion = robotSizeMeters / fieldWidthMeters;
@@ -55,7 +54,7 @@ class FieldPositionSelector extends StatelessWidget {
           return GestureDetector(
             onTapDown: (details) {
               onTap(
-                FieldPosition(
+                FieldPosition.rounded(
                   (details.localPosition.dx / constraints.maxWidth * 2) - 1,
                   ((1 -
                               details.localPosition.dy /
@@ -71,7 +70,7 @@ class FieldPositionSelector extends StatelessWidget {
                   Align(
                     alignment: Alignment(coverAlignment!, 0),
                     child: Container(
-                      width: constraints.maxWidth / 2,
+                      width: constraints.maxWidth / (1.0 / mapRatio),
                       height: double.infinity,
                       color: Colors.black54,
                     ),
@@ -313,12 +312,11 @@ class FieldHeatMap extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ConstrainedBox(
-      constraints: BoxConstraints.loose(Size(size, size / 2)),
+      constraints: BoxConstraints.loose(Size(size, size / (1.0 / mapRatio))),
       child: FullScreenFieldSelector(
         child: FieldMap(
           //size: size,
           children: [
-            Container(color: Colors.black12),
             CustomPaint(
               size: Size.infinite,
               painter: HeatMap(events: events),
@@ -413,7 +411,7 @@ class _PathsViewerState extends State<PathsViewer> {
         children: [
           ConstrainedBox(
             constraints: BoxConstraints.loose(
-              Size(widget.size, widget.size / 2),
+              Size(widget.size, widget.size / (1.0 / mapRatio)),
             ),
             child: FullScreenFieldSelector(
               showAbove: null,
@@ -535,6 +533,24 @@ class _PathsViewerState extends State<PathsViewer> {
   }
 }
 
+class Tile {
+  int x;
+  int y;
+
+  Tile({required this.x, required this.y});
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Tile &&
+          runtimeType == other.runtimeType &&
+          x == other.x &&
+          y == other.y;
+
+  @override
+  int get hashCode => Object.hash(x, y);
+}
+
 class HeatMap extends CustomPainter {
   List<MatchEvent> events;
 
@@ -542,52 +558,55 @@ class HeatMap extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    DBSCAN dbscan = DBSCAN(
-      epsilon: robotFieldProportion / 5 * size.width,
-      //Allow for clusters of single points
-      minPoints: 1,
+    Map<Tile, int> groups = {};
+
+    final scale = 35;
+
+    for (final event in events) {
+      final tile = Tile(
+        x: (((event.position.x + 1)) * scale).floor(),
+        y: ((1 - (event.position.y + 1) / (1.0 / mapRatio)) * scale).floor(),
+      );
+      groups[tile] = (groups[tile] ?? 0) + 1;
+    }
+
+    final max = math.max(
+      groups.values.fold<int>(
+        0,
+        (previousValue, element) => math.max(previousValue, element),
+      ),
+      // Minimum scale (it takes at least X points to show red-hot)
+      4,
     );
 
-    List<List<double>> ls = List.generate(
-      events.length,
-      (index) => [
-        ((events[index].position.x + 1) / 2) * size.width,
-        (1 - ((events[index].position.y + 1) / 2)) * size.height,
-      ],
+    final tileSize = Offset(
+      size.width / scale.toDouble() * 0.5,
+      size.width / scale.toDouble() * 0.5,
     );
 
-    final result = dbscan.run(ls);
-    //Sort so the smallest render first
-    result.sort((a, b) => a.length - b.length);
-
-    //Max group length with a minimum of 4 (to prevent single elements from being red hot)
-    int maxGroupLength = result.fold(
-      0,
-      (previousValue, element) => math.max(previousValue, element.length),
-    );
-
-    for (final group in result) {
+    for (final entry in groups.entries) {
       //group contains the index of each element in that group
 
       Paint p = Paint();
-      p.maskFilter = MaskFilter.blur(
-        BlurStyle.normal,
-        math.sqrt(group.length * 0.1) + 1,
-      );
-      //Make the intensity of each dot based on the amount of events within its approximate area
 
       p.color = HSVColor.fromAHSV(
-        math.min(1, math.max(((group.length + 1) / maxGroupLength), 0.3)),
-        100,
+        0.5,
+        120 -
+            math.min(
+              120,
+              // log scale gain for lower quantities
+              (math.sqrt(entry.value.toDouble() / max.toDouble()) * 100),
+            ),
         1,
         1,
       ).toColor();
       //Draw more and more green circles with increasing opacity
-      canvas.drawCircle(
-        Offset(ls[group[0]][0], ls[group[0]][1]),
-        4 + math.sqrt(group.length * 0.5),
-        p,
+
+      final tl = Offset(
+        entry.key.x / scale * size.width / (1.0 / mapRatio),
+        entry.key.y / scale * size.height,
       );
+      canvas.drawRect(Rect.fromPoints(tl, tl + tileSize), p);
     }
   }
 
@@ -643,8 +662,8 @@ class MapLine extends CustomPainter {
   // Returns [x, y]
   getFieldPosition(MatchEvent event, Size renderSize) {
     return [
-      ((event.position.x + 1) / 2) * renderSize.width,
-      (1 - ((event.position.y + 1) / 2)) * renderSize.height,
+      ((event.position.x + 1) / (1.0 / mapRatio)) * renderSize.width,
+      (1 - ((event.position.y + 1) / (1.0 / mapRatio))) * renderSize.height,
     ];
   }
 
@@ -664,10 +683,15 @@ class FieldMap extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ConstrainedBox(
-      constraints: BoxConstraints.loose(Size(size, size / 2)),
+      constraints: BoxConstraints.loose(Size(size, size / (1.0 / mapRatio))),
       child: AspectRatio(
         aspectRatio: 1 / mapRatio,
-        child: Stack(children: [const FieldImage(), ...children]),
+        child: Stack(
+          children: [
+            Align(alignment: Alignment.center, child: const FieldImage()),
+            ...children,
+          ],
+        ),
       ),
     );
   }

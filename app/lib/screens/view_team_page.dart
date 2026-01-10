@@ -232,27 +232,7 @@ class _TeamViewPageState extends State<TeamViewPage> {
                     ),
                 ],
               ),
-              Column(
-                children: [
-                  const SizedBox(height: 16),
-                  Text(
-                    "Autos Heatmap",
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  FieldHeatMap(
-                    events: [
-                      for (final match in data.event.teamRecordedMatches(
-                        widget.teamNumber,
-                      ))
-                        ...match.value.robot[widget.teamNumber.toString()]!
-                            .timelineInterpolatedBlueNormalized(
-                              data.event.config.fieldStyle,
-                            )
-                            .where((element) => element.isInAuto),
-                    ],
-                  ),
-                ],
-              ),
+
               const Divider(height: 32),
               DataSheet(
                 shrinkWrap: true,

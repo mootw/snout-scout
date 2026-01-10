@@ -38,6 +38,27 @@ class AnalysisEventsHeatmap extends StatelessWidget {
           const SizedBox(height: 16),
           Center(
             child: Text(
+              "Driving Area",
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+          ),
+          Center(
+            child: FieldHeatMap(
+              size: largeFieldSize,
+              events: [
+                for (final match in data.event.matches.entries)
+                  for (final robot in match.value.robot.entries)
+                    ...match.value.robot[robot.key]!
+                        .timelineInterpolatedBlueNormalized(
+                          data.event.config.fieldStyle,
+                        )
+                        .where((element) => element.isPositionEvent),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          Center(
+            child: Text(
               "Autos Heatmap",
               style: Theme.of(context).textTheme.titleMedium,
             ),
