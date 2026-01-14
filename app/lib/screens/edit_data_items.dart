@@ -44,7 +44,7 @@ Future editMatchDataPage(BuildContext context, String matchID) async {
       builder: (context) => EditDataItemsPage(
         title: Text('Match $matchID'),
         config: snoutData.event.config.matchscouting.properties,
-        initialData: snoutData.event.matchProperties(matchID),
+        initialData: snoutData.event.matchDataItems(matchID),
       ),
     ),
   );

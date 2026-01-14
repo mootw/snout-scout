@@ -14,6 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:snout_db/config/data_item_schema.dart';
+import 'package:snout_db/config/match_period_config.dart';
 import 'package:snout_db/data_item.dart';
 import 'package:snout_db/event/match_schedule_item.dart';
 
@@ -32,6 +33,8 @@ class TeamViewPage extends StatefulWidget {
 }
 
 class _TeamViewPageState extends State<TeamViewPage> {
+  String? _filterPeriod;
+
   @override
   Widget build(BuildContext context) {
     final data = context.watch<DataProvider>();
@@ -58,12 +61,13 @@ class _TeamViewPageState extends State<TeamViewPage> {
     return Scaffold(
       appBar: AppBar(
         actions: [
-          TextButton(
+          FilledButton.tonal(
             onPressed: () async {
               await editTeamDataPage(context, widget.teamNumber);
             },
             child: const Text("Scout"),
           ),
+          const SizedBox(width: 8),
         ],
         title: Row(
           children: [
@@ -187,15 +191,19 @@ class _TeamViewPageState extends State<TeamViewPage> {
                       data.event.runMatchResultsProcess(
                             item,
                             match.$2?.robot[widget.teamNumber.toString()],
-                            data.event.matchSurvey(widget.teamNumber, match.$3),
+                            data.event.matchTeamData(
+                              widget.teamNumber,
+                              match.$3,
+                            ),
                             widget.teamNumber,
+                            match.$3,
                           ) ??
                           (value: null, error: null),
                     ),
                   traceTableItem(data.database, match.$3, widget.teamNumber),
                   for (final survey in data.event.config.matchscouting.survey)
                     DataTableItem.fromSurveyItem(
-                      data.event.matchSurvey(
+                      data.event.matchTeamData(
                         widget.teamNumber,
                         match.$3,
                       )?[survey.id],
@@ -227,7 +235,13 @@ class _TeamViewPageState extends State<TeamViewPage> {
                           .timelineInterpolatedBlueNormalized(
                             data.event.config.fieldStyle,
                           )
-                          .where((element) => element.isInAuto)
+                          .where(
+                            (element) =>
+                                data.event.config
+                                    .getPeriodAtTime(element.timeDuration)
+                                    .id ==
+                                autoPeriodId,
+                          )
                           .toList(),
                     ),
                 ],
@@ -239,10 +253,7 @@ class _TeamViewPageState extends State<TeamViewPage> {
                 title: 'Metrics',
                 showRainbow: false,
                 columns: [
-                  DataItemColumn(
-                    DataTableItem.fromText("Metric"),
-                    width: numericWidth,
-                  ),
+                  DataItemColumn(DataTableItem.fromText("Metric"), width: 120),
                   for (final event in data.event.config.matchscouting.events)
                     DataItemColumn(
                       DataTableItem.fromText(event.label),
@@ -261,33 +272,57 @@ class _TeamViewPageState extends State<TeamViewPage> {
                         ),
                       ),
                   ],
-                  [
-                    DataTableItem.fromText("Auto"),
-                    for (final eventType
-                        in data.event.config.matchscouting.events)
-                      DataTableItem.fromNumber(
-                        data.event.teamAverageMetric(
-                          widget.teamNumber,
-                          eventType.id,
-                          (event) => event.isInAuto,
+                  for (final period in data.event.config.matchperiods) ...[
+                    [
+                      DataTableItem.fromText("${period.label} Total"),
+                      for (final event
+                          in data.event.config.matchscouting.events)
+                        DataTableItem.fromNumber(
+                          data.event.teamAverageMetric(
+                            widget.teamNumber,
+                            event.id,
+                            (event) =>
+                                data.event.config
+                                    .getPeriodAtTime(event.timeDuration)
+                                    .id ==
+                                period.id,
+                          ),
                         ),
-                      ),
-                  ],
-                  [
-                    DataTableItem.fromText("Teleop"),
-                    for (final eventType
-                        in data.event.config.matchscouting.events)
-                      DataTableItem.fromNumber(
-                        data.event.teamAverageMetric(
-                          widget.teamNumber,
-                          eventType.id,
-                          (event) => !event.isInAuto,
-                        ),
-                      ),
+                    ],
                   ],
                 ],
               ),
-              const Divider(),
+              Padding(
+                padding: const EdgeInsets.only(top: 24, bottom: 8),
+                child: Center(
+                  child: Text(
+                    "Event Heatmaps",
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                ),
+              ),
+              Wrap(
+                spacing: 12,
+                children: [
+                  for (final period in data.event.config.matchperiods)
+                    FilterChip(
+                      label: Text(period.label),
+                      selected: _filterPeriod == period.id,
+                      onSelected: (selected) {
+                        setState(() {
+                          if (selected) {
+                            _filterPeriod = period.id;
+                          } else {
+                            _filterPeriod = null;
+                          }
+                        });
+                      },
+                    ),
+                ],
+              ),
+              // TODO jank handling of the mega wrap
+              SizedBox(width: double.infinity),
+
               Column(
                 children: [
                   const SizedBox(height: 16),
@@ -304,7 +339,17 @@ class _TeamViewPageState extends State<TeamViewPage> {
                             .timelineInterpolatedBlueNormalized(
                               data.event.config.fieldStyle,
                             )
-                            .where((element) => element.isPositionEvent)
+                            .where(
+                              (element) =>
+                                  element.isPositionEvent &&
+                                  (_filterPeriod == null ||
+                                      data.event.config
+                                              .getPeriodAtTime(
+                                                element.timeDuration,
+                                              )
+                                              .id ==
+                                          _filterPeriod),
+                            )
                             .firstOrNull,
                     ].nonNulls.toList(),
                   ),
@@ -327,7 +372,17 @@ class _TeamViewPageState extends State<TeamViewPage> {
                               ?.timelineBlueNormalized(
                                 data.event.config.fieldStyle,
                               )
-                              .where((event) => event.id == eventType.id),
+                              .where(
+                                (event) =>
+                                    (_filterPeriod == null ||
+                                        data.event.config
+                                                .getPeriodAtTime(
+                                                  event.timeDuration,
+                                                )
+                                                .id ==
+                                            _filterPeriod) &&
+                                    event.id == eventType.id,
+                              ),
                       ],
                     ),
                   ],
@@ -348,7 +403,17 @@ class _TeamViewPageState extends State<TeamViewPage> {
                             .timelineInterpolatedBlueNormalized(
                               data.event.config.fieldStyle,
                             )
-                            .where((element) => element.isPositionEvent)
+                            .where(
+                              (element) =>
+                                  (_filterPeriod == null ||
+                                      data.event.config
+                                              .getPeriodAtTime(
+                                                element.timeDuration,
+                                              )
+                                              .id ==
+                                          _filterPeriod) &&
+                                  element.isPositionEvent,
+                            )
                             .lastOrNull,
                     ].nonNulls.toList(),
                   ),
@@ -370,7 +435,17 @@ class _TeamViewPageState extends State<TeamViewPage> {
                             ?.timelineInterpolatedBlueNormalized(
                               data.event.config.fieldStyle,
                             )
-                            .where((event) => event.isPositionEvent),
+                            .where(
+                              (event) =>
+                                  (_filterPeriod == null ||
+                                      data.event.config
+                                              .getPeriodAtTime(
+                                                event.timeDuration,
+                                              )
+                                              .id ==
+                                          _filterPeriod) &&
+                                  event.isPositionEvent,
+                            ),
                     ],
                   ),
                 ],
@@ -380,22 +455,22 @@ class _TeamViewPageState extends State<TeamViewPage> {
           const Divider(height: 32),
           Center(
             child: Text(
-              "Scouting",
+              "Data Items",
               style: Theme.of(context).textTheme.titleLarge,
             ),
           ),
-          ScoutingResultsViewer(teamNumber: widget.teamNumber, snoutData: data),
+          DataItemsViewer(teamNumber: widget.teamNumber, snoutData: data),
         ],
       ),
     );
   }
 }
 
-class ScoutingResultsViewer extends StatelessWidget {
+class DataItemsViewer extends StatelessWidget {
   final int teamNumber;
   final DataProvider snoutData;
 
-  const ScoutingResultsViewer({
+  const DataItemsViewer({
     super.key,
     required this.teamNumber,
     required this.snoutData,

@@ -183,8 +183,8 @@ class MintVibesBanner extends NameBannerUnlock {
             borderRadius: BorderRadius.circular(6),
             gradient: LinearGradient(
               colors: [
-                Colors.greenAccent.withOpacity(0.3),
-                Colors.cyanAccent.withOpacity(0.3),
+                Colors.greenAccent.withValues(alpha: 0.3),
+                Colors.cyanAccent.withValues(alpha: 0.3),
               ],
             ),
           ),
@@ -206,8 +206,8 @@ class PurpleVibesBanner extends NameBannerUnlock {
             borderRadius: BorderRadius.circular(6),
             gradient: LinearGradient(
               colors: [
-                Colors.purple.withOpacity(0.3),
-                Colors.yellow.withOpacity(0.3),
+                Colors.purple.withValues(alpha: 0.3),
+                Colors.yellow.withValues(alpha: 0.3),
               ],
             ),
           ),
@@ -229,8 +229,8 @@ class CherryVibesBanner extends NameBannerUnlock {
             borderRadius: BorderRadius.circular(6),
             gradient: LinearGradient(
               colors: [
-                Colors.redAccent.withOpacity(0.3),
-                Colors.pinkAccent.withOpacity(0.3),
+                Colors.redAccent.withValues(alpha: 0.3),
+                Colors.pinkAccent.withValues(alpha: 0.3),
               ],
             ),
           ),

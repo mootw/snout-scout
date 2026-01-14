@@ -1,6 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:meta/meta.dart';
 import 'package:snout_db/config/data_item_schema.dart';
+import 'package:snout_db/config/match_period_config.dart';
 import 'package:snout_db/config/matchscouting.dart';
 
 part 'eventconfig.g.dart';
@@ -40,6 +41,8 @@ class EventConfig {
 
   final MatchScouting matchscouting;
 
+  final List<MatchPeriodConfig> matchperiods;
+
   final String fieldImage;
 
   const EventConfig({
@@ -69,6 +72,10 @@ class EventConfig {
         type: DataItemType.toggle,
       ),
     ],
+    this.matchperiods = const [
+      MatchPeriodConfig(id: 'auto', label: 'Auto', durationSeconds: 17),
+      MatchPeriodConfig(id: 'teleop', label: 'Teleop', durationSeconds: 135),
+    ],
     this.matchscouting = const MatchScouting(),
     // image is put last to make editing via text easier
     required this.fieldImage,
@@ -77,6 +84,24 @@ class EventConfig {
   factory EventConfig.fromJson(Map<String, dynamic> json) =>
       _$EventConfigFromJson(json);
   Map<String, dynamic> toJson() => _$EventConfigToJson(this);
+
+  Duration get matchLength {
+    final totalSeconds = matchperiods
+        .map((e) => e.durationSeconds)
+        .fold<int>(0, (previousValue, element) => previousValue + element);
+    return Duration(seconds: totalSeconds);
+  }
+
+  MatchPeriodConfig getPeriodAtTime(Duration time) {
+    Duration accumulatedTime = Duration.zero;
+    for (final period in matchperiods) {
+      accumulatedTime += Duration(seconds: period.durationSeconds);
+      if (time < accumulatedTime) {
+        return period;
+      }
+    }
+    return matchperiods.last;
+  }
 }
 
 enum FieldStyle { rotated, mirrored }

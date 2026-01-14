@@ -6,7 +6,7 @@ import 'package:app/screens/analysis/boxplot_analysis.dart';
 import 'package:app/screens/analysis/events_heatmaps.dart';
 import 'package:app/screens/analysis/match_preview.dart';
 import 'package:app/screens/analysis/pitscout_survey_analysis.dart';
-import 'package:app/screens/analysis/postmatch_survey_analysis.dart';
+import 'package:app/screens/analysis/analysis_match_robot_dataitem.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -60,7 +60,7 @@ class _KioskInfoCycleState extends State<KioskInfoCycle> {
       AnalysisPitScouting(),
 
       // Match Recording survey analysis (each chart)
-      AnalysisPostMatchSurvey(),
+      AnalysisRobotDataItem(),
 
       // events heatmap analysis (each chart)
       AnalysisEventsHeatmap(),
@@ -75,4 +75,3 @@ class _KioskInfoCycleState extends State<KioskInfoCycle> {
     return AutoScroller(key: ValueKey(_idx), child: options[_idx]);
   }
 }
-

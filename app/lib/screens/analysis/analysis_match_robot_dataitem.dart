@@ -8,14 +8,14 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:snout_db/config/data_item_schema.dart';
 
-class AnalysisPostMatchSurvey extends StatelessWidget {
-  const AnalysisPostMatchSurvey({super.key});
+class AnalysisRobotDataItem extends StatelessWidget {
+  const AnalysisRobotDataItem({super.key});
 
   @override
   Widget build(BuildContext context) {
     final data = context.watch<DataProvider>();
     return Scaffold(
-      appBar: AppBar(title: const Text("Post-Match Survey Analysis")),
+      appBar: AppBar(title: const Text("Match Robot DataItem Analysis")),
       body: ListView(
         primary: true,
         children: [
@@ -59,7 +59,10 @@ class _PostGameRatioChartState extends State<PostGameRatioChart> {
     for (final match in data.event.matches.entries) {
       for (final robot in match.value.robot.entries) {
         final item = data.event
-            .matchSurvey(int.parse(robot.key), match.key)?[widget.surveyItem.id]
+            .matchTeamData(
+              int.parse(robot.key),
+              match.key,
+            )?[widget.surveyItem.id]
             ?.toString();
         if (item == null) {
           //Basically this is just missing data in the chart.

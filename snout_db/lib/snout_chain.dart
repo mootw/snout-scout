@@ -7,7 +7,6 @@ import 'package:snout_db/event/frcevent.dart';
 import 'package:snout_db/message.dart';
 import 'package:snout_db/pubkey.dart';
 import 'package:snout_db/secret_key.dart';
-import 'package:snout_db/strategy/team_list.dart';
 
 export 'package:snout_db/config/eventconfig.dart';
 export 'package:snout_db/fieldposition.dart';

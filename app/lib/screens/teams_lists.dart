@@ -80,6 +80,7 @@ class _TeamListsPageState extends State<TeamListsPage> {
 
     return ListView(
       children: [
+        Text('Examples: needs help/broken/picklists/blacklists'),
         if (_draftLists.isNotEmpty)
           for (final teamList in _draftLists)
             ListTile(

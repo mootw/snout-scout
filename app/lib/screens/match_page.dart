@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:snout_db/actions/write_matchresults.dart';
+import 'package:snout_db/config/match_period_config.dart';
 import 'package:snout_db/data_item.dart';
 import 'package:snout_db/event/match_data.dart';
 import 'package:snout_db/event/match_schedule_item.dart';
@@ -33,6 +34,8 @@ class MatchPage extends StatefulWidget {
 }
 
 class _MatchPageState extends State<MatchPage> {
+  String? _filterPeriod;
+
   @override
   Widget build(BuildContext context) {
     final snoutData = context.watch<DataProvider>();
@@ -72,7 +75,7 @@ class _MatchPageState extends State<MatchPage> {
                               .properties) ...[
                         DynamicValueViewer(
                           itemType: item,
-                          value: snoutData.event.matchProperties(
+                          value: snoutData.event.matchDataItems(
                             widget.matchid,
                           )?[item.id],
                         ),
@@ -113,6 +116,233 @@ class _MatchPageState extends State<MatchPage> {
         cacheExtent: 5000,
         primary: true,
         children: [
+          DataSheet(
+            shrinkWrap: true,
+            title: 'Per Team Performance',
+            //Data is a list of rows and columns
+            columns: [
+              DataItemColumn.teamHeader(),
+              for (final item in snoutData.event.config.matchscouting.processes)
+                DataItemColumn.fromProcess(item),
+              DataItemColumn.text('Scout'),
+              for (final item in snoutData.event.config.matchscouting.survey)
+                DataItemColumn(DataTableItem.fromText(item.label)),
+            ],
+            rows: [
+              for (final team in <int>{
+                ...matchSchedule?.blue ?? [],
+                ...matchSchedule?.red ?? [],
+                //Also include all of the surrogate robots
+                ...match?.robot.keys.map((e) => int.tryParse(e)).nonNulls ?? [],
+              })
+                [
+                  DataTableItem(
+                    displayValue: TextButton(
+                      child: Row(
+                        children: [
+                          FRCTeamAvatar(teamNumber: team),
+                          const SizedBox(width: 4),
+                          Text(
+                            team.toString() +
+                                (matchSchedule?.isScheduledToHaveTeam(team) ==
+                                        false
+                                    ? " [surrogate]"
+                                    : ""),
+                            style: TextStyle(
+                              // Get the alliance color first from the match data, then the schedule
+                              color:
+                                  getAllianceUIColor(
+                                    match?.robot[team.toString()]?.alliance,
+                                  ) ??
+                                  getAllianceUIColor(
+                                    matchSchedule?.getAllianceOf(team),
+                                  ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => TeamViewPage(teamNumber: team),
+                        ),
+                      ),
+                    ),
+                    exportValue: team.toString(),
+                    sortingValue: team,
+                  ),
+                  for (final item
+                      in snoutData.event.config.matchscouting.processes)
+                    DataTableItem.fromErrorNumber(
+                      snoutData.event.runMatchResultsProcess(
+                            item,
+                            match?.robot[team.toString()],
+                            snoutData.event.matchTeamData(team, widget.matchid),
+                            team,
+                            widget.matchid,
+                          ) ??
+                          //Missing results, this is not an error
+                          (value: null, error: null),
+                    ),
+                  traceTableItem(snoutData.database, widget.matchid, team),
+                  for (final item
+                      in snoutData.event.config.matchscouting.survey)
+                    DataTableItem.fromSurveyItem(
+                      snoutData.event.matchTeamData(
+                        team,
+                        widget.matchid,
+                      )?[item.id],
+                      item,
+                    ),
+                ],
+            ],
+          ),
+          const SizedBox(height: 32),
+          if (match != null) FieldTimelineViewer(match: match),
+
+          if (match != null)
+            Column(
+              children: [
+                const SizedBox(height: 16),
+                Text("Autos", style: Theme.of(context).textTheme.titleMedium),
+                PathsViewer(
+                  paths: [
+                    for (final robot in match.robot.entries)
+                      (
+                        label: robot.key,
+                        path: robot.value.timelineInterpolated
+                            .where((element) => snoutData.event.config.getPeriodAtTime(element.timeDuration).id == autoPeriodId)
+                            .toList(),
+                      ),
+                  ],
+                ),
+              ],
+            ),
+
+          //Heatmaps for this specific match
+          Padding(
+            padding: const EdgeInsets.only(top: 24, bottom: 8),
+            child: Center(
+              child: Text(
+                "Event Heatmaps",
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+            ),
+          ),
+          Center(
+            child: Wrap(
+              spacing: 12,
+              children: [
+                for (final period in snoutData.event.config.matchperiods)
+                  FilterChip(
+                    label: Text(period.label),
+                    selected: _filterPeriod == period.id,
+                    onSelected: (selected) {
+                      setState(() {
+                        if (selected) {
+                          _filterPeriod = period.id;
+                        } else {
+                          _filterPeriod = null;
+                        }
+                      });
+                    },
+                  ),
+              ],
+            ),
+          ),
+
+          if (match != null)
+            Wrap(
+              spacing: 12,
+              alignment: WrapAlignment.center,
+              children: [
+                for (final eventType
+                    in snoutData.event.config.matchscouting.events)
+                  Column(
+                    children: [
+                      const SizedBox(height: 16),
+                      Text(
+                        eventType.label,
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      FieldHeatMap(
+                        events: [
+                          for (final robot in match.robot.values)
+                            ...robot.timeline.where(
+                              (event) =>
+                                  (_filterPeriod == null ||
+                                      snoutData.event.config
+                                              .getPeriodAtTime(event.timeDuration)
+                                              .id ==
+                                          _filterPeriod) &&
+                                  event.id == eventType.id,
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
+                Column(
+                  children: [
+                    const SizedBox(height: 16),
+                    Text(
+                      "Driving Tendencies",
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    FieldHeatMap(
+                      events: [
+                        for (final robot in match.robot.values)
+                          ...robot.timelineInterpolated.where(
+                            (event) =>
+                                (_filterPeriod == null ||
+                                    snoutData.event.config
+                                            .getPeriodAtTime(event.timeDuration)
+                                            .id ==
+                                        _filterPeriod) &&
+                                event.isPositionEvent,
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          SizedBox(height: 16),
+          Center(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: 800),
+              child: Column(
+                children: [
+                  Text(
+                    "DataItems",
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  FilledButton(
+                    onPressed: () async {
+                      await editMatchDataPage(context, widget.matchid);
+                    },
+                    child: const Text("Edit"),
+                  ),
+                  for (final item
+                      in snoutData.event.config.matchscouting.properties) ...[
+                    DynamicValueViewer(
+                      itemType: item,
+                      value: snoutData.event.matchDataItems(
+                        widget.matchid,
+                      )?[item.id],
+                    ),
+                    Container(
+                      padding: const EdgeInsets.only(right: 16),
+                      alignment: Alignment.centerRight,
+                      child: DataItemEditAudit(
+                        dataItem: DataItem.match(widget.matchid, item.id, null),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+
           Row(
             children: [
               if (snoutData.event.getMatchResults(widget.matchid) != null)
@@ -199,186 +429,7 @@ class _MatchPageState extends State<MatchPage> {
                   )
                 : null,
           ),
-          const SizedBox(height: 8),
-          DataSheet(
-            shrinkWrap: true,
-            title: 'Per Team Performance',
-            //Data is a list of rows and columns
-            columns: [
-              DataItemColumn.teamHeader(),
-              for (final item in snoutData.event.config.matchscouting.processes)
-                DataItemColumn.fromProcess(item),
-              DataItemColumn.text('Scout'),
-              for (final item in snoutData.event.config.matchscouting.survey)
-                DataItemColumn(DataTableItem.fromText(item.label)),
-            ],
-            rows: [
-              for (final team in <int>{
-                ...matchSchedule?.blue ?? [],
-                ...matchSchedule?.red ?? [],
-                //Also include all of the surrogate robots
-                ...match?.robot.keys.map((e) => int.tryParse(e)).nonNulls ?? [],
-              })
-                [
-                  DataTableItem(
-                    displayValue: TextButton(
-                      child: Row(
-                        children: [
-                          FRCTeamAvatar(teamNumber: team),
-                          const SizedBox(width: 4),
-                          Text(
-                            team.toString() +
-                                (matchSchedule?.isScheduledToHaveTeam(team) ==
-                                        false
-                                    ? " [surrogate]"
-                                    : ""),
-                            style: TextStyle(
-                              // Get the alliance color first from the match data, then the schedule
-                              color:
-                                  getAllianceUIColor(
-                                    match?.robot[team.toString()]?.alliance,
-                                  ) ??
-                                  getAllianceUIColor(
-                                    matchSchedule?.getAllianceOf(team),
-                                  ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      onPressed: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => TeamViewPage(teamNumber: team),
-                        ),
-                      ),
-                    ),
-                    exportValue: team.toString(),
-                    sortingValue: team,
-                  ),
-                  for (final item
-                      in snoutData.event.config.matchscouting.processes)
-                    DataTableItem.fromErrorNumber(
-                      snoutData.event.runMatchResultsProcess(
-                            item,
-                            match?.robot[team.toString()],
-                            snoutData.event.matchSurvey(team, widget.matchid),
-                            team,
-                          ) ??
-                          //Missing results, this is not an error
-                          (value: null, error: null),
-                    ),
-                  traceTableItem(snoutData.database, widget.matchid, team),
-                  for (final item
-                      in snoutData.event.config.matchscouting.survey)
-                    DataTableItem.fromSurveyItem(
-                      snoutData.event.matchSurvey(
-                        team,
-                        widget.matchid,
-                      )?[item.id],
-                      item,
-                    ),
-                ],
-            ],
-          ),
-          const SizedBox(height: 32),
-          if (match != null) FieldTimelineViewer(match: match),
-          //Heatmaps for this specific match
-          if (match != null)
-            Wrap(
-              spacing: 12,
-              alignment: WrapAlignment.center,
-              children: [
-                Column(
-                  children: [
-                    const SizedBox(height: 16),
-                    Text(
-                      "Autos",
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    PathsViewer(
-                      paths: [
-                        for (final robot in match.robot.entries)
-                          (
-                            label: robot.key,
-                            path: robot.value.timelineInterpolated
-                                .where((element) => element.isInAuto)
-                                .toList(),
-                          ),
-                      ],
-                    ),
-                  ],
-                ),
-                for (final eventType
-                    in snoutData.event.config.matchscouting.events)
-                  Column(
-                    children: [
-                      const SizedBox(height: 16),
-                      Text(
-                        eventType.label,
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      FieldHeatMap(
-                        events: [
-                          for (final robot in match.robot.values)
-                            ...robot.timeline.where(
-                              (event) => event.id == eventType.id,
-                            ),
-                        ],
-                      ),
-                    ],
-                  ),
-                Column(
-                  children: [
-                    const SizedBox(height: 16),
-                    Text(
-                      "Driving Tendencies",
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    FieldHeatMap(
-                      events: [
-                        for (final robot in match.robot.values)
-                          ...robot.timelineInterpolated.where(
-                            (event) => event.isPositionEvent,
-                          ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          SizedBox(height: 16),
-          Center(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: 800),
-              child: Column(
-                children: [
-                  Text("Data", style: Theme.of(context).textTheme.titleMedium),
-                  FilledButton(
-                    onPressed: () async {
-                      await editMatchDataPage(context, widget.matchid);
-                    },
-                    child: const Text("Edit"),
-                  ),
-                  for (final item
-                      in snoutData.event.config.matchscouting.properties) ...[
-                    DynamicValueViewer(
-                      itemType: item,
-                      value: snoutData.event.matchProperties(
-                        widget.matchid,
-                      )?[item.id],
-                    ),
-                    Container(
-                      padding: const EdgeInsets.only(right: 16),
-                      alignment: Alignment.centerRight,
-                      child: DataItemEditAudit(
-                        dataItem: DataItem.match(widget.matchid, item.id, null),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          ),
+
           Text(widget.matchid),
         ],
       ),

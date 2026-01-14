@@ -22,20 +22,20 @@ For example there are 2 scoring locations for a game piece, and we want to displ
 
 Another example might be that we want to see how much a robot does something in auto. We could even filter for robots that intake more than 2 pieces in auto and score at least 1 ball high:
 
-`AUTOEVENT("intake") > 2 && AUTOEVENT("ball_high") >= 2`
+`PEVENT("auto", "intake") > 2 && PEVENT("auto", "ball_high") >= 2`
 
 ## Calculating scoring
 You may want to calculate a teams impact. Here is a way to calculate scoring. Firstly we can add up all of the events in auto and in teleop and multiply it by the points for each scoring piece. It might look like this. This process might have the id of "ball_score":
 
-`(AUTOEVENT("balls_high")*4)+(TELEOPEVENT("balls_high")*2)`
+`(PEVENT("auto", "balls_high")*4)+(TELEOPEVENT("balls_high")*2)`
 
 We could caclulate auto_movement by checking if the number of robot_position events is greater than zero in a certain region in auto. returning 1 or 0 and then multiply it by scoring later:
 
-`AUTOEVENTINBBOX("robot_position",-0.42,-1,0.42,1) > 0`
+`PEVENTINBBOX("auto", "robot_position",-0.42,-1,0.42,1) > 0`
 
 Lastly we can calculate the climb_score by getting post game data and doing some clever math. This will return 0 if none match since 0 + 0 + 0 = 0:
 
-`(POSTGAMEIS("climb_level", "High") * 15) + (POSTGAMEIS("climb_level", "Medium") * 10) + (POSTGAMEIS("climb_level", "Low") * 5)`
+`(MATCHTEAMIS("climb_level", "High") * 15) + (MATCHTEAMIS("climb_level", "Medium") * 10) + (MATCHTEAMIS("climb_level", "Low") * 5)`
 
 The final score might be calculated as:
 
@@ -50,11 +50,11 @@ In this example we will use previous metrics and even pit scouting metrics to de
 
 We will create a separate driving_score_bias process to simplify the pickability expression:
 
-`(POSTGAMEIS("driving_awareness", "High") * 15) + (POSTGAMEIS("driving_awareness", "Medium") * 0) + (POSTGAMEIS("driving_awareness", "Low") * -10)`
+`(MATCHTEAMIS("driving_awareness", "High") * 15) + (MATCHTEAMIS("driving_awareness", "Medium") * 0) + (MATCHTEAMIS("driving_awareness", "Low") * -10)`
 
 Our final 'pickability' expression looks like this. We might create multiple different pickability expressions with different biases or focuses:
 
-`PROCESS("score") + ((POSTGAMEIS("climb_level", "High") && PITSCOUTINGIS("climb_compatible", "true")) * 20) - (EVENT("fumble") * 10) + PROCESS("driving_score_bias")`
+`PROCESS("score") + ((MATCHTEAMIS("climb_level", "High") && TEAMDATAIS("climb_compatible", "true")) * 20) - (EVENT("fumble") * 10) + PROCESS("driving_score_bias")`
 
 
 # Functions and Variables
@@ -66,14 +66,13 @@ There are no pre-defined variables at the moment.
 
 | Function | Description |
 |----------|-------------|
-| PITSCOUTINGIS ("id", "value") | Returns 1 if the team's pit scouting data matches 0 otherwise |
-| POSTGAMEIS ("id", "value") | Returns 1 if a post game survey item matches the value 0 otherwise |
+| TEAMDATAIS ("id", "value") | Returns 1 if the team's DataItem matches 0 otherwise |
+| MATCHDATAIS ("id", "value") | Returns 1 if a match DataItem matches the value 0 otherwise |
+| MATCHTEAMIS ("id", "value") | Returns 1 if a per team match DataItem matches the value 0 otherwise |
 | EVENTINBBOX("id", minX, minY, maxX, maxY) | Returns number of events with a specific id within a bbox (uses interpolated timeline) |
-| AUTOEVENTINBBOX("id", minX, minY, maxX, maxY) | Returns number of auto events with a specific id within a bbox (uses interpolated timeline) |
-| TELEOPEVENTINBBOX("id", minX, minY, maxX, maxY) | Returns number of teleop events with a specific id within a bbox (uses interpolated timeline) |
+| PEVENTINBBOX("periodid", "id", minX, minY, maxX, maxY) | Returns number of events with a specific id within a bbox and during a match period (uses interpolated timeline) |
 | EVENT("id") | adder that counts the number of a specific event |
-| AUTOEVENT("id") | adder that counts the number of a specific event during auto |
-| TELEOPEVENT("id") | adder that counts the number of a specific event during teleop |
+| PEVENT("periodid", "id") | adder that counts the number of a specific event during a match period |
 | PROCESS("id") | calls another process by id and returns the value |
 
 ## [eval_ex built in functions](https://github.com/RobluScouting/EvalEx#built-in-functions-and-operators)

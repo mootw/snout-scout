@@ -251,7 +251,7 @@ class _DashboardPageState extends State<DashboardPage> {
                 for (final item in snoutData.event.config.pit) ...[
                   DynamicValueViewer(
                     itemType: item,
-                    value: snoutData.event.pitData()?[item.id],
+                    value: snoutData.event.pitDataItems()?[item.id],
                   ),
                   Container(
                     padding: const EdgeInsets.only(right: 16),

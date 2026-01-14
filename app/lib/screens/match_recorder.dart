@@ -12,6 +12,7 @@ import 'package:app/widgets/dynamic_property_editor.dart';
 import 'package:app/widgets/team_avatar.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:provider/provider.dart';
@@ -46,14 +47,18 @@ typedef RobotMatchTraceDataResult = ({
 
 enum MatchMode { setup, playing, finished }
 
-class _MatchRecorderPageState extends State<MatchRecorderPage> {
+class _MatchRecorderPageState extends State<MatchRecorderPage>
+    with SingleTickerProviderStateMixin {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   MatchMode _mode = MatchMode.setup;
   List<MatchEvent> _events = [];
   final DynamicProperties _postGameSurvey = {};
-  int _time = 0;
+
+  late Ticker _ticker;
+
+  int _timeMS = 0;
+
   bool _rotateField = false;
-  Timer? _t;
 
   bool _showSurvey = false;
 
@@ -75,7 +80,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
 
   @override
   void dispose() {
-    _t?.cancel();
+    _ticker.dispose();
     super.dispose();
   }
 
@@ -100,7 +105,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                   if (_mode != MatchMode.setup && _robotPosition != null) {
                     _events.add(
                       MatchEvent.fromEventConfig(
-                        time: _time,
+                        time: Duration(milliseconds: _timeMS),
                         event: tool,
                         position: _robotPosition!,
                       ),
@@ -131,7 +136,9 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                   _events.remove(item);
                 }),
                 child: Text(
-                  '${item.time.round()}  ${item.getLabelFromConfig(context.watch<DataProvider>().event.config)}',
+                  item.getLabelFromConfig(
+                    context.watch<DataProvider>().event.config,
+                  ),
                   style: TextStyle(
                     color: item.isPositionEvent
                         ? Theme.of(context).colorScheme.onSurface
@@ -309,7 +316,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                               for (final event in _events.toList()) {
                                 if (event.isPositionEvent) {
                                   //Is position event
-                                  if (event.time == _time) {
+                                  if (event.timeMS == _timeMS) {
                                     //Event is the same time, overrwite
                                     _events.remove(event);
                                   }
@@ -317,7 +324,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                               }
                               _events.add(
                                 MatchEvent.robotPositionEvent(
-                                  time: _time,
+                                  time: Duration(milliseconds: _timeMS),
                                   position: robotPosition,
                                 ),
                               );
@@ -379,7 +386,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                           for (final event in _events.toList()) {
                             if (event.isPositionEvent) {
                               //Is position event
-                              if (event.time == _time) {
+                              if (event.timeMS == _timeMS) {
                                 //Event is the same time, overrwite
                                 _events.remove(event);
                               }
@@ -387,7 +394,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
                           }
                           _events.add(
                             MatchEvent.robotPositionEvent(
-                              time: _time,
+                              time: Duration(milliseconds: _timeMS),
                               position: robotPosition,
                             ),
                           );
@@ -440,7 +447,16 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
             icon: const Icon(Icons.rotate_right),
           ),
           const SizedBox(width: 8),
-          Text("time $_time"),
+          Text("time ${(_timeMS / Duration.millisecondsPerSecond).floor()}"),
+          const SizedBox(width: 8),
+          Text(
+            context
+                .watch<DataProvider>()
+                .event
+                .config
+                .getPeriodAtTime(Duration(milliseconds: _timeMS))
+                .label,
+          ),
           const SizedBox(width: 8),
           if (robotPicture == null) const Text("No Picture"),
           if (robotPicture != null)
@@ -481,45 +497,54 @@ class _MatchRecorderPageState extends State<MatchRecorderPage> {
   }
 
   void _handleNextSection() {
+    final matchLength = context.read<DataProvider>().event.config.matchLength;
     HapticFeedback.heavyImpact();
     if (_mode == MatchMode.playing) {
       //Stop timer
-      _t?.cancel();
+      _ticker.stop();
       _mode = MatchMode.finished;
       //Scale event times to be within the match length
       _events = List.generate(_events.length, (index) {
         final event = _events[index];
         return MatchEvent(
-          time: ((event.time / _time) * matchLength.inSeconds).round(),
+          timeMS: ((event.timeMS / _timeMS) * matchLength.inMilliseconds).round(),
           x: event.x,
           y: event.y,
           id: event.id,
         );
       });
-      _time = matchLength.inSeconds;
+      _timeMS = matchLength.inMilliseconds;
     }
     if (_mode == MatchMode.setup) {
       _mode = MatchMode.playing;
-      _time = 1; //Second 0 is reserved for pre-game events
-      //Start timer
-      _t = Timer.periodic(const Duration(seconds: 1), (timer) {
-        if (_mode != MatchMode.finished) {
-          setState(() {
-            _time++;
-            if (_time == 17) {
-              //Buzz the device for end of auto
-              HapticFeedback.heavyImpact();
-              Timer(const Duration(milliseconds: 500), () {
-                HapticFeedback.heavyImpact();
-              });
-              Timer(const Duration(milliseconds: 1000), () {
-                HapticFeedback.heavyImpact();
-              });
-            }
-          });
-        }
-      });
+      _ticker = createTicker(_onTick)..start();
     }
     setState(() {});
+  }
+
+  String? _lastMatchPeriod;
+
+  void _onTick(Duration elapsed) {
+    setState(() {
+      _timeMS = elapsed.inMilliseconds;
+    });
+
+    //Buzz the device just before the end of each match period
+    final currentMatchPeriod = context
+        .read<DataProvider>()
+        .event
+        .config
+        .getPeriodAtTime(Duration(milliseconds: _timeMS + 2000))
+        .id;
+    if (currentMatchPeriod != _lastMatchPeriod) {
+      _lastMatchPeriod = currentMatchPeriod;
+      HapticFeedback.heavyImpact();
+      Timer(const Duration(milliseconds: 750), () {
+        HapticFeedback.heavyImpact();
+      });
+      Timer(const Duration(milliseconds: 1500), () {
+        HapticFeedback.heavyImpact();
+      });
+    }
   }
 }

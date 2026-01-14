@@ -49,9 +49,33 @@ void main(List<String> args) async {
 
     List<ChainAction> actions = [];
 
+    final configJson = db.event.config.toJson();
+    if (configJson['matchscouting'] != null &&
+        configJson['matchscouting']['processes'] != null) {
+      for (final process in configJson['matchscouting']['processes']) {
+        String expression = process['expression'];
+        expression = expression.replaceAll('PITSCOUTINGIS', 'TEAMDATAIS');
+        expression = expression.replaceAll('POSTGAMEIS', 'MATCHTEAMIS');
+
+        expression = expression.replaceAll(
+          'AUTOEVENTINBBOX(',
+          'PEVENTINBBOX("auto", ',
+        );
+        expression = expression.replaceAll(
+          'TELEOPEVENTINBBOX(',
+          'PEVENTINBBOX("teleop", ',
+        );
+
+        expression = expression.replaceAll('AUTOEVENT(', 'PEVENT("auto", ');
+        expression = expression.replaceAll('TELEOPEVENT(', 'PEVENT("teleop", ');
+
+        process['expression'] = expression;
+      }
+    }
+
     actions.add(
       // Handle the type change to the new format since they are identical schemas
-      ActionWriteConfig(EventConfig.fromJson(db.event.config.toJson())),
+      ActionWriteConfig(EventConfig.fromJson(configJson)),
     );
 
     actions.add(ActionWriteTeams(db.event.teams));
@@ -83,12 +107,18 @@ void main(List<String> args) async {
 
     for (final match in db.event.matches.entries) {
       for (final team in match.value.robot.entries) {
+        final traceData = team.value.toJson();
+        for (final event in traceData['timeline']) {
+          event['timeMS'] = (event['time'] * 1000).toInt();
+        }
+
         final matchTrace = MatchTrace(
           match: match.key,
           team: int.parse(team.key),
           // Handle type mismatch
-          trace: RobotMatchTraceData.fromJson(team.value.toJson()),
+          trace: RobotMatchTraceData.fromJson(traceData),
         );
+
         final action = ActionWriteMatchTrace(matchTrace);
         actions.add(action);
 

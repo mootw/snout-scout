@@ -1,18 +1,15 @@
-import 'package:app/providers/data_provider.dart';
 import 'package:app/screens/analysis/boxplot_analysis.dart';
 import 'package:app/screens/analysis/events_heatmaps.dart';
 import 'package:app/screens/analysis/heatmap_event_type.dart';
 import 'package:app/screens/analysis/match_preview.dart';
 import 'package:app/screens/analysis/pitscout_survey_analysis.dart';
-import 'package:app/screens/analysis/postmatch_survey_analysis.dart';
-import 'package:app/screens/analysis/table_match_properties.dart';
+import 'package:app/screens/analysis/analysis_match_robot_dataitem.dart';
+import 'package:app/screens/analysis/table_match_dataitems.dart';
 import 'package:app/screens/analysis/table_robot_recordings.dart';
 import 'package:app/screens/analysis/table_team_averages.dart';
-import 'package:app/screens/analysis/table_team_survey.dart';
+import 'package:app/screens/analysis/table_team_dataitems.dart';
 import 'package:app/search.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher_string.dart';
 
 class AnalysisPage extends StatefulWidget {
   const AnalysisPage({super.key});
@@ -35,17 +32,19 @@ class _AnalysisPageState extends State<AnalysisPage> {
           },
         ),
         ListTile(
-          title: const Text("Team Survey"),
+          title: const Text("Team DataItems"),
           leading: const Icon(Icons.table_chart),
           onTap: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (builder) => const TableTeamSurvey()),
+              MaterialPageRoute(
+                builder: (builder) => const TableTeamDataItems(),
+              ),
             );
           },
         ),
         ListTile(
-          title: const Text("Team Averages"),
+          title: const Text("Robot Trace Averages"),
           leading: const Icon(Icons.table_chart),
           onTap: () {
             Navigator.push(
@@ -63,19 +62,19 @@ class _AnalysisPageState extends State<AnalysisPage> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (builder) => const TableRobotRecordingsPage(),
+                builder: (builder) => const TableRobotTracePage(),
               ),
             );
           },
         ),
         ListTile(
-          title: const Text("Match Data"),
+          title: const Text("Match DataItems"),
           leading: const Icon(Icons.table_chart),
           onTap: () {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (builder) => const TableMatchProperties(),
+                builder: (builder) => const TableMatchDataItems(),
               ),
             );
           },
@@ -128,7 +127,7 @@ class _AnalysisPageState extends State<AnalysisPage> {
           },
         ),
         ListTile(
-          title: const Text("Pit Survey Analysis"),
+          title: const Text("Team DataItem"),
           leading: const Icon(Icons.pie_chart),
           onTap: () {
             Navigator.push(
@@ -140,13 +139,13 @@ class _AnalysisPageState extends State<AnalysisPage> {
           },
         ),
         ListTile(
-          title: const Text("Match Recording Survey Analysis"),
+          title: const Text("Match Robot DataItem Analysis"),
           leading: const Icon(Icons.pie_chart),
           onTap: () {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (builder) => const AnalysisPostMatchSurvey(),
+                builder: (builder) => const AnalysisRobotDataItem(),
               ),
             );
           },

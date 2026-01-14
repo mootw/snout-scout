@@ -1,12 +1,10 @@
-import 'package:app/widgets/team_avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:app/widgets/datasheet.dart';
 import 'package:app/providers/data_provider.dart';
-import 'package:app/screens/view_team_page.dart';
 import 'package:provider/provider.dart';
 
-class TableTeamSurvey extends StatelessWidget {
-  const TableTeamSurvey({super.key});
+class TableTeamDataItems extends StatelessWidget {
+  const TableTeamDataItems({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +12,7 @@ class TableTeamSurvey extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(),
       body: DataSheet(
-        title: 'Team Survey',
+        title: 'Team Data Items',
         columns: [
           DataItemColumn.teamHeader(),
           for (final item in data.event.config.pitscouting)

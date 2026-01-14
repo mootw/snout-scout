@@ -4,6 +4,7 @@ import 'package:eval_ex/built_ins.dart';
 import 'package:eval_ex/expression.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:snout_db/config/eventconfig.dart';
+import 'package:snout_db/config/match_period_config.dart';
 import 'package:snout_db/config/matchresults_process.dart';
 import 'package:snout_db/data_item.dart';
 import 'package:snout_db/event/dynamic_property.dart';
@@ -61,7 +62,7 @@ class FRCEvent {
       matchResults['/match/$matchId/result']?.$1;
 
   // Legacy-like accessor for match survey data
-  DynamicProperties? matchSurvey(int team, String matchId) {
+  DynamicProperties? matchTeamData(int team, String matchId) {
     final f = DynamicProperties.fromEntries(
       dataItems.entries
           .where(
@@ -74,7 +75,7 @@ class FRCEvent {
     return f;
   }
 
-  DynamicProperties? pitData() {
+  DynamicProperties? pitDataItems() {
     final f = DynamicProperties.fromEntries(
       dataItems.entries
           .where(
@@ -87,7 +88,7 @@ class FRCEvent {
     return f;
   }
 
-  DynamicProperties? matchProperties(String matchId) {
+  DynamicProperties? matchDataItems(String matchId) {
     final f = DynamicProperties.fromEntries(
       dataItems.entries
           .where(
@@ -234,11 +235,12 @@ class FRCEvent {
   //
   ({double? value, String? error})? runMatchResultsProcess(
     MatchResultsProcess process,
-    RobotMatchTraceData? matchResults,
-    DynamicProperties? matchSurvey,
+    RobotMatchTraceData? robotResults,
+    DynamicProperties? robotSurvey,
     int team,
+    String matchId,
   ) {
-    if (matchResults == null) {
+    if (robotResults == null) {
       return null;
     }
 
@@ -247,7 +249,29 @@ class FRCEvent {
     //Returns 1 if the team's pit scouting data matches 0 otherwise.
     exp.addLazyFunction(
       LazyFunctionImpl(
-        "PITSCOUTINGIS",
+        "MATCHDATAIS",
+        2,
+        fEval: (params) {
+          if (matchDataItems(matchId)?[params[0].getString()].toString() ==
+              params[1].getString()) {
+            return LazyNumberImpl(
+              eval: () => Decimal.fromInt(1),
+              getString: () => "1",
+            );
+          } else {
+            return LazyNumberImpl(
+              eval: () => Decimal.fromInt(0),
+              getString: () => "0",
+            );
+          }
+        },
+      ),
+    );
+
+    //Returns 1 if the team's pit scouting data matches 0 otherwise.
+    exp.addLazyFunction(
+      LazyFunctionImpl(
+        "TEAMDATAIS",
         2,
         fEval: (params) {
           if (pitscouting[team.toString()]?[params[0].getString()].toString() ==
@@ -269,10 +293,10 @@ class FRCEvent {
     //Returns 1 if a post game survey item matches the value 0 otherwise
     exp.addLazyFunction(
       LazyFunctionImpl(
-        "POSTGAMEIS",
+        "MATCHTEAMIS",
         2,
         fEval: (params) {
-          if (matchSurvey?[params[0].getString()].toString() ==
+          if (robotSurvey?[params[0].getString()].toString() ==
               params[1].getString()) {
             return LazyNumberImpl(
               eval: () => Decimal.fromInt(1),
@@ -299,7 +323,7 @@ class FRCEvent {
         "EVENTINBBOX",
         5,
         fEval: (params) {
-          final int value = matchResults.timelineInterpolated
+          final int value = robotResults.timelineInterpolated
               .where(
                 (element) =>
                     element.id == params[0].getString() &&
@@ -317,56 +341,21 @@ class FRCEvent {
       ),
     );
 
-    // Returns number of events with a specific name within a bbox
-    //   -- O
-    // |    |
-    // |    |
-    // o --
-    // min x, min y, max X, max Y
     exp.addLazyFunction(
       LazyFunctionImpl(
-        "AUTOEVENTINBBOX",
-        5,
+        "PEVENTINBBOX",
+        6,
         fEval: (params) {
-          final int value = matchResults.timelineInterpolated
+          final int value = robotResults.timelineInterpolated
               .where(
                 (element) =>
-                    element.isInAuto &&
-                    element.id == params[0].getString() &&
-                    element.position.x >= params[1].eval()!.toDouble() &&
-                    element.position.y >= params[2].eval()!.toDouble() &&
-                    element.position.x <= params[3].eval()!.toDouble() &&
-                    element.position.y <= params[4].eval()!.toDouble(),
-              )
-              .length;
-          return LazyNumberImpl(
-            eval: () => Decimal.fromInt(value),
-            getString: () => value.toString(),
-          );
-        },
-      ),
-    );
-
-    // Returns number of events with a specific name within a bbox
-    //   -- O
-    // |    |
-    // |    |
-    // o --
-    // min x, min y, max X, max Y
-    exp.addLazyFunction(
-      LazyFunctionImpl(
-        "TELEOPEVENTINBBOX",
-        5,
-        fEval: (params) {
-          final int value = matchResults.timelineInterpolated
-              .where(
-                (element) =>
-                    element.isInAuto == false &&
-                    element.id == params[0].getString() &&
-                    element.position.x >= params[1].eval()!.toDouble() &&
-                    element.position.y >= params[2].eval()!.toDouble() &&
-                    element.position.x <= params[3].eval()!.toDouble() &&
-                    element.position.y <= params[4].eval()!.toDouble(),
+                    config.getPeriodAtTime(element.timeDuration).id ==
+                        params[0].getString() &&
+                    element.id == params[1].getString() &&
+                    element.position.x >= params[2].eval()!.toDouble() &&
+                    element.position.y >= params[3].eval()!.toDouble() &&
+                    element.position.x <= params[4].eval()!.toDouble() &&
+                    element.position.y <= params[5].eval()!.toDouble(),
               )
               .length;
           return LazyNumberImpl(
@@ -383,7 +372,7 @@ class FRCEvent {
         "EVENT",
         1,
         fEval: (params) {
-          final int value = matchResults.timeline
+          final int value = robotResults.timeline
               .where((element) => element.id == params[0].getString())
               .length;
           return LazyNumberImpl(
@@ -397,34 +386,15 @@ class FRCEvent {
     //adder that counts the number of a specific event in the timeline
     exp.addLazyFunction(
       LazyFunctionImpl(
-        "AUTOEVENT",
-        1,
+        "PEVENT",
+        2,
         fEval: (params) {
-          final int value = matchResults.timeline
+          final int value = robotResults.timeline
               .where(
                 (element) =>
-                    element.isInAuto && element.id == params[0].getString(),
-              )
-              .length;
-          return LazyNumberImpl(
-            eval: () => Decimal.fromInt(value),
-            getString: () => value.toString(),
-          );
-        },
-      ),
-    );
-
-    //adder that counts the number of a specific event in the timeline
-    exp.addLazyFunction(
-      LazyFunctionImpl(
-        "TELEOPEVENT",
-        1,
-        fEval: (params) {
-          final int value = matchResults.timeline
-              .where(
-                (element) =>
-                    element.isInAuto == false &&
-                    element.id == params[0].getString(),
+                    config.getPeriodAtTime(element.timeDuration).id ==
+                        params[0].getString() &&
+                    element.id == params[1].getString(),
               )
               .length;
           return LazyNumberImpl(
@@ -454,9 +424,10 @@ class FRCEvent {
           }
           final result = runMatchResultsProcess(
             otherProcess,
-            matchResults,
-            matchSurvey,
+            robotResults,
+            robotSurvey,
             team,
+            matchId,
           );
           return LazyNumberImpl(
             eval: () => Decimal.parse(result!.value.toString()),
@@ -491,8 +462,9 @@ class FRCEvent {
               (runMatchResultsProcess(
                     process,
                     match.value.robot[team.toString()],
-                    matchSurvey(team, match.key) ?? DynamicProperties(),
+                    matchTeamData(team, match.key) ?? DynamicProperties(),
                     team,
+                    match.key,
                   )?.value ??
                   0),
         ) /

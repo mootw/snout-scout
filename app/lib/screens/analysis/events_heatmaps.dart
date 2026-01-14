@@ -2,6 +2,7 @@ import 'package:app/providers/data_provider.dart';
 import 'package:app/widgets/fieldwidget.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:snout_db/config/match_period_config.dart';
 
 class AnalysisEventsHeatmap extends StatelessWidget {
   const AnalysisEventsHeatmap({super.key});
@@ -29,7 +30,13 @@ class AnalysisEventsHeatmap extends StatelessWidget {
                       label:
                           '${match.value.getSchedule(data.event, match.key)?.label} ${robot.key}',
                       path: match.value.robot[robot.key]!.timelineInterpolated
-                          .where((element) => element.isInAuto)
+                          .where(
+                            (element) =>
+                                data.event.config
+                                    .getPeriodAtTime(element.timeDuration)
+                                    .id ==
+                                autoPeriodId,
+                          )
                           .toList(),
                     ),
               ],
@@ -73,7 +80,13 @@ class AnalysisEventsHeatmap extends StatelessWidget {
                         .timelineInterpolatedBlueNormalized(
                           data.event.config.fieldStyle,
                         )
-                        .where((event) => event.isInAuto),
+                        .where(
+                          (event) =>
+                              data.event.config
+                                  .getPeriodAtTime(event.timeDuration)
+                                  .id ==
+                              autoPeriodId,
+                        ),
               ],
             ),
           ),

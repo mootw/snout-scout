@@ -3,8 +3,8 @@ import 'package:app/providers/data_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class TableRobotRecordingsPage extends StatelessWidget {
-  const TableRobotRecordingsPage({super.key});
+class TableRobotTracePage extends StatelessWidget {
+  const TableRobotTracePage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -47,17 +47,18 @@ class TableRobotRecordingsPage extends StatelessWidget {
                     data.event.runMatchResultsProcess(
                           item,
                           match.value.robot[robot.key],
-                          data.event.matchSurvey(
+                          data.event.matchTeamData(
                             int.tryParse(robot.key) ?? 0,
                             match.key,
                           ),
                           int.tryParse(robot.key) ?? 0,
+                          match.key,
                         ) ??
                         (value: null, error: "Missing Results"),
                   ),
                 for (final item in data.event.config.matchscouting.survey)
                   DataTableItem.fromSurveyItem(
-                    data.event.matchSurvey(
+                    data.event.matchTeamData(
                       int.tryParse(robot.key) ?? 0,
                       match.key,
                     )?[item.id],

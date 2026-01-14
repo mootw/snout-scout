@@ -1,6 +1,5 @@
 import 'package:app/screens/analysis/match_preview.dart';
 import 'package:app/providers/data_provider.dart';
-import 'package:app/screens/view_team_page.dart';
 import 'package:app/widgets/datasheet.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

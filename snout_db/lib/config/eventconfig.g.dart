@@ -35,16 +35,27 @@ EventConfig _$EventConfigFromJson(Map json) => EventConfig(
           docs: 'Image of the Pit Map',
         ),
         DataItemSchema(
-          id: 'schedule',
-          label: 'Schedule',
+          id: 'docs',
+          label: 'Docs',
           type: DataItemType.text,
-          docs: 'Event Schedule as a markdown table',
+          docs: 'Event schedule and other important info',
         ),
         DataItemSchema(
           id: 'fresh_battery',
           label: 'Fresh Battery',
           type: DataItemType.toggle,
         ),
+      ],
+  matchperiods:
+      (json['matchperiods'] as List<dynamic>?)
+          ?.map(
+            (e) =>
+                MatchPeriodConfig.fromJson(Map<String, dynamic>.from(e as Map)),
+          )
+          .toList() ??
+      const [
+        MatchPeriodConfig(id: 'auto', label: 'Auto', durationSeconds: 17),
+        MatchPeriodConfig(id: 'teleop', label: 'Teleop', durationSeconds: 135),
       ],
   matchscouting: json['matchscouting'] == null
       ? const MatchScouting()
@@ -64,6 +75,7 @@ Map<String, dynamic> _$EventConfigToJson(EventConfig instance) =>
       'pitscouting': instance.pitscouting.map((e) => e.toJson()).toList(),
       'pit': instance.pit.map((e) => e.toJson()).toList(),
       'matchscouting': instance.matchscouting.toJson(),
+      'matchperiods': instance.matchperiods.map((e) => e.toJson()).toList(),
       'fieldImage': instance.fieldImage,
     };
 

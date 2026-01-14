@@ -4,8 +4,8 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class TableMatchProperties extends StatelessWidget {
-  const TableMatchProperties({super.key});
+class TableMatchDataItems extends StatelessWidget {
+  const TableMatchDataItems({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +52,10 @@ class TableMatchProperties extends StatelessWidget {
                   time: match.$1?.scheduledTime,
                 ),
                 for (final item in data.event.config.matchscouting.properties)
-                  DataTableItem.fromSurveyItem(data.event.matchProperties(match.$3)?[item.id], item),
+                  DataTableItem.fromSurveyItem(
+                    data.event.matchDataItems(match.$3)?[item.id],
+                    item,
+                  ),
               ],
           ],
         ),

@@ -420,8 +420,8 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
 
                 if (pickedFile != null) {
                   final fileBytes = await pickedFile.readAsBytes();
-                  // Ensure that the archive is decodable
-                  final archive = ZipDecoder().decodeBytes(fileBytes);
+                  // Ensure that the archive is decodable by decoding it. we do not care about the result
+                  ZipDecoder().decodeBytes(fileBytes);
 
                   final file = fs.file(
                     '${fs.directory('/kiosk').path}/kiosk.zip',

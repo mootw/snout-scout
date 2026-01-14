@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:app/config_editor/edit_match_event.dart';
+import 'package:app/config_editor/edit_match_period.dart';
 import 'package:app/config_editor/edit_process.dart';
 import 'package:app/config_editor/edit_survey_item.dart';
 import 'package:app/form_validators.dart';
@@ -9,6 +10,7 @@ import 'package:app/style.dart';
 import 'package:app/widgets/image_view.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
+import 'package:snout_db/config/match_period_config.dart';
 import 'package:snout_db/config/matcheventconfig.dart';
 import 'package:snout_db/config/matchresults_process.dart';
 import 'package:snout_db/config/matchscouting.dart';
@@ -35,6 +37,7 @@ class _ConfigEditorPageState extends State<ConfigEditorPage> {
   late final TextEditingController _tbaSecretKey;
   late FieldStyle _fieldStyle;
   late final TextEditingController _team;
+  late final List<MatchPeriodEditState> _matchPeriods;
   late final List<SurveyItemEditState> _pit;
   late final List<SurveyItemEditState> _pitscouting;
   late final List<SurveyItemEditState> _matchscoutingSurvey;
@@ -53,6 +56,9 @@ class _ConfigEditorPageState extends State<ConfigEditorPage> {
     _tbaEventId = TextEditingController(text: config.tbaEventId);
     _tbaSecretKey = TextEditingController(text: config.tbaSecretKey);
     _team = TextEditingController(text: config.team.toString());
+    _matchPeriods = config.matchperiods
+        .map((item) => MatchPeriodEditState(item))
+        .toList();
     _pit = config.pit.map((item) => SurveyItemEditState(item)).toList();
     _pitscouting = config.pitscouting
         .map((item) => SurveyItemEditState(item))
@@ -87,6 +93,7 @@ class _ConfigEditorPageState extends State<ConfigEditorPage> {
                 final newConfig = EventConfig(
                   name: _name.text,
                   team: int.parse(_team.text),
+                  matchperiods: _matchPeriods.map((e) => e.toConfig()).toList(),
                   fieldStyle: _fieldStyle,
                   pit: _pit.map((e) => e.toConfig()).toList(),
                   pitscouting: _pitscouting.map((e) => e.toConfig()).toList(),
@@ -181,6 +188,74 @@ class _ConfigEditorPageState extends State<ConfigEditorPage> {
                   border: const OutlineInputBorder(),
                 ),
               ),
+            ),
+
+            ListTile(title: Text('matchperiods')),
+            Column(
+              children: [
+                for (final (idx, item) in _matchPeriods.indexed)
+                  Container(
+                    color: idx % 2 == 0 ? null : Colors.white12,
+                    child: Padding(
+                      key: Key(idx.toString()),
+                      padding: EdgeInsetsGeometry.only(bottom: 12),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: ListTile(
+                              title: EditMatchPeriod(state: item),
+                              leading: IconButton(
+                                onPressed: () => setState(() {
+                                  _matchPeriods.removeAt(idx);
+                                }),
+                                icon: Icon(
+                                  Icons.remove,
+                                  color: Colors.redAccent,
+                                ),
+                              ),
+                            ),
+                          ),
+                          Column(
+                            children: [
+                              if (idx > 0)
+                                IconButton(
+                                  onPressed: () => setState(() {
+                                    _matchPeriods.move(idx, idx - 1);
+                                  }),
+                                  icon: Icon(Icons.arrow_upward),
+                                ),
+                              if (idx < _matchPeriods.length - 1)
+                                IconButton(
+                                  onPressed: () => setState(() {
+                                    _matchPeriods.move(idx, idx + 1);
+                                  }),
+                                  icon: Icon(Icons.arrow_downward),
+                                ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                Center(
+                  child: FilledButton.tonalIcon(
+                    onPressed: () => setState(() {
+                      _matchPeriods.add(
+                        MatchPeriodEditState(
+                          MatchPeriodConfig(
+                            id: '',
+                            label: '',
+                            durationSeconds: 0,
+                          ),
+                        ),
+                      );
+                    }),
+                    label: Text('Add'),
+                    icon: Icon(Icons.add),
+                  ),
+                ),
+              ],
             ),
 
             ListTile(title: Text('pit')),

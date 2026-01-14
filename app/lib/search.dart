@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/screens/match_page.dart';
 import 'package:app/screens/view_team_page.dart';
-import 'package:app/services/snout_image_cache.dart';
 import 'package:app/widgets/team_avatar.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
@@ -259,7 +258,7 @@ Stream<SearchResult> _search(FRCEvent event, String query) async* {
     for (final robot in match.value.robot.entries) {
       for (final value
           in event
-                  .matchSurvey(int.tryParse(robot.key) ?? 0, match.key)
+                  .matchTeamData(int.tryParse(robot.key) ?? 0, match.key)
                   ?.entries ??
               DynamicProperties().entries) {
         final surveyItem = event.config.matchscouting.survey.firstWhereOrNull(

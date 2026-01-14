@@ -8,7 +8,6 @@ part 'robot_match_trace.g.dart';
 @immutable
 @JsonSerializable()
 class RobotMatchTraceData {
-
   /// The alliance that the robot was on
   final Alliance alliance;
 
@@ -19,10 +18,8 @@ class RobotMatchTraceData {
   /// Independent data structure that contains all data
   /// of a single robot in a match.
   /// Initializing this object will also pre-calculate an interpolated timeline
-  RobotMatchTraceData({
-    required this.alliance,
-    required this.timeline,
-  }) : timelineInterpolated = _interpolateTimeline(timeline);
+  RobotMatchTraceData({required this.alliance, required this.timeline})
+    : timelineInterpolated = _interpolateTimeline(timeline);
 
   factory RobotMatchTraceData.fromJson(Map<String, dynamic> json) =>
       _$RobotMatchTraceDataFromJson(json);
@@ -42,12 +39,11 @@ class RobotMatchTraceData {
     if (alliance == Alliance.red) {
       return List.generate(events.length, (index) {
         final MatchEvent event = events[index];
-        final FieldPosition position =
-            fieldStyle == FieldStyle.rotated
-                ? event.position.rotated
-                : event.position.mirrored;
+        final FieldPosition position = fieldStyle == FieldStyle.rotated
+            ? event.position.rotated
+            : event.position.mirrored;
         return MatchEvent(
-          time: event.time,
+          timeMS: event.timeMS,
           id: event.id,
           x: position.x,
           y: position.y,
@@ -66,41 +62,43 @@ class RobotMatchTraceData {
 List<MatchEvent> _interpolateTimeline(List<MatchEvent> timeline) {
   final interpolated = timeline.toList();
 
-  final positions =
-      interpolated.where((element) => element.isPositionEvent).toList();
+  final positions = interpolated
+      .where((element) => element.isPositionEvent)
+      .toList();
   for (int i = 0; i < positions.length - 1; i++) {
     //Interpolate between them
     final pos1 = positions[i];
     final pos2 = positions[i + 1];
 
     //Amount of seconds that need to be interpolated
-    final width = pos2.time - pos1.time;
+    final width = pos2.timeMS - pos1.timeMS;
 
-    if (width > 8) {
+    // 8 seconds
+    if (width > 8000) {
       //Teleport the robot if there is a large gap; too much missing data.
       // POTENTIALLY, it makes sense to add positions for the time stamps that are "SKIPPED"
       // though this implies that there is 'information' which there really is not.
       continue;
     }
 
-    //Do not double include the zero time so start at x=1.
-    for (int x = 1; x < width; x++) {
-      final newTime = pos1.time + x;
+    //Do not double include the zero time so start at x=1 (which is 1 millisecond)
+    for (int x = 1; x < width; x += 1000) {
+      final newTime = pos1.timeMS + x;
       interpolated.add(
         MatchEvent.robotPositionEvent(
-          time: newTime,
+          time: Duration(milliseconds: newTime),
           position: FieldPosition(
             lerp(
-              pos1.time.toDouble(),
+              pos1.timeMS.toDouble(),
               pos1.position.x,
-              pos2.time.toDouble(),
+              pos2.timeMS.toDouble(),
               pos2.position.x,
               newTime.toDouble(),
             ),
             lerp(
-              pos1.time.toDouble(),
+              pos1.timeMS.toDouble(),
               pos1.position.y,
-              pos2.time.toDouble(),
+              pos2.timeMS.toDouble(),
               pos2.position.y,
               newTime.toDouble(),
             ),
@@ -109,7 +107,7 @@ List<MatchEvent> _interpolateTimeline(List<MatchEvent> timeline) {
       );
     }
   }
-  interpolated.sort((a, b) => a.time - b.time);
+  interpolated.sort((a, b) => a.timeMS.compareTo(b.timeMS));
   return interpolated;
 }
 

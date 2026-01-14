@@ -34,13 +34,13 @@ class EditScoutProfile extends StatefulWidget {
 class _EditScoutProfileState extends State<EditScoutProfile> {
   List<Unlock> _selectedUnlocks = [];
 
-  GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final _formKey = GlobalKey<FormState>();
 
-  TextEditingController _prefixEmojiController = TextEditingController();
-  TextEditingController _suffixEmojiController = TextEditingController();
+  final _prefixEmojiController = TextEditingController();
+  final _suffixEmojiController = TextEditingController();
 
   @override
-  initState() {
+  void initState() {
     super.initState();
     final db = context.read<DataProvider>().database;
     ScoutProfile? profile = db.scoutProfiles[widget.scoutPubkey];

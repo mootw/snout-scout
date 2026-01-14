@@ -40,6 +40,7 @@ class _EditMatchResultsState extends State<EditMatchResults> {
 
     DateTime? date = widget.results?.time;
     if (date != null) {
+      final matchLength = context.read<DataProvider>().event.config.matchLength;
       _matchEndTime = date.add(matchLength);
     } else {
       _matchEndTime = DateTime.now();
@@ -55,6 +56,7 @@ class _EditMatchResultsState extends State<EditMatchResults> {
 
   @override
   Widget build(BuildContext context) {
+    final matchLength = context.read<DataProvider>().event.config.matchLength;
     return ConfirmExitDialog(
       child: Scaffold(
         appBar: AppBar(

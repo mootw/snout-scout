@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
 import 'package:snout_db/config/data_item_schema.dart';
+import 'package:snout_db/config/match_period_config.dart';
 import 'package:snout_db/event/frcevent.dart';
 import 'package:snout_db/snout_chain.dart';
 
@@ -256,7 +257,7 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                                           .timelineInterpolatedBlueNormalized(
                                             data.event.config.fieldStyle,
                                           )
-                                          .where((element) => element.isInAuto)
+                                          .where((element) => data.event.config.getPeriodAtTime(element.timeDuration).id == autoPeriodId)
                                           .toList(),
                                     ),
                                 ],
@@ -299,7 +300,7 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                                     .timelineInterpolatedBlueNormalized(
                                       data.event.config.fieldStyle,
                                     )
-                                    .where((element) => element.isInAuto),
+                                    .where((element) => data.event.config.getPeriodAtTime(element.timeDuration).id == autoPeriodId),
                             ],
                           ),
                           for (final eventType
@@ -399,7 +400,7 @@ DataTableItem teamPostGameSurveyTableDisplay(
 
     for (final match in recordedMatches) {
       final surveyValue = event
-          .matchSurvey(team, match.key)?[surveyItem.id]
+          .matchTeamData(team, match.key)?[surveyItem.id]
           ?.toString();
       if (surveyValue == null) {
         continue;
@@ -431,7 +432,7 @@ DataTableItem teamPostGameSurveyTableDisplay(
   // Reversed to display the most recent match first in the table
   for (final match in recordedMatches.reversed) {
     final surveyValue = event
-        .matchSurvey(team, match.key)?[surveyItem.id]
+        .matchTeamData(team, match.key)?[surveyItem.id]
         ?.toString();
 
     if (surveyValue == null) {

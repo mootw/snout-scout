@@ -122,17 +122,22 @@ class FieldTimelineViewer extends StatefulWidget {
 }
 
 class _FieldTimelineViewerState extends State<FieldTimelineViewer> {
-  int _animationTime = 0;
+  double _animationTime = 0;
   Timer? _playTimer;
   bool _isPlayingValue = false;
   bool get _isPlaying => _isPlayingValue;
   set _isPlaying(bool newValue) {
     _isPlayingValue = newValue;
     if (newValue) {
-      //Increment the animation right away, this makes things feel more responsive.
-      _animationTime++;
       _playTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-        if (_animationTime < matchLength.inSeconds && mounted) {
+        if (_animationTime <
+                context
+                    .read<DataProvider>()
+                    .event
+                    .config
+                    .matchLength
+                    .inSeconds &&
+            mounted) {
           setState(() {
             _animationTime++;
           });
@@ -144,7 +149,14 @@ class _FieldTimelineViewerState extends State<FieldTimelineViewer> {
   }
 
   @override
+  void dispose() {
+    _playTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final config = context.read<DataProvider>().event.config;
     return Column(
       children: [
         FieldMap(
@@ -161,6 +173,18 @@ class _FieldTimelineViewerState extends State<FieldTimelineViewer> {
         // TODO in depth timeline here???? like robot: event
         Row(
           children: [
+            SizedBox(width: 16),
+            Text(_animationTime.floor().toString()),
+            SizedBox(width: 16),
+            Text(
+              config
+                  .getPeriodAtTime(Duration(seconds: _animationTime.floor()))
+                  .label,
+            ),
+          ],
+        ),
+        Row(
+          children: [
             IconButton(
               icon: Icon(_isPlaying ? Icons.pause : Icons.play_arrow),
               onPressed: () {
@@ -172,22 +196,15 @@ class _FieldTimelineViewerState extends State<FieldTimelineViewer> {
             Expanded(
               child: Slider(
                 min: 0,
-                max: matchLength.inSeconds.toDouble(),
-                divisions: matchLength.inSeconds,
+                max: config.matchLength.inSeconds.toDouble(),
+                divisions: config.matchLength.inSeconds,
                 onChanged: (double value) {
                   setState(() {
-                    _animationTime = value.toInt();
+                    _animationTime = value;
                     _isPlaying = false;
                   });
                 },
                 value: _animationTime.toDouble(),
-              ),
-            ),
-            SizedBox(
-              width: 32,
-              child: Text(
-                _animationTime.toString(),
-                textAlign: TextAlign.center,
               ),
             ),
           ],
@@ -207,14 +224,16 @@ class RobotMapEventView extends StatelessWidget {
   });
 
   final bool isAnimating;
-  final int time;
+  final double time;
   final RobotMatchTraceData robotRecording;
   final String team;
 
   @override
   Widget build(BuildContext context) {
     final posEvent = robotRecording.timelineInterpolated.lastWhereOrNull(
-      (event) => event.time <= time && event.isPositionEvent,
+      (event) =>
+          event.timeMS <= time * Duration.millisecondsPerSecond &&
+          event.isPositionEvent,
     );
     if (posEvent == null) {
       //A position event is required to show the robot on the timeline
@@ -224,8 +243,8 @@ class RobotMapEventView extends StatelessWidget {
 
     final allRecentEvents = robotRecording.timelineInterpolated.where(
       (event) =>
-          event.time >= time &&
-          event.time < time + 2 &&
+          event.timeMS >= time * Duration.millisecondsPerSecond &&
+          event.timeMS < (time + 2) * Duration.millisecondsPerSecond &&
           event.isPositionEvent == false,
     );
 
@@ -317,10 +336,20 @@ class FieldHeatMap extends StatelessWidget {
         child: FieldMap(
           //size: size,
           children: [
-            CustomPaint(
-              size: Size.infinite,
-              painter: HeatMap(events: events),
-            ),
+            if (events.isEmpty)
+              Center(
+                child: Text(
+                  "NO DATA",
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(color: warningColor),
+                ),
+              )
+            else
+              CustomPaint(
+                size: Size.infinite,
+                painter: HeatMap(events: events),
+              ),
           ],
         ),
       ),
@@ -467,7 +496,7 @@ class _PathsViewerState extends State<PathsViewer> {
                                 (event) => !event.isPositionEvent,
                               ))
                                 Text(
-                                  '${event.time} ${event.getLabelFromConfig(context.watch<DataProvider>().event.config)}',
+                                  '${event.timeDuration.inSeconds} ${event.getLabelFromConfig(context.watch<DataProvider>().event.config)}',
                                   style: TextStyle(
                                     color: getColorFromIndex(
                                       filteredPaths.indexOf(path),
