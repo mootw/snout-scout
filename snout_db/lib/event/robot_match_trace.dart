@@ -81,8 +81,15 @@ List<MatchEvent> _interpolateTimeline(List<MatchEvent> timeline) {
       continue;
     }
 
-    //Do not double include the zero time so start at x=1 (which is 1 millisecond)
-    for (int x = 1; x < width; x += 1000) {
+    // TODO interpolate based on distance rather than time
+    // BE CAREFUL this has huge performance impact (compute and memory), since the interpolated timeline is used for most all calculations and visuals.
+    //interpolate every 200 milliseconds. There needs to be at least 1000 ms since old code relied on there being 1 event per integer second
+    const interpolationFrequency = 200;
+    for (
+      int x = interpolationFrequency;
+      x < width;
+      x += interpolationFrequency
+    ) {
       final newTime = pos1.timeMS + x;
       interpolated.add(
         MatchEvent.robotPositionEvent(

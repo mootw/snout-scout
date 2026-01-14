@@ -310,26 +310,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage>
                           teamNumber: widget.team,
                           alliance: widget.teamAlliance,
                           robotPosition: _robotPosition,
-                          onTap: (robotPosition) {
-                            HapticFeedback.lightImpact();
-                            setState(() {
-                              for (final event in _events.toList()) {
-                                if (event.isPositionEvent) {
-                                  //Is position event
-                                  if (event.timeMS == _timeMS) {
-                                    //Event is the same time, overrwite
-                                    _events.remove(event);
-                                  }
-                                }
-                              }
-                              _events.add(
-                                MatchEvent.robotPositionEvent(
-                                  time: Duration(milliseconds: _timeMS),
-                                  position: robotPosition,
-                                ),
-                              );
-                            });
-                          },
+                          onTap: _robotPositionHandler,
                         ),
                       ),
                     ),
@@ -380,26 +361,7 @@ class _MatchRecorderPageState extends State<MatchRecorderPage>
                           : 1,
                       alliance: widget.teamAlliance,
                       robotPosition: _robotPosition,
-                      onTap: (robotPosition) {
-                        HapticFeedback.lightImpact();
-                        setState(() {
-                          for (final event in _events.toList()) {
-                            if (event.isPositionEvent) {
-                              //Is position event
-                              if (event.timeMS == _timeMS) {
-                                //Event is the same time, overrwite
-                                _events.remove(event);
-                              }
-                            }
-                          }
-                          _events.add(
-                            MatchEvent.robotPositionEvent(
-                              time: Duration(milliseconds: _timeMS),
-                              position: robotPosition,
-                            ),
-                          );
-                        });
-                      },
+                      onTap: _robotPositionHandler,
                     ),
                   ),
                 ),
@@ -419,6 +381,33 @@ class _MatchRecorderPageState extends State<MatchRecorderPage>
         ),
       ),
     );
+  }
+
+  void _robotPositionHandler(FieldPosition robotPosition) {
+    HapticFeedback.lightImpact();
+    setState(() {
+      for (final event in _events.toList()) {
+        if (event.isPositionEvent) {
+          const toleranceMS = 500;
+          if ((event.timeMS / toleranceMS).floor() * toleranceMS ==
+              (_timeMS / toleranceMS).floor() * toleranceMS) {
+            if (_timeMS > 0 && event.timeMS == 0) {
+              // That is the starting position, do not overwrite it after the start of the match.
+              continue;
+            }
+
+            //Event is the same time, overwrite
+            _events.remove(event);
+          }
+        }
+      }
+      _events.add(
+        MatchEvent.robotPositionEvent(
+          time: Duration(milliseconds: _timeMS),
+          position: robotPosition,
+        ),
+      );
+    });
   }
 
   Widget _statusAndToolBar() {
@@ -507,7 +496,8 @@ class _MatchRecorderPageState extends State<MatchRecorderPage>
       _events = List.generate(_events.length, (index) {
         final event = _events[index];
         return MatchEvent(
-          timeMS: ((event.timeMS / _timeMS) * matchLength.inMilliseconds).round(),
+          timeMS: ((event.timeMS / _timeMS) * matchLength.inMilliseconds)
+              .round(),
           x: event.x,
           y: event.y,
           id: event.id,
