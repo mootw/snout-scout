@@ -40,5 +40,5 @@ class ActionWriteDataItem implements ChainAction {
   }
 
   @override
-  String toString () => 'ActionWriteDataItem(${dataItem.uniqueKey})';
+  String toString() => 'ActionWriteDataItem(${dataItem.uniqueKey})';
 }

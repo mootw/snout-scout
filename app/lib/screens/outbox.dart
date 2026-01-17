@@ -75,14 +75,19 @@ class _OutboxStoragePageState extends State<OutboxStoragePage> {
                 context: context,
                 builder: (context) => AlertDialog(
                   title: const Text("Patch Data"),
-                  content: Text(SignedChainMessage.fromCbor(
-                    cbor.decode(base64Decode(patch)) as CborMap,
-                  ).payload.action.toCbor().toString()),
+                  content: Text(
+                    SignedChainMessage.fromCbor(
+                      cbor.decode(base64Decode(patch)) as CborMap,
+                    ).payload.action.toCbor().toString(),
+                  ),
                 ),
               ),
-              leading: IconButton(icon: Icon(Icons.delete), onPressed: () {
-                serverConnection.remoteOutbox.remove(patch);
-              },),
+              leading: IconButton(
+                icon: Icon(Icons.delete),
+                onPressed: () {
+                  serverConnection.remoteOutbox.remove(patch);
+                },
+              ),
               title: Text(
                 DateFormat.yMMMMEEEEd().add_Hms().format(
                   SignedChainMessage.fromCbor(
@@ -92,8 +97,8 @@ class _OutboxStoragePageState extends State<OutboxStoragePage> {
               ),
               subtitle: Text(
                 SignedChainMessage.fromCbor(
-                    cbor.decode(base64Decode(patch)) as CborMap,
-                  ).payload.action.toString(),
+                  cbor.decode(base64Decode(patch)) as CborMap,
+                ).payload.action.toString(),
               ),
             ),
         ],

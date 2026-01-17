@@ -56,7 +56,6 @@ class ActionWriteMatchTrace implements ChainAction {
     }
   }
 
-
   @override
-  String toString () => 'ActionWriteMatchTrace(${trace.uniqueKey})';
+  String toString() => 'ActionWriteMatchTrace(${trace.uniqueKey})';
 }

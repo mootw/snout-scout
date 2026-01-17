@@ -18,5 +18,6 @@ class Pubkey {
   String fingerprint() => toString().substring(0, 3);
 
   @override
-  String toString () => bytes.map((e) => e.toRadixString(16).padLeft(2, '0')).join();
+  String toString() =>
+      bytes.map((e) => e.toRadixString(16).padLeft(2, '0')).join();
 }

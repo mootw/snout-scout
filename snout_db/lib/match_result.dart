@@ -2,7 +2,6 @@ import 'package:cbor/cbor.dart';
 import 'package:snout_db/event/matchresults.dart';
 
 class MatchResult {
-  
   final String match;
   final MatchResultValues? result;
 

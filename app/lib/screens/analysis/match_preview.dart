@@ -257,7 +257,15 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                                           .timelineInterpolatedBlueNormalized(
                                             data.event.config.fieldStyle,
                                           )
-                                          .where((element) => data.event.config.getPeriodAtTime(element.timeDuration).id == autoPeriodId)
+                                          .where(
+                                            (element) =>
+                                                data.event.config
+                                                    .getPeriodAtTime(
+                                                      element.timeDuration,
+                                                    )
+                                                    .id ==
+                                                autoPeriodId,
+                                          )
                                           .toList(),
                                     ),
                                 ],
@@ -300,7 +308,15 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                                     .timelineInterpolatedBlueNormalized(
                                       data.event.config.fieldStyle,
                                     )
-                                    .where((element) => data.event.config.getPeriodAtTime(element.timeDuration).id == autoPeriodId),
+                                    .where(
+                                      (element) =>
+                                          data.event.config
+                                              .getPeriodAtTime(
+                                                element.timeDuration,
+                                              )
+                                              .id ==
+                                          autoPeriodId,
+                                    ),
                             ],
                           ),
                           for (final eventType

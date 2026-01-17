@@ -13,12 +13,12 @@ void main() async {
     final db = SnoutChain([rootKeypairAction]);
 
     final writeConfigAction = await ChainActionData(
-    time: DateTime.now(),
-    previousHash: await rootKeypairAction.hash,
-    action: ActionWriteConfig(
-      const EventConfig(name: 'Test Event', team: 6749, fieldImage: ''),
-    ),
-  ).encodeAndSign(await keyPair.extractPrivateKeyBytes());
+      time: DateTime.now(),
+      previousHash: await rootKeypairAction.hash,
+      action: ActionWriteConfig(
+        const EventConfig(name: 'Test Event', team: 6749, fieldImage: ''),
+      ),
+    ).encodeAndSign(await keyPair.extractPrivateKeyBytes());
 
     await db.verifyApplyAction(writeConfigAction);
 
@@ -26,5 +26,4 @@ void main() async {
 
     expect(db.event.config.name, equals('Test Event'));
   });
-
 }

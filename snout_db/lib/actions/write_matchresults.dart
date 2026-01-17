@@ -40,5 +40,5 @@ class ActionWriteMatchResults implements ChainAction {
   }
 
   @override
-  String toString () => 'ActionWriteMatchResults(${matchResult.uniqueKey})';
+  String toString() => 'ActionWriteMatchResults(${matchResult.uniqueKey})';
 }

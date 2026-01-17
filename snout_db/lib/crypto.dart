@@ -32,6 +32,7 @@ void main(List<String> args) async {
 Future<EncryptedSecretKey> encryptSeedKey({
   required List<int> seedKey,
   required List<int> password,
+
   /// Difficulty target for PBKDF2
   int t = 210000,
 }) async {
@@ -70,7 +71,6 @@ Future<List<int>> decryptSeedKey({
   final aes_256_cbc = await AesCbcSecretKey.importRawKey(dk);
   return aes_256_cbc.decryptBytes(seedKey.encryptedKey, seedKey.iv);
 }
-
 
 /*
 TODO follow this:?

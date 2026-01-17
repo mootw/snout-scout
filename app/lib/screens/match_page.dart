@@ -211,7 +211,13 @@ class _MatchPageState extends State<MatchPage> {
                       (
                         label: robot.key,
                         path: robot.value.timelineInterpolated
-                            .where((element) => snoutData.event.config.getPeriodAtTime(element.timeDuration).id == autoPeriodId)
+                            .where(
+                              (element) =>
+                                  snoutData.event.config
+                                      .getPeriodAtTime(element.timeDuration)
+                                      .id ==
+                                  autoPeriodId,
+                            )
                             .toList(),
                       ),
                   ],
@@ -272,7 +278,9 @@ class _MatchPageState extends State<MatchPage> {
                               (event) =>
                                   (_filterPeriod == null ||
                                       snoutData.event.config
-                                              .getPeriodAtTime(event.timeDuration)
+                                              .getPeriodAtTime(
+                                                event.timeDuration,
+                                              )
                                               .id ==
                                           _filterPeriod) &&
                                   event.id == eventType.id,

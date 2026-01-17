@@ -7,7 +7,6 @@ part 'match_data.g.dart';
 
 @JsonSerializable()
 class MatchData {
-
   /// Performance of each robot during the match
   /// this map might include surrogate robots (aka robots that are not in the union of the scheduled teams)
   Map<String, RobotMatchTraceData> robot = {};

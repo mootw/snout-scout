@@ -107,6 +107,5 @@ class CachedMemoryImageAvif extends ImageProvider<CachedMemoryImageAvif> {
   int get hashCode => tag.hashCode;
 
   @override
-  String toString() =>
-      'CachedMemoryImageAvif("$tag")';
+  String toString() => 'CachedMemoryImageAvif("$tag")';
 }

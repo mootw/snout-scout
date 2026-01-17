@@ -26,10 +26,10 @@ class MatchResultValues {
   }
 
   CborMap toCbor() => CborMap({
-        CborString('time'): CborSmallInt(time.millisecondsSinceEpoch),
-        CborString('redScore'): CborSmallInt(redScore),
-        CborString('blueScore'): CborSmallInt(blueScore),
-      });
+    CborString('time'): CborSmallInt(time.millisecondsSinceEpoch),
+    CborString('redScore'): CborSmallInt(redScore),
+    CborString('blueScore'): CborSmallInt(blueScore),
+  });
 
   Alliance get winner {
     if (redScore == blueScore) {

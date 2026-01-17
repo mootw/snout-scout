@@ -6,14 +6,13 @@ import 'package:snout_db/pubkey.dart';
 
 Map<Pubkey, dynamic> getScoutStatus(DataProvider provider) {
   final recentEvents = provider.database.actions.where(
-    (message) => message.payload.time.isAfter(DateTime.now().subtract(Duration(minutes: 15))),
+    (message) => message.payload.time.isAfter(
+      DateTime.now().subtract(Duration(minutes: 15)),
+    ),
   );
   final eventsMap = Map.fromEntries([
     ...recentEvents.map(
-      (e) => MapEntry(e.author, (
-        e.payload.time,
-        e.payload.action.toString(),
-      )),
+      (e) => MapEntry(e.author, (e.payload.time, e.payload.action.toString())),
     ),
   ]);
   return eventsMap;
