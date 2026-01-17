@@ -248,6 +248,7 @@ Future<AuthorizedScoutData?> registerNewScout(BuildContext context) async {
       return (secretKey: dialogResult.$1, pubkey: dialogResult.$2.pk);
     }
   }
+  return null;
 }
 
 typedef RegistrationResult = (List<int> seed, ActionWriteKeyPair addKey);

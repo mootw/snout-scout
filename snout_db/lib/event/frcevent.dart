@@ -4,7 +4,6 @@ import 'package:eval_ex/built_ins.dart';
 import 'package:eval_ex/expression.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:snout_db/config/eventconfig.dart';
-import 'package:snout_db/config/match_period_config.dart';
 import 'package:snout_db/config/matchresults_process.dart';
 import 'package:snout_db/data_item.dart';
 import 'package:snout_db/event/dynamic_property.dart';
