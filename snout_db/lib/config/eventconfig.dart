@@ -1,7 +1,8 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:meta/meta.dart';
+import 'package:snout_db/config/data_item_schema.dart';
+import 'package:snout_db/config/match_period_config.dart';
 import 'package:snout_db/config/matchscouting.dart';
-import 'package:snout_db/config/surveyitem.dart';
 
 part 'eventconfig.g.dart';
 
@@ -33,12 +34,14 @@ class EventConfig {
   /// team number
   final int team;
 
-  final List<SurveyItem> pitscouting;
+  // TODO rename this field before 2026
+  final List<DataItemSchema> pitscouting;
+
+  final List<DataItemSchema> pit;
 
   final MatchScouting matchscouting;
 
-  /// documentation about this years scouting (generic)
-  final String docs;
+  final List<MatchPeriodConfig> matchperiods;
 
   final String fieldImage;
 
@@ -49,8 +52,31 @@ class EventConfig {
     this.tbaSecretKey,
     this.fieldStyle = FieldStyle.rotated,
     this.pitscouting = const [],
+    this.pit = const [
+      // Default values to inspire these pit data fields
+      DataItemSchema(
+        id: 'pit_map',
+        label: 'Pit Map',
+        type: DataItemType.picture,
+        docs: 'Image of the Pit Map',
+      ),
+      DataItemSchema(
+        id: 'docs',
+        label: 'Docs',
+        type: DataItemType.text,
+        docs: 'Event schedule and other important info',
+      ),
+      DataItemSchema(
+        id: 'fresh_battery',
+        label: 'Fresh Battery',
+        type: DataItemType.toggle,
+      ),
+    ],
+    this.matchperiods = const [
+      MatchPeriodConfig(id: 'auto', label: 'Auto', durationSeconds: 17),
+      MatchPeriodConfig(id: 'teleop', label: 'Teleop', durationSeconds: 135),
+    ],
     this.matchscouting = const MatchScouting(),
-    this.docs = '',
     // image is put last to make editing via text easier
     required this.fieldImage,
   });
@@ -58,6 +84,24 @@ class EventConfig {
   factory EventConfig.fromJson(Map<String, dynamic> json) =>
       _$EventConfigFromJson(json);
   Map<String, dynamic> toJson() => _$EventConfigToJson(this);
+
+  Duration get matchLength {
+    final totalSeconds = matchperiods
+        .map((e) => e.durationSeconds)
+        .fold<int>(0, (previousValue, element) => previousValue + element);
+    return Duration(seconds: totalSeconds);
+  }
+
+  MatchPeriodConfig getPeriodAtTime(Duration time) {
+    Duration accumulatedTime = Duration.zero;
+    for (final period in matchperiods) {
+      accumulatedTime += Duration(seconds: period.durationSeconds);
+      if (time < accumulatedTime) {
+        return period;
+      }
+    }
+    return matchperiods.last;
+  }
 }
 
 enum FieldStyle { rotated, mirrored }

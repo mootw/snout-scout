@@ -3,11 +3,12 @@ import 'dart:async';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/screens/match_page.dart';
 import 'package:app/screens/view_team_page.dart';
-import 'package:app/services/snout_image_cache.dart';
+import 'package:app/widgets/team_avatar.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:snout_db/config/surveyitem.dart';
+import 'package:snout_db/config/data_item_schema.dart';
+import 'package:snout_db/event/dynamic_property.dart';
 import 'package:snout_db/event/frcevent.dart';
 import 'package:string_similarity/string_similarity.dart';
 
@@ -155,23 +156,10 @@ Stream<SearchResult> _search(FRCEvent event, String query) async* {
         ? 0.99
         : (team.toString().contains(query) ? 0.9 : -1);
     if (quality >= 0) {
-      //Load the robot picture to show in the search if it is available
-      Widget? robotPicture;
-      final pictureData =
-          event.pitscouting[team.toString()]?[robotPictureReserved];
-      if (pictureData != null) {
-        robotPicture = AspectRatio(
-          aspectRatio: 1,
-          child: Image(
-            image: snoutImageCache.getCached(pictureData),
-            fit: BoxFit.cover,
-          ),
-        );
-      }
       yield SearchResult(
         quality.toDouble(),
         (context) => ListTile(
-          leading: robotPicture,
+          leading: FRCTeamAvatar(teamNumber: team, size: null),
           title: Text(team.toString()),
           subtitle: const Text("Team"),
           onTap: () {
@@ -233,7 +221,7 @@ Stream<SearchResult> _search(FRCEvent event, String query) async* {
       if (surveyItem == null) {
         continue;
       }
-      if (surveyItem.type == SurveyItemType.picture) {
+      if (surveyItem.type == DataItemType.picture) {
         //Do not include image data.
         continue;
       }
@@ -242,24 +230,10 @@ Stream<SearchResult> _search(FRCEvent event, String query) async* {
         query,
       );
       if (quality >= threshold) {
-        //Load the robot picture to show in the search if it is available
-        Widget? robotPicture;
-        final pictureData =
-            event.pitscouting[team.toString()]?[robotPictureReserved];
-        if (pictureData != null) {
-          robotPicture = AspectRatio(
-            aspectRatio: 1,
-            child: Image(
-              image: snoutImageCache.getCached(pictureData),
-              fit: BoxFit.cover,
-            ),
-          );
-        }
-
         yield SearchResult(
           quality,
           (context) => ListTile(
-            leading: robotPicture,
+            leading: FRCTeamAvatar(teamNumber: team, size: null),
             title: Text('${item.value}'),
             subtitle: Text("${team.toString()}: ${surveyItem.id}"),
             onTap: () {
@@ -282,11 +256,15 @@ Stream<SearchResult> _search(FRCEvent event, String query) async* {
       continue;
     }
     for (final robot in match.value.robot.entries) {
-      for (final value in robot.value.survey.entries) {
+      for (final value
+          in event
+                  .matchTeamData(int.tryParse(robot.key) ?? 0, match.key)
+                  ?.entries ??
+              DynamicProperties().entries) {
         final surveyItem = event.config.matchscouting.survey.firstWhereOrNull(
           (element) => element.id == value.key,
         );
-        if (surveyItem?.type == SurveyItemType.picture) {
+        if (surveyItem?.type == DataItemType.picture) {
           //Do not include image data.
           continue;
         }
@@ -300,6 +278,10 @@ Stream<SearchResult> _search(FRCEvent event, String query) async* {
           yield SearchResult(
             quality,
             (context) => ListTile(
+              leading: FRCTeamAvatar(
+                teamNumber: int.tryParse(robot.key) ?? 0,
+                size: null,
+              ),
               title: Text(value.value.toString()),
               subtitle: Text(
                 "${event.schedule[match.key]?.label}: ${robot.key}: ${value.key}",

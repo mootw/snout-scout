@@ -1,11 +1,12 @@
 import 'dart:async';
 
+import 'package:app/kiosk/auto_scroller.dart';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/screens/analysis/boxplot_analysis.dart';
 import 'package:app/screens/analysis/events_heatmaps.dart';
 import 'package:app/screens/analysis/match_preview.dart';
 import 'package:app/screens/analysis/pitscout_survey_analysis.dart';
-import 'package:app/screens/analysis/postmatch_survey_analysis.dart';
+import 'package:app/screens/analysis/analysis_match_robot_dataitem.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -23,7 +24,7 @@ class _KioskInfoCycleState extends State<KioskInfoCycle> {
   @override
   void initState() {
     super.initState();
-    _t = Timer.periodic(Duration(seconds: 20), (_) {
+    _t = Timer.periodic(Duration(seconds: 40), (_) {
       displayNewStat();
     });
   }
@@ -59,20 +60,18 @@ class _KioskInfoCycleState extends State<KioskInfoCycle> {
       AnalysisPitScouting(),
 
       // Match Recording survey analysis (each chart)
-      AnalysisPostMatchSurvey(),
+      AnalysisRobotDataItem(),
 
       // events heatmap analysis (each chart)
       AnalysisEventsHeatmap(),
 
       // consistency analysis chart, random stat (scroll?)
       BoxPlotAnalysis(),
-
-      //  Show a random teams autos (M2 mode)
     ];
 
     if (_idx >= options.length) {
       _idx = 0;
     }
-    return options[_idx];
+    return AutoScroller(key: ValueKey(_idx), child: options[_idx]);
   }
 }

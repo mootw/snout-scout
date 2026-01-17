@@ -6,9 +6,10 @@ import 'package:app/screens/edit_json.dart';
 import 'package:app/screens/view_team_page.dart';
 import 'package:app/services/snout_image_cache.dart';
 import 'package:app/services/tba_autofill.dart';
+import 'package:app/widgets/team_avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:snout_db/patch.dart';
+import 'package:snout_db/actions/write_teams.dart';
 
 /// Displays a wrapped grid of teams
 class TeamGridList extends StatefulWidget {
@@ -25,6 +26,7 @@ class _TeamGridListState extends State<TeamGridList> {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
+      primary: true,
       scrollDirection: Axis.vertical,
       child: Center(
         child: Wrap(
@@ -72,12 +74,13 @@ class _TeamGridListState extends State<TeamGridList> {
                               );
 
                               if (result != null && context.mounted) {
-                                Patch patch = Patch.teams(
-                                  DateTime.now(),
-                                  List<int>.from(json.decode(result)),
+                                final teams = List<int>.from(
+                                  json.decode(result),
                                 );
+                                teams.sort();
+                                final action = ActionWriteTeams(teams);
                                 //Save the scouting results to the server!!
-                                await submitData(context, patch);
+                                await submitData(context, action);
                               }
                             },
                             child: const Text("Manual"),
@@ -124,12 +127,11 @@ class _TeamGridListState extends State<TeamGridList> {
                               );
 
                               if (result != null && context.mounted) {
-                                Patch patch = Patch.teams(
-                                  DateTime.now(),
-                                  json.decode(result),
+                                final action = ActionWriteTeams(
+                                  json.decode(result) as List<int>,
                                 );
                                 //Save the scouting results to the server!!
-                                await submitData(context, patch);
+                                await submitData(context, action);
                               }
                             },
                             child: const Text("TBA AutoFill"),
@@ -169,7 +171,7 @@ class TeamListTile extends StatelessWidget {
     if (data != null) {
       image = AspectRatio(
         aspectRatio: 1,
-        child: Image(image: snoutImageCache.getCached(data), fit: BoxFit.cover),
+        child: Image(image: memoryImageProvider(data), fit: BoxFit.cover),
       );
     }
 
@@ -184,9 +186,16 @@ class TeamListTile extends StatelessWidget {
             child: image ?? const Center(child: Text("No Image")),
           ),
           const SizedBox(height: 4),
-          Text(
-            teamNumber.toString(),
-            style: Theme.of(context).textTheme.titleMedium,
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              FRCTeamAvatar(teamNumber: teamNumber),
+              const SizedBox(width: 4),
+              Text(
+                teamNumber.toString(),
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+            ],
           ),
         ],
       ),

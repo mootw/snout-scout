@@ -2,9 +2,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:cbor/cbor.dart';
 import 'package:dotenv/dotenv.dart';
 import 'package:logging/logging.dart';
-import 'package:rfc_6901/rfc_6901.dart';
 import 'package:server/socket_messages.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
@@ -12,21 +12,14 @@ import 'package:shelf_gzip/shelf_gzip.dart';
 import 'package:shelf_multipart/shelf_multipart.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'package:shelf_web_socket/shelf_web_socket.dart';
-import 'package:snout_db/patch.dart';
-import 'package:snout_db/snout_db.dart';
+import 'package:snout_db/message.dart';
+import 'package:snout_db/snout_chain.dart';
 import 'package:synchronized/synchronized.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
-
-import 'edit_lock.dart';
-
-//TODO implement https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/ETag
 
 final env = DotEnv(includePlatformEnvironment: true);
 int serverPort = 6749;
 Map<String, EventData> loadedEvents = {};
-
-//To keep things simple we will just have 1 edit lock for all loaded events.
-EditLock editLock = EditLock();
 
 // used to prevent the server from writing the database multiple times at once
 final Lock dbWriteLock = Lock();
@@ -56,14 +49,12 @@ Future _loadEvents() async {
   }
 }
 
-Future<SnoutDB?> _loadFromDisk(String eventID) async {
+Future<SnoutDBFile?> _loadFromDisk(String eventID) async {
   final File? f = loadedEvents[eventID]?.file;
   if (f == null || await f.exists() == false) {
     return null;
   }
-  return SnoutDB.fromJson(
-    json.decode(await f.readAsString()) as Map<String, dynamic>,
-  );
+  return SnoutDBFile.fromCbor(cbor.decode(await f.readAsBytes()) as CborMap);
 }
 
 void main(List<String> args) async {
@@ -130,33 +121,6 @@ void main(List<String> args) async {
     return handler(request);
   });
 
-  app.get("/edit_lock", (Request request) {
-    final key = request.headers["key"];
-    if (key == null) {
-      return Response.badRequest(body: "invalid or missing key");
-    }
-    final lock = editLock.get(key);
-    return Response.ok(lock.toString());
-  });
-
-  app.post("/edit_lock", (Request request) {
-    final key = request.headers["key"];
-    if (key == null) {
-      return Response.badRequest(body: "invalid or missing key");
-    }
-    editLock.set(key);
-    return Response.ok("");
-  });
-
-  app.delete("/edit_lock", (Request request) {
-    final key = request.headers["key"];
-    if (key == null) {
-      return Response.badRequest(body: "invalid or missing key");
-    }
-    editLock.clear(key);
-    return Response.ok("");
-  });
-
   app.put("/upload_events", (Request request) {
     // Since this edits db files, it could conflict with other writes
     return dbWriteLock.synchronized(() async {
@@ -197,7 +161,7 @@ void main(List<String> args) async {
         return Response.unauthorized("upload_password is invalid");
       }
 
-      logger.info("Attempting file upload for event name $eventID");
+      logger.info("Attempting file delete for event name $eventID");
       final eventFile = File('${eventsDirectory.path}/$eventID');
 
       // unload the file
@@ -230,40 +194,36 @@ void main(List<String> args) async {
     }
 
     return Response.ok(
-      json.encode(event),
-      headers: {
-        'Content-Type': ContentType(
-          'application',
-          'json',
-          charset: 'utf-8',
-        ).toString(),
-      },
+      cbor.encode(event.toCbor()),
+      headers: {'Content-Type': ContentType.binary.toString()},
     );
   });
 
-  app.get("/events/<eventID>/head", (Request request, String eventID) async {
+  /// Gets an ordered list of all message hashes in the database
+  /// Using json is fine here because gzip makes the file size about the same as binary encoding
+  /// This also makes it easier to debug
+  app.get("/events/<eventID>/index", (Request request, String eventID) async {
     eventID = Uri.decodeComponent(eventID);
     final event = await _loadFromDisk(eventID);
     if (event == null) {
       return Response.badRequest(body: 'event not found');
     }
 
+    final messageHashes = <String>[];
+    for (final action in event.actions) {
+      messageHashes.add(base64UrlEncode(await action.hash));
+    }
     return Response.ok(
-      jsonEncode(event.patches.length),
-      headers: {
-        'Content-Type': ContentType(
-          'application',
-          'json',
-          charset: 'utf-8',
-        ).toString(),
-      },
+      json.encode(messageHashes),
+      headers: {'Content-Type': ContentType.json.toString()},
     );
   });
 
-  app.get("/events/<eventID>/<subPath|.*>", (
+  /// Gets a specific message by its base64 hash
+  app.get("/events/<eventID>/messages/<messageID>", (
     Request request,
     String eventID,
-    String subPath,
+    String messageID,
   ) async {
     eventID = Uri.decodeComponent(eventID);
     final event = await _loadFromDisk(eventID);
@@ -271,24 +231,18 @@ void main(List<String> args) async {
       return Response.badRequest(body: 'event not found');
     }
 
-    try {
-      var dbJson = json.decode(json.encode(event));
-      final pointer = JsonPointer('/$subPath');
-      dbJson = pointer.read(dbJson);
-      return Response.ok(
-        json.encode(dbJson),
-        headers: {
-          'Content-Type': ContentType(
-            'application',
-            'json',
-            charset: 'utf-8',
-          ).toString(),
-        },
-      );
-    } catch (e, s) {
-      logger.warning('failed to read sub-path', e, s);
-      return Response.internalServerError(body: e);
+    for (final action in event.actions) {
+      if (base64UrlEncode(await action.hash) == messageID) {
+        return Response.ok(
+          cbor.encode(action.toCbor()),
+          headers: {'Content-Type': ContentType.binary.toString()},
+        );
+      }
     }
+    return Response.notFound(
+      'message $messageID not found',
+      headers: {'Content-Type': ContentType.json.toString()},
+    );
   });
 
   app.put("/events/<eventID>", (Request request, String eventID) {
@@ -299,36 +253,48 @@ void main(List<String> args) async {
       if (f == null || await f.exists() == false) {
         return Response.notFound("Event not found");
       }
-      final event = SnoutDB.fromJson(
-        json.decode(await f.readAsString()) as Map<String, dynamic>,
+      final event = SnoutDBFile.fromCbor(
+        cbor.decode(await f.readAsBytes()) as CborMap,
       );
-      //Uses UTF-8 by default
-      final String content = await request.readAsString();
+
+      // TODO verify this works lol
+      final List<int> content = await request.read().fold(
+        <int>[],
+        (a, b) => [...a, ...b],
+      );
+
       try {
-        final Patch patch = Patch.fromJson(json.decode(content) as Map);
+        final SignedChainMessage message = SignedChainMessage.fromCbor(
+          cbor.decode(content) as CborMap,
+        );
 
-        event.addPatch(patch);
+        final dbWithNewMessage = SnoutChain.fromFile(event);
+        // Verify change is valid
+        await dbWithNewMessage.verifyApplyAction(message);
 
-        logger.fine('added patch: ${json.encode(patch)}');
+        logger.fine('added message: ${message.toCbor()}');
 
-        //Successful patch, send this update to all listeners
+        //Successful message, send this update to all listeners
         for (final WebSocketChannel listener
             in loadedEvents[eventID]?.listeners ?? []) {
           listener.sink.add(
             json.encode({
               "type": SocketMessageType.newPatchId,
-              "patch": event.patches.length - 1,
+              "message": base64UrlEncode(await message.hash),
             }),
           );
         }
 
         //Write the new DB to disk
-        await f.writeAsString(json.encode(event), flush: true);
+        await f.writeAsBytes(
+          cbor.encode(SnoutDBFile(actions: dbWithNewMessage.actions).toCbor()),
+          flush: true,
+        );
 
         return Response.ok("");
       } catch (e, s) {
-        logger.severe('failed to accept patch: $content', e, s);
-        return Response.internalServerError(body: e);
+        logger.severe('failed to accept message: $content', e, s);
+        return Response.internalServerError(body: e.toString());
       }
     });
   });
@@ -345,10 +311,9 @@ void main(List<String> args) async {
     serverPort,
     poweredByHeader: 'frogs',
   );
-  //Enable GZIP compression since every byte counts and the performance hit is
-  //negligable for the 30%+ compression depending on how much of the data is image
+  //Enable GZIP compression since every byte counts!
+  // even though the new binary format is efficient, gzip can still save ~30%
   server.autoCompress = true;
-  //TODO i think this will work if chunked transfer encoding is set..
   logger.info('Server started: ${server.address} port ${server.port}');
 }
 

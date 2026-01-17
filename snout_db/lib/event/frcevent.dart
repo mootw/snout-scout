@@ -3,40 +3,102 @@ import 'package:decimal/decimal.dart';
 import 'package:eval_ex/built_ins.dart';
 import 'package:eval_ex/expression.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:meta/meta.dart';
-import 'package:rfc_6901/rfc_6901.dart';
 import 'package:snout_db/config/eventconfig.dart';
 import 'package:snout_db/config/matchresults_process.dart';
+import 'package:snout_db/data_item.dart';
 import 'package:snout_db/event/dynamic_property.dart';
 import 'package:snout_db/event/match_data.dart';
 import 'package:snout_db/event/match_schedule_item.dart';
 import 'package:snout_db/event/matchevent.dart';
-import 'package:snout_db/event/robotmatchresults.dart';
-import 'package:snout_db/patch.dart';
+import 'package:snout_db/event/matchresults.dart';
+import 'package:snout_db/event/robot_match_trace.dart';
+import 'package:snout_db/pubkey.dart';
+import 'package:snout_db/strategy/team_list.dart';
 
 part 'frcevent.g.dart';
 
 const scheduleBreakDuration = Duration(minutes: 29);
 
-@immutable
 @JsonSerializable()
 class FRCEvent {
   /// how should this event be tracked?
-  final EventConfig config;
+  EventConfig config;
 
   ///List of teams in the event, ideally ordered smallest number to largest
-  final List<int> teams;
+  List<int> teams;
 
-  // Match schedule configuration. This is a Map Type to avoid insertion collisions.
-  // Technically a list type is more ideal, and it is expensive to remove an item
-  // but that is rarely required
-  final Map<String, MatchScheduleItem> schedule;
+  /// '''Table''' of data items
+  @JsonKey(includeToJson: false, includeFromJson: false)
+  Map<String, (DataItem item, Pubkey author, DateTime modifiedDate)> dataItems =
+      {};
+
+  @JsonKey(includeToJson: false, includeFromJson: false)
+  Map<String, TeamList> teamLists = {};
+
+  /// '''Table'''
+  @JsonKey(includeToJson: false, includeFromJson: false)
+  Map<String, (RobotMatchTraceData item, Pubkey author, DateTime modifiedDate)>
+  traces = {};
+
+  Map<String, MatchScheduleItem> schedule;
+
+  /// '''Table'''
+  @JsonKey(includeToJson: false, includeFromJson: false)
+  Map<String, (MatchResultValues item, Pubkey author, DateTime modifiedDate)>
+  matchResults = {};
 
   // Sorted schedule. Important for some lookups
   List<MatchScheduleItem> get scheduleSorted => schedule.values.sorted();
 
+  /// --------------------------------------------
+  /// EVERYTHING BELOW THIS POINT IS DERIVED DATA
+  /// --------------------------------------------
+
   /// Match Data
-  final Map<String, MatchData> matches;
+  Map<String, MatchData> matches = {};
+
+  MatchResultValues? getMatchResults(String matchId) =>
+      matchResults['/match/$matchId/result']?.$1;
+
+  // Legacy-like accessor for match survey data
+  DynamicProperties? matchTeamData(int team, String matchId) {
+    final f = DynamicProperties.fromEntries(
+      dataItems.entries
+          .where(
+            // TODO use a more robust way to identify the values for this robots survey using a proper index based on the config
+            (e) => e.key.startsWith('/match/$matchId/team/$team'),
+          )
+          .map((e) => MapEntry(e.value.$1.key, e.value.$1.value))
+          .toList(),
+    );
+    return f;
+  }
+
+  DynamicProperties? pitDataItems() {
+    final f = DynamicProperties.fromEntries(
+      dataItems.entries
+          .where(
+            // TODO use a more robust way to identify the values for this robots survey using a proper index based on the config
+            (e) => e.key.startsWith('/pit/'),
+          )
+          .map((e) => MapEntry(e.value.$1.key, e.value.$1.value))
+          .toList(),
+    );
+    return f;
+  }
+
+  DynamicProperties? matchDataItems(String matchId) {
+    final f = DynamicProperties.fromEntries(
+      dataItems.entries
+          .where(
+            // TODO use a more robust way to identify the values for this robots survey using a proper index based on the config
+            (e) => e.key.startsWith('/match/$matchId/data/'),
+          )
+          .map((e) => MapEntry(e.value.$1.key, e.value.$1.value))
+          .toList(),
+    );
+    return f;
+  }
 
   List<MapEntry<String, MatchData>> matchesSorted() {
     return matches.entries.sorted((a, b) {
@@ -47,53 +109,56 @@ class FRCEvent {
     });
   }
 
-  //Team Survey results
-  final Map<String, DynamicProperties> pitscouting;
+  //Team Survey results TODO JANK implementation and so inefficient it's not even funny
+  Map<String, DynamicProperties> get pitscouting {
+    final entries = dataItems.entries
+        .where((entry) => entry.key.startsWith('/team/'))
+        .toList();
 
-  /// image of the pit map
-  final String? pitmap;
+    final Map<String, Map<String, dynamic>> result = {};
 
-  // List of registered scouts and their passwords
-  final Map<String, String> scoutPasswords;
+    for (final entry in entries) {
+      // Remove leading slash if present and split
+      final parts = entry.key.startsWith('/')
+          ? entry.key.substring(1).split('/')
+          : entry.key.split('/');
+
+      // Ensure we have the expected structure: team/<id>/<attribute>
+      if (parts.length >= 3 && parts[0] == 'team') {
+        final teamId = parts[1];
+        // Join the rest in case the attribute itself contains slashes
+        final attribute = parts.sublist(2).join('/');
+
+        // Get or create the inner map for this team
+        final teamMap = result.putIfAbsent(teamId, () => <String, dynamic>{});
+
+        // Add the attribute.
+        // If you have a value associated with this key, assign it here.
+        // Otherwise, we can set it to null, true, or the original full key.
+        teamMap[attribute] = entry.value.$1.value;
+      }
+    }
+
+    return result;
+  }
 
   //Enforce that all matches are sorted
-  const FRCEvent({
+  FRCEvent({
     required this.config,
+    required this.matches,
     this.teams = const [],
     this.schedule = const {},
-    this.matches = const {},
-    this.pitscouting = const {},
-    this.scoutPasswords = const {},
-    this.pitmap,
   });
 
   factory FRCEvent.fromJson(Map json) => _$FRCEventFromJson(json);
   Map toJson() => _$FRCEventToJson(this);
 
-  /// "performant" way to load a database state from a list patches
-  /// note, this will fail if the resulting structure does not match
-  /// a valid FRCEvent
-  factory FRCEvent.fromPatches(List<Patch> patches) {
-    //Start with empty!
-    Map? dbJson;
-    for (final patch in patches) {
-      if (dbJson == null) {
-        //Initialize the db with the first patch's data.
-        dbJson = FRCEvent.fromJson(patch.value! as Map).toJson();
-        continue;
-      }
-      dbJson = JsonPointer(patch.path).write(dbJson, patch.value)! as Map;
-    }
-    return FRCEvent.fromJson(dbJson!);
-  }
-
   /// returns matches SCHEDULED to have a specific team in them.
   /// this is NOT the same as teamRecordedMatches which is all matches
   /// that are actually recorded
-  List<MatchScheduleItem> matchesWithTeam(int team) =>
-      scheduleSorted
-          .where((match) => match.isScheduledToHaveTeam(team))
-          .toList();
+  List<MatchScheduleItem> matcheScheduledWithTeam(int team) => scheduleSorted
+      .where((match) => match.isScheduledToHaveTeam(team))
+      .toList();
 
   //returns the match after the last match with results
   MatchScheduleItem? get nextMatch => scheduleSorted
@@ -101,7 +166,7 @@ class FRCEvent {
       .reversed
       .lastWhereOrNull((match) => match.isComplete(this) == false);
 
-  MatchScheduleItem? nextMatchForTeam(int team) => matchesWithTeam(
+  MatchScheduleItem? nextMatchForTeam(int team) => matcheScheduledWithTeam(
     team,
   ).reversed.lastWhereOrNull((match) => match.isComplete(this) == false);
 
@@ -111,12 +176,11 @@ class FRCEvent {
       (match) => match.isComplete(this),
     );
 
-    final matchAfterNext =
-        nextMatch == null
-            ? null
-            : scheduleSorted.firstWhereOrNull(
-              (match) => match.scheduledTime.isAfter(nextMatch.scheduledTime),
-            );
+    final matchAfterNext = nextMatch == null
+        ? null
+        : scheduleSorted.firstWhereOrNull(
+            (match) => match.scheduledTime.isAfter(nextMatch.scheduledTime),
+          );
 
     if (nextMatch != null &&
         matchAfterNext != null &&
@@ -170,10 +234,12 @@ class FRCEvent {
   //
   ({double? value, String? error})? runMatchResultsProcess(
     MatchResultsProcess process,
-    RobotMatchResults? matchResults,
+    RobotMatchTraceData? robotResults,
+    DynamicProperties? robotSurvey,
     int team,
+    String matchId,
   ) {
-    if (matchResults == null) {
+    if (robotResults == null) {
       return null;
     }
 
@@ -182,7 +248,29 @@ class FRCEvent {
     //Returns 1 if the team's pit scouting data matches 0 otherwise.
     exp.addLazyFunction(
       LazyFunctionImpl(
-        "PITSCOUTINGIS",
+        "MATCHDATAIS",
+        2,
+        fEval: (params) {
+          if (matchDataItems(matchId)?[params[0].getString()].toString() ==
+              params[1].getString()) {
+            return LazyNumberImpl(
+              eval: () => Decimal.fromInt(1),
+              getString: () => "1",
+            );
+          } else {
+            return LazyNumberImpl(
+              eval: () => Decimal.fromInt(0),
+              getString: () => "0",
+            );
+          }
+        },
+      ),
+    );
+
+    //Returns 1 if the team's pit scouting data matches 0 otherwise.
+    exp.addLazyFunction(
+      LazyFunctionImpl(
+        "TEAMDATAIS",
         2,
         fEval: (params) {
           if (pitscouting[team.toString()]?[params[0].getString()].toString() ==
@@ -204,10 +292,10 @@ class FRCEvent {
     //Returns 1 if a post game survey item matches the value 0 otherwise
     exp.addLazyFunction(
       LazyFunctionImpl(
-        "POSTGAMEIS",
+        "MATCHTEAMIS",
         2,
         fEval: (params) {
-          if (matchResults.survey[params[0].getString()].toString() ==
+          if (robotSurvey?[params[0].getString()].toString() ==
               params[1].getString()) {
             return LazyNumberImpl(
               eval: () => Decimal.fromInt(1),
@@ -234,17 +322,16 @@ class FRCEvent {
         "EVENTINBBOX",
         5,
         fEval: (params) {
-          final int value =
-              matchResults.timelineInterpolated
-                  .where(
-                    (element) =>
-                        element.id == params[0].getString() &&
-                        element.position.x >= params[1].eval()!.toDouble() &&
-                        element.position.y >= params[2].eval()!.toDouble() &&
-                        element.position.x <= params[3].eval()!.toDouble() &&
-                        element.position.y <= params[4].eval()!.toDouble(),
-                  )
-                  .length;
+          final int value = robotResults.timelineInterpolated
+              .where(
+                (element) =>
+                    element.id == params[0].getString() &&
+                    element.position.x >= params[1].eval()!.toDouble() &&
+                    element.position.y >= params[2].eval()!.toDouble() &&
+                    element.position.x <= params[3].eval()!.toDouble() &&
+                    element.position.y <= params[4].eval()!.toDouble(),
+              )
+              .length;
           return LazyNumberImpl(
             eval: () => Decimal.fromInt(value),
             getString: () => value.toString(),
@@ -253,60 +340,23 @@ class FRCEvent {
       ),
     );
 
-    // Returns number of events with a specific name within a bbox
-    //   -- O
-    // |    |
-    // |    |
-    // o --
-    // min x, min y, max X, max Y
     exp.addLazyFunction(
       LazyFunctionImpl(
-        "AUTOEVENTINBBOX",
-        5,
+        "PEVENTINBBOX",
+        6,
         fEval: (params) {
-          final int value =
-              matchResults.timelineInterpolated
-                  .where(
-                    (element) =>
-                        element.isInAuto &&
-                        element.id == params[0].getString() &&
-                        element.position.x >= params[1].eval()!.toDouble() &&
-                        element.position.y >= params[2].eval()!.toDouble() &&
-                        element.position.x <= params[3].eval()!.toDouble() &&
-                        element.position.y <= params[4].eval()!.toDouble(),
-                  )
-                  .length;
-          return LazyNumberImpl(
-            eval: () => Decimal.fromInt(value),
-            getString: () => value.toString(),
-          );
-        },
-      ),
-    );
-
-    // Returns number of events with a specific name within a bbox
-    //   -- O
-    // |    |
-    // |    |
-    // o --
-    // min x, min y, max X, max Y
-    exp.addLazyFunction(
-      LazyFunctionImpl(
-        "TELEOPEVENTINBBOX",
-        5,
-        fEval: (params) {
-          final int value =
-              matchResults.timelineInterpolated
-                  .where(
-                    (element) =>
-                        element.isInAuto == false &&
-                        element.id == params[0].getString() &&
-                        element.position.x >= params[1].eval()!.toDouble() &&
-                        element.position.y >= params[2].eval()!.toDouble() &&
-                        element.position.x <= params[3].eval()!.toDouble() &&
-                        element.position.y <= params[4].eval()!.toDouble(),
-                  )
-                  .length;
+          final int value = robotResults.timelineInterpolated
+              .where(
+                (element) =>
+                    config.getPeriodAtTime(element.timeDuration).id ==
+                        params[0].getString() &&
+                    element.id == params[1].getString() &&
+                    element.position.x >= params[2].eval()!.toDouble() &&
+                    element.position.y >= params[3].eval()!.toDouble() &&
+                    element.position.x <= params[4].eval()!.toDouble() &&
+                    element.position.y <= params[5].eval()!.toDouble(),
+              )
+              .length;
           return LazyNumberImpl(
             eval: () => Decimal.fromInt(value),
             getString: () => value.toString(),
@@ -321,10 +371,9 @@ class FRCEvent {
         "EVENT",
         1,
         fEval: (params) {
-          final int value =
-              matchResults.timeline
-                  .where((element) => element.id == params[0].getString())
-                  .length;
+          final int value = robotResults.timeline
+              .where((element) => element.id == params[0].getString())
+              .length;
           return LazyNumberImpl(
             eval: () => Decimal.fromInt(value),
             getString: () => value.toString(),
@@ -336,38 +385,17 @@ class FRCEvent {
     //adder that counts the number of a specific event in the timeline
     exp.addLazyFunction(
       LazyFunctionImpl(
-        "AUTOEVENT",
-        1,
+        "PEVENT",
+        2,
         fEval: (params) {
-          final int value =
-              matchResults.timeline
-                  .where(
-                    (element) =>
-                        element.isInAuto && element.id == params[0].getString(),
-                  )
-                  .length;
-          return LazyNumberImpl(
-            eval: () => Decimal.fromInt(value),
-            getString: () => value.toString(),
-          );
-        },
-      ),
-    );
-
-    //adder that counts the number of a specific event in the timeline
-    exp.addLazyFunction(
-      LazyFunctionImpl(
-        "TELEOPEVENT",
-        1,
-        fEval: (params) {
-          final int value =
-              matchResults.timeline
-                  .where(
-                    (element) =>
-                        element.isInAuto == false &&
-                        element.id == params[0].getString(),
-                  )
-                  .length;
+          final int value = robotResults.timeline
+              .where(
+                (element) =>
+                    config.getPeriodAtTime(element.timeDuration).id ==
+                        params[0].getString() &&
+                    element.id == params[1].getString(),
+              )
+              .length;
           return LazyNumberImpl(
             eval: () => Decimal.fromInt(value),
             getString: () => value.toString(),
@@ -395,8 +423,10 @@ class FRCEvent {
           }
           final result = runMatchResultsProcess(
             otherProcess,
-            matchResults,
+            robotResults,
+            robotSurvey,
             team,
+            matchId,
           );
           return LazyNumberImpl(
             eval: () => Decimal.parse(result!.value.toString()),
@@ -431,7 +461,9 @@ class FRCEvent {
               (runMatchResultsProcess(
                     process,
                     match.value.robot[team.toString()],
+                    matchTeamData(team, match.key) ?? DynamicProperties(),
                     team,
+                    match.key,
                   )?.value ??
                   0),
         ) /

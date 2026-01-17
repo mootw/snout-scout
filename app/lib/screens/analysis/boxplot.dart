@@ -73,7 +73,7 @@ class BoxPlotPainter extends CustomPainter {
     if (boxPlotData.values.length <= 2) {
       p.strokeWidth = 3;
       for (final point in boxPlotData.values) {
-        canvas.drawCircle(getOffset(size, point), 1, p);
+        canvas.drawCircle(_getOffset(size, point), 1, p);
       }
       return;
     }
@@ -82,17 +82,17 @@ class BoxPlotPainter extends CustomPainter {
 
     //Median
     canvas.drawLine(
-      getOffset(size, quartiles.median) + Offset(0, plotHeight),
-      getOffset(size, quartiles.median) + Offset(0, -plotHeight),
+      _getOffset(size, quartiles.median) + Offset(0, plotHeight),
+      _getOffset(size, quartiles.median) + Offset(0, -plotHeight),
       p,
     );
 
     //1st and 3rd quartile
     canvas.drawRRect(
       RRect.fromLTRBR(
-        getPercent(quartiles.lower) * size.width,
+        _getPercent(quartiles.lower) * size.width,
         (size.height / 2) + plotHeight,
-        getPercent(quartiles.upper) * size.width,
+        _getPercent(quartiles.upper) * size.width,
         (size.height / 2) - plotHeight,
         Radius.zero,
       ),
@@ -111,13 +111,13 @@ class BoxPlotPainter extends CustomPainter {
     //Top IQR
     if (maxWithinIQR != null) {
       canvas.drawLine(
-        getOffset(size, quartiles.upper),
-        getOffset(size, maxWithinIQR),
+        _getOffset(size, quartiles.upper),
+        _getOffset(size, maxWithinIQR),
         p,
       );
       canvas.drawLine(
-        getOffset(size, maxWithinIQR) + Offset(0, plotHeight / 2),
-        getOffset(size, maxWithinIQR) + Offset(0, -plotHeight / 2),
+        _getOffset(size, maxWithinIQR) + Offset(0, plotHeight / 2),
+        _getOffset(size, maxWithinIQR) + Offset(0, -plotHeight / 2),
         p,
       );
     }
@@ -125,13 +125,13 @@ class BoxPlotPainter extends CustomPainter {
     //bot IQR
     if (minWithinIQR != null) {
       canvas.drawLine(
-        getOffset(size, quartiles.lower),
-        getOffset(size, minWithinIQR),
+        _getOffset(size, quartiles.lower),
+        _getOffset(size, minWithinIQR),
         p,
       );
       canvas.drawLine(
-        getOffset(size, minWithinIQR) + Offset(0, plotHeight / 2),
-        getOffset(size, minWithinIQR) + Offset(0, -plotHeight / 2),
+        _getOffset(size, minWithinIQR) + Offset(0, plotHeight / 2),
+        _getOffset(size, minWithinIQR) + Offset(0, -plotHeight / 2),
         p,
       );
     }
@@ -140,7 +140,7 @@ class BoxPlotPainter extends CustomPainter {
     for (final point in boxPlotData.values) {
       if (point > quartiles.upper + (iqr * 1.5) ||
           point < quartiles.lower - (iqr * 1.5)) {
-        canvas.drawCircle(getOffset(size, point), 2, p);
+        canvas.drawCircle(_getOffset(size, point), 2, p);
       }
     }
 
@@ -149,10 +149,10 @@ class BoxPlotPainter extends CustomPainter {
     // }
   }
 
-  Offset getOffset(Size size, num input) =>
-      Offset(size.width * getPercent(input), 0);
+  Offset _getOffset(Size size, num input) =>
+      Offset(size.width * _getPercent(input), 0);
 
-  getPercent(num input) =>
+  double _getPercent(num input) =>
       (input - boxPlotData.min) / (boxPlotData.max - boxPlotData.min);
 
   @override
@@ -184,8 +184,8 @@ class BoxPlotLabelPainter extends CustomPainter {
 
       //Just draw the whole thing down the entire display height height
       canvas.drawLine(
-        getOffset(size, value) + Offset(0, plotHeight + screenHeight),
-        getOffset(size, value) + Offset(0, -plotHeight),
+        _getOffset(size, value) + Offset(0, plotHeight + screenHeight),
+        _getOffset(size, value) + Offset(0, -plotHeight),
         p,
       );
 
@@ -199,14 +199,14 @@ class BoxPlotLabelPainter extends CustomPainter {
         textDirection: TextDirection.ltr,
       );
       tp.layout();
-      tp.paint(canvas, getOffset(size, value) + Offset(4, -plotHeight));
+      tp.paint(canvas, _getOffset(size, value) + Offset(4, -plotHeight));
     }
   }
 
-  Offset getOffset(Size size, num input) =>
-      Offset(size.width * getPercent(input), 0);
+  Offset _getOffset(Size size, num input) =>
+      Offset(size.width * _getPercent(input), 0);
 
-  getPercent(num input) =>
+  double _getPercent(num input) =>
       (input - boxPlotData.min) / (boxPlotData.max - boxPlotData.min);
 
   @override

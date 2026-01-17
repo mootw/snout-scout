@@ -6,7 +6,7 @@ import 'package:app/screens/teams_page.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:snout_db/config/surveyitem.dart';
+import 'package:snout_db/config/data_item_schema.dart';
 
 class AnalysisPitScouting extends StatelessWidget {
   const AnalysisPitScouting({super.key});
@@ -17,6 +17,7 @@ class AnalysisPitScouting extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text("Scouting Survey Analysis")),
       body: ListView(
+        primary: true,
         children: [
           Wrap(
             spacing: 42,
@@ -24,7 +25,7 @@ class AnalysisPitScouting extends StatelessWidget {
             alignment: WrapAlignment.center,
             children: [
               for (final surveyItem in data.event.config.pitscouting.where(
-                (element) => element.type != SurveyItemType.picture,
+                (element) => element.type != DataItemType.picture,
               ))
                 SurveyItemRatioChart(surveyItem: surveyItem),
             ],
@@ -38,7 +39,7 @@ class AnalysisPitScouting extends StatelessWidget {
 class SurveyItemRatioChart extends StatefulWidget {
   const SurveyItemRatioChart({super.key, required this.surveyItem});
 
-  final SurveyItem surveyItem;
+  final DataItemSchema surveyItem;
 
   @override
   State<SurveyItemRatioChart> createState() => _SurveyItemRatioChartState();

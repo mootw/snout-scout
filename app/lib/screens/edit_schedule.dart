@@ -2,15 +2,15 @@ import 'dart:convert';
 
 import 'package:app/data_submit_login.dart';
 import 'package:app/providers/data_provider.dart';
-import 'package:app/providers/identity_provider.dart';
 import 'package:app/screens/edit_json.dart';
 import 'package:app/services/tba_autofill.dart';
 import 'package:app/widgets/load_status_or_error_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:snout_db/action.dart';
+import 'package:snout_db/actions/write_schedule.dart';
 import 'package:snout_db/event/match_data.dart';
 import 'package:snout_db/event/match_schedule_item.dart';
-import 'package:snout_db/patch.dart';
 
 class EditSchedulePage extends StatefulWidget {
   const EditSchedulePage({super.key, required this.matches});
@@ -33,12 +33,9 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
           TextButton(
             child: const Text("AutoFill TBA"),
             onPressed: () async {
-              List<Patch> patch;
+              ChainAction patch;
               try {
-                patch = await loadScheduleFromTBA(
-                  snoutData.event,
-                  context.read<IdentityProvider>().identity,
-                );
+                patch = await loadScheduleFromTBA(snoutData.event);
               } catch (e) {
                 if (context.mounted) {
                   showDialog(
@@ -66,15 +63,13 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
                       actions: [
                         TextButton(
                           onPressed: () async {
-                            for (var p in patch) {
-                              await snoutData.newTransaction(p);
-                            }
+                            await submitData(context, patch);
                             if (context.mounted) {
                               Navigator.pop(context);
                             }
                           },
                           child: const Text(
-                            "Apply (Wait for dialog to close after pressing ik its jank)",
+                            "Apply (Wait for dialog to close!)",
                           ),
                         ),
                       ],
@@ -137,12 +132,11 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
                         );
                     matchesWithRemoved.remove(match.key);
 
-                    Patch patch = Patch.schedule(
-                      DateTime.now(),
-                      matchesWithRemoved.entries.map((e) => e.value).toList(),
+                    final action = ActionWriteSchedule(
+                      matchesWithRemoved.values.toList(),
                     );
                     if (context.mounted) {
-                      await submitData(context, patch);
+                      await submitData(context, action);
                     }
                   }
                 },
@@ -161,14 +155,15 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
       ),
     );
 
-    if (result != null) {
+    if (result != null && mounted) {
       MatchScheduleItem resultMatch = MatchScheduleItem.fromJson(
         json.decode(result),
       );
 
-      Patch patch = Patch.scheduleItem(DateTime.now(), resultMatch);
+      final schedule = context.read<DataProvider>().event.schedule;
+      final action = ActionWriteSchedule([...schedule.values, resultMatch]);
       if (mounted && context.mounted) {
-        await submitData(context, patch);
+        await submitData(context, action);
       }
     }
   }

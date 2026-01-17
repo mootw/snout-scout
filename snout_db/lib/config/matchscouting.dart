@@ -1,8 +1,8 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:meta/meta.dart';
+import 'package:snout_db/config/data_item_schema.dart';
 import 'package:snout_db/config/matcheventconfig.dart';
 import 'package:snout_db/config/matchresults_process.dart';
-import 'package:snout_db/config/surveyitem.dart';
 
 part 'matchscouting.g.dart';
 
@@ -17,10 +17,10 @@ class MatchScouting {
 
   /// survey that is displayed at the end of the game related
   /// to the team that the scout was watching.
-  final List<SurveyItem> survey;
+  final List<DataItemSchema> survey;
 
   /// properties stored on a per match basis
-  final List<SurveyItem> properties;
+  final List<DataItemSchema> properties;
 
   const MatchScouting({
     this.events = const [],

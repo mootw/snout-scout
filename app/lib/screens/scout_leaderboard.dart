@@ -1,62 +1,64 @@
 import 'dart:collection';
+import 'dart:math' as math;
 
+import 'package:snout_db/app_extras/bencoin.dart';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/widgets/datasheet.dart';
+import 'package:app/widgets/scout_name_display.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:snout_db/patch.dart';
+import 'package:snout_db/pubkey.dart';
 
 class ScoutLeaderboard extends StatelessWidget {
   const ScoutLeaderboard({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final data = context.watch<DataProvider>().database.patches;
+    final db = context.watch<DataProvider>().database;
+    final actions = db.actions;
 
-    final matchesExpression = RegExp(r'\/matches\/.+\/robot\/');
+    final scouts = db.allowedKeys.keys;
 
-    Map<String, int> scores = SplayTreeMap<String, int>();
-    Map<String, int> edits = SplayTreeMap<String, int>();
+    final bencoins = <Pubkey, double>{};
+    final edits = <Pubkey, int>{};
 
-    final Set<String> unique = {};
-    final List<Patch> deDuplicated = [];
-    for (final patch in data) {
-      if (unique.contains(patch.path) == false) {
-        deDuplicated.add(patch);
-      }
-      unique.add(patch.path);
+    for (final scout in scouts) {
+      bencoins[scout] = spendableBencoin(db, scout);
+      edits[scout] = 0;
     }
 
-    for (final patch in deDuplicated) {
-      if (scores[patch.identity] == null) {
-        scores[patch.identity] = 0;
-        edits[patch.identity] = 0;
-      }
-
-      int addValue = 1;
-      if (matchesExpression.hasMatch(patch.path)) {
-        addValue = 10;
-      }
-
-      edits[patch.identity] = edits[patch.identity]! + 1;
-      scores[patch.identity] = scores[patch.identity]! + addValue;
+    for (final actionMessage in actions) {
+      edits[actionMessage.author] = (edits[actionMessage.author] ?? 0) + 1;
     }
 
-    List<({String identity, int score, int edits})> sorted = [
-      for (final scout in scores.entries)
-        (identity: scout.key, score: scout.value, edits: edits[scout.key]!),
+    List<({Pubkey identity, double bencoin, int edits})> sorted = [
+      for (final scout in bencoins.entries)
+        (
+          identity: scout.key,
+          bencoin: scout.value,
+          edits: edits[scout.key] ?? 0,
+        ),
     ];
 
-    sorted.sort((k1, k2) => k2.score.compareTo(k1.score));
+    sorted.sort((k1, k2) => k2.bencoin.compareTo(k1.bencoin));
 
-    int highScore = sorted.first.score;
+    double highBencoin = math.max(sorted.first.bencoin, 100);
+    double highEdits = math.max(
+      sorted
+          .sorted((k1, k2) => k2.edits.compareTo(k1.edits))
+          .first
+          .edits
+          .toDouble(),
+      10,
+    );
 
     const height = 400.0;
 
     return Column(
       children: [
         const Text(
-          "This is just for fun! Each normal edit is worth 1 point (pit scouting is worth 1 point per field). A edits that match 'r'\\/matches\\/.+\\/robot\\/'' are worth 5 points because Robot recordings take longer.",
+          "Earn Bencoin by Scouting and then predict matches. Remember it's not gambling if you know the outcome!",
         ),
         const SizedBox(height: 32),
         SizedBox(
@@ -71,7 +73,12 @@ class ScoutLeaderboard extends StatelessWidget {
                   Column(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      Text('${idx + 1}. ${item.identity}'),
+                      Row(
+                        children: [
+                          Text('${idx + 1}. '),
+                          ScoutName(db: db, scoutPubkey: item.identity),
+                        ],
+                      ),
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
@@ -80,9 +87,9 @@ class ScoutLeaderboard extends StatelessWidget {
                               Container(
                                 color: Colors.red,
                                 width: 36,
-                                height: item.score / highScore * height,
+                                height: item.bencoin / highBencoin * height,
                               ),
-                              Text(item.score.toString()),
+                              Text(item.bencoin.toString()),
                             ],
                           ),
                           Column(
@@ -90,7 +97,7 @@ class ScoutLeaderboard extends StatelessWidget {
                               Container(
                                 width: 36,
                                 color: Colors.blue,
-                                height: item.edits / highScore * height,
+                                height: item.edits / highEdits * height,
                               ),
                               Text(item.edits.toString()),
                             ],
@@ -107,7 +114,7 @@ class ScoutLeaderboard extends StatelessWidget {
         ),
         ListTile(
           leading: Container(height: 32, width: 32, color: Colors.red),
-          title: const Text("Score"),
+          title: const Text("Bencoin"),
         ),
         ListTile(
           leading: Container(height: 32, width: 32, color: Colors.blue),

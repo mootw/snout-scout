@@ -4,11 +4,15 @@ import 'package:app/screens/scout_authenticator_dialog.dart';
 import 'package:app/widgets/confirm_exit_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:snout_db/patch.dart';
+import 'package:snout_db/action.dart';
 
-Future submitMultiplePatches(BuildContext context, List<Patch> patches) async {
+Future submitMultipleActions(
+  BuildContext context,
+  List<ChainAction> actions,
+) async {
+  final dataProvider = context.read<DataProvider>();
   //TODO make this flash and only pushReplacement the route at the save button, then show leaderboard while saving
-  final login = await showDialog(
+  final AuthorizedScoutData? login = await showDialog(
     context: context,
     builder: (context) => ConfirmExitDialog(
       child: ScoutAuthorizationDialog(allowBackButton: true),
@@ -17,30 +21,24 @@ Future submitMultiplePatches(BuildContext context, List<Patch> patches) async {
 
   if (login != null && context.mounted) {
     // Update the current login
-    final dataProvider = context.read<DataProvider>();
-    context.read<IdentityProvider>().setIdentity(login);
+    context.read<IdentityProvider>().setIdentity(login.pubkey);
 
-    for (final patch in patches) {
-      final newPatch = Patch(
-        // Force the identity for the patch to be the login user!
-        identity: login,
-        path: patch.path,
-        time: patch.time,
-        value: patch.value,
-      );
-      await dataProvider.newTransaction(newPatch);
+    List<int> lastHash = await dataProvider.database.actions.last.hash;
+
+    for (final action in actions) {
+      final signed = await ChainActionData(
+        time: DateTime.now(),
+        previousHash: lastHash,
+        action: action,
+      ).encodeAndSign(login.secretKey);
+      await dataProvider.newTransaction(signed);
+      lastHash = await signed.hash;
     }
-    // if (context.mounted) {
-    //   Navigator.push(
-    //     context,
-    //     MaterialPageRoute(builder: (_) => ScoutLeaderboardPage()),
-    //   );
-    // }
   }
 }
 
-Future submitData(BuildContext context, Patch patch) async =>
-    submitMultiplePatches(context, [patch]);
+Future submitData(BuildContext context, ChainAction action) async =>
+    submitMultipleActions(context, [action]);
 
 class HoldScreen extends StatelessWidget {
   const HoldScreen({super.key});
@@ -52,9 +50,9 @@ class HoldScreen extends StatelessWidget {
 }
 
 class SaveScreen extends StatefulWidget {
-  final Patch patch;
+  final Action action;
 
-  const SaveScreen({required this.patch, super.key});
+  const SaveScreen({required this.action, super.key});
 
   @override
   State<SaveScreen> createState() => _SaveScreenState();

@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:snout_db/pubkey.dart';
 
 class IdentityProvider extends ChangeNotifier {
-  String identity = 'unknown';
+  Pubkey? identity;
 
   IdentityProvider();
 
-  Future setIdentity(String newIdentity) async {
+  Future setIdentity(Pubkey newIdentity) async {
     identity = newIdentity;
     notifyListeners();
   }

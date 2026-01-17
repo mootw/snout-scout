@@ -3,38 +3,46 @@ import 'dart:convert';
 
 import 'package:app/config_editor/config_editor.dart';
 import 'package:app/data_submit_login.dart';
-import 'package:app/kiosk/kiosk_configure.dart';
+import 'package:app/kiosk/kiosk.dart';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/providers/local_config_provider.dart';
 import 'package:app/screens/dashboard.dart';
 import 'package:app/screens/scout_authenticator_dialog.dart';
+import 'package:app/screens/teams_lists.dart';
+import 'package:app/services/data_service.dart';
 import 'package:app/style.dart';
 import 'package:app/providers/identity_provider.dart';
 import 'package:app/screens/analysis.dart';
 import 'package:app/screens/select_data_source.dart';
-import 'package:app/screens/documentation_page.dart';
 import 'package:app/screens/edit_json.dart';
-import 'package:app/screens/patch_history.dart';
+import 'package:app/screens/chain_history.dart';
 import 'package:app/screens/schedule_page.dart';
 import 'package:app/screens/teams_page.dart';
 import 'package:app/search.dart';
 import 'package:app/widgets/load_status_or_error_bar.dart';
+import 'package:cbor/cbor.dart';
 import 'package:download/download.dart';
+import 'package:file_selector/file_selector.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:logging/logging.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:snout_db/patch.dart';
-import 'package:snout_db/snout_db.dart';
+import 'package:snout_db/actions/write_config.dart';
+import 'package:snout_db/snout_chain.dart';
 import 'package:url_launcher/url_launcher_string.dart';
+import 'package:archive/archive.dart';
 
 /// Only update this value when there is a VALID data source loaded,
 const String defaultSourceKey = 'default_source_uri';
 
+const String kioskModeKey = 'kiosk_mode';
+
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
   FlutterError.onError = (details) {
     FlutterError.presentError(details);
@@ -59,6 +67,21 @@ void main() async {
   final defaultDataSource = prefs.getString(defaultSourceKey);
   final ds = defaultDataSource == null ? null : Uri.parse(defaultDataSource);
 
+  final kioskMode = prefs.getBool(kioskModeKey) ?? false;
+
+  if (ds != null && kioskMode) {
+    try {
+      final file = fs.file('${fs.directory('/kiosk').path}/kiosk.zip');
+
+      final bytes = await file.readAsBytes();
+      final archive = ZipDecoder().decodeBytes(bytes);
+
+      runApp(Kiosk(dataSource: ds, kioskData: archive));
+      return;
+    } catch (e, s) {
+      Logger.root.severe('$e, $s');
+    }
+  }
   runApp(SnoutScoutApp(defaultSourceKey: ds));
 }
 
@@ -89,6 +112,10 @@ class SnoutScoutAppState extends State<SnoutScoutApp> {
   @override
   void initState() {
     super.initState();
+    // Keep the splash up for 3 extra seconds
+    Future.delayed(
+      Duration(seconds: 3),
+    ).then((onValue) => FlutterNativeSplash.remove());
     _dataSource = widget.defaultSourceKey;
   }
 
@@ -110,6 +137,7 @@ class SnoutScoutAppState extends State<SnoutScoutApp> {
           ),
       ],
       child: MaterialApp(
+        debugShowCheckedModeBanner: false,
         title: 'Snout Scout',
         onGenerateRoute: (settings) {
           final name = settings.name;
@@ -147,6 +175,7 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
   @override
   void initState() {
     super.initState();
+
     WidgetsBinding.instance.addObserver(this);
     Logger.root.onRecord.listen((record) {
       if (record.level >= Level.SEVERE) {
@@ -225,14 +254,12 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
         titleSpacing: 0,
         title: Text(data.event.config.name),
         actions: [
-          Padding(
-            padding: const EdgeInsets.only(left: 8, right: 8),
-            child: IconButton(
-              onPressed: () =>
-                  showSearch(context: context, delegate: SnoutScoutSearch()),
-              icon: const Icon(Icons.search),
-            ),
+          IconButton(
+            onPressed: () =>
+                showSearch(context: context, delegate: SnoutScoutSearch()),
+            icon: const Icon(Icons.search),
           ),
+          SizedBox(width: 4),
         ],
       ),
       body: Row(
@@ -271,7 +298,7 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
               ),
               const TeamGridList(showEditButton: true),
               const AnalysisPage(),
-              const DocumentationScreen(),
+              const TeamListsPage(),
             ][_currentPageIndex],
           ),
         ],
@@ -292,6 +319,11 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
                 ),
               ),
             ),
+            ListTile(
+              title: const Text("Register"),
+              leading: const Icon(Icons.account_circle),
+              onTap: () => registerNewScout(context),
+            ),
             Center(
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -299,7 +331,7 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
                   onPressed: () {
                     final data = context.read<DataProvider>().database;
                     final stream = Stream.fromIterable(
-                      utf8.encode(json.encode(data)),
+                      cbor.encode(SnoutDBFile(actions: data.actions).toCbor()),
                     );
                     download(stream, '${data.event.config.name}.snoutdb');
                   },
@@ -312,12 +344,12 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
               title: const Text("Ledger"),
               trailing: const Icon(Icons.receipt_long),
               subtitle: Text(
-                '${data.database.patches.length.toString()} transactions',
+                '${data.database.actions.length.toString()} transactions',
               ),
               onTap: () => Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const PatchHistoryPage(),
+                  builder: (context) => const ActionChainHistoryPage(),
                 ),
               ),
             ),
@@ -326,8 +358,6 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
               title: const Text("Event Config"),
               leading: const Icon(Icons.edit),
               onTap: () async {
-                final identity = context.read<IdentityProvider>().identity;
-
                 final config = context.read<DataProvider>().event.config;
 
                 final EventConfig? result = await Navigator.push(
@@ -339,15 +369,10 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
                 );
 
                 if (result != null) {
-                  Patch patch = Patch(
-                    identity: identity,
-                    time: DateTime.now(),
-                    path: Patch.buildPath(['config']),
-                    value: result.toJson(),
-                  );
+                  final writeConfig = ActionWriteConfig(result);
                   //Save the scouting results to the server!!
                   if (context.mounted) {
-                    await submitData(context, patch);
+                    await submitData(context, writeConfig);
                   }
                 }
               },
@@ -356,8 +381,6 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
               title: const Text("Event Config (JSON)"),
               leading: const Icon(Icons.data_object),
               onTap: () async {
-                final identity = context.read<IdentityProvider>().identity;
-
                 final config = context.read<DataProvider>().event.config;
 
                 final result = await Navigator.push(
@@ -372,32 +395,46 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
 
                 if (result != null) {
                   final modAsConfig = EventConfig.fromJson(jsonDecode(result));
-
-                  Patch patch = Patch(
-                    identity: identity,
-                    time: DateTime.now(),
-                    path: Patch.buildPath(['config']),
-                    value: modAsConfig.toJson(),
-                  );
-                  //Save the scouting results to the server!!
+                  final writeConfig = ActionWriteConfig(modAsConfig);
                   if (context.mounted) {
-                    await submitData(context, patch);
+                    await submitData(context, writeConfig);
                   }
                 }
               },
             ),
             ListTile(
-              title: const Text("Kiosk"),
+              title: const Text("Kiosk Mode"),
+              subtitle: const Text("Restarts App. Requires password to exit."),
               trailing: const Icon(Icons.screen_share_outlined),
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => KioskConfigurationScreen(
-                    dataSource: data.dataSourceUri,
-                    baseConfig: data.event.config,
-                  ),
-                ),
-              ),
+              onTap: () async {
+                const XTypeGroup typeGroup = XTypeGroup(
+                  label: 'kiosk package',
+                  extensions: <String>['zip'],
+                  uniformTypeIdentifiers: <String>['kiosk.zip'],
+                );
+
+                final XFile? pickedFile = await openFile(
+                  acceptedTypeGroups: <XTypeGroup>[typeGroup],
+                );
+
+                if (pickedFile != null) {
+                  final fileBytes = await pickedFile.readAsBytes();
+                  // Ensure that the archive is decodable by decoding it. we do not care about the result
+                  ZipDecoder().decodeBytes(fileBytes);
+
+                  final file = fs.file(
+                    '${fs.directory('/kiosk').path}/kiosk.zip',
+                  );
+                  if (await file.exists() == false) {
+                    await file.create(recursive: true);
+                  }
+                  await file.writeAsBytes(fileBytes, flush: true);
+
+                  final prefs = await SharedPreferences.getInstance();
+                  prefs.setBool(kioskModeKey, true);
+                  main();
+                }
+              },
             ),
             ListTile(
               title: const Text("App Version"),
@@ -416,7 +453,7 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
             ),
             ListTile(
               title: const Text('Hire Me'),
-              subtitle: const Text('portfolio.xqkz.net'),
+              subtitle: const Text('https://portfolio.xqkz.net'),
               leading: const Icon(Icons.work),
               onTap: () => launchUrlString('https://portfolio.xqkz.net/'),
             ),
@@ -460,20 +497,8 @@ const navigationDestinations = [
     label: 'Analysis',
   ),
   NavigationDestination(
-    selectedIcon: Icon(Icons.book),
-    icon: Icon(Icons.book_outlined),
-    label: 'Docs',
+    selectedIcon: Icon(Icons.list),
+    icon: Icon(Icons.list_outlined),
+    label: 'Lists',
   ),
 ];
-
-Future editIdentityFunction({
-  required BuildContext context,
-  bool allowBackButton = true,
-}) async {
-  await Navigator.of(context).push(
-    MaterialPageRoute(
-      builder: (context) =>
-          ScoutAuthorizationDialog(allowBackButton: allowBackButton),
-    ),
-  );
-}

@@ -1,6 +1,6 @@
 import 'package:app/widgets/fieldwidget.dart';
 import 'package:flutter/material.dart';
-import 'package:snout_db/snout_db.dart';
+import 'package:snout_db/snout_chain.dart';
 
 class DebugFieldPosition extends StatefulWidget {
   const DebugFieldPosition({super.key});

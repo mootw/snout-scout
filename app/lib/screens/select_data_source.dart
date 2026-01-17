@@ -4,6 +4,7 @@ import 'package:app/config_editor/config_editor.dart';
 import 'package:app/main.dart';
 import 'package:app/mock_data_generator.dart';
 import 'package:app/providers/data_provider.dart';
+import 'package:app/screens/scout_authenticator_dialog.dart';
 import 'package:app/services/data_service.dart';
 import 'package:app/style.dart';
 import 'package:app/providers/loading_status_service.dart';
@@ -14,9 +15,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:snout_db/action.dart';
+import 'package:snout_db/actions/write_config.dart';
 import 'package:snout_db/event/frcevent.dart';
-import 'package:snout_db/patch.dart';
-import 'package:snout_db/snout_db.dart';
+import 'package:snout_db/snout_chain.dart';
 
 import 'package:http/http.dart' as http;
 
@@ -87,9 +89,9 @@ class _SelectDataSourceScreenState extends State<SelectDataSourceScreen> {
               final sourceUri = Uri.parse(
                 '${localSnoutDBPath.path}/sample.snoutdb',
               );
-              final mockData = generateMockData(seed: 1);
+              final mockData = await generateMockData(seed: 1);
               await writeLocalDiskDatabase(
-                SnoutDB(patches: mockData),
+                SnoutDBFile(actions: mockData),
                 sourceUri,
               );
               updateLocalDbs();
@@ -100,7 +102,7 @@ class _SelectDataSourceScreenState extends State<SelectDataSourceScreen> {
             title: const Text("New Database"),
             onTap: () async {
               final evergreenField = await rootBundle.load(
-                'evergreen_field.avif',
+                'assets/evergreen_field.avif',
               );
               if (context.mounted) {
                 final EventConfig? value = await Navigator.of(context).push(
@@ -121,20 +123,40 @@ class _SelectDataSourceScreenState extends State<SelectDataSourceScreen> {
                   return;
                 }
 
+                // Login
+                final RegistrationResult? login = await Navigator.of(context)
+                    .push(
+                      MaterialPageRoute(
+                        builder: (context) => ScoutRegistrationScreen(),
+                      ),
+                    );
+
+                if (login == null) {
+                  return;
+                }
+
                 if (context.mounted) {
-                  FRCEvent event = FRCEvent(config: value);
-                  Patch p = Patch(
-                    identity: "",
-                    time: DateTime.now(),
-                    path: Patch.buildPath([""]),
-                    value: event.toJson(),
-                  );
+                  FRCEvent event = FRCEvent(config: value, matches: {});
 
                   final sourceUri = Uri.parse(
                     '${localSnoutDBPath.path}/${event.config.name}.snoutdb',
                   );
+                  final loginMessage = await ChainActionData(
+                    time: DateTime.now(),
+                    previousHash: Uint8List(32),
+                    action: login.$2,
+                  ).encodeAndSign(login.$1);
                   await writeLocalDiskDatabase(
-                    SnoutDB(patches: [p]),
+                    SnoutDBFile(
+                      actions: [
+                        loginMessage,
+                        await ChainActionData(
+                          time: DateTime.now(),
+                          previousHash: await loginMessage.hash,
+                          action: ActionWriteConfig(event.config),
+                        ).encodeAndSign(login.$1),
+                      ],
+                    ),
                     sourceUri,
                   );
 
@@ -165,20 +187,40 @@ class _SelectDataSourceScreenState extends State<SelectDataSourceScreen> {
                   return;
                 }
 
+                // Login
+                final RegistrationResult? login = await Navigator.of(context)
+                    .push(
+                      MaterialPageRoute(
+                        builder: (context) => ScoutRegistrationScreen(),
+                      ),
+                    );
+
+                if (login == null) {
+                  return;
+                }
+
                 if (context.mounted) {
                   FRCEvent event = FRCEvent.fromJson(json.decode(value));
-                  Patch p = Patch(
-                    identity: "",
-                    time: DateTime.now(),
-                    path: Patch.buildPath([""]),
-                    value: event.toJson(),
-                  );
 
                   final sourceUri = Uri.parse(
                     '${localSnoutDBPath.path}/${event.config.name}.snoutdb',
                   );
+                  final loginMessage = await ChainActionData(
+                    time: DateTime.now(),
+                    previousHash: Uint8List(32),
+                    action: login.$2,
+                  ).encodeAndSign(login.$1);
                   await writeLocalDiskDatabase(
-                    SnoutDB(patches: [p]),
+                    SnoutDBFile(
+                      actions: [
+                        loginMessage,
+                        await ChainActionData(
+                          time: DateTime.now(),
+                          previousHash: await loginMessage.hash,
+                          action: ActionWriteConfig(event.config),
+                        ).encodeAndSign(login.$1),
+                      ],
+                    ),
                     sourceUri,
                   );
 
@@ -586,5 +628,6 @@ class _SnoutServerPageState extends State<SnoutServerPage> {
 }
 
 FRCEvent get emptyNewEvent => FRCEvent(
+  matches: {},
   config: const EventConfig(name: 'Event Name', team: 6749, fieldImage: ''),
 );

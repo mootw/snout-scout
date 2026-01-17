@@ -1,4 +1,5 @@
 .dart_tool
+.flutter-plugins-dependencies
 
 # Logs
 logs

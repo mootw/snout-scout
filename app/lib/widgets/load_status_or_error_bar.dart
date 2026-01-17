@@ -1,6 +1,6 @@
 import 'package:app/providers/data_provider.dart';
 import 'package:app/providers/loading_status_service.dart';
-import 'package:app/screens/failed_patches.dart';
+import 'package:app/screens/outbox.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -16,7 +16,7 @@ class LoadOrErrorStatusBar extends StatelessWidget
       return InkWell(
         onTap: () => Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const FailedPatchStorage()),
+          MaterialPageRoute(builder: (context) => const OutboxStoragePage()),
         ),
         child: Container(
           alignment: Alignment.center,

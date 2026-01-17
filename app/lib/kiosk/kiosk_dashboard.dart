@@ -1,14 +1,18 @@
-import 'package:app/kiosk/stat_cylce.dart';
+import 'dart:convert';
+
+import 'package:app/kiosk/auto_scroller.dart';
+import 'package:app/kiosk/kiosk_provider.dart';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/screens/analysis.dart';
 import 'package:app/screens/schedule_page.dart';
-import 'package:app/screens/select_data_source.dart';
 import 'package:app/screens/teams_page.dart';
-import 'package:app/style.dart';
 import 'package:app/widgets/load_status_or_error_bar.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
+import 'package:model_viewer_plus/model_viewer_plus.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class KioskDashboard extends StatefulWidget {
   const KioskDashboard({super.key});
@@ -19,8 +23,6 @@ class KioskDashboard extends StatefulWidget {
 
 class _KioskDashboardState extends State<KioskDashboard>
     with WidgetsBindingObserver {
-  int _currentPageIndex = 0;
-
   @override
   void initState() {
     super.initState();
@@ -80,140 +82,138 @@ class _KioskDashboardState extends State<KioskDashboard>
           ),
           bottom: LoadOrErrorStatusBar(),
         ),
-        body: TextButton(
-          onPressed: () => Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const SelectDataSourceScreen(),
-            ),
-          ),
-          child: Text("Change Source"),
-        ),
       );
     }
 
-    final nextMatch = data.event.nextMatch;
-
-    final largeDevice = isLargeDevice(context);
-
-    return Scaffold(
-      body: Row(
-        children: [
-          if (largeDevice)
-            NavigationRail(
-              backgroundColor: Theme.of(
-                context,
-              ).bottomNavigationBarTheme.backgroundColor,
-              labelType: NavigationRailLabelType.all,
-              onDestinationSelected: (int index) {
-                setState(() {
-                  _currentPageIndex = index;
-                });
-              },
-              destinations: navigationDestinations
-                  .map(
-                    (e) => NavigationRailDestination(
-                      selectedIcon: e.selectedIcon,
-                      icon: e.icon,
-                      label: Text(e.label),
-                    ),
-                  )
-                  .toList(),
-              selectedIndex: _currentPageIndex,
-            ),
-          Expanded(
-            child: [
-              KioskHome(),
-              AllMatchesPage(
-                // 10/10 hack to make the widget re-scroll to the correct spot on load
-                // this will force it to scroll whenever the matches length changes
-                // we could add another value here to make it scroll on other changes too
-                key: Key(data.event.matches.length.toString()),
-                scrollPosition: nextMatch,
-              ),
-              const TeamGridList(showEditButton: true),
-              const AnalysisPage(),
-            ][_currentPageIndex],
-          ),
-        ],
-      ),
-      bottomNavigationBar: largeDevice
-          ? null
-          : NavigationBar(
-              onDestinationSelected: (int index) {
-                setState(() {
-                  _currentPageIndex = index;
-                });
-              },
-              selectedIndex: _currentPageIndex,
-              destinations: navigationDestinations,
-            ),
-    );
+    return Scaffold(body: KioskHome());
   }
 }
-
-const navigationDestinations = [
-  NavigationDestination(
-    selectedIcon: Icon(Icons.home),
-    icon: Icon(Icons.home_outlined),
-    label: 'Home',
-  ),
-  NavigationDestination(
-    selectedIcon: Icon(Icons.calendar_today),
-    icon: Icon(Icons.calendar_today_outlined),
-    label: 'Schedule',
-  ),
-  NavigationDestination(
-    selectedIcon: Icon(Icons.people),
-    icon: Icon(Icons.people_alt_outlined),
-    label: 'Teams',
-  ),
-  NavigationDestination(
-    selectedIcon: Icon(Icons.analytics),
-    icon: Icon(Icons.analytics_outlined),
-    label: 'Analysis',
-  ),
-];
 
 class KioskHome extends StatelessWidget {
   const KioskHome({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final data = context.read<DataProvider>().event;
+    final data = context.read<DataProvider>();
+
+    final nextMatch = data.event.nextMatch;
+
+    final robotGlb = context.read<KioskProvider>().kioskData.firstWhereOrNull(
+      (e) => e.isFile && e.name.endsWith('robot.glb'),
+    );
+
+    // TODO generate this once rather than on each build since it is a static value.
+    final glbDataString = robotGlb == null
+        ? null
+        : 'data:model/gltf-binary;base64,${base64Encode(robotGlb.content)}';
+
     return Column(
       children: [
-        SizedBox(height: 12),
-        Text(
-          'Want to learn more about our robot?',
-          style: Theme.of(context).textTheme.displayMedium,
-        ),
-        Container(height: 300, width: 750, color: Colors.red),
-        FilledButton(
-          onPressed: () => {
-            // TODO go to promo page
-          },
-          child: Text("Learn more about ${data.config.team}"),
+        Expanded(
+          flex: 4,
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  children: [
+                    Text(
+                      'Our Robot',
+                      style: Theme.of(context).textTheme.displaySmall,
+                    ),
+                    Expanded(
+                      child: glbDataString == null
+                          ? Text('/robot.glb')
+                          : ModelViewer(
+                              // Handles conflicts with the
+                              backgroundColor: Theme.of(context).canvasColor,
+                              debugLogging: false,
+                              // For some reason it is way too bright by default. Guessing underlying config is weird
+                              exposure: 0.7,
+                              src: glbDataString,
+                              // Plays the first animation found in the model automatically
+                              autoPlay: true,
+                              //src: 'https://modelviewer.dev/shared-assets/models/Astronaut.glb',
+                              autoRotate: true,
+                            ),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: Column(
+                  children: [
+                    Text(
+                      'Our Team',
+                      style: Theme.of(context).textTheme.displaySmall,
+                    ),
+                    Expanded(
+                      child: Container(
+                        color: Colors.black,
+                        alignment: Alignment.center,
+                        child: Text('TODO SLIDESHOW'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
 
-        SizedBox(height: 24),
-        Text(
-          'Want to learn more about another robot?',
-          style: Theme.of(context).textTheme.displayMedium,
-        ),
-        Text(
-          'Here are some cool stats we have collected. To see more, check out the navigation on the left',
-        ),
+        const Divider(height: 0),
+
         Expanded(
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Container(
-              clipBehavior: Clip.hardEdge,
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.white),
+          flex: 5,
+          child: Row(
+            children: [
+              SizedBox(
+                width: 350,
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: AllMatchesPage(
+                        key: Key(nextMatch?.id ?? 'no_match'),
+                        scrollPosition: nextMatch,
+                      ),
+                    ),
+                    Divider(height: 0),
+                    ListTile(
+                      title: const Text('Hire Me'),
+                      subtitle: const Text('https://portfolio.xqkz.net'),
+                      leading: const Icon(Icons.work),
+                      onTap: () =>
+                          launchUrlString('https://portfolio.xqkz.net/'),
+                    ),
+                  ],
+                ),
               ),
-              child: KioskInfoCycle(),
-            ),
+              VerticalDivider(width: 0),
+              Expanded(
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 250,
+                      child: AutoScroller(child: const AnalysisPage()),
+                    ),
+                    Expanded(
+                      child: AutoScroller(
+                        child: const TeamGridList(showEditButton: false),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Expanded(
+              //   child: Container(
+              //     clipBehavior: Clip.hardEdge,
+              //     decoration: BoxDecoration(
+              //       border: Border.all(color: Colors.white),
+              //     ),
+              //     child: KioskInfoCycle(),
+              //   ),
+              // ),
+            ],
           ),
         ),
       ],

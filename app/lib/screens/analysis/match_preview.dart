@@ -6,13 +6,15 @@ import 'package:app/widgets/fieldwidget.dart';
 import 'package:app/style.dart';
 import 'package:app/screens/view_team_page.dart';
 import 'package:app/widgets/image_view.dart';
+import 'package:app/widgets/team_avatar.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
-import 'package:snout_db/config/surveyitem.dart';
+import 'package:snout_db/config/data_item_schema.dart';
+import 'package:snout_db/config/match_period_config.dart';
 import 'package:snout_db/event/frcevent.dart';
-import 'package:snout_db/snout_db.dart';
+import 'package:snout_db/snout_chain.dart';
 
 class AnalysisMatchPreview extends StatefulWidget {
   const AnalysisMatchPreview({
@@ -80,6 +82,7 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
         ],
       ),
       body: ListView(
+        primary: true,
         cacheExtent: 5000,
         children: [
           if (widget.plan != null) widget.plan!,
@@ -87,13 +90,13 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
             shrinkWrap: true,
             title: "Alliance Sum of Avg",
             columns: [
-              DataItemColumn(DataItem.fromText("Alliance")),
+              DataItemColumn(DataTableItem.fromText("Alliance")),
               for (final item in data.event.config.matchscouting.processes)
                 DataItemColumn.fromProcess(item),
             ],
             rows: [
               [
-                const DataItem(
+                const DataTableItem(
                   displayValue: Text(
                     "BLUE",
                     style: TextStyle(color: Colors.blue),
@@ -102,7 +105,7 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                   sortingValue: "BLUE",
                 ),
                 for (final item in data.event.config.matchscouting.processes)
-                  DataItem.fromNumber(
+                  DataTableItem.fromNumber(
                     _blue.fold<double>(
                       0,
                       (previousValue, team) =>
@@ -112,7 +115,7 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                   ),
               ],
               [
-                const DataItem(
+                const DataTableItem(
                   displayValue: Text(
                     "RED",
                     style: TextStyle(color: Colors.red),
@@ -121,7 +124,7 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                   sortingValue: "RED",
                 ),
                 for (final item in data.event.config.matchscouting.processes)
-                  DataItem.fromNumber(
+                  DataTableItem.fromNumber(
                     _red.fold<double>(
                       0,
                       (previousValue, team) =>
@@ -146,28 +149,15 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
             rows: [
               for (final team in [..._blue, ..._red])
                 [
-                  DataItem(
-                    displayValue: TextButton(
-                      child: Text(
-                        team.toString(),
-                        style: TextStyle(
-                          color: getAllianceUIColor(
-                            _red.contains(team) ? Alliance.red : Alliance.blue,
-                          ),
-                        ),
-                      ),
-                      onPressed: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => TeamViewPage(teamNumber: team),
-                        ),
-                      ),
-                    ),
-                    exportValue: team.toString(),
-                    sortingValue: team,
+                  DataTableItem.fromTeam(
+                    context: context,
+                    team: team,
+                    alliance: _red.contains(team)
+                        ? Alliance.red
+                        : Alliance.blue,
                   ),
                   for (final item in data.event.config.matchscouting.processes)
-                    DataItem.fromNumber(
+                    DataTableItem.fromNumber(
                       data.event.teamAverageProcess(team, item),
                     ),
                   for (final item in data.event.config.matchscouting.survey)
@@ -204,7 +194,7 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                                     aspectRatio: 1,
                                     child: ImageViewer(
                                       child: Image(
-                                        image: snoutImageCache.getCached(
+                                        image: memoryImageProvider(
                                           context
                                               .read<DataProvider>()
                                               .event
@@ -225,16 +215,22 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                                     TeamViewPage(teamNumber: team),
                               ),
                             ),
-                            child: Text(
-                              team.toString(),
-                              style: Theme.of(context).textTheme.titleLarge
-                                  ?.copyWith(
-                                    color: getAllianceUIColor(
-                                      _red.contains(team)
-                                          ? Alliance.red
-                                          : Alliance.blue,
-                                    ),
-                                  ),
+                            child: Row(
+                              children: [
+                                FRCTeamAvatar(teamNumber: team, size: 20),
+                                const SizedBox(width: 4),
+                                Text(
+                                  team.toString(),
+                                  style: Theme.of(context).textTheme.titleLarge
+                                      ?.copyWith(
+                                        color: getAllianceUIColor(
+                                          _red.contains(team)
+                                              ? Alliance.red
+                                              : Alliance.blue,
+                                        ),
+                                      ),
+                                ),
+                              ],
                             ),
                           ),
                           Column(
@@ -261,7 +257,15 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                                           .timelineInterpolatedBlueNormalized(
                                             data.event.config.fieldStyle,
                                           )
-                                          .where((element) => element.isInAuto)
+                                          .where(
+                                            (element) =>
+                                                data.event.config
+                                                    .getPeriodAtTime(
+                                                      element.timeDuration,
+                                                    )
+                                                    .id ==
+                                                autoPeriodId,
+                                          )
                                           .toList(),
                                     ),
                                 ],
@@ -304,7 +308,15 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
                                     .timelineInterpolatedBlueNormalized(
                                       data.event.config.fieldStyle,
                                     )
-                                    .where((element) => element.isInAuto),
+                                    .where(
+                                      (element) =>
+                                          data.event.config
+                                              .getPeriodAtTime(
+                                                element.timeDuration,
+                                              )
+                                              .id ==
+                                          autoPeriodId,
+                                    ),
                             ],
                           ),
                           for (final eventType
@@ -392,21 +404,19 @@ class _AnalysisMatchPreviewState extends State<AnalysisMatchPreview> {
   }
 }
 
-DataItem teamPostGameSurveyTableDisplay(
+DataTableItem teamPostGameSurveyTableDisplay(
   FRCEvent event,
   int team,
-  SurveyItem surveyItem,
+  DataItemSchema surveyItem,
 ) {
   final recordedMatches = event.teamRecordedMatches(team).toList();
 
-  if (surveyItem.type == SurveyItemType.selector) {
+  if (surveyItem.type == DataItemType.selector) {
     final Map<String, double> toReturn = {};
 
     for (final match in recordedMatches) {
-      final surveyValue = match
-          .value
-          .robot[team.toString()]!
-          .survey[surveyItem.id]
+      final surveyValue = event
+          .matchTeamData(team, match.key)?[surveyItem.id]
           ?.toString();
       if (surveyValue == null) {
         continue;
@@ -419,7 +429,7 @@ DataItem teamPostGameSurveyTableDisplay(
     }
 
     //Convert the map to be a percentage rather than total sum
-    return DataItem.fromText(
+    return DataTableItem.fromText(
       toReturn.entries
           .sorted((a, b) => Comparable.compare(b.value, a.value))
           .fold<String>(
@@ -430,17 +440,15 @@ DataItem teamPostGameSurveyTableDisplay(
     );
   }
 
-  if (surveyItem.type == SurveyItemType.picture) {
-    return DataItem.fromText("See team page or Robot recordings");
+  if (surveyItem.type == DataItemType.picture) {
+    return DataTableItem.fromText("See team page or Robot Traces");
   }
 
   String result = "";
   // Reversed to display the most recent match first in the table
   for (final match in recordedMatches.reversed) {
-    final surveyValue = match
-        .value
-        .robot[team.toString()]!
-        .survey[surveyItem.id]
+    final surveyValue = event
+        .matchTeamData(team, match.key)?[surveyItem.id]
         ?.toString();
 
     if (surveyValue == null) {
@@ -451,7 +459,7 @@ DataItem teamPostGameSurveyTableDisplay(
         '${match.value.getSchedule(event, match.key)?.label ?? match.key}: $surveyValue\n';
   }
 
-  return DataItem.fromText(result);
+  return DataTableItem.fromText(result);
 }
 
 typedef MatchAlliances = ({List<int> red, List<int> blue});
@@ -520,14 +528,14 @@ class MatchPreviewAlliancePickerState
                           icon: Icon(Icons.close),
                         ),
                         if (_selectedTeam != null)
-                          FilledButton(
+                          FilledButton.tonal(
                             onPressed: () {
                               setState(() {
                                 _alliances.blue[i] = _selectedTeam!;
                                 _selectedTeam = null;
                               });
                             },
-                            child: Text('SET $_selectedTeam'),
+                            child: Text('Replace $_selectedTeam'),
                           ),
                       ],
                     ),
@@ -537,16 +545,23 @@ class MatchPreviewAlliancePickerState
                 Expanded(
                   child: Column(
                     children: [
-                      Text('Blue'),
                       if (_selectedTeam != null)
                         FilledButton(
+                          style: ButtonStyle(
+                            backgroundColor: WidgetStatePropertyAll(
+                              Colors.blue,
+                            ),
+                          ),
                           onPressed: () {
                             setState(() {
                               _alliances.blue.add(_selectedTeam!);
                               _selectedTeam = null;
                             });
                           },
-                          child: Text('ADD $_selectedTeam'),
+                          child: Text(
+                            'Add Blue\n$_selectedTeam',
+                            textAlign: TextAlign.center,
+                          ),
                         ),
                     ],
                   ),
@@ -569,14 +584,14 @@ class MatchPreviewAlliancePickerState
                           icon: Icon(Icons.close),
                         ),
                         if (_selectedTeam != null)
-                          FilledButton(
+                          FilledButton.tonal(
                             onPressed: () {
                               setState(() {
                                 _alliances.red[i] = _selectedTeam!;
                                 _selectedTeam = null;
                               });
                             },
-                            child: Text('SET $_selectedTeam'),
+                            child: Text('Replace $_selectedTeam'),
                           ),
                       ],
                     ),
@@ -586,16 +601,21 @@ class MatchPreviewAlliancePickerState
                 Expanded(
                   child: Column(
                     children: [
-                      Text('Red'),
                       if (_selectedTeam != null)
                         FilledButton(
+                          style: ButtonStyle(
+                            backgroundColor: WidgetStatePropertyAll(Colors.red),
+                          ),
                           onPressed: () {
                             setState(() {
                               _alliances.red.add(_selectedTeam!);
                               _selectedTeam = null;
                             });
                           },
-                          child: Text('ADD $_selectedTeam'),
+                          child: Text(
+                            'Add Red\n$_selectedTeam',
+                            textAlign: TextAlign.center,
+                          ),
                         ),
                     ],
                   ),

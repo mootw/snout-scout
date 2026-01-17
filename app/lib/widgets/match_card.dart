@@ -1,5 +1,6 @@
 import 'package:app/providers/data_provider.dart';
 import 'package:app/style.dart';
+import 'package:app/widgets/team_avatar.dart';
 import 'package:app/widgets/timeduration.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -7,133 +8,183 @@ import 'package:app/screens/match_page.dart';
 import 'package:flutter/material.dart';
 import 'package:snout_db/event/match_data.dart';
 import 'package:snout_db/event/match_schedule_item.dart';
-import 'package:snout_db/snout_db.dart';
+import 'package:snout_db/event/matchresults.dart';
+import 'package:snout_db/snout_chain.dart';
 
-const double matchCardHeight = 46;
+const double matchCardHeight = 40;
+
+const BorderRadius matchCardRadius = BorderRadius.all(Radius.circular(8));
 
 const TextStyle whiteText = TextStyle(color: Colors.white, fontSize: 12);
-const TextStyle whiteTextBold = TextStyle(
-  color: Colors.white,
-  fontWeight: FontWeight.bold,
-  fontSize: 12,
-);
+
+const winOutlineColor = Colors.white;
 
 class MatchCard extends StatelessWidget {
   final MatchData? match;
+  final MatchResultValues? results;
   final MatchScheduleItem matchSchedule;
   final int? focusTeam;
+  final Color? color;
 
   const MatchCard({
     super.key,
     required this.match,
+    required this.results,
     required this.matchSchedule,
     this.focusTeam,
+    this.color,
   });
 
   @override
   Widget build(BuildContext context) {
     final snoutData = context.watch<DataProvider>();
 
-    final matchTime = match?.results != null
-        ? match!.results!.time
+    final matchTime = results != null
+        ? results!.time
         : matchSchedule.scheduledTime.add(
             snoutData.event.scheduleDelay ?? Duration.zero,
           );
 
-    return SizedBox(
-      height: matchCardHeight,
-      child: InkWell(
-        onTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => MatchPage(matchid: matchSchedule.id),
-          ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SizedBox(
-              width: 65,
-              child: Column(
-                children: [
-                  TimeDuration(time: matchTime),
-                  Text(DateFormat.E().format(matchTime.toLocal())),
-                ],
+    return Align(
+      alignment: Alignment.center,
+      child: Material(
+        borderRadius: matchCardRadius,
+        color: color ?? Theme.of(context).colorScheme.surfaceContainerHigh,
+        child: SizedBox(
+          height: matchCardHeight,
+          child: InkWell(
+            borderRadius: matchCardRadius,
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => MatchPage(matchid: matchSchedule.id),
               ),
             ),
-            matchSchedule.isScheduledToHaveTeam(focusTeam ?? 0)
-                ? SizedBox(
-                    width: 19,
-                    child: Icon(
-                      Icons.star,
-                      color: getAllianceUIColor(
-                        matchSchedule.getAllianceOf(focusTeam ?? 0),
-                      ),
-                    ),
-                  )
-                : const SizedBox(width: 19),
-            SizedBox(
-              width: 110,
-              child: Text(matchSchedule.label, textAlign: TextAlign.center),
-            ),
-            Column(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                  height: 20,
-                  width: 160,
-                  color: Colors.red,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  decoration: BoxDecoration(
+                    borderRadius: matchCardRadius,
+                    color: matchSchedule.isScheduledToHaveTeam(focusTeam ?? 0)
+                        ? getAllianceUIColor(
+                            matchSchedule.getAllianceOf(focusTeam ?? 0),
+                          )
+                        : null,
+                  ),
+                  width: 60,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      for (final team in matchSchedule.red)
-                        Text("$team", style: whiteText),
-                      SizedBox(
-                        width: 25,
-                        child: Text(
-                          match?.results?.redScore != null
-                              ? match!.results!.redScore.toString()
-                              : "-",
-                          style:
-                              match?.results?.winner == Alliance.red ||
-                                  match?.results?.winner == Alliance.tie
-                              ? whiteTextBold
-                              : whiteText,
-                          textAlign: TextAlign.center,
-                        ),
+                      TimeDuration(time: matchTime, style: whiteText),
+                      Text(
+                        DateFormat.E().format(matchTime.toLocal()),
+                        style: whiteText,
                       ),
                     ],
                   ),
                 ),
-                Container(
-                  height: 20,
-                  width: 160,
-                  color: Colors.blueAccent,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      for (final team in matchSchedule.blue)
-                        Text("$team", style: whiteText),
-                      SizedBox(
-                        width: 25,
-                        child: Text(
-                          match?.results?.blueScore != null
-                              ? match!.results!.blueScore.toString()
-                              : "-",
-                          style:
-                              match?.results?.winner == Alliance.blue ||
-                                  match?.results?.winner == Alliance.tie
-                              ? whiteTextBold
-                              : whiteText,
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ],
+                SizedBox(
+                  width: 75,
+                  child: Text(
+                    matchSchedule.label,
+                    textAlign: TextAlign.center,
+                    style: whiteText,
                   ),
+                ),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          decoration: BoxDecoration(
+                            border:
+                                results?.winner == Alliance.red ||
+                                    results?.winner == Alliance.tie
+                                ? Border.all(color: winOutlineColor, width: 1)
+                                : null,
+                            color: Colors.red.withAlpha(128),
+                          ),
+                          height: 20,
+                          width: 170,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              for (final team in matchSchedule.red)
+                                Flexible(
+                                  child: Row(
+                                    children: [
+                                      const SizedBox(width: 3),
+                                      FRCTeamAvatar(teamNumber: team, size: 15),
+                                      const SizedBox(width: 2),
+                                      Text(team.toString(), style: whiteText),
+                                    ],
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(
+                          width: 30,
+                          child: Text(
+                            results?.redScore != null
+                                ? results!.redScore.toString()
+                                : "-",
+                            style: whiteText,
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Container(
+                          height: 20,
+                          width: 170,
+                          decoration: BoxDecoration(
+                            border:
+                                results?.winner == Alliance.blue ||
+                                    results?.winner == Alliance.tie
+                                ? Border.all(color: winOutlineColor, width: 1)
+                                : null,
+                            color: Colors.blueAccent.withAlpha(128),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              for (final team in matchSchedule.blue)
+                                Flexible(
+                                  child: Row(
+                                    children: [
+                                      const SizedBox(width: 3),
+                                      FRCTeamAvatar(teamNumber: team, size: 15),
+                                      const SizedBox(width: 2),
+                                      Text(team.toString(), style: whiteText),
+                                    ],
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(
+                          width: 30,
+                          child: Text(
+                            results?.blueScore != null
+                                ? results!.blueScore.toString()
+                                : "-",
+                            style: whiteText,
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ],
             ),
-          ],
+          ),
         ),
       ),
     );

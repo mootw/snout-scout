@@ -9,10 +9,12 @@ class TimeDuration extends StatefulWidget {
     super.key,
     required this.time,
     this.displayDurationDefault = false,
+    this.style,
   });
 
   final DateTime time;
   final bool displayDurationDefault;
+  final TextStyle? style;
 
   @override
   State<TimeDuration> createState() => _TimeDurationState();
@@ -50,6 +52,9 @@ class _TimeDurationState extends State<TimeDuration> {
       secondaryText = formatDuration(widget.time.difference(DateTime.now()));
     }
 
-    return Tooltip(message: secondaryText, child: Text(primaryText));
+    return Tooltip(
+      message: secondaryText,
+      child: Text(primaryText, style: widget.style),
+    );
   }
 }

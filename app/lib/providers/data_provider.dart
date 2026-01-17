@@ -1,18 +1,21 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:app/api.dart';
+import 'package:app/providers/client_snout_db.dart';
 import 'package:app/providers/loading_status_service.dart';
-import 'package:app/screens/select_data_source.dart';
 import 'package:app/services/data_service.dart';
+import 'package:cbor/cbor.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:server/socket_messages.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:snout_db/db.dart';
+import 'package:snout_db/actions/write_config.dart';
 import 'package:snout_db/event/frcevent.dart';
-import 'package:snout_db/patch.dart';
-import 'package:snout_db/snout_db.dart';
+import 'package:snout_db/message.dart';
+import 'package:snout_db/snout_chain.dart';
 import 'package:synchronized/synchronized.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
@@ -47,19 +50,28 @@ class PatchOutbox {
     notifyListeners();
   }
 
-  Future newPatch(Patch patch) async {
+  Future remove(String value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(
+      outboxKey,
+      prefs.getStringList(outboxKey)?.where((e) => e != value).toList() ?? [],
+    );
+    notifyListeners();
+  }
+
+  Future writeNewMessage(SignedChainMessage message) async {
     // First save patch to disk asap, we can complete the future now and be certain of no data loss
     final prefs = await SharedPreferences.getInstance();
     final outbox = prefs.getStringList(outboxKey) ?? [];
-    outbox.add(jsonEncode(patch.toJson()));
+    outbox.add(base64Encode(cbor.encode(message.toCbor())));
     outboxCache = outbox;
     await prefs.setStringList(outboxKey, outbox);
     notifyListeners();
     // Then submit patches
-    commitPatchs();
+    commitActions();
   }
 
-  Future commitPatchs() async {
+  Future commitActions() async {
     await commitLock.synchronized(() async {
       // Notify listeners that an outbox commit attempt is started.
       notifyListeners();
@@ -68,10 +80,10 @@ class PatchOutbox {
       if (outbox.isEmpty) {
         Logger.root.warning('Tried to commit an empty outbox');
       }
-      final patch = outbox[0];
+      final action = base64Decode(outbox[0]);
       try {
         final res = await apiClient
-            .put(source, body: patch)
+            .put(source, body: action)
             .timeout(Duration(seconds: 30));
         if (res.statusCode == 200) {
           // Success
@@ -79,8 +91,6 @@ class PatchOutbox {
           await prefs.setStringList(outboxKey, outbox);
           outboxCache = List.of(outbox);
           notifyListeners();
-
-          // TODO commit remaining patches if there are more left
         } else {
           throw Exception(
             'Failed to upload patch ${res.statusCode} ${res.body}',
@@ -96,18 +106,18 @@ class PatchOutbox {
 }
 
 /// saves the data into storage
-Future writeLocalDiskDatabase(SnoutDB db, Uri path) async {
+Future writeLocalDiskDatabase(SnoutDBFile db, Uri path) async {
   final file = fs.file(Uri.decodeFull(path.toString()));
   if (await file.exists() == false) {
     await file.create(recursive: true);
   }
-  await file.writeAsBytes(utf8.encode(jsonEncode(db.toJson())));
+  await file.writeAsBytes(Uint8List.fromList(cbor.encode(db.toCbor())));
 }
 
 /// To be used within the context of a single data source
 class DataProvider extends ChangeNotifier {
   final Uri dataSourceUri;
-  final List<String>? safeIds;
+  final bool kioskMode;
 
   final _loadingLock = Lock();
 
@@ -119,65 +129,63 @@ class DataProvider extends ChangeNotifier {
   //Initialize the database as empty
   //this value should get quickly overwritten
   //i just dont like this being nullable is all.
-  SnoutDB _database = SnoutDB(
-    patches: [
-      Patch(
-        identity: '',
-        path: Patch.buildPath(['']),
-        time: DateTime.now(),
-        value: emptyNewEvent.toJson(),
-      ),
-    ],
-  );
+  SnoutChain _database = SnoutChain([]);
 
-  set database(SnoutDB newDatabase) {
+  set database(SnoutChain newDatabase) {
     _database = newDatabase;
-    _santize();
+    _sanitize();
     isInitialLoad = true;
   }
 
-  void _santize() {
+  void _sanitize() {
     // This is expensive and slow (because it's hacky) so only run it in kiosk mode.
-    if (safeIds != null) {
-      // Remove pitscouting data
-      database.event.pitscouting.forEach(
-        (team, value) =>
-            value.removeWhere((key, value) => safeIds!.contains(key) == false),
+    if (kioskMode) {
+      // Since the kiosk mode overwrites the database, we must  grab the config from the actions list manually
+      final configAction = database.actions.lastWhereOrNull(
+        (e) => e.payload.action is ActionWriteConfig,
       );
-      database.event.config.pitscouting.removeWhere(
-        (e) => safeIds!.contains(e.id) == false,
+      final config =
+          (configAction?.payload.action as ActionWriteConfig?)?.config;
+
+      final List<String> safeIds = config == null
+          ? []
+          : [
+              ...config.pitscouting
+                  .where((e) => e.isSensitiveField == false)
+                  .map((e) => e.id),
+              ...config.matchscouting.properties
+                  .where((e) => e.isSensitiveField == false)
+                  .map((e) => e.id),
+              ...config.matchscouting.survey
+                  .where((e) => e.isSensitiveField == false)
+                  .map((e) => e.id),
+              ...config.matchscouting.processes
+                  .where((e) => e.isSensitiveField == false)
+                  .map((e) => e.id),
+            ];
+
+      // Remove data items by key ids
+      database.event.dataItems.removeWhere(
+        (e, s) => safeIds.contains(s.$1.key) == false,
       );
 
-      // Remove match scouting survey data
-      database.event.matches.forEach(
-        (matchKey, match) => match.robot.forEach(
-          (teamKey, robotData) => robotData.survey.removeWhere(
-            (key, value) => safeIds!.contains(key) == false,
-          ),
-        ),
+      database.event.config.pitscouting.removeWhere(
+        (e) => safeIds.contains(e.id) == false,
       );
       database.event.config.matchscouting.survey.removeWhere(
-        (item) => safeIds!.contains(item.id) == false,
-      );
-
-      // Remove match properties data
-      database.event.matches.forEach(
-        (matchKey, match) => match.properties?.removeWhere(
-          (key, value) => safeIds!.contains(key) == false,
-        ),
+        (item) => safeIds.contains(item.id) == false,
       );
       database.event.config.matchscouting.properties.removeWhere(
-        (e) => safeIds!.contains(e.id) == false,
+        (e) => safeIds.contains(e.id) == false,
       );
-
       // Remove match process data
       database.event.config.matchscouting.processes.removeWhere(
-        (e) => safeIds!.contains(e.id) == false,
+        (e) => safeIds.contains(e.id) == false,
       );
     }
   }
 
-  SnoutDB get database {
+  SnoutChain get database {
     return _database;
   }
 
@@ -185,7 +193,7 @@ class DataProvider extends ChangeNotifier {
 
   FRCEvent get event => database.event;
 
-  DataProvider(this.dataSourceUri, [this.safeIds]) {
+  DataProvider(this.dataSourceUri, [this.kioskMode = false]) {
     () async {
       remoteOutbox = PatchOutbox(dataSourceUri, () => notifyListeners());
       await remoteOutbox.init();
@@ -217,15 +225,18 @@ class DataProvider extends ChangeNotifier {
   }
 
   //Writes a patch to local disk and submits it to the server.
-  Future newTransaction(Patch patch) {
+  Future newTransaction(SignedChainMessage message) {
     final future = () async {
       if (isDataSourceUriRemote) {
-        await remoteOutbox.newPatch(patch);
+        await remoteOutbox.writeNewMessage(message);
       } else {
         // Add this patch to the local DB before saving.
-        database.addPatch(patch);
-        _santize();
-        await writeLocalDiskDatabase(database, dataSourceUri);
+        database.verifyApplyAction(message);
+        _sanitize();
+        await writeLocalDiskDatabase(
+          SnoutDBFile(actions: database.actions),
+          dataSourceUri,
+        );
       }
       notifyListeners();
     }();
@@ -236,9 +247,11 @@ class DataProvider extends ChangeNotifier {
   Future _loadLocalDBData() async {
     final data = await fs
         .file(Uri.decodeFull(dataSourceUri.toString()))
-        .readAsString();
+        .readAsBytes();
 
-    database = SnoutDB.fromJson(json.decode(data));
+    database = SnoutChain.fromFile(
+      SnoutDBFile.fromCbor(cbor.decode(data) as CborMap),
+    );
     notifyListeners();
   }
 
@@ -251,79 +264,106 @@ class DataProvider extends ChangeNotifier {
   Future _getDatabaseFromServer(Uri source) async {
     // We cannot have multiple instances of this method running at the same time, because right now
     // only the length of the ledger is the only way to check the state, rather than using
-    // blockchain tech to properly link the list and maintain state like it really should
+    // tech to properly link the list and maintain state like it really should
 
     await _loadingLock.synchronized(() async {
       final storageKey = base64UrlEncode(utf8.encode(source.toString()));
 
-      // Database is stored on disk as just an array of patches
-      String? diskData = await readText(storageKey);
+      // Client stores data in a map format on disk.
+      Uint8List? diskData = await readBytes(storageKey);
 
-      if (diskData == null) {
-        Uri path = Uri.parse('${Uri.decodeFull(source.toString())}/patches');
-        final newData = await apiClient
-            .get(path)
-            .timeout(Duration(seconds: 30));
+      ClientSnoutDb? clientDb;
 
-        final List<Patch> patches = (json.decode(newData.body) as List)
-            .map((e) => Patch.fromJson(e as Map))
-            .toList();
-        final decodedDatabase = SnoutDB(patches: patches);
-        database = decodedDatabase;
-        _santize();
-        await storeText(
+      if (diskData != null) {
+        // ive played these games before
+        clientDb = ClientSnoutDb.fromCbor(cbor.decode(diskData) as CborMap);
+        database = clientDb.toDbFile();
+        notifyListeners();
+      } else {
+        // new database! do an initial full sync, this is one network request
+        // This is problematic if a device has a poor connection
+
+        final data = await apiClient.get(
+          Uri.parse(Uri.decodeFull(source.toString())),
+        );
+
+        final remoteDb = SnoutChain.fromFile(
+          SnoutDBFile.fromCbor(cbor.decode(data.bodyBytes) as CborMap),
+        );
+
+        clientDb = ClientSnoutDb(messageHashes: [], messages: {});
+        clientDb.messageHashes = await Future.wait(
+          remoteDb.actions.map((e) => e.hash),
+        );
+        clientDb.messages = Map.fromEntries(
+          await Future.wait(
+            remoteDb.actions.map(
+              (e) async => MapEntry(base64UrlEncode(await e.hash), e),
+            ),
+          ),
+        );
+        database = clientDb.toDbFile();
+        // Store up-to-date database
+        await storeBytes(
           storageKey,
-          json.encode(decodedDatabase.patches.map((e) => e.toJson()).toList()),
+          Uint8List.fromList(cbor.encode(clientDb.toCbor())),
         );
         notifyListeners();
         return;
       }
 
-      //Decode as list of patches
-      final patches = List.from(
-        json.decode(diskData) as List,
-      ).map((x) => Patch.fromJson(x)).toList();
+      // Get index from origin
+      // Index is in the form of a json list of message hashes encoded in url safe base64
+      final indexResult = await apiClient
+          .get(Uri.parse('${Uri.decodeFull(source.toString())}/index'))
+          .timeout(Duration(seconds: 20));
 
-      //Load the changest only, since it is more bandwidth efficient
-      //and the database is ONLY based on patches.
-      final headOriginResult = await apiClient
-          .get(Uri.parse('${Uri.decodeFull(source.toString())}/head'))
-          .timeout(Duration(seconds: 10));
+      clientDb.messageHashes = (json.decode(indexResult.body) as List)
+          .map<List<int>>((e) => base64Url.decode(e as String))
+          .toList();
 
-      final headOrigin = jsonDecode(headOriginResult.body) as int;
+      // Store the updated database index immediately!
+      await storeBytes(
+        storageKey,
+        Uint8List.fromList(cbor.encode(clientDb.toCbor())),
+      );
 
-      final headLocal = patches.length;
-      if (headOrigin > headLocal) {
-        // There are new patches, download them.
-        for (int i = headLocal; i < headOrigin; i++) {
-          final patchResult = await apiClient
-              .get(Uri.parse('${Uri.decodeFull(source.toString())}/patches/$i'))
-              .timeout(Duration(seconds: 10));
+      // Find missing messages
+      final missingMessageHashes = clientDb.messageHashes
+          .where(
+            (e) => clientDb!.messages.containsKey(base64Url.encode(e)) == false,
+          )
+          .toList();
 
-          if (patchResult.statusCode != 200) {
-            throw Exception(
-              'Failed to download patch $i ${patchResult.statusCode} ${patchResult.body}',
-            );
-          }
-          final patch = Patch.fromJson(json.decode(patchResult.body));
-          patches.add(patch);
-          // Save new database! This allows for incremental updates. It hurts download performance
-          // but each patch is immediately saved to disk
-          await storeText(
-            storageKey,
-            json.encode(patches.map((e) => e.toJson()).toList()),
+      for (final messageHash in missingMessageHashes) {
+        final messageResult = await apiClient
+            .get(
+              Uri.parse(
+                '${Uri.decodeFull(source.toString())}/messages/${base64Url.encode(messageHash)}',
+              ),
+            )
+            .timeout(Duration(seconds: 10));
+
+        if (messageResult.statusCode != 200) {
+          throw Exception(
+            'Failed to download message ${base64Url.encode(messageHash)} ${messageResult.statusCode} ${messageResult.body}',
           );
-          print('downloaded $i of ${headOrigin - headLocal} patches');
         }
 
-        //Assign to local database so even when it fails to load, we still have
-        //the latest disk database
-        database = SnoutDB(patches: patches);
-        ;
-        _santize();
-      }
-    });
+        final decoded = SignedChainMessage.fromCbor(
+          cbor.decode(messageResult.bodyBytes) as CborMap,
+        );
 
+        clientDb.messages[base64Url.encode(messageHash)] = decoded;
+      }
+      // Store up-to-date database
+      await storeBytes(
+        storageKey,
+        Uint8List.fromList(cbor.encode(clientDb.toCbor())),
+      );
+      database = clientDb.toDbFile();
+      notifyListeners();
+    });
     notifyListeners();
   }
 
@@ -410,7 +450,7 @@ class DataProvider extends ChangeNotifier {
 
         _channel?.sink.close();
         //Re-attempt a connection after some time
-        Timer(const Duration(seconds: 3), () {
+        Timer(const Duration(seconds: 17), () {
           if (connected == false) {
             _initializeLiveServerPatches();
           }

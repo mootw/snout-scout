@@ -1,0 +1,7 @@
+include: package:lint/strict.yaml
+
+analyzer:
+  exclude: [lib/**.g.dart]
+
+  errors:
+    todo: info

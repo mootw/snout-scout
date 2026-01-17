@@ -1,6 +1,6 @@
 import 'package:app/widgets/confirm_exit_dialog.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 
 class EditMarkdownPage extends StatefulWidget {
   const EditMarkdownPage({super.key, required this.source});

@@ -1,14 +1,10 @@
 import 'package:app/widgets/datasheet.dart';
-import 'package:app/style.dart';
 import 'package:app/providers/data_provider.dart';
-import 'package:app/screens/view_team_page.dart';
-import 'package:app/widgets/edit_audit.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:snout_db/patch.dart';
 
-class TableRobotRecordingsPage extends StatelessWidget {
-  const TableRobotRecordingsPage({super.key});
+class TableRobotTracePage extends StatelessWidget {
+  const TableRobotTracePage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +13,7 @@ class TableRobotRecordingsPage extends StatelessWidget {
       appBar: AppBar(),
       body: DataSheet(
         numFixedColumns: 2,
-        title: 'Robot Recordings',
+        title: 'Robot Traces',
         //Data is a list of rows and columns
         columns: [
           DataItemColumn.matchHeader(),
@@ -26,13 +22,12 @@ class TableRobotRecordingsPage extends StatelessWidget {
             DataItemColumn.fromProcess(item),
           for (final item in data.event.config.matchscouting.survey)
             DataItemColumn.fromSurveyItem(item),
-          DataItemColumn(DataItem.fromText("Scout")),
         ],
         rows: [
           for (final match in data.event.matchesSorted().reversed)
             for (final robot in match.value.robot.entries)
               [
-                DataItem.fromMatch(
+                DataTableItem.fromMatch(
                   context: context,
                   key: match.key,
                   label:
@@ -42,51 +37,33 @@ class TableRobotRecordingsPage extends StatelessWidget {
                       .getSchedule(data.event, match.key)
                       ?.scheduledTime,
                 ),
-                DataItem(
-                  displayValue: TextButton(
-                    child: Text(
-                      robot.key,
-                      style: TextStyle(
-                        color: getAllianceUIColor(robot.value.alliance),
-                      ),
-                    ),
-                    onPressed: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            TeamViewPage(teamNumber: int.parse(robot.key)),
-                      ),
-                    ),
-                  ),
-                  exportValue: robot.key,
-                  sortingValue: robot.key,
+                DataTableItem.fromTeam(
+                  context: context,
+                  team: int.tryParse(robot.key) ?? 0,
+                  alliance: robot.value.alliance,
                 ),
                 for (final item in data.event.config.matchscouting.processes)
-                  DataItem.fromErrorNumber(
+                  DataTableItem.fromErrorNumber(
                     data.event.runMatchResultsProcess(
                           item,
                           match.value.robot[robot.key],
+                          data.event.matchTeamData(
+                            int.tryParse(robot.key) ?? 0,
+                            match.key,
+                          ),
                           int.tryParse(robot.key) ?? 0,
+                          match.key,
                         ) ??
                         (value: null, error: "Missing Results"),
                   ),
                 for (final item in data.event.config.matchscouting.survey)
-                  DataItem.fromSurveyItem(
-                    match.value.robot[robot.key]?.survey[item.id],
+                  DataTableItem.fromSurveyItem(
+                    data.event.matchTeamData(
+                      int.tryParse(robot.key) ?? 0,
+                      match.key,
+                    )?[item.id],
                     item,
                   ),
-                DataItem.fromText(
-                  getAuditString(
-                    context.watch<DataProvider>().database.getLastPatchFor(
-                      Patch.buildPath([
-                        'matches',
-                        match.key,
-                        'robot',
-                        robot.key,
-                      ]),
-                    ),
-                  ),
-                ),
               ],
         ],
       ),

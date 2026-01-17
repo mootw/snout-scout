@@ -1,21 +1,32 @@
 import 'dart:math';
+import 'dart:typed_data';
 
-import 'package:snout_db/event/frcevent.dart';
+import 'package:collection/collection.dart';
+import 'package:cryptography/cryptography.dart';
+import 'package:snout_db/action.dart';
+import 'package:snout_db/actions/add_keypair.dart';
+import 'package:snout_db/actions/write_config.dart';
+import 'package:snout_db/actions/write_schedule.dart';
+import 'package:snout_db/actions/write_teams.dart';
+import 'package:snout_db/crypto.dart';
 import 'package:snout_db/event/match_schedule_item.dart';
-import 'package:snout_db/patch.dart';
-import 'package:snout_db/snout_db.dart';
+import 'package:snout_db/message.dart';
+import 'package:snout_db/pubkey.dart';
+import 'package:snout_db/snout_chain.dart';
 
 const maxFRCTeam = 12000;
 
-List<Patch> generateMockData({
+Future<List<SignedChainMessage>> generateMockData({
   required int seed,
   int team = 6749,
   int numTeams = 43,
   int numMatches = 86,
-}) {
+}) async {
   final random = Random(seed);
 
-  final teams = [for (int i = 0; i < numTeams; i++) random.nextInt(maxFRCTeam)];
+  final teams = [
+    for (int i = 0; i < numTeams; i++) random.nextInt(maxFRCTeam),
+  ].sorted((a, b) => a.compareTo(b));
 
   final scouts = [
     "albert",
@@ -49,17 +60,44 @@ List<Patch> generateMockData({
       ),
   ];
 
-  Patch initialPatch = Patch(
-    identity: '',
-    time: startTime,
-    path: Patch.buildPath(['']),
-    value: FRCEvent(
-      config: EventConfig(name: 'Mock $seed', team: team, fieldImage: ''),
-    ).toJson(),
+  final config = ActionWriteConfig(
+    EventConfig(name: 'Mock $seed', team: team, fieldImage: ''),
   );
 
-  Patch teamsPatch = Patch.teams(startTime, teams);
-  Patch schedule = Patch.schedule(startTime, matches);
+  final teamsPatch = ActionWriteTeams(teams);
+  final schedule = ActionWriteSchedule(matches);
 
-  return [initialPatch, teamsPatch, schedule];
+  return await _signActions([config, teamsPatch, schedule]);
+}
+
+Future<List<SignedChainMessage>> _signActions(List<ChainAction> actions) async {
+  final seed = Uint8List(32);
+
+  final keyPair = await Ed25519().newKeyPairFromSeed(seed);
+
+  var lastHash = List<int>.filled(32, 0);
+
+  final snoutChain = SnoutChain([
+    await ChainActionData(
+      time: DateTime.now(),
+      previousHash: lastHash,
+      action: ActionWriteKeyPair(
+        await encryptSeedKey(seedKey: seed, password: [1, 2, 3]),
+        await keyPair.extractPublicKey().then((value) => Pubkey(value.bytes)),
+        'demo data',
+      ),
+    ).encodeAndSign(seed),
+  ]);
+  lastHash = await snoutChain.actions.first.hash;
+  for (final action in actions) {
+    final chainAction = ChainActionData(
+      time: DateTime.now(),
+      previousHash: lastHash,
+      action: action,
+    );
+    final signedMessage = await chainAction.encodeAndSign(seed);
+    await snoutChain.verifyApplyAction(signedMessage);
+    lastHash = await signedMessage.hash;
+  }
+  return snoutChain.actions;
 }

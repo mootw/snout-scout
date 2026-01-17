@@ -14,10 +14,12 @@ class FieldPosition {
   final double x;
   final double y;
 
-  /// Rounded, yields a resolution of about 8cm
-  FieldPosition(double x, double y)
-    : x = (x * 200).roundToDouble() / 200,
-      y = (y * 100).roundToDouble() / 100;
+  const FieldPosition(this.x, this.y);
+
+  /// Rounded, yields a resolution of about 3cm
+  FieldPosition.rounded(double x, double y)
+    : x = (x * 500).roundToDouble() / 500,
+      y = (y * 250).roundToDouble() / 250;
 
   /// Returns a new position rotated 180 degrees about the origin (center of field).
   /// This can be used to normalize recorded positions to always be as if it was

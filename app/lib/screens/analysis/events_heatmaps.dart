@@ -2,6 +2,7 @@ import 'package:app/providers/data_provider.dart';
 import 'package:app/widgets/fieldwidget.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:snout_db/config/match_period_config.dart';
 
 class AnalysisEventsHeatmap extends StatelessWidget {
   const AnalysisEventsHeatmap({super.key});
@@ -12,6 +13,7 @@ class AnalysisEventsHeatmap extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text("Events Heatmap Analysis")),
       body: ListView(
+        primary: true,
         children: [
           Center(
             child: Text(
@@ -28,9 +30,36 @@ class AnalysisEventsHeatmap extends StatelessWidget {
                       label:
                           '${match.value.getSchedule(data.event, match.key)?.label} ${robot.key}',
                       path: match.value.robot[robot.key]!.timelineInterpolated
-                          .where((element) => element.isInAuto)
+                          .where(
+                            (element) =>
+                                data.event.config
+                                    .getPeriodAtTime(element.timeDuration)
+                                    .id ==
+                                autoPeriodId,
+                          )
                           .toList(),
                     ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          Center(
+            child: Text(
+              "Driving Area",
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+          ),
+          Center(
+            child: FieldHeatMap(
+              size: largeFieldSize,
+              events: [
+                for (final match in data.event.matches.entries)
+                  for (final robot in match.value.robot.entries)
+                    ...match.value.robot[robot.key]!
+                        .timelineInterpolatedBlueNormalized(
+                          data.event.config.fieldStyle,
+                        )
+                        .where((element) => element.isPositionEvent),
               ],
             ),
           ),
@@ -51,7 +80,13 @@ class AnalysisEventsHeatmap extends StatelessWidget {
                         .timelineInterpolatedBlueNormalized(
                           data.event.config.fieldStyle,
                         )
-                        .where((event) => event.isInAuto),
+                        .where(
+                          (event) =>
+                              data.event.config
+                                  .getPeriodAtTime(event.timeDuration)
+                                  .id ==
+                              autoPeriodId,
+                        ),
               ],
             ),
           ),
