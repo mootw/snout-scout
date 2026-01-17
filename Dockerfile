@@ -1,4 +1,4 @@
-# Flutter sdk is required for now: https://github.com/google/webcrypto.dart/issues/192
+# TODO Flutter sdk is required for now: https://github.com/google/webcrypto.dart/issues/192
 # This dockerfile needs to be rebuilt from the ground up once this issue is resolved.
 # reference commit 1ae3f381b6f84d5bd6b5e76a7f3530c536f83b50
 

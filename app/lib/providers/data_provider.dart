@@ -147,7 +147,7 @@ class DataProvider extends ChangeNotifier {
       final config =
           (configAction?.payload.action as ActionWriteConfig?)?.config;
 
-      final List<String>? safeIds = config == null
+      final List<String> safeIds = config == null
           ? []
           : [
               ...config.pitscouting
@@ -166,21 +166,21 @@ class DataProvider extends ChangeNotifier {
 
       // Remove data items by key ids
       database.event.dataItems.removeWhere(
-        (e, s) => safeIds!.contains(s.$1.key) == false,
+        (e, s) => safeIds.contains(s.$1.key) == false,
       );
 
       database.event.config.pitscouting.removeWhere(
-        (e) => safeIds!.contains(e.id) == false,
+        (e) => safeIds.contains(e.id) == false,
       );
       database.event.config.matchscouting.survey.removeWhere(
-        (item) => safeIds!.contains(item.id) == false,
+        (item) => safeIds.contains(item.id) == false,
       );
       database.event.config.matchscouting.properties.removeWhere(
-        (e) => safeIds!.contains(e.id) == false,
+        (e) => safeIds.contains(e.id) == false,
       );
       // Remove match process data
       database.event.config.matchscouting.processes.removeWhere(
-        (e) => safeIds!.contains(e.id) == false,
+        (e) => safeIds.contains(e.id) == false,
       );
     }
   }
@@ -311,8 +311,6 @@ class DataProvider extends ChangeNotifier {
         notifyListeners();
         return;
       }
-
-      print(StackTrace.current);
 
       // Get index from origin
       // Index is in the form of a json list of message hashes encoded in url safe base64

@@ -169,11 +169,13 @@ class _EditTeamListState extends State<EditTeamList> {
 
   @override
   Widget build(BuildContext context) {
-    final data = context.watch<DataProvider>();
-    return WillPopScope(
-      onWillPop: () async {
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
         if (_list.teams.isEmpty) {
-          return true;
+          Navigator.pop(context);
+          return;
         }
         final prefs = await SharedPreferences.getInstance();
         final drafts = prefs.getStringList('drafts') ?? <String>[];
@@ -189,7 +191,7 @@ class _EditTeamListState extends State<EditTeamList> {
           'drafts',
           decoded.map((e) => base64.encode(cbor.encode(e.toCbor()))).toList(),
         );
-        return true;
+        Navigator.pop(context);
       },
       child: Scaffold(
         appBar: AppBar(

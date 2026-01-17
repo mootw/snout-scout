@@ -29,7 +29,7 @@ class ActionWriteKeyPair implements ChainAction {
     CborString("alias"): CborString(alias),
   });
 
-  static ActionWriteKeyPair fromCbor(CborValue data) {
+  factory ActionWriteKeyPair.fromCbor(CborValue data) {
     final map = data as CborMap;
     return ActionWriteKeyPair(
       EncryptedSecretKey.fromJson(

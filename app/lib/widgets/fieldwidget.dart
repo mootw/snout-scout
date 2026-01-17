@@ -670,13 +670,13 @@ class MapLine extends CustomPainter {
     Path path = Path();
 
     final startingPosition = getFieldPosition(events.first, size);
-    path.moveTo(startingPosition[0], startingPosition[1]);
+    path.moveTo(startingPosition.x, startingPosition.y);
     for (final event in events) {
       final pos1 = getFieldPosition(event, size);
       if (event.isPositionEvent) {
-        path.lineTo(pos1[0], pos1[1]);
+        path.lineTo(pos1.x, pos1.y);
       } else {
-        canvas.drawCircle(Offset(pos1[0], pos1[1]), 1.5, p);
+        canvas.drawCircle(Offset(pos1.x, pos1.y), 1.5, p);
       }
     }
     canvas.drawPath(path, p);
@@ -684,16 +684,16 @@ class MapLine extends CustomPainter {
     p.style = PaintingStyle.fill;
 
     if (emphasizeStartPoint) {
-      canvas.drawCircle(Offset(startingPosition[0], startingPosition[1]), 6, p);
+      canvas.drawCircle(Offset(startingPosition.x, startingPosition.y), 6, p);
     }
   }
 
   // Returns [x, y]
-  getFieldPosition(MatchEvent event, Size renderSize) {
-    return [
-      ((event.position.x + 1) / (1.0 / mapRatio)) * renderSize.width,
-      (1 - ((event.position.y + 1) / (1.0 / mapRatio))) * renderSize.height,
-    ];
+  ({double x, double y}) getFieldPosition(MatchEvent event, Size renderSize) {
+    return (
+      x: ((event.position.x + 1) / (1.0 / mapRatio)) * renderSize.width,
+      y: (1 - ((event.position.y + 1) / (1.0 / mapRatio))) * renderSize.height,
+    );
   }
 
   @override

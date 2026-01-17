@@ -17,7 +17,7 @@ class ActionWriteMatchResults implements ChainAction {
   @override
   CborValue toCbor() => matchResult.toCbor();
 
-  static ActionWriteMatchResults fromCbor(CborValue data) {
+  factory ActionWriteMatchResults.fromCbor(CborValue data) {
     return ActionWriteMatchResults(MatchResult.fromCbor(data as CborMap));
   }
 

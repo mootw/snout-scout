@@ -7,6 +7,7 @@ import 'package:app/widgets/scout_name_display.dart';
 import 'package:collection/collection.dart';
 import 'package:cryptography/cryptography.dart';
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:snout_db/action.dart';
@@ -203,8 +204,7 @@ class _ScoutAuthorizationDialogState extends State<ScoutAuthorizationDialog> {
         _scoutPassword.text = '';
         _errorText = 'Decryption failed';
       });
-      print('Decryption failed: $e');
-      print(s);
+      Logger.root.severe('Decryption failed for scout $_selectedScout', e, s);
     }
   }
 }

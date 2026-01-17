@@ -1,7 +1,7 @@
 import 'package:app/screens/analysis/boxplot.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-main() {
+void main() {
   group('quartiles math', () {
     test('even', () {
       expect(getQuartiles([5, 7, 4, 4, 6, 2, 8]), (

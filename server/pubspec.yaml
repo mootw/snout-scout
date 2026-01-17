@@ -11,7 +11,7 @@ dependencies:
   collection: ^1.19.1
   dotenv: ^4.2.0
   eval_ex: ^1.1.8
-  # Flutter sdk is required... https://github.com/google/webcrypto.dart/issues/192
+  # TODO Flutter sdk is required... https://github.com/google/webcrypto.dart/issues/192
   flutter:
     sdk: flutter
   http: ^1.1.2

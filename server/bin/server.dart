@@ -263,7 +263,6 @@ void main(List<String> args) async {
         (a, b) => [...a, ...b],
       );
 
-      print(content);
       try {
         final SignedChainMessage message = SignedChainMessage.fromCbor(
           cbor.decode(content) as CborMap,
@@ -315,7 +314,6 @@ void main(List<String> args) async {
   //Enable GZIP compression since every byte counts!
   // even though the new binary format is efficient, gzip can still save ~30%
   server.autoCompress = true;
-  //TODO i think this will work if chunked transfer encoding is set..
   logger.info('Server started: ${server.address} port ${server.port}');
 }
 

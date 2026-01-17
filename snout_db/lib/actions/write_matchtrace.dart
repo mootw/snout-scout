@@ -18,7 +18,7 @@ class ActionWriteMatchTrace implements ChainAction {
   @override
   CborValue toCbor() => trace.toCbor();
 
-  static ActionWriteMatchTrace fromCbor(CborValue data) {
+  factory ActionWriteMatchTrace.fromCbor(CborValue data) {
     return ActionWriteMatchTrace(MatchTrace.fromCbor(data as CborMap));
   }
 

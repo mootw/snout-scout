@@ -71,7 +71,6 @@ void main() async {
 
   if (ds != null && kioskMode) {
     try {
-      print('Running in kiosk mode with data source $ds');
       final file = fs.file('${fs.directory('/kiosk').path}/kiosk.zip');
 
       final bytes = await file.readAsBytes();
@@ -80,7 +79,7 @@ void main() async {
       runApp(Kiosk(dataSource: ds, kioskData: archive));
       return;
     } catch (e, s) {
-      print('$e, $s');
+      Logger.root.severe('$e, $s');
     }
   }
   runApp(SnoutScoutApp(defaultSourceKey: ds));

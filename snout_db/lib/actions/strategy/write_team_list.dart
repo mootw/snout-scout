@@ -17,7 +17,7 @@ class ActionWriteTeamList implements ChainAction {
   CborValue toCbor() =>
       CborMap({CborString("list"): CborBytes(cbor.encode(list.toCbor()))});
 
-  static ActionWriteTeamList fromCbor(CborValue data) {
+  factory ActionWriteTeamList.fromCbor(CborValue data) {
     final map = data as CborMap;
     return ActionWriteTeamList(
       TeamList.fromCbor(

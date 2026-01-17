@@ -30,9 +30,9 @@ class _DynamicPropertyEditorWidgetState
     extends State<DynamicPropertyEditorWidget> {
   final _myController = TextEditingController();
 
-  get _initialValue => widget.initialData?[widget.tool.id];
+  dynamic get _initialValue => widget.initialData?[widget.tool.id];
 
-  get _value => widget.survey[widget.tool.id];
+  dynamic get _value => widget.survey[widget.tool.id];
   set _value(dynamic newValue) => widget.survey[widget.tool.id] = newValue;
 
   @override

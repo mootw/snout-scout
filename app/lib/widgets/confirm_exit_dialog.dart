@@ -9,9 +9,11 @@ class ConfirmExitDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        return (await showDialog(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+        if ((await showDialog(
               context: context,
               builder: (context) => AlertDialog(
                 title: const Text('Are you sure?'),
@@ -28,7 +30,9 @@ class ConfirmExitDialog extends StatelessWidget {
                 ],
               ),
             )) ??
-            false;
+            false) {
+          Navigator.of(context).pop();
+        }
       },
       child: child,
     );

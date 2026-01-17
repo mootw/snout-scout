@@ -15,7 +15,7 @@ class MatchResult {
     CborString('r'): result == null ? const CborNull() : result!.toCbor(),
   });
 
-  static MatchResult fromCbor(CborMap data) {
+  factory MatchResult.fromCbor(CborMap data) {
     final match = (data[CborString('m')]! as CborString).toString();
     final result = data[CborString('r')] is CborNull
         ? null

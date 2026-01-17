@@ -24,7 +24,7 @@ class ActionWriteSchedule implements ChainAction {
     ),
   });
 
-  static ActionWriteSchedule fromCbor(CborValue data) {
+  factory ActionWriteSchedule.fromCbor(CborValue data) {
     final map = data as CborMap;
     return ActionWriteSchedule(
       (json.decode((map[CborString("schedule")]! as CborString).toString())

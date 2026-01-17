@@ -78,7 +78,7 @@ class SignedChainMessage {
     const CborSmallInt(3): CborBytes(signature),
   });
 
-  static SignedChainMessage fromCbor(CborMap map) {
+  factory SignedChainMessage.fromCbor(CborMap map) {
     return SignedChainMessage(
       Pubkey((map[const CborSmallInt(1)]! as CborBytes).bytes),
       (map[const CborSmallInt(2)]! as CborBytes).bytes,

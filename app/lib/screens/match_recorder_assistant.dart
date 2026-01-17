@@ -158,44 +158,41 @@ class _MatchRecorderAssistantPageState
 
     return InkWell(
       onTap: onTap,
-      child: Container(
-        // color: (isRecommended ? Theme.of(context).colorScheme.onPrimary : null),
-        child: Flex(
-          direction: isWideScreen(context) ? Axis.vertical : Axis.horizontal,
-          children: [
-            SizedBox(
-              height: 140,
-              width: 140,
-              child: Padding(
-                padding: const EdgeInsets.all(8),
-                child: Center(child: image ?? const Text("No Image")),
+      child: Flex(
+        direction: isWideScreen(context) ? Axis.vertical : Axis.horizontal,
+        children: [
+          SizedBox(
+            height: 140,
+            width: 140,
+            child: Padding(
+              padding: const EdgeInsets.all(8),
+              child: Center(child: image ?? const Text("No Image")),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // if (isRecommended) const Text("Recommended"),
+              Row(
+                children: [
+                  FRCTeamAvatar(teamNumber: team),
+                  const SizedBox(width: 4),
+                  Text("$team", style: Theme.of(context).textTheme.bodyLarge),
+                ],
               ),
-            ),
-            const SizedBox(width: 8),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // if (isRecommended) const Text("Recommended"),
-                Row(
-                  children: [
-                    FRCTeamAvatar(teamNumber: team),
-                    const SizedBox(width: 4),
-                    Text("$team", style: Theme.of(context).textTheme.bodyLarge),
-                  ],
-                ),
-                Text(
-                  subtitle,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyMedium?.copyWith(color: subtitleColor),
-                ),
-                Text("$numRecordings recording(s)"),
-                if (inInMatchWithOurTeam) Text("alliance member"),
-              ],
-            ),
-          ],
-        ),
+              Text(
+                subtitle,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: subtitleColor),
+              ),
+              Text("$numRecordings recording(s)"),
+              if (inInMatchWithOurTeam) Text("alliance member"),
+            ],
+          ),
+        ],
       ),
     );
   }

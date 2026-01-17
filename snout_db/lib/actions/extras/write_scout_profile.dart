@@ -21,7 +21,7 @@ class ActionWriteScoutProfile implements ChainAction {
     CborString("profile"): CborString(json.encode(profile.toJson())),
   });
 
-  static ActionWriteScoutProfile fromCbor(CborValue data) {
+  factory ActionWriteScoutProfile.fromCbor(CborValue data) {
     final map = data as CborMap;
     return ActionWriteScoutProfile(
       ScoutProfile.fromJson(

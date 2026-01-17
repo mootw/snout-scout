@@ -19,7 +19,7 @@ class ActionWriteConfig implements ChainAction {
     CborString("config"): CborString(json.encode(config.toJson())),
   });
 
-  static ActionWriteConfig fromCbor(CborValue data) {
+  factory ActionWriteConfig.fromCbor(CborValue data) {
     final map = data as CborMap;
     return ActionWriteConfig(
       EventConfig.fromJson(

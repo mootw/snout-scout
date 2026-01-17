@@ -23,7 +23,7 @@ class SnoutDBFile {
     });
   }
 
-  static SnoutDBFile fromCbor(CborMap db) {
+  factory SnoutDBFile.fromCbor(CborMap db) {
     return SnoutDBFile(
       actions: List<CborMap>.from(
         db[CborString('chain')]! as CborList,

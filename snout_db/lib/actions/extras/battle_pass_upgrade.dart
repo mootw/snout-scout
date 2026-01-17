@@ -18,7 +18,7 @@ class ActionBattlePassLevelUp implements ChainAction {
   @override
   CborValue toCbor() => CborMap({CborString("level"): CborSmallInt(level)});
 
-  static ActionBattlePassLevelUp fromCbor(CborValue data) {
+  factory ActionBattlePassLevelUp.fromCbor(CborValue data) {
     final map = data as CborMap;
     return ActionBattlePassLevelUp(
       (map[CborString("level")]! as CborSmallInt).toInt(),

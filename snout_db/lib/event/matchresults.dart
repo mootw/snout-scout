@@ -14,7 +14,7 @@ class MatchResultValues {
     required this.blueScore,
   });
 
-  static MatchResultValues fromCbor(CborValue value) {
+  factory MatchResultValues.fromCbor(CborValue value) {
     final map = value as CborMap;
     return MatchResultValues(
       time: DateTime.fromMillisecondsSinceEpoch(

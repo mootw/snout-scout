@@ -59,7 +59,6 @@ class TBAAvatarImageProvider extends ImageProvider<TBAAvatarImageProvider> {
     final response = await http.get(Uri.parse(url), headers: headers);
 
     if (response.statusCode != 200) {
-      print('cache');
       // RETURN GENERIC
       PaintingBinding.instance.imageCache.evict(this);
       throw StateError(

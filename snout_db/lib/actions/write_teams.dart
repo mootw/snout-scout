@@ -20,7 +20,7 @@ class ActionWriteTeams implements ChainAction {
     ]),
   });
 
-  static ActionWriteTeams fromCbor(CborValue data) {
+  factory ActionWriteTeams.fromCbor(CborValue data) {
     final map = data as CborMap;
     return ActionWriteTeams(
       List<int>.from(

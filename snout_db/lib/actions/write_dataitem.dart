@@ -17,7 +17,7 @@ class ActionWriteDataItem implements ChainAction {
   @override
   CborValue toCbor() => dataItem.toCbor();
 
-  static ActionWriteDataItem fromCbor(CborValue data) {
+  factory ActionWriteDataItem.fromCbor(CborValue data) {
     return ActionWriteDataItem(DataItem.fromCbor(data as CborMap));
   }
 

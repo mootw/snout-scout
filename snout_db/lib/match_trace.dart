@@ -20,7 +20,7 @@ class MatchTrace {
         : CborString(json.encode(trace!.toJson())),
   });
 
-  static MatchTrace fromCbor(CborMap data) {
+  factory MatchTrace.fromCbor(CborMap data) {
     final match = (data[CborString('m')]! as CborString).toString();
     final robot = (data[CborString('r')]! as CborSmallInt).toInt();
     final trace = data[CborString('t')] is CborNull

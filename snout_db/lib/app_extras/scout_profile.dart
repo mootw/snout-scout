@@ -16,7 +16,7 @@ class ScoutProfile {
     'suffixEmoji': suffixEmoji,
   };
 
-  static ScoutProfile fromJson(Map<String, dynamic> json) {
+  factory ScoutProfile.fromJson(Map<String, dynamic> json) {
     return ScoutProfile(
       selectedUpgrades: List<String>.from(
         json['selectedUpgrades'] as List<dynamic>,

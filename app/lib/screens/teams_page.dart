@@ -73,10 +73,11 @@ class _TeamGridListState extends State<TeamGridList> {
                                 ),
                               );
 
-                              final teams = List<int>.from(json.decode(result));
-                              teams.sort();
-
                               if (result != null && context.mounted) {
+                                final teams = List<int>.from(
+                                  json.decode(result),
+                                );
+                                teams.sort();
                                 final action = ActionWriteTeams(teams);
                                 //Save the scouting results to the server!!
                                 await submitData(context, action);

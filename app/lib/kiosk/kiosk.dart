@@ -35,7 +35,6 @@ class _KioskState extends State<Kiosk> {
   @override
   void initState() {
     super.initState();
-    print(widget.kioskData.files.map((e) => e.name).toList());
   }
 
   void _resetKiosk() {

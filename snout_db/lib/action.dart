@@ -101,16 +101,13 @@ class ChainActionData {
     const CborSmallInt(4): action.toCbor(),
   });
 
-  static ChainActionData fromCbor(CborMap map) {
-    return ChainActionData(
-      previousHash: (map[const CborSmallInt(1)]! as CborBytes).bytes,
-      time: DateTime.parse(
+  ChainActionData.fromCbor(CborMap map)
+    : previousHash = (map[const CborSmallInt(1)]! as CborBytes).bytes,
+      time = DateTime.parse(
         (map[const CborSmallInt(2)]! as CborString).toString(),
       ),
-      action: ActionType.create(
+      action = ActionType.create(
         (map[const CborSmallInt(3)]! as CborSmallInt).value,
         map[const CborSmallInt(4)]!,
-      ),
-    );
-  }
+      );
 }

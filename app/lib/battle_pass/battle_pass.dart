@@ -74,7 +74,11 @@ class _BattlePassPageState extends State<BattlePassPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Image.asset('assets/battle_pass.png', width: 140, height: 140),
+                    Image.asset(
+                      'assets/battle_pass.png',
+                      width: 140,
+                      height: 140,
+                    ),
                     SizedBox(width: 32),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -141,7 +145,10 @@ class _BattlePassPageState extends State<BattlePassPage> {
                   if (level.key > currentLevel)
                     Center(
                       child: FilledButton.tonal(
-                        onPressed: currentLevel + 1 < level.key || spendableBencoin(db, identity) < battlePassCost(level.key)
+                        onPressed:
+                            currentLevel + 1 < level.key ||
+                                spendableBencoin(db, identity) <
+                                    battlePassCost(level.key)
                             ? null
                             : () async {
                                 final AuthorizedScoutData? auth =
@@ -176,13 +183,14 @@ class _BattlePassPageState extends State<BattlePassPage> {
                                 await context
                                     .read<DataProvider>()
                                     .newTransaction(signed);
-
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        LevelUpScreen(level: level.key),
-                                  ),
-                                );
+                                if (context.mounted) {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          LevelUpScreen(level: level.key),
+                                    ),
+                                  );
+                                }
                               },
                         child: Text(
                           'Unlock for ${battlePassCost(level.key)} Bencoin${currentLevel + 1 < level.key ? ' (Needs Level ${level.key - 1})' : ''}',

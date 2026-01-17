@@ -206,7 +206,7 @@ void main(List<String> args) async {
 
     print('signed password 1234');
 
-    final outFile = File('${filePath}.converted.snoutdb');
+    final outFile = File('$filePath.converted.snoutdb');
     outFile.writeAsBytesSync(
       cbor.encode(SnoutDBFile(actions: snoutChain.actions).toCbor()),
     );
