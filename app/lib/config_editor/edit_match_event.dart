@@ -85,9 +85,16 @@ class _EditMatchEventConfigState extends State<EditMatchEventConfig> {
               border: const OutlineInputBorder(),
             ),
           ),
+
           trailing: Icon(
             Icons.circle,
-            color: colorFromHex(widget.state.color.text),
+            color: () {
+              try {
+                return colorFromHex(widget.state.color.text);
+              } catch (e) {
+                return null;
+              }
+            }(),
           ),
         ),
 
