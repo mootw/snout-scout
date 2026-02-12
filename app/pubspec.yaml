@@ -77,6 +77,8 @@ dependencies:
   web: ^1.1.1
   archive: ^4.0.7
   flutter_native_splash: ^2.4.7
+  mime: ^2.0.0
+  video_player: ^2.10.1
 
 dev_dependencies:
   flutter_test:

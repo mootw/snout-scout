@@ -112,40 +112,48 @@ class KioskBanner extends StatelessWidget {
     return Column(
       children: [
         AbsorbPointer(
-          child: Row(
+          child: Column(
             children: [
-              if (scheduleDelay != null && teamNextMatch != null)
-                Expanded(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Text(
-                        'Edits: ${snoutData.database.actions.length.toString()}',
-                      ),
-                      if (nextMatch != null)
-                        MatchCard(
-                          match: nextMatch.getData(snoutData.event),
-                          results: snoutData.event.getMatchResults(
-                            nextMatch.id,
+              SizedBox(height: 4),
+              Row(
+                children: [
+                  if (scheduleDelay != null && teamNextMatch != null)
+                    Expanded(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Text(
+                            'Edits: ${snoutData.database.actions.length.toString()}',
                           ),
-                          matchSchedule: nextMatch,
-                          focusTeam: snoutData.event.config.team,
-                        ),
-                      MatchCard(
-                        match: teamNextMatch.getData(snoutData.event),
-                        results: snoutData.event.getMatchResults(
-                          teamNextMatch.id,
-                        ),
-                        matchSchedule: teamNextMatch,
-                        focusTeam: snoutData.event.config.team,
+                          if (nextMatch != null)
+                            MatchCard(
+                              match: nextMatch.getData(snoutData.event),
+                              results: snoutData.event.getMatchResults(
+                                nextMatch.id,
+                              ),
+                              matchSchedule: nextMatch,
+                              focusTeam: snoutData.event.config.team,
+                            ),
+                          MatchCard(
+                            match: teamNextMatch.getData(snoutData.event),
+                            results: snoutData.event.getMatchResults(
+                              teamNextMatch.id,
+                            ),
+                            matchSchedule: teamNextMatch,
+                            focusTeam: snoutData.event.config.team,
+                          ),
+                          TimeDuration(
+                            time: teamNextMatch.scheduledTime.add(
+                              scheduleDelay,
+                            ),
+                            displayDurationDefault: true,
+                          ),
+                        ],
                       ),
-                      TimeDuration(
-                        time: teamNextMatch.scheduledTime.add(scheduleDelay),
-                        displayDurationDefault: true,
-                      ),
-                    ],
-                  ),
-                ),
+                    ),
+                ],
+              ),
+              SizedBox(height: 4),
             ],
           ),
         ),
@@ -155,16 +163,22 @@ class KioskBanner extends StatelessWidget {
               child: Container(
                 color: Colors.green[900],
                 child: InkWell(
-                  child: Center(child: Text('Reset Kiosk')),
+                  child: Center(
+                    child: Text('Reset Kiosk', style: TextStyle(fontSize: 18)),
+                  ),
                   onTap: () => onReset(),
                 ),
               ),
             ),
             Container(
-              width: 40,
               color: Colors.brown,
               child: InkWell(
-                child: Center(child: Text('Exit')),
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: Text('Exit', style: TextStyle(fontSize: 18)),
+                  ),
+                ),
                 onTap: () async {
                   final AuthorizedScoutData? auth = await showDialog(
                     context: context,

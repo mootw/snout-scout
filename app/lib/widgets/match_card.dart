@@ -49,7 +49,7 @@ class MatchCard extends StatelessWidget {
       alignment: Alignment.center,
       child: Material(
         borderRadius: matchCardRadius,
-        color: color ?? Theme.of(context).colorScheme.surfaceContainerHigh,
+        color: color ?? Theme.of(context).colorScheme.surfaceContainer,
         child: SizedBox(
           height: matchCardHeight,
           child: InkWell(
