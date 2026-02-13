@@ -59,6 +59,13 @@ class _AutoScrollerState extends State<AutoScroller> {
 
   Timer? _exitTimer;
 
+  void _startExitTimer() {
+    _exitTimer?.cancel();
+    _exitTimer = Timer(const Duration(seconds: 8), () {
+      _isHovering = false;
+    });
+  }
+
   // TODO this is awful LOL
   @override
   Widget build(BuildContext context) {
@@ -67,23 +74,13 @@ class _AutoScrollerState extends State<AutoScroller> {
         _exitTimer?.cancel();
         _isHovering = true;
       },
-      onPointerUp: (_) {
-        _exitTimer?.cancel();
-        _exitTimer = Timer(const Duration(seconds: 8), () {
-          _isHovering = false;
-        });
-      },
+      onPointerUp: (_) => _startExitTimer(),
       child: MouseRegion(
         onEnter: (_) {
           _exitTimer?.cancel();
           _isHovering = true;
         },
-        onExit: (_) {
-          _exitTimer?.cancel();
-          _exitTimer = Timer(const Duration(seconds: 8), () {
-            _isHovering = false;
-          });
-        },
+        onExit: (_) => _startExitTimer(),
         child: PrimaryScrollController(
           controller: _controller,
           child: widget.child,

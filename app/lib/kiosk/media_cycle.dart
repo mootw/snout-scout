@@ -1,16 +1,12 @@
 import 'dart:async';
-import 'dart:js_interop';
-import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:mime/mime.dart';
 import 'package:video_player/video_player.dart';
-import 'package:web/web.dart' as web;
 
 class MediaCycle extends StatefulWidget {
   const MediaCycle({super.key, required this.media});
 
-  final Map<String, Uint8List> media;
+  final Map<String, ({String mime, String uri})> media;
 
   @override
   State<MediaCycle> createState() => _MediaCycleState();
@@ -20,19 +16,16 @@ class _MediaCycleState extends State<MediaCycle> {
   int _index = 0;
   Timer? _timer;
 
-  Map<String, String> blobUrls = {};
-
+  // So just reusing one controller and disposing it makes sure that the video always starts
+  // at the beginning. tried using a map and loading all of them only once, but could not
+  // get consistent play performance. i think that is due to the viewer being un-interactable
+  // when not visible. even though i am disposing it it leaks somehow...
   VideoPlayerController? _videoPlayer;
-
-  String? mime;
 
   @override
   void initState() {
     super.initState();
-
     _changeSlide();
-
-    _timer = Timer.periodic(Duration(seconds: 10), (timer) async {});
   }
 
   void _changeSlide() {
@@ -44,25 +37,11 @@ class _MediaCycleState extends State<MediaCycle> {
 
     final value = widget.media.entries.toList()[_index];
 
-    mime = lookupMimeType(
-      value.key,
-      headerBytes: value.value.take(defaultMagicNumbersMaxLength).toList(),
-    );
+    if (value.value.mime.startsWith('video') == true) {
+      _videoPlayer?.dispose();
 
-    // Create Blobs
-    if (blobUrls.containsKey(value.key) == false) {
-      final bytes = value.value.buffer.toJS;
-      final blob = web.Blob([bytes].toJS, web.BlobPropertyBag());
-
-      final blobUrl = web.URL.createObjectURL(blob);
-      blobUrls[value.key] = blobUrl;
-    }
-
-    _videoPlayer?.dispose();
-
-    if (mime?.startsWith('video') == true) {
       _videoPlayer =
-          VideoPlayerController.networkUrl(Uri.parse(blobUrls[value.key]!))
+          VideoPlayerController.networkUrl(Uri.parse(value.value.uri))
             ..initialize().then((_) {
               _timer = Timer(
                 _videoPlayer?.value.duration ?? Duration(seconds: 10),
@@ -73,7 +52,6 @@ class _MediaCycleState extends State<MediaCycle> {
               // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
               setState(() {});
             });
-
       // Start playing the video
       _videoPlayer?.play();
     } else {
@@ -87,9 +65,6 @@ class _MediaCycleState extends State<MediaCycle> {
 
   @override
   void dispose() {
-    for (final url in blobUrls.values) {
-      web.URL.revokeObjectURL(url);
-    }
     _videoPlayer?.dispose();
     _timer?.cancel();
     super.dispose();
@@ -108,16 +83,14 @@ class _MediaCycleState extends State<MediaCycle> {
 
     final value = widget.media.entries.toList()[_index];
 
-    if (mime == null) {
-      return Text('File not recognized ${value.key}');
-    }
-    if (mime?.startsWith('image') == true) {
-      return Image.memory(value.value, fit: BoxFit.contain);
-    } else if (mime?.startsWith('video') == true) {
-      if (_videoPlayer == null || _videoPlayer!.value.isInitialized == false) {
+    if (value.value.mime.startsWith('image') == true) {
+      return Image.network(value.value.uri, fit: BoxFit.contain);
+    } else if (value.value.mime.startsWith('video') == true) {
+      final player = _videoPlayer;
+      if (player == null || player.value.isInitialized == false) {
         return Text('Loading ${value.key}...');
       } else {
-        return VideoPlayer(_videoPlayer!);
+        return VideoPlayer(player);
       }
     } else {
       return Text('Unsupported file ${value.key}');

@@ -58,14 +58,14 @@ class _KioskState extends State<Kiosk> {
         ),
         ChangeNotifierProvider<KioskProvider>(
           // Loads the dataprovider in a cleanse mode which filters out some data
-          create: (_) => KioskProvider(kioskData: widget.kioskData),
+          create: (_) => KioskProvider(kioskFiles: widget.kioskData),
         ),
       ],
       child: Column(
         children: [
           Expanded(
             child: Listener(
-              onPointerDown: (ptr) {
+              onPointerDown: (_) {
                 _idleTimer?.cancel();
                 _idleTimer = Timer(idleTimeout, () => _resetKiosk());
               },

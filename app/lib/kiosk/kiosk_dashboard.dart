@@ -123,6 +123,8 @@ class _KioskHomeState extends State<KioskHome> {
                       child: kioskProvider.encodedModels[_selectedModel] == null
                           ? Text('ROBOT MODEL $_selectedModel is invalid')
                           : ModelViewer(
+                              key: Key(_selectedModel ?? 'no_model'),
+
                               // Handles conflicts with the
                               backgroundColor: Theme.of(context).canvasColor,
                               debugLogging: false,
@@ -144,7 +146,9 @@ class _KioskHomeState extends State<KioskHome> {
 
                             onSelected: (isSelected) => setState(() {
                               if (isSelected) {
-                                _selectedModel = model;
+                                setState(() {
+                                  _selectedModel = model;
+                                });
                               }
                             }),
                           ),
@@ -160,7 +164,7 @@ class _KioskHomeState extends State<KioskHome> {
                       child: Container(
                         color: Colors.black,
                         alignment: Alignment.center,
-                        child: MediaCycle(media: kioskProvider.slideshow),
+                        child: MediaCycle(media: kioskProvider.slideshowBlobs),
                       ),
                     ),
                   ],
