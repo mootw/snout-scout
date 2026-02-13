@@ -11,11 +11,11 @@ import 'package:snout_db/event/match_schedule_item.dart';
 import 'package:snout_db/event/matchresults.dart';
 import 'package:snout_db/snout_chain.dart';
 
-const double matchCardHeight = 40;
+const double matchCardHeight = 48;
 
 const BorderRadius matchCardRadius = BorderRadius.all(Radius.circular(8));
 
-const TextStyle whiteText = TextStyle(color: Colors.white, fontSize: 12);
+const TextStyle whiteText = TextStyle(color: Colors.white, fontSize: 13);
 
 const winOutlineColor = Colors.white;
 
@@ -105,10 +105,10 @@ class MatchCard extends StatelessWidget {
                                     results?.winner == Alliance.tie
                                 ? Border.all(color: winOutlineColor, width: 1)
                                 : null,
-                            color: Colors.red.withAlpha(128),
+                            color: const Color.fromARGB(255, 170, 46, 46),
                           ),
-                          height: 20,
-                          width: 170,
+                          height: matchCardHeight / 2,
+                          width: 175,
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
@@ -141,15 +141,15 @@ class MatchCard extends StatelessWidget {
                     Row(
                       children: [
                         Container(
-                          height: 20,
-                          width: 170,
+                          height: matchCardHeight / 2,
+                          width: 175,
                           decoration: BoxDecoration(
                             border:
                                 results?.winner == Alliance.blue ||
                                     results?.winner == Alliance.tie
                                 ? Border.all(color: winOutlineColor, width: 1)
                                 : null,
-                            color: Colors.blueAccent.withAlpha(128),
+                            color: const Color.fromARGB(255, 65, 73, 167),
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -169,7 +169,7 @@ class MatchCard extends StatelessWidget {
                           ),
                         ),
                         SizedBox(
-                          width: 30,
+                          width: 32,
                           child: Text(
                             results?.blueScore != null
                                 ? results!.blueScore.toString()

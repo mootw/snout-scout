@@ -20,6 +20,8 @@ class _MediaCycleState extends State<MediaCycle> {
   // at the beginning. tried using a map and loading all of them only once, but could not
   // get consistent play performance. i think that is due to the viewer being un-interactable
   // when not visible. even though i am disposing it it leaks somehow...
+  // It looks like the leaks come from the flt-platform-view not being cleaned up in the DOM
+  // id="flt-pv-XX"
   VideoPlayerController? _videoPlayer;
 
   @override
