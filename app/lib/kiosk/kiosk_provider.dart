@@ -23,7 +23,7 @@ class KioskProvider extends ChangeNotifier {
           .where(
             (e) =>
                 e.isFile &&
-                e.name.startsWith('models/') &&
+                e.name.contains('models/') &&
                 (e.name.endsWith('.glb') || e.name.endsWith('.gltf')),
           )
           .map((e) {
