@@ -31,6 +31,7 @@ class _MediaCycleState extends State<MediaCycle> {
   }
 
   void _changeSlide() {
+    if(widget.media.isEmpty) return;
     _timer?.cancel();
 
     setState(() {

@@ -23,7 +23,7 @@ class KioskProvider extends ChangeNotifier {
           .where(
             (e) =>
                 e.isFile &&
-                e.name.startsWith('${kioskFiles.first.name}models/') &&
+                e.name.startsWith('models/') &&
                 (e.name.endsWith('.glb') || e.name.endsWith('.gltf')),
           )
           .map((e) {
@@ -37,7 +37,7 @@ class KioskProvider extends ChangeNotifier {
 
     primaryModel = utf8.decode(
       kioskFiles
-          .firstWhere((e) => e.isFile && e.name.endsWith('/primary_model.txt'))
+          .firstWhere((e) => e.isFile && e.name.endsWith('primary_model.txt'))
           .content,
     );
 
@@ -46,7 +46,7 @@ class KioskProvider extends ChangeNotifier {
           .where(
             (e) =>
                 e.isFile &&
-                e.name.startsWith('${kioskFiles.first.name}slideshow'),
+                e.name.contains('slideshow/'),
           )
           .map((e) {
             final mime = lookupMimeType(
