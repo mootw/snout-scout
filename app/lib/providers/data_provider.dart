@@ -24,7 +24,7 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 // There is a separate outbox for each source
 class PatchOutbox {
   final Uri source;
-  final commitLock = Lock();
+  final writeLock = Lock();
 
   List<String> outboxCache = [];
 
@@ -51,28 +51,30 @@ class PatchOutbox {
   }
 
   Future remove(String value) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList(
-      outboxKey,
-      prefs.getStringList(outboxKey)?.where((e) => e != value).toList() ?? [],
-    );
-    notifyListeners();
+    await writeLock.synchronized(() async {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList(
+        outboxKey,
+        prefs.getStringList(outboxKey)?.where((e) => e != value).toList() ?? [],
+      );
+      notifyListeners();
+    });
   }
 
   Future writeNewMessage(SignedChainMessage message) async {
-    // First save patch to disk asap, we can complete the future now and be certain of no data loss
-    final prefs = await SharedPreferences.getInstance();
-    final outbox = prefs.getStringList(outboxKey) ?? [];
-    outbox.add(base64Encode(cbor.encode(message.toCbor())));
-    outboxCache = outbox;
-    await prefs.setStringList(outboxKey, outbox);
-    notifyListeners();
-    // Then submit patches
-    commitActions();
+    await writeLock.synchronized(() async {
+      // First save patch to disk asap, we can complete the future now and be certain of no data loss
+      final prefs = await SharedPreferences.getInstance();
+      final outbox = prefs.getStringList(outboxKey) ?? [];
+      outbox.add(base64Encode(cbor.encode(message.toCbor())));
+      outboxCache = outbox;
+      await prefs.setStringList(outboxKey, outbox);
+      notifyListeners();
+    });
   }
 
-  Future commitActions() async {
-    await commitLock.synchronized(() async {
+  Future commitOneAction() async {
+    await writeLock.synchronized(() async {
       // Notify listeners that an outbox commit attempt is started.
       notifyListeners();
       final prefs = await SharedPreferences.getInstance();
@@ -229,6 +231,7 @@ class DataProvider extends ChangeNotifier {
     final future = () async {
       if (isDataSourceUriRemote) {
         await remoteOutbox.writeNewMessage(message);
+        await remoteOutbox.commitOneAction();
       } else {
         // Add this patch to the local DB before saving.
         database.verifyApplyAction(message);

@@ -22,6 +22,7 @@ import 'package:app/search.dart';
 import 'package:app/widgets/load_status_or_error_bar.dart';
 import 'package:cbor/cbor.dart';
 import 'package:download/download.dart';
+import 'package:file_saver/file_saver.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -328,12 +329,19 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: FilledButton.tonal(
-                  onPressed: () {
+                  onPressed: () async {
                     final data = context.read<DataProvider>().database;
-                    final stream = Stream.fromIterable(
-                      cbor.encode(SnoutDBFile(actions: data.actions).toCbor()),
+                    await FileSaver.instance.saveFile(
+                      name: data.event.config.name,
+                      bytes: Uint8List.fromList(
+                        cbor.encode(
+                          SnoutDBFile(actions: data.actions).toCbor(),
+                        ),
+                      ),
+                      fileExtension: "snoutdb",
+                      mimeType: MimeType.custom,
+                      customMimeType: 'application/octet-stream',
                     );
-                    download(stream, '${data.event.config.name}.snoutdb');
                   },
                   child: const Text("Download DB as File"),
                 ),

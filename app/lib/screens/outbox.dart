@@ -24,10 +24,10 @@ class _OutboxStoragePageState extends State<OutboxStoragePage> {
         title: const Text("Outbox"),
         bottom: const LoadOrErrorStatusBar(),
         actions: [
-          if (serverConnection.remoteOutbox.commitLock.locked == false)
+          if (serverConnection.remoteOutbox.writeLock.locked == false)
             IconButton(
               onPressed: () async {
-                await serverConnection.remoteOutbox.commitActions();
+                await serverConnection.remoteOutbox.commitOneAction();
                 setState(() {});
               },
               icon: Icon(Icons.send),
