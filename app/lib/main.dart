@@ -9,7 +9,6 @@ import 'package:app/providers/local_config_provider.dart';
 import 'package:app/screens/dashboard.dart';
 import 'package:app/screens/scout_authenticator_dialog.dart';
 import 'package:app/screens/teams_lists.dart';
-import 'package:app/services/data_service.dart';
 import 'package:app/style.dart';
 import 'package:app/providers/identity_provider.dart';
 import 'package:app/screens/analysis.dart';
@@ -21,9 +20,7 @@ import 'package:app/screens/teams_page.dart';
 import 'package:app/search.dart';
 import 'package:app/widgets/load_status_or_error_bar.dart';
 import 'package:cbor/cbor.dart';
-import 'package:download/download.dart';
 import 'package:file_saver/file_saver.dart';
-import 'package:file_selector/file_selector.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
@@ -34,7 +31,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:snout_db/actions/write_config.dart';
 import 'package:snout_db/snout_chain.dart';
 import 'package:url_launcher/url_launcher_string.dart';
-import 'package:archive/archive.dart';
 
 /// Only update this value when there is a VALID data source loaded,
 const String defaultSourceKey = 'default_source_uri';
@@ -71,17 +67,8 @@ void main() async {
   final kioskMode = prefs.getBool(kioskModeKey) ?? false;
 
   if (ds != null && kioskMode) {
-    try {
-      final file = fs.file('${fs.directory('/kiosk').path}/kiosk.zip');
-
-      final bytes = await file.readAsBytes();
-      final archive = ZipDecoder().decodeBytes(bytes);
-
-      runApp(Kiosk(dataSource: ds, kioskData: archive));
-      return;
-    } catch (e, s) {
-      Logger.root.severe('$e, $s');
-    }
+    runApp(Kiosk(dataSource: ds));
+    return;
   }
   runApp(SnoutScoutApp(defaultSourceKey: ds));
 }
@@ -415,33 +402,9 @@ class _DatabaseBrowserScreenState extends State<DatabaseBrowserScreen>
               subtitle: const Text("Restarts App. Requires password to exit."),
               trailing: const Icon(Icons.screen_share_outlined),
               onTap: () async {
-                const XTypeGroup typeGroup = XTypeGroup(
-                  label: 'kiosk package',
-                  extensions: <String>['zip'],
-                  uniformTypeIdentifiers: <String>['kiosk.zip'],
-                );
-
-                final XFile? pickedFile = await openFile(
-                  acceptedTypeGroups: <XTypeGroup>[typeGroup],
-                );
-
-                if (pickedFile != null) {
-                  final fileBytes = await pickedFile.readAsBytes();
-                  // Ensure that the archive is decodable by decoding it. we do not care about the result
-                  ZipDecoder().decodeBytes(fileBytes);
-
-                  final file = fs.file(
-                    '${fs.directory('/kiosk').path}/kiosk.zip',
-                  );
-                  if (await file.exists() == false) {
-                    await file.create(recursive: true);
-                  }
-                  await file.writeAsBytes(fileBytes, flush: true);
-
-                  final prefs = await SharedPreferences.getInstance();
-                  prefs.setBool(kioskModeKey, true);
-                  main();
-                }
+                final prefs = await SharedPreferences.getInstance();
+                prefs.setBool(kioskModeKey, true);
+                main();
               },
             ),
             ListTile(

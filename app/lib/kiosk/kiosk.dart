@@ -11,7 +11,10 @@ import 'package:app/style.dart';
 import 'package:app/widgets/match_card.dart';
 import 'package:app/widgets/timeduration.dart';
 import 'package:archive/archive.dart';
+import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:snout_db/event/match_schedule_item.dart';
@@ -20,9 +23,8 @@ const Duration idleTimeout = Duration(minutes: 2);
 
 class Kiosk extends StatefulWidget {
   final Uri dataSource;
-  final Archive kioskData;
 
-  const Kiosk({super.key, required this.dataSource, required this.kioskData});
+  const Kiosk({super.key, required this.dataSource});
 
   @override
   State<Kiosk> createState() => _KioskState();
@@ -31,14 +33,80 @@ class Kiosk extends StatefulWidget {
 class _KioskState extends State<Kiosk> {
   Timer? _idleTimer;
   final NavigatorObserver _observer = NavigatorObserver();
+  Archive? _kioskData;
+  late final GlobalKey<NavigatorState> _navigatorKey;
 
   @override
   void initState() {
     super.initState();
+    _navigatorKey = GlobalKey<NavigatorState>();
+    FlutterNativeSplash.remove();
   }
 
   void _resetKiosk() {
     _observer.navigator?.pushReplacementNamed('/');
+  }
+
+  Future<void> _pickFile() async {
+    try {
+      const XTypeGroup typeGroup = XTypeGroup(
+        label: 'kiosk package',
+        extensions: <String>['zip'],
+        uniformTypeIdentifiers: <String>['kiosk.zip'],
+      );
+
+      final XFile? pickedFile = await openFile(
+        acceptedTypeGroups: <XTypeGroup>[typeGroup],
+      );
+
+      if (pickedFile != null) {
+        final bytes = await pickedFile.readAsBytes();
+        setState(() {
+          _kioskData = ZipDecoder().decodeBytes(bytes);
+        });
+      }
+    } catch (e, s) {
+      Logger.root.severe('$e, $s');
+    }
+  }
+
+  Future<void> _exitKiosk(BuildContext context) async {
+    final AuthorizedScoutData? auth = await showDialog(
+      context: context,
+      builder: (context) => ScoutAuthorizationDialog(allowBackButton: true),
+    );
+    if (auth != null) {
+      final prefs = await SharedPreferences.getInstance();
+      prefs.setBool(kioskModeKey, false);
+      main();
+    }
+  }
+
+  Widget _buildSetupScreen() {
+    return Scaffold(
+      body: Builder(
+        builder: (context) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text("Snout Scout Kiosk", style: TextStyle(fontSize: 32)),
+                const SizedBox(height: 32),
+                FilledButton(
+                  onPressed: _pickFile,
+                  child: const Text("Select Kiosk Package (.zip)"),
+                ),
+                const SizedBox(height: 16),
+                TextButton(
+                  onPressed: () => _exitKiosk(context),
+                  child: const Text("Exit Kiosk Mode"),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
   }
 
   @override
@@ -56,41 +124,45 @@ class _KioskState extends State<Kiosk> {
           // Loads the dataprovider in a cleanse mode which filters out some data
           create: (_) => DataProvider(widget.dataSource, true),
         ),
-        ChangeNotifierProvider<KioskProvider>(
-          // Loads the dataprovider in a cleanse mode which filters out some data
-          create: (_) => KioskProvider(kioskFiles: widget.kioskData),
-        ),
+        if (_kioskData != null)
+          ChangeNotifierProvider<KioskProvider>(
+            // Loads the dataprovider in a cleanse mode which filters out some data
+            create: (_) => KioskProvider(kioskFiles: _kioskData!),
+          ),
       ],
-      child: Column(
-        children: [
-          Expanded(
-            child: Listener(
-              onPointerDown: (_) {
-                _idleTimer?.cancel();
-                _idleTimer = Timer(idleTimeout, () => _resetKiosk());
-              },
-              child: MaterialApp(
-                title: 'Snout Scout Kiosk',
-                theme: defaultTheme,
-                home: Column(
-                  children: [
-                    Material(child: KioskBanner(onReset: _resetKiosk)),
-                    Expanded(
-                      child: Navigator(
-                        observers: [_observer],
-                        onGenerateRoute: (settings) {
-                          return MaterialPageRoute(
-                            builder: (context) => KioskDashboard(),
-                          );
-                        },
+      child: MaterialApp(
+        title: 'Snout Scout Kiosk',
+        theme: defaultTheme,
+        home: _kioskData == null
+            ? _buildSetupScreen()
+            : Column(
+                children: [
+                  Expanded(
+                    child: Listener(
+                      onPointerDown: (_) {
+                        _idleTimer?.cancel();
+                        _idleTimer = Timer(idleTimeout, () => _resetKiosk());
+                      },
+                      child: Column(
+                        children: [
+                          Material(child: KioskBanner(onReset: _resetKiosk)),
+                          Expanded(
+                            child: Navigator(
+                              key: _navigatorKey,
+                              observers: [_observer],
+                              onGenerateRoute: (settings) {
+                                return MaterialPageRoute(
+                                  builder: (context) => KioskDashboard(),
+                                );
+                              },
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -182,7 +254,7 @@ class KioskBanner extends StatelessWidget {
                 onTap: () async {
                   final AuthorizedScoutData? auth = await showDialog(
                     context: context,
-                    builder: (context) =>
+                    builder: (innerContext) =>
                         ScoutAuthorizationDialog(allowBackButton: true),
                   );
                   if (auth != null) {
