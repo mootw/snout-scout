@@ -5,6 +5,7 @@ import 'package:app/providers/data_provider.dart';
 import 'package:app/screens/edit_json.dart';
 import 'package:app/services/tba_autofill.dart';
 import 'package:app/widgets/load_status_or_error_bar.dart';
+import 'package:cbor/cbor.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:snout_db/action.dart';
@@ -58,7 +59,7 @@ class _EditSchedulePageState extends State<EditSchedulePage> {
                     return AlertDialog(
                       title: const Text("data"),
                       content: SingleChildScrollView(
-                        child: Text(json.encode(patch)),
+                        child: Text(patch.toCbor().toString()),
                       ),
                       actions: [
                         TextButton(
